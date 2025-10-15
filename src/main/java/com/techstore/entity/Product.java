@@ -19,6 +19,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -134,13 +135,24 @@ public class Product extends BaseEntity {
     private Set<CartItem> cartItems = new HashSet<>();
 
     public void calculateFinalPrice() {
-        if (priceClient != null && markupPercentage != null) {
-            BigDecimal markup = priceClient.multiply(markupPercentage.divide(BigDecimal.valueOf(100)));
-            this.finalPrice = priceClient.add(markup);
+        if (priceClient == null || markupPercentage == null) {
+            this.finalPrice = null;
+            return;
+        }
+
+        BigDecimal markup = priceClient.multiply(markupPercentage.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+        BigDecimal basePrice = priceClient.add(markup);
+
+        if (discount != null && discount.compareTo(BigDecimal.ZERO) != 0) {
+            BigDecimal discountPercent = discount.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            BigDecimal discountAmount = basePrice.multiply(discountPercent);
+            this.finalPrice = basePrice.add(discountAmount);
+        } else {
+            this.finalPrice = basePrice;
         }
     }
 
     public boolean isOnSale() {
-        return discount != null && discount.compareTo(BigDecimal.ZERO) != 0;
+        return discount != null && discount.compareTo(BigDecimal.ZERO) < 0;
     }
 }

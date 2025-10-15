@@ -19,6 +19,8 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
+    List<Product> findByManufacturerId(Long manufacturerId);
+
     boolean existsByReferenceNumberIgnoreCase(String referenceNumber);
 
     Optional<Product> findByExternalId(Long externalId);
