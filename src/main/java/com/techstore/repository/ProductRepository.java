@@ -83,12 +83,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     List<Product> findAllByCategoryId(Long categoryId);
 
-    Optional<Product> findBySku(String sku);
-
-    long countByCategoryId(Long categoryId);
-
-    List<Product> findByCategoryId(Long categoryId);
-
     @Query("SELECT p.sku, COUNT(p) FROM Product p WHERE p.sku IS NOT NULL GROUP BY p.sku HAVING COUNT(p) > 1")
     List<Object[]> findDuplicateProductsBySku();
 
