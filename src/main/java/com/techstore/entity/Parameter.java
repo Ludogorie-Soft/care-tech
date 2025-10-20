@@ -29,6 +29,9 @@ import java.util.Set;
 @Data
 public class Parameter extends BaseEntity {
 
+    @Column(name = "asbis_key")
+    private String asbisKey;
+
     @Column(name = "external_id")
     private Long externalId;
 

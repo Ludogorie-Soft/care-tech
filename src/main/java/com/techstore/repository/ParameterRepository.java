@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ParameterRepository extends JpaRepository<Parameter, Long> {
+public interface
+ParameterRepository extends JpaRepository<Parameter, Long> {
 
     Optional<Parameter> findByExternalId(Long externalId);
 
@@ -39,4 +40,13 @@ public interface ParameterRepository extends JpaRepository<Parameter, Long> {
     long countByCategoryId(Long categoryId);
 
     Optional<Parameter> findByTekraKeyAndCategoryId(String tekraKey, Long categoryId);
+
+    @Query("SELECT p FROM Parameter p WHERE p.asbisKey = :key AND p.category.id = :categoryId")
+    Optional<Parameter> findByAsbisKeyAndCategoryId(@Param("key") String key, @Param("categoryId") Long categoryId);
+
+    @Query("SELECT p FROM Parameter p WHERE p.asbisKey IS NOT NULL")
+    List<Parameter> findAllAsbisParameters();
+
+    @Query("SELECT COUNT(p) FROM Parameter p WHERE p.asbisKey IS NOT NULL")
+    Long countAsbisParameters();
 }

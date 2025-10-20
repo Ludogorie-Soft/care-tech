@@ -27,6 +27,12 @@ public class Category extends BaseEntity {
     @Column(name = "tekra_slug")
     private String tekraSlug;
 
+    @Column(name = "asbis_id")
+    private String asbisId;
+
+    @Column(name = "asbis_code")
+    private String asbisCode;
+
     @Column(name = "external_id", unique = true)
     private Long externalId;
 

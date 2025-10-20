@@ -24,6 +24,12 @@ public class Manufacturer extends BaseEntity {
     @Column(name = "external_id", unique = true)
     private Long externalId;
 
+    @Column(name = "asbis_id")
+    private String asbisId;
+
+    @Column(name = "asbis_code")
+    private String asbisCode;
+
     @FullTextField
     @Column(name = "name", nullable = false)
     private String name;

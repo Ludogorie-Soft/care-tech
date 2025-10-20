@@ -102,4 +102,24 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("UPDATE Product p SET p.category.id = :newCategoryId WHERE p.category.id = :oldCategoryId")
     int updateCategoryForProducts(@Param("oldCategoryId") Long oldCategoryId,
                                   @Param("newCategoryId") Long newCategoryId);
+
+    @Query("SELECT p FROM Product p WHERE p.asbisCode = :code")
+    Optional<Product> findByAsbisCode(@Param("code") String code);
+
+    @Query("SELECT p FROM Product p WHERE p.asbisPartNumber = :partNumber")
+    Optional<Product> findByAsbisPartNumber(@Param("partNumber") String partNumber);
+
+    @Query("SELECT p FROM Product p WHERE p.asbisId = :id")
+    Optional<Product> findByAsbisId(@Param("id") String id);
+
+    @Query("SELECT p FROM Product p WHERE p.asbisCode IS NOT NULL")
+    List<Product> findAllAsbisProducts();
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.asbisCode IS NOT NULL")
+    Long countAsbisProducts();
+
+    @Query("SELECT p.asbisCode, COUNT(p) FROM Product p WHERE p.asbisCode IS NOT NULL " +
+            "GROUP BY p.asbisCode HAVING COUNT(p) > 1")
+    List<Object[]> findDuplicateProductsByAsbisCode();
+
 }

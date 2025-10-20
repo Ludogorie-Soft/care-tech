@@ -1,4 +1,4 @@
-package com.techstore.controller;
+package com.techstore.controller.sync;
 
 import com.techstore.service.sync.ValiSyncService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -12,16 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Hidden
 @RestController
-@RequestMapping("/admin/vali/sync")
+@RequestMapping("/api/sync/vali")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
-public class AdminValiController {
+public class ValiSyncController {
 
     private final ValiSyncService valiSyncService;
 
     @PostMapping("/categories")
-//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> syncCategories() {
         try {
             valiSyncService.syncCategories();
@@ -33,7 +31,6 @@ public class AdminValiController {
     }
 
     @PostMapping("/manufacturers")
-//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> syncManufacturers() {
         try {
             valiSyncService.syncManufacturers();
@@ -45,7 +42,6 @@ public class AdminValiController {
     }
 
     @PostMapping("/parameters")
-//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> syncParameters() {
         try {
             valiSyncService.syncParameters();
@@ -57,7 +53,6 @@ public class AdminValiController {
     }
 
     @PostMapping("/products")
-//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> syncProducts() {
         try {
             valiSyncService.syncProducts();

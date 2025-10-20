@@ -1,4 +1,4 @@
-package com.techstore.controller;
+package com.techstore.controller.sync;
 
 import com.techstore.service.sync.TekraSyncService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -13,11 +13,10 @@ import java.util.Map;
 
 @Hidden
 @RestController
-@RequestMapping("/admin/tekra/sync")
+@RequestMapping("/api/sync/tekra")
 @RequiredArgsConstructor
 @Slf4j
-//@PreAuthorize("hasRole('ADMIN')")
-public class AdminTekraController {
+public class TekraSyncController {
 
     private final TekraSyncService tekraSyncService;
 

@@ -36,6 +36,15 @@ public class Product extends BaseEntity {
 
     private String sku;
 
+    @Column(name = "asbis_id")
+    private String asbisId;
+
+    @Column(name = "asbis_code")
+    private String asbisCode;
+
+    @Column(name = "asbis_part_number")
+    private String asbisPartNumber;
+
     @FullTextField
     @Column(name = "name_bg", columnDefinition = "TEXT")
     private String nameBg;
