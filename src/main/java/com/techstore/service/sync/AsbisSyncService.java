@@ -48,338 +48,231 @@ public class AsbisSyncService {
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("=== STARTING Asbis 2-level categories synchronization ===");
-            log.info("Strategy: ProductCategory (Level 1) -> ProductType (Level 2)");
+            log.info("=== STARTING Asbis categories synchronization ===");
 
-            List<Map<String, Object>> allProducts = asbisApiService.getAllProducts();
+            // Measure API call time
+            long apiStart = System.currentTimeMillis();
+            List<Map<String, Object>> externalCategories = asbisApiService.extractCategories();
+            long apiDuration = System.currentTimeMillis() - apiStart;
 
-            if (allProducts.isEmpty()) {
-                log.warn("No products from Asbis API");
+            log.info("✓ Asbis API call completed in {}ms, returned {} categories",
+                    apiDuration, externalCategories.size());
+
+            if (externalCategories.isEmpty()) {
+                log.warn("No categories returned from Asbis API");
                 logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, 0, 0, 0, 0,
-                        "No products found", startTime);
+                        "No categories found", startTime);
                 return;
             }
 
-            log.info("Analyzing {} products to extract category hierarchy", allProducts.size());
+            // Group categories by level for proper hierarchical processing
+            Map<Integer, List<Map<String, Object>>> categoriesByLevel = externalCategories.stream()
+                    .collect(Collectors.groupingBy(cat -> getInteger(cat, "level")));
 
-            // ✅ STEP 1: Extract unique ProductCategory (Level 1) and build mapping
-            Map<String, Set<String>> categoryToSubcategories = new HashMap<>();
+            log.info("Category breakdown by level:");
+            categoriesByLevel.forEach((level, cats) ->
+                    log.info("  Level {}: {} categories", level, cats.size())
+            );
 
-            for (Map<String, Object> product : allProducts) {
-                String mainCategory = getString(product, "productcategory");
-                String subCategory = getString(product, "producttype");
+            // Load existing categories
+            Map<String, Category> existingCategoriesById = categoryRepository.findAll()
+                    .stream()
+                    .filter(cat -> cat.getAsbisId() != null && !cat.getAsbisId().isEmpty())
+                    .collect(Collectors.toMap(
+                            Category::getAsbisId,
+                            cat -> cat,
+                            (existing, duplicate) -> existing
+                    ));
 
-                if (mainCategory != null && subCategory != null) {
-                    categoryToSubcategories.putIfAbsent(mainCategory, new HashSet<>());
-                    categoryToSubcategories.get(mainCategory).add(subCategory);
-                }
-            }
+            log.info("Found {} existing Asbis categories in database", existingCategoriesById.size());
 
-            log.info("Found {} main categories (ProductCategory)", categoryToSubcategories.size());
-            int totalSubcategories = categoryToSubcategories.values().stream()
-                    .mapToInt(Set::size).sum();
-            log.info("Found {} total subcategories (ProductType)", totalSubcategories);
+            long totalCreated = 0, totalUpdated = 0, totalSkipped = 0;
 
-            long created = 0, updated = 0, skipped = 0;
+            // ========================================
+            // STEP 1: Process Level 1 (Root) categories
+            // ========================================
+            log.info("=== STEP 1: Processing Level 1 (Root) categories ===");
+            List<Map<String, Object>> level1Categories = categoriesByLevel.getOrDefault(1, new ArrayList<>());
 
-            // ✅ STEP 2: Create/Update Level 1 categories (ProductCategory)
-            log.info("=== STEP 1: Processing Level 1 categories (ProductCategory) ===");
+            for (int i = 0; i < level1Categories.size(); i++) {
+                Map<String, Object> extCategory = level1Categories.get(i);
 
-            Map<String, Long> mainCategoryNameToId = new HashMap<>();
-
-            for (String mainCategoryName : categoryToSubcategories.keySet()) {
                 try {
-                    if (mainCategoryName == null || mainCategoryName.trim().isEmpty()) {
-                        skipped++;
+                    String asbisId = getString(extCategory, "id");
+                    String name = getString(extCategory, "name");
+
+                    if (asbisId == null || name == null) {
+                        log.warn("Skipping L1 category with missing id or name");
+                        totalSkipped++;
                         continue;
                     }
 
-                    // Find or create main category (no parent)
-                    Category mainCategory = findOrCreateMainCategory(mainCategoryName);
-                    mainCategory = categoryRepository.saveAndFlush(mainCategory);
+                    Category category = existingCategoriesById.get(asbisId);
+                    boolean isNew = (category == null);
 
-                    mainCategoryNameToId.put(mainCategoryName, mainCategory.getId());
-
-                    if (mainCategory.getCreatedAt().equals(mainCategory.getUpdatedAt())) {
-                        created++;
-                        log.info("✓ Created Level 1: '{}' (ID: {})", mainCategoryName, mainCategory.getId());
+                    if (isNew) {
+                        category = createAsbisCategoryFromExternal(extCategory, existingCategoriesById);
+                        totalCreated++;
                     } else {
-                        updated++;
-                        log.info("✓ Updated Level 1: '{}' (ID: {})", mainCategoryName, mainCategory.getId());
+                        updateAsbisCategoryFromExternal(category, extCategory, existingCategoriesById);
+                        totalUpdated++;
                     }
+
+                    category = categoryRepository.save(category);
+                    existingCategoriesById.put(asbisId, category);
+
+                    log.info("  ✓ L1 [{}/{}]: '{}' (ID: {})",
+                            i + 1, level1Categories.size(), name, category.getId());
 
                 } catch (Exception e) {
-                    log.error("✗ Error processing main category '{}': {}", mainCategoryName, e.getMessage(), e);
-                    skipped++;
+                    log.error("Error processing L1 category: {}", e.getMessage(), e);
+                    totalSkipped++;
                 }
             }
 
+            // Flush after Level 1
+            entityManager.flush();
             entityManager.clear();
-            log.info("=== Level 1 COMPLETE: {} main categories processed ===", mainCategoryNameToId.size());
+            log.info("=== STEP 1 COMPLETE: {} Level 1 categories processed ===", level1Categories.size());
 
-            // ✅ STEP 3: Create/Update Level 2 categories (ProductType)
-            log.info("=== STEP 2: Processing Level 2 categories (ProductType) ===");
+            // ========================================
+            // STEP 2: Process Level 2 categories
+            // ========================================
+            log.info("=== STEP 2: Processing Level 2 categories ===");
+            List<Map<String, Object>> level2Categories = categoriesByLevel.getOrDefault(2, new ArrayList<>());
 
-            for (Map.Entry<String, Set<String>> entry : categoryToSubcategories.entrySet()) {
-                String mainCategoryName = entry.getKey();
-                Set<String> subCategories = entry.getValue();
+            for (int i = 0; i < level2Categories.size(); i++) {
+                Map<String, Object> extCategory = level2Categories.get(i);
 
-                Long mainCategoryId = mainCategoryNameToId.get(mainCategoryName);
-                if (mainCategoryId == null) {
-                    log.error("✗ Main category '{}' not found, skipping its subcategories", mainCategoryName);
-                    skipped += subCategories.size();
-                    continue;
-                }
+                try {
+                    String asbisId = getString(extCategory, "id");
+                    String name = getString(extCategory, "name");
+                    String parentId = getString(extCategory, "parent");
 
-                // Load parent category (managed entity)
-                Category parentCategory = categoryRepository.findById(mainCategoryId).orElse(null);
-                if (parentCategory == null) {
-                    log.error("✗ Parent category with ID {} not found in DB", mainCategoryId);
-                    skipped += subCategories.size();
-                    continue;
-                }
+                    if (asbisId == null || name == null) {
+                        log.warn("Skipping L2 category with missing id or name");
+                        totalSkipped++;
+                        continue;
+                    }
 
-                log.info("Processing {} subcategories for parent '{}'", subCategories.size(), mainCategoryName);
-
-                for (String subCategoryName : subCategories) {
-                    try {
-                        if (subCategoryName == null || subCategoryName.trim().isEmpty()) {
-                            skipped++;
+                    // Verify parent exists
+                    Category parent = null;
+                    if (parentId != null) {
+                        parent = existingCategoriesById.get(parentId);
+                        if (parent == null) {
+                            log.warn("✗ Skipping L2 category '{}': parent '{}' not found", name, parentId);
+                            totalSkipped++;
                             continue;
                         }
-
-                        // Find or create subcategory with parent
-                        Category subCategory = findOrCreateSubCategory(subCategoryName, parentCategory);
-                        subCategory = categoryRepository.saveAndFlush(subCategory);
-
-                        if (subCategory.getCreatedAt().equals(subCategory.getUpdatedAt())) {
-                            created++;
-                            log.info("✓ Created Level 2: '{}' (ID: {}, parent: '{}')",
-                                    subCategoryName, subCategory.getId(), mainCategoryName);
-                        } else {
-                            updated++;
-                            log.info("✓ Updated Level 2: '{}' (ID: {}, parent: '{}')",
-                                    subCategoryName, subCategory.getId(), mainCategoryName);
-                        }
-
-                    } catch (Exception e) {
-                        log.error("✗ Error processing subcategory '{}' under '{}': {}",
-                                subCategoryName, mainCategoryName, e.getMessage(), e);
-                        skipped++;
                     }
+
+                    Category category = existingCategoriesById.get(asbisId);
+                    boolean isNew = (category == null);
+
+                    if (isNew) {
+                        category = createAsbisCategoryFromExternal(extCategory, existingCategoriesById);
+                        totalCreated++;
+                    } else {
+                        updateAsbisCategoryFromExternal(category, extCategory, existingCategoriesById);
+                        totalUpdated++;
+                    }
+
+                    category = categoryRepository.save(category);
+                    existingCategoriesById.put(asbisId, category);
+
+                    log.info("  ✓ L2 [{}/{}]: '{}' (ID: {}, parent: '{}')",
+                            i + 1, level2Categories.size(), name, category.getId(),
+                            parent != null ? parent.getNameBg() : "none");
+
+                } catch (Exception e) {
+                    log.error("Error processing L2 category: {}", e.getMessage(), e);
+                    totalSkipped++;
                 }
             }
 
+            // Flush after Level 2
+            entityManager.flush();
             entityManager.clear();
-            log.info("=== Level 2 COMPLETE ===");
+            log.info("=== STEP 2 COMPLETE: {} Level 2 categories processed ===", level2Categories.size());
 
-            long totalCategories = mainCategoryNameToId.size() + totalSubcategories;
+            // ========================================
+            // STEP 3: Process Level 3 categories
+            // ========================================
+            log.info("=== STEP 3: Processing Level 3 categories ===");
+            List<Map<String, Object>> level3Categories = categoriesByLevel.getOrDefault(3, new ArrayList<>());
 
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalCategories,
-                    created, updated, skipped,
-                    skipped > 0 ? String.format("Skipped %d categories", skipped) : null, startTime);
+            for (int i = 0; i < level3Categories.size(); i++) {
+                Map<String, Object> extCategory = level3Categories.get(i);
 
-            log.info("=== SYNC COMPLETE ===");
-            log.info("Total: {}, Created: {}, Updated: {}, Skipped: {}",
-                    totalCategories, created, updated, skipped);
+                try {
+                    String asbisId = getString(extCategory, "id");
+                    String name = getString(extCategory, "name");
+                    String parentId = getString(extCategory, "parent");
+
+                    if (asbisId == null || name == null) {
+                        log.warn("Skipping L3 category with missing id or name");
+                        totalSkipped++;
+                        continue;
+                    }
+
+                    // Verify parent exists
+                    Category parent = null;
+                    if (parentId != null) {
+                        parent = existingCategoriesById.get(parentId);
+                        if (parent == null) {
+                            log.warn("✗ Skipping L3 category '{}': parent '{}' not found", name, parentId);
+                            totalSkipped++;
+                            continue;
+                        }
+                    }
+
+                    Category category = existingCategoriesById.get(asbisId);
+                    boolean isNew = (category == null);
+
+                    if (isNew) {
+                        category = createAsbisCategoryFromExternal(extCategory, existingCategoriesById);
+                        totalCreated++;
+                    } else {
+                        updateAsbisCategoryFromExternal(category, extCategory, existingCategoriesById);
+                        totalUpdated++;
+                    }
+
+                    category = categoryRepository.save(category);
+                    existingCategoriesById.put(asbisId, category);
+
+                    log.info("  ✓ L3 [{}/{}]: '{}' (ID: {}, parent: '{}', path: '{}')",
+                            i + 1, level3Categories.size(), name, category.getId(),
+                            parent != null ? parent.getNameBg() : "none",
+                            category.getCategoryPath());
+
+                } catch (Exception e) {
+                    log.error("Error processing L3 category: {}", e.getMessage(), e);
+                    totalSkipped++;
+                }
+            }
+
+            // Flush after Level 3
+            entityManager.flush();
+            entityManager.clear();
+            log.info("=== STEP 3 COMPLETE: {} Level 3 categories processed ===", level3Categories.size());
+
+            long totalCategories = totalCreated + totalUpdated;
+            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalCategories, totalCreated,
+                    totalUpdated, totalSkipped,
+                    totalSkipped > 0 ? String.format("Skipped %d categories", totalSkipped) : null,
+                    startTime);
+
+            log.info("=== COMPLETE: Asbis categories sync finished in {}ms ===",
+                    System.currentTimeMillis() - startTime);
+            log.info("Summary: Total={}, Created={}, Updated={}, Skipped={}",
+                    totalCategories, totalCreated, totalUpdated, totalSkipped);
 
         } catch (Exception e) {
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
-            log.error("=== SYNC FAILED ===", e);
+            log.error("=== FAILED: Asbis categories synchronization ===", e);
+            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0,
+                    e.getMessage(), startTime);
             throw e;
         }
-    }
-
-    /**
-     * Find or create MAIN category (Level 1 - ProductCategory)
-     * No parent, asbisId format: "main:CategoryName"
-     */
-    private Category findOrCreateMainCategory(String categoryName) {
-        String asbisId = "main:" + categoryName;
-
-        // Check by asbisId
-        List<Category> byAsbisId = categoryRepository.findAll()
-                .stream()
-                .filter(cat -> asbisId.equals(cat.getAsbisId()))
-                .collect(Collectors.toList());
-
-        if (!byAsbisId.isEmpty()) {
-            Category category = byAsbisId.get(0);
-            category.setParent(null); // Ensure it's root
-            log.debug("Found existing main category by asbisId: {}", categoryName);
-            return category;
-        }
-
-        // Check by normalized name (no parent)
-        String normalizedName = normalizeCategoryName(categoryName);
-
-        for (Category cat : categoryRepository.findAll()) {
-            if (cat.getParent() == null) { // Only root categories
-                String catNormalized = normalizeCategoryName(cat.getNameBg());
-                if (normalizedName.equals(catNormalized)) {
-                    // Reuse existing root category
-                    cat.setAsbisId(asbisId);
-                    cat.setAsbisCode(asbisId);
-                    log.info("✓ REUSING existing root category '{}' as Asbis main category", categoryName);
-                    return cat;
-                }
-            }
-        }
-
-        // Create new main category
-        log.info("✓ CREATING new main category: '{}'", categoryName);
-
-        Category category = new Category();
-        category.setNameBg(categoryName);
-        category.setNameEn(categoryName);
-        category.setAsbisId(asbisId);
-        category.setAsbisCode(asbisId);
-        category.setParent(null);
-        category.setShow(true);
-        category.setSortOrder(0);
-
-        String slug = generateSlug(categoryName, null);
-        category.setSlug(slug);
-
-        return category;
-    }
-
-    /**
-     * Find or create SUBCATEGORY (Level 2 - ProductType)
-     * Has parent, asbisId format: "sub:ParentName:SubcategoryName"
-     */
-    private Category findOrCreateSubCategory(String categoryName, Category parentCategory) {
-        String asbisId = "sub:" + parentCategory.getNameBg() + ":" + categoryName;
-
-        // Check by asbisId
-        List<Category> byAsbisId = categoryRepository.findAll()
-                .stream()
-                .filter(cat -> asbisId.equals(cat.getAsbisId()))
-                .collect(Collectors.toList());
-
-        if (!byAsbisId.isEmpty()) {
-            Category category = byAsbisId.get(0);
-            category.setParent(parentCategory); // Ensure correct parent
-            log.debug("Found existing subcategory by asbisId: {}", categoryName);
-            return category;
-        }
-
-        // Check by normalized name + parent match
-        String normalizedName = normalizeCategoryName(categoryName);
-
-        for (Category cat : categoryRepository.findAll()) {
-            String catNormalized = normalizeCategoryName(cat.getNameBg());
-
-            if (normalizedName.equals(catNormalized)) {
-                // Check parent match
-                if (cat.getParent() != null &&
-                        cat.getParent().getId().equals(parentCategory.getId())) {
-                    // Reuse existing subcategory
-                    cat.setAsbisId(asbisId);
-                    cat.setAsbisCode(asbisId);
-                    cat.setParent(parentCategory);
-                    log.info("✓ REUSING existing subcategory '{}' under parent '{}'",
-                            categoryName, parentCategory.getNameBg());
-                    return cat;
-                }
-            }
-        }
-
-        // Create new subcategory
-        log.info("✓ CREATING new subcategory: '{}' under parent '{}'",
-                categoryName, parentCategory.getNameBg());
-
-        Category category = new Category();
-        category.setNameBg(categoryName);
-        category.setNameEn(categoryName);
-        category.setAsbisId(asbisId);
-        category.setAsbisCode(asbisId);
-        category.setParent(parentCategory);
-        category.setShow(true);
-        category.setSortOrder(0);
-
-        String slug = generateSlug(categoryName, parentCategory);
-        category.setSlug(slug);
-
-        return category;
-    }
-
-    /**
-     * Generate unique slug with parent hierarchy
-     */
-    private String generateSlug(String categoryName, Category parentCategory) {
-        String baseSlug = syncHelper.createSlugFromName(categoryName);
-
-        if (parentCategory == null) {
-            // Root category
-            if (!slugExists(baseSlug, null)) {
-                return baseSlug;
-            }
-            return baseSlug + "-asbis";
-        }
-
-        // Child category - hierarchical slug
-        String parentSlug = parentCategory.getSlug();
-        if (parentSlug == null) {
-            parentSlug = syncHelper.createSlugFromName(parentCategory.getNameBg());
-        }
-
-        String hierarchicalSlug = parentSlug + "-" + baseSlug;
-
-        if (!slugExists(hierarchicalSlug, parentCategory)) {
-            return hierarchicalSlug;
-        }
-
-        // Add counter if exists
-        int counter = 2;
-        String numberedSlug;
-        do {
-            numberedSlug = hierarchicalSlug + "-" + counter;
-            counter++;
-        } while (slugExists(numberedSlug, parentCategory) && counter < 100);
-
-        return numberedSlug;
-    }
-
-    /**
-     * Check if slug exists with specific parent
-     */
-    private boolean slugExists(String slug, Category expectedParent) {
-        List<Category> existing = categoryRepository.findAll()
-                .stream()
-                .filter(cat -> slug.equals(cat.getSlug()))
-                .collect(Collectors.toList());
-
-        if (existing.isEmpty()) {
-            return false;
-        }
-
-        for (Category cat : existing) {
-            if (expectedParent == null && cat.getParent() == null) {
-                return true;
-            }
-            if (expectedParent != null && cat.getParent() != null) {
-                if (expectedParent.getId().equals(cat.getParent().getId())) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Normalize category name for comparison
-     */
-    private String normalizeCategoryName(String name) {
-        if (name == null) return "";
-
-        return name.toLowerCase()
-                .trim()
-                .replaceAll("[^a-zа-я0-9\\s]+", "")
-                .replaceAll("\\s+", " ")
-                .replaceAll("\\b(категория|category|продукти|products)\\b", "")
-                .trim();
     }
 
     // ===========================================
@@ -712,10 +605,11 @@ public class AsbisSyncService {
             // Show sample products
             log.info("Sample products:");
             allProducts.stream().limit(3).forEach(p ->
-                    log.info("  - Code: {}, Vendor: {}, Type: {}, Name: {}",
+                    log.info("  - Code: {}, Vendor: {}, Category: '{}', Type: '{}', Name: {}",
                             getString(p, "productcode"),
                             getString(p, "vendor"),
-                            getString(p, "producttype"),
+                            getString(p, "productcategory"),  // Level 1
+                            getString(p, "producttype"),      // Level 2
                             getString(p, "productdescription"))
             );
 
@@ -723,7 +617,7 @@ public class AsbisSyncService {
             log.info("STEP 2: Loading categories and manufacturers...");
             long lookupStart = System.currentTimeMillis();
 
-            // Categories by Asbis ID (which is the fullPath or generated ID)
+            // Categories by Asbis ID
             Map<String, Category> categoriesByAsbisId = categoryRepository.findAll().stream()
                     .filter(cat -> cat.getAsbisId() != null && !cat.getAsbisId().isEmpty())
                     .collect(Collectors.toMap(
@@ -731,15 +625,6 @@ public class AsbisSyncService {
                             cat -> cat,
                             (existing, duplicate) -> existing
                     ));
-
-            // Also create a map by fullPath for matching products
-            Map<String, Category> categoriesByFullPath = new HashMap<>();
-            for (Category cat : categoriesByAsbisId.values()) {
-                String fullPath = cat.getCategoryPath();
-                if (fullPath != null) {
-                    categoriesByFullPath.put(fullPath, cat);
-                }
-            }
 
             Map<String, Manufacturer> manufacturersMap = manufacturerRepository.findAll().stream()
                     .filter(m -> m.getName() != null && !m.getName().isEmpty())
@@ -771,8 +656,7 @@ public class AsbisSyncService {
                     log.info("=== Processing batch [{}/{}] with {} products ===",
                             batchIndex + 1, batches.size(), batch.size());
 
-                    BatchResult result = processProductsBatch(batch, categoriesByAsbisId,
-                            categoriesByFullPath, manufacturersMap);
+                    BatchResult result = processProductsBatch(batch, categoriesByAsbisId, manufacturersMap);
 
                     totalProcessed += result.processed;
                     totalCreated += result.created;
@@ -840,7 +724,6 @@ public class AsbisSyncService {
 
     private BatchResult processProductsBatch(List<Map<String, Object>> batch,
                                              Map<String, Category> categoriesByAsbisId,
-                                             Map<String, Category> categoriesByFullPath,
                                              Map<String, Manufacturer> manufacturersMap) {
         long processed = 0, created = 0, updated = 0, errors = 0, skippedNoCategory = 0;
 
@@ -848,7 +731,6 @@ public class AsbisSyncService {
             try {
                 String productCode = getString(rawProduct, "productcode");
                 String productDescription = getString(rawProduct, "productdescription");
-                String productType = getString(rawProduct, "producttype"); // Full category path
 
                 if (productCode == null || productDescription == null) {
                     log.debug("Skipping product with missing code or description");
@@ -856,12 +738,14 @@ public class AsbisSyncService {
                     continue;
                 }
 
-                // Find category by productType (which is the full path like "Level1 - Level2 - Level3")
-                Category category = findCategoryByProductType(productType, categoriesByAsbisId, categoriesByFullPath);
+                // Find category using new method
+                Category category = findCategoryByProductType(rawProduct, categoriesByAsbisId);
 
                 if (category == null) {
-                    log.warn("✗ Skipping product '{}' ({}): category not found for type: '{}'",
-                            productDescription, productCode, productType);
+                    String productCategory = getString(rawProduct, "productcategory");
+                    String productType = getString(rawProduct, "producttype");
+                    log.warn("✗ Skipping product '{}' ({}): category not found (category='{}', type='{}')",
+                            productDescription, productCode, productCategory, productType);
                     skippedNoCategory++;
                     continue;
                 }
@@ -918,45 +802,39 @@ public class AsbisSyncService {
     // HELPER METHODS
     // ===========================================
 
-    private Category findCategoryByProductType(String productType,
-                                               Map<String, Category> categoriesByAsbisId,
-                                               Map<String, Category> categoriesByFullPath) {
-        if (productType == null || productType.isEmpty()) {
-            return null;
-        }
+    private Category findCategoryByProductType(Map<String, Object> rawProduct,
+                                               Map<String, Category> categoriesByAsbisId) {
+        String productCategory = getString(rawProduct, "productcategory"); // Level 1
+        String productType = getString(rawProduct, "producttype");         // Level 2
+        String sku = getString(rawProduct, "productcode");
 
-        // Try exact match by full path
-        Category category = categoriesByFullPath.get(productType);
-        if (category != null) {
-            return category;
-        }
+        // STRATEGY 1: Try Level 2 first (most specific - ProductType)
+        if (productType != null && !productType.trim().isEmpty() &&
+                productCategory != null && !productCategory.trim().isEmpty()) {
 
-        // Try to find by generated ID (Level3 key or Level2 key)
-        String[] parts = productType.split(" - ");
-        if (parts.length == 3) {
-            String level3Key = parts[0].trim() + "|" + parts[1].trim() + "|" + parts[2].trim();
-            category = categoriesByAsbisId.get(level3Key);
+            String level2Key = productCategory + "|" + productType;
+            Category category = categoriesByAsbisId.get(level2Key);
+
             if (category != null) {
+                log.debug("✓ Product {} matched Level 2: '{}' (parent: '{}')",
+                        sku, productType, productCategory);
                 return category;
             }
         }
 
-        if (parts.length >= 2) {
-            String level2Key = parts[0].trim() + "|" + parts[1].trim();
-            category = categoriesByAsbisId.get(level2Key);
+        // STRATEGY 2: Fallback to Level 1 (ProductCategory)
+        if (productCategory != null && !productCategory.trim().isEmpty()) {
+            Category category = categoriesByAsbisId.get(productCategory);
+
             if (category != null) {
+                log.debug("✓ Product {} matched Level 1: '{}'", sku, productCategory);
                 return category;
             }
         }
 
-        if (parts.length >= 1) {
-            String level1Key = parts[0].trim();
-            category = categoriesByAsbisId.get(level1Key);
-            if (category != null) {
-                return category;
-            }
-        }
-
+        // No match found
+        log.warn("✗ No category match for product {}: productCategory='{}', productType='{}'",
+                sku, productCategory, productType);
         return null;
     }
 

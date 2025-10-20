@@ -107,111 +107,86 @@ public class AsbisApiService {
     }
 
     /**
-     * Extract categories with hierarchy from ProductType field
-     * ProductType format: "Level1 - Level2 - Level3"
+     * Extract categories from Asbis products
+     * Structure:
+     * - Level 1: ProductCategory (e.g. "Игри и мултимедия")
+     * - Level 2: ProductType (e.g. "Гейминг слушалки")
      */
     public List<Map<String, Object>> extractCategories() {
         try {
             List<Map<String, Object>> products = getAllProducts();
 
-            // Use TreeSet to maintain unique categories per level
-            Set<String> allProductTypes = new HashSet<>();
+            // Track unique categories
+            Map<String, Map<String, Object>> level1Map = new LinkedHashMap<>();
+            Map<String, Map<String, Object>> level2Map = new LinkedHashMap<>();
 
             for (Map<String, Object> product : products) {
-                String productType = getString(product, "producttype");
-                if (productType != null) {
-                    allProductTypes.add(productType);
+                String productCategory = getString(product, "productcategory"); // Level 1
+                String productType = getString(product, "producttype");         // Level 2
+
+                // Skip if both are null
+                if (productCategory == null && productType == null) {
+                    continue;
+                }
+
+                // Create Level 1 (ProductCategory - root)
+                if (productCategory != null && !productCategory.trim().isEmpty()) {
+                    if (!level1Map.containsKey(productCategory)) {
+                        Map<String, Object> cat = new HashMap<>();
+                        cat.put("id", productCategory);
+                        cat.put("name", productCategory);
+                        cat.put("level", 1);
+                        cat.put("parent", null);
+                        cat.put("fullPath", productCategory);
+                        level1Map.put(productCategory, cat);
+                    }
+                }
+
+                // Create Level 2 (ProductType - child of ProductCategory)
+                if (productType != null && !productType.trim().isEmpty() &&
+                        productCategory != null && !productCategory.trim().isEmpty()) {
+
+                    String level2Key = productCategory + "|" + productType;
+
+                    if (!level2Map.containsKey(level2Key)) {
+                        Map<String, Object> cat = new HashMap<>();
+                        cat.put("id", level2Key);
+                        cat.put("name", productType);
+                        cat.put("level", 2);
+                        cat.put("parent", productCategory); // Points to Level 1 ID
+                        cat.put("parentName", productCategory);
+                        cat.put("fullPath", productCategory + " / " + productType);
+                        level2Map.put(level2Key, cat);
+                    }
                 }
             }
 
-            List<Map<String, Object>> categories = buildCategoryHierarchy(allProductTypes);
+            List<Map<String, Object>> categories = new ArrayList<>();
+            categories.addAll(level1Map.values());
+            categories.addAll(level2Map.values());
 
             log.info("Extracted {} hierarchical categories from Asbis products", categories.size());
+            log.info("  Level 1 (ProductCategory): {} categories", level1Map.size());
+            log.info("  Level 2 (ProductType): {} categories", level2Map.size());
+
+            // Show sample categories
+            if (!level1Map.isEmpty()) {
+                log.info("Sample Level 1 categories: {}",
+                        level1Map.keySet().stream().limit(5).toList());
+            }
+            if (!level2Map.isEmpty()) {
+                log.info("Sample Level 2 categories: {}",
+                        level2Map.values().stream().limit(5)
+                                .map(c -> c.get("name"))
+                                .toList());
+            }
+
             return categories;
 
         } catch (Exception e) {
             log.error("Error extracting categories from Asbis products", e);
             return new ArrayList<>();
         }
-    }
-
-    /**
-     * Build hierarchical category structure
-     * Format: "Level1 - Level2 - Level3"
-     */
-    private List<Map<String, Object>> buildCategoryHierarchy(Set<String> productTypes) {
-        List<Map<String, Object>> categories = new ArrayList<>();
-
-        // Track processed categories at each level to avoid duplicates
-        Set<String> processedLevel1 = new HashSet<>();
-        Set<String> processedLevel2 = new HashSet<>();
-        Set<String> processedLevel3 = new HashSet<>();
-
-        String delimiter = " - "; // Asbis uses " - " as delimiter
-
-        for (String productType : productTypes) {
-            String[] parts = productType.split(delimiter);
-
-            // Level 1 - Root category
-            if (parts.length >= 1) {
-                String level1 = parts[0].trim();
-
-                if (!processedLevel1.contains(level1)) {
-                    Map<String, Object> category = new HashMap<>();
-                    category.put("id", level1);
-                    category.put("name", level1);
-                    category.put("level", 1);
-                    category.put("parent", null);
-                    category.put("fullPath", level1);
-                    categories.add(category);
-                    processedLevel1.add(level1);
-                }
-            }
-
-            // Level 2 - Subcategory
-            if (parts.length >= 2) {
-                String level1 = parts[0].trim();
-                String level2 = parts[1].trim();
-                String level2Key = level1 + "|" + level2; // Unique key
-
-                if (!processedLevel2.contains(level2Key)) {
-                    Map<String, Object> category = new HashMap<>();
-                    category.put("id", level2Key);
-                    category.put("name", level2);
-                    category.put("level", 2);
-                    category.put("parent", level1);
-                    category.put("fullPath", level1 + " - " + level2);
-                    categories.add(category);
-                    processedLevel2.add(level2Key);
-                }
-            }
-
-            // Level 3 - Sub-subcategory
-            if (parts.length >= 3) {
-                String level1 = parts[0].trim();
-                String level2 = parts[1].trim();
-                String level3 = parts[2].trim();
-                String level2Key = level1 + "|" + level2;
-                String level3Key = level1 + "|" + level2 + "|" + level3; // Unique key
-
-                if (!processedLevel3.contains(level3Key)) {
-                    Map<String, Object> category = new HashMap<>();
-                    category.put("id", level3Key);
-                    category.put("name", level3);
-                    category.put("level", 3);
-                    category.put("parent", level2Key);
-                    category.put("parentName", level2);
-                    category.put("fullPath", level1 + " - " + level2 + " - " + level3);
-                    categories.add(category);
-                    processedLevel3.add(level3Key);
-                }
-            }
-        }
-
-        log.info("Built category hierarchy: L1={}, L2={}, L3={}",
-                processedLevel1.size(), processedLevel2.size(), processedLevel3.size());
-
-        return categories;
     }
 
     public Set<String> extractManufacturers() {
@@ -287,11 +262,12 @@ public class AsbisApiService {
                         products.add(product);
 
                         if (i < 3) {
-                            log.debug("Sample product #{}: code={}, vendor={}, name={}",
+                            log.debug("Sample product #{}: code={}, vendor={}, category={}, type={}",
                                     i + 1,
                                     product.get("productcode"),
                                     product.get("vendor"),
-                                    product.get("productdescription"));
+                                    product.get("productcategory"),
+                                    product.get("producttype"));
                         }
                     }
                 }
@@ -394,11 +370,6 @@ public class AsbisApiService {
                 .toUriString();
     }
 
-    private String sanitizeUrl(String url) {
-        if (url == null) return null;
-        return url.replaceAll("PASSWORD=[^&]+", "PASSWORD=***");
-    }
-
     public void clearCache() {
         productsCache.clear();
         cacheTimestamp = 0;
@@ -424,19 +395,13 @@ public class AsbisApiService {
                     .filter(cat -> getInteger(cat, "level") == 2)
                     .count();
 
-            long level3Count = categories.stream()
-                    .filter(cat -> getInteger(cat, "level") == 3)
-                    .count();
-
             Map<String, Object> stats = new HashMap<>();
             stats.put("total", categories.size());
             stats.put("level1", level1Count);
             stats.put("level2", level2Count);
-            stats.put("level3", level3Count);
             stats.put("breakdown", Map.of(
-                    "rootCategories", level1Count,
-                    "subcategories", level2Count,
-                    "subSubcategories", level3Count
+                    "productCategories", level1Count,
+                    "productTypes", level2Count
             ));
 
             return stats;
