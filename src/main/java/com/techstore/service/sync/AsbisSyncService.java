@@ -38,10 +38,6 @@ public class AsbisSyncService {
     @Value("${app.sync.batch-size:50}")
     private int batchSize;
 
-    // ===========================================
-    // CATEGORIES SYNC
-    // ===========================================
-
     @Transactional
     public void syncAsbisCategories() {
         SyncLog syncLog = logHelper.createSyncLogSimple("ASBIS_CATEGORIES");
@@ -65,16 +61,7 @@ public class AsbisSyncService {
                 return;
             }
 
-            // Group categories by level for proper hierarchical processing
-            Map<Integer, List<Map<String, Object>>> categoriesByLevel = externalCategories.stream()
-                    .collect(Collectors.groupingBy(cat -> getInteger(cat, "level")));
-
-            log.info("Category breakdown by level:");
-            categoriesByLevel.forEach((level, cats) ->
-                    log.info("  Level {}: {} categories", level, cats.size())
-            );
-
-            // Load existing categories
+            // Load existing categories by Asbis ID
             Map<String, Category> existingCategoriesById = categoryRepository.findAll()
                     .stream()
                     .filter(cat -> cat.getAsbisId() != null && !cat.getAsbisId().isEmpty())
@@ -88,173 +75,73 @@ public class AsbisSyncService {
 
             long totalCreated = 0, totalUpdated = 0, totalSkipped = 0;
 
-            // ========================================
-            // STEP 1: Process Level 1 (Root) categories
-            // ========================================
-            log.info("=== STEP 1: Processing Level 1 (Root) categories ===");
-            List<Map<String, Object>> level1Categories = categoriesByLevel.getOrDefault(1, new ArrayList<>());
+            // Process categories in correct hierarchical order (Level 1 -> Level 2 -> Level 3)
+            for (int level = 1; level <= 3; level++) {
+                log.info("=== STEP {}: Processing Level {} categories ===", level, level);
 
-            for (int i = 0; i < level1Categories.size(); i++) {
-                Map<String, Object> extCategory = level1Categories.get(i);
+                int finalLevel = level;
+                List<Map<String, Object>> levelCategories = externalCategories.stream()
+                        .filter(cat -> getInteger(cat, "level") == finalLevel)
+                        .toList();
 
-                try {
-                    String asbisId = getString(extCategory, "id");
-                    String name = getString(extCategory, "name");
+                log.info("Found {} Level {} categories", levelCategories.size(), level);
 
-                    if (asbisId == null || name == null) {
-                        log.warn("Skipping L1 category with missing id or name");
-                        totalSkipped++;
-                        continue;
-                    }
+                for (int i = 0; i < levelCategories.size(); i++) {
+                    Map<String, Object> extCategory = levelCategories.get(i);
 
-                    Category category = existingCategoriesById.get(asbisId);
-                    boolean isNew = (category == null);
+                    try {
+                        String asbisId = getString(extCategory, "id");
+                        String name = getString(extCategory, "name");
+                        String parentId = getString(extCategory, "parent");
 
-                    if (isNew) {
-                        category = createAsbisCategoryFromExternal(extCategory, existingCategoriesById);
-                        totalCreated++;
-                    } else {
-                        updateAsbisCategoryFromExternal(category, extCategory, existingCategoriesById);
-                        totalUpdated++;
-                    }
-
-                    category = categoryRepository.save(category);
-                    existingCategoriesById.put(asbisId, category);
-
-                    log.info("  ✓ L1 [{}/{}]: '{}' (ID: {})",
-                            i + 1, level1Categories.size(), name, category.getId());
-
-                } catch (Exception e) {
-                    log.error("Error processing L1 category: {}", e.getMessage(), e);
-                    totalSkipped++;
-                }
-            }
-
-            // Flush after Level 1
-            entityManager.flush();
-            entityManager.clear();
-            log.info("=== STEP 1 COMPLETE: {} Level 1 categories processed ===", level1Categories.size());
-
-            // ========================================
-            // STEP 2: Process Level 2 categories
-            // ========================================
-            log.info("=== STEP 2: Processing Level 2 categories ===");
-            List<Map<String, Object>> level2Categories = categoriesByLevel.getOrDefault(2, new ArrayList<>());
-
-            for (int i = 0; i < level2Categories.size(); i++) {
-                Map<String, Object> extCategory = level2Categories.get(i);
-
-                try {
-                    String asbisId = getString(extCategory, "id");
-                    String name = getString(extCategory, "name");
-                    String parentId = getString(extCategory, "parent");
-
-                    if (asbisId == null || name == null) {
-                        log.warn("Skipping L2 category with missing id or name");
-                        totalSkipped++;
-                        continue;
-                    }
-
-                    // Verify parent exists
-                    Category parent = null;
-                    if (parentId != null) {
-                        parent = existingCategoriesById.get(parentId);
-                        if (parent == null) {
-                            log.warn("✗ Skipping L2 category '{}': parent '{}' not found", name, parentId);
+                        if (asbisId == null || name == null) {
+                            log.warn("Skipping L{} category with missing id or name", level);
                             totalSkipped++;
                             continue;
                         }
-                    }
 
-                    Category category = existingCategoriesById.get(asbisId);
-                    boolean isNew = (category == null);
-
-                    if (isNew) {
-                        category = createAsbisCategoryFromExternal(extCategory, existingCategoriesById);
-                        totalCreated++;
-                    } else {
-                        updateAsbisCategoryFromExternal(category, extCategory, existingCategoriesById);
-                        totalUpdated++;
-                    }
-
-                    category = categoryRepository.save(category);
-                    existingCategoriesById.put(asbisId, category);
-
-                    log.info("  ✓ L2 [{}/{}]: '{}' (ID: {}, parent: '{}')",
-                            i + 1, level2Categories.size(), name, category.getId(),
-                            parent != null ? parent.getNameBg() : "none");
-
-                } catch (Exception e) {
-                    log.error("Error processing L2 category: {}", e.getMessage(), e);
-                    totalSkipped++;
-                }
-            }
-
-            // Flush after Level 2
-            entityManager.flush();
-            entityManager.clear();
-            log.info("=== STEP 2 COMPLETE: {} Level 2 categories processed ===", level2Categories.size());
-
-            // ========================================
-            // STEP 3: Process Level 3 categories
-            // ========================================
-            log.info("=== STEP 3: Processing Level 3 categories ===");
-            List<Map<String, Object>> level3Categories = categoriesByLevel.getOrDefault(3, new ArrayList<>());
-
-            for (int i = 0; i < level3Categories.size(); i++) {
-                Map<String, Object> extCategory = level3Categories.get(i);
-
-                try {
-                    String asbisId = getString(extCategory, "id");
-                    String name = getString(extCategory, "name");
-                    String parentId = getString(extCategory, "parent");
-
-                    if (asbisId == null || name == null) {
-                        log.warn("Skipping L3 category with missing id or name");
-                        totalSkipped++;
-                        continue;
-                    }
-
-                    // Verify parent exists
-                    Category parent = null;
-                    if (parentId != null) {
-                        parent = existingCategoriesById.get(parentId);
-                        if (parent == null) {
-                            log.warn("✗ Skipping L3 category '{}': parent '{}' not found", name, parentId);
-                            totalSkipped++;
-                            continue;
+                        // For levels 2 and 3, verify parent exists
+                        Category parent = null;
+                        if (level > 1 && parentId != null) {
+                            parent = existingCategoriesById.get(parentId);
+                            if (parent == null) {
+                                log.warn("✗ Skipping L{} category '{}': parent '{}' not found",
+                                        level, name, parentId);
+                                totalSkipped++;
+                                continue;
+                            }
                         }
+
+                        Category category = existingCategoriesById.get(asbisId);
+                        boolean isNew = (category == null);
+
+                        if (isNew) {
+                            category = createAsbisCategoryFromExternal(extCategory, existingCategoriesById);
+                            totalCreated++;
+                        } else {
+                            updateAsbisCategoryFromExternal(category, extCategory, existingCategoriesById);
+                            totalUpdated++;
+                        }
+
+                        category = categoryRepository.save(category);
+                        existingCategoriesById.put(asbisId, category);
+
+                        log.info("  ✓ L{} [{}/{}]: '{}' (ID: {}, parent: '{}')",
+                                level, i + 1, levelCategories.size(), name, category.getId(),
+                                parent != null ? parent.getNameBg() : "none");
+
+                    } catch (Exception e) {
+                        log.error("Error processing L{} category: {}", level, e.getMessage(), e);
+                        totalSkipped++;
                     }
-
-                    Category category = existingCategoriesById.get(asbisId);
-                    boolean isNew = (category == null);
-
-                    if (isNew) {
-                        category = createAsbisCategoryFromExternal(extCategory, existingCategoriesById);
-                        totalCreated++;
-                    } else {
-                        updateAsbisCategoryFromExternal(category, extCategory, existingCategoriesById);
-                        totalUpdated++;
-                    }
-
-                    category = categoryRepository.save(category);
-                    existingCategoriesById.put(asbisId, category);
-
-                    log.info("  ✓ L3 [{}/{}]: '{}' (ID: {}, parent: '{}', path: '{}')",
-                            i + 1, level3Categories.size(), name, category.getId(),
-                            parent != null ? parent.getNameBg() : "none",
-                            category.getCategoryPath());
-
-                } catch (Exception e) {
-                    log.error("Error processing L3 category: {}", e.getMessage(), e);
-                    totalSkipped++;
                 }
-            }
 
-            // Flush after Level 3
-            entityManager.flush();
-            entityManager.clear();
-            log.info("=== STEP 3 COMPLETE: {} Level 3 categories processed ===", level3Categories.size());
+                // Flush after each level
+                entityManager.flush();
+                entityManager.clear();
+                log.info("=== STEP {} COMPLETE: {} Level {} categories processed ===",
+                        level, levelCategories.size(), level);
+            }
 
             long totalCategories = totalCreated + totalUpdated;
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalCategories, totalCreated,
@@ -274,10 +161,6 @@ public class AsbisSyncService {
             throw e;
         }
     }
-
-    // ===========================================
-    // MANUFACTURERS SYNC
-    // ===========================================
 
     @Transactional
     public void syncAsbisManufacturers() {
@@ -376,10 +259,6 @@ public class AsbisSyncService {
         }
     }
 
-    // ===========================================
-    // PARAMETERS SYNC
-    // ===========================================
-
     @Transactional
     public void syncAsbisParameters() {
         SyncLog syncLog = logHelper.createSyncLogSimple("ASBIS_PARAMETERS");
@@ -421,44 +300,21 @@ public class AsbisSyncService {
 
             log.info("Found {} Asbis categories to associate parameters with", asbisCategories.size());
 
-            // For Asbis, we'll create global parameters and associate them with root category
-            // Root category = category without parent
-            Category rootCategory = asbisCategories.stream()
-                    .filter(cat -> cat.getParent() == null)
-                    .findFirst()
-                    .orElse(null);
-
-            if (rootCategory == null) {
-                log.warn("No root category found, using first available category");
-                rootCategory = asbisCategories.get(0);
-            }
-
-            // Validate root category
-            if (rootCategory.getId() == null) {
-                log.error("Root category has null ID - cannot proceed");
-                logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0,
-                        "Root category has null ID", startTime);
-                return;
-            }
-
-            log.info("Using category '{}' (ID: {}, AsbisID: {}) for global Asbis parameters",
-                    rootCategory.getNameBg(), rootCategory.getId(), rootCategory.getAsbisId());
-
-            // Load existing parameters for this category
-            Map<String, Parameter> existingParameters;
+            // Load existing parameters for ALL categories
+            Map<String, Parameter> existingParameters = new HashMap<>();
             try {
-                existingParameters = parameterRepository
-                        .findByCategoryId(rootCategory.getId())
-                        .stream()
+                List<Parameter> allParameters = parameterRepository.findAll();
+                existingParameters = allParameters.stream()
+                        .filter(p -> p.getAsbisKey() != null && !p.getAsbisKey().isEmpty())
                         .collect(Collectors.toMap(
-                                p -> p.getAsbisKey() != null ? p.getAsbisKey() : p.getNameBg(),
+                                Parameter::getAsbisKey,
                                 p -> p,
                                 (existing, duplicate) -> {
                                     log.warn("Duplicate parameter key: {}, keeping first", existing.getAsbisKey());
                                     return existing;
                                 }
                         ));
-                log.info("Found {} existing parameters for root category", existingParameters.size());
+                log.info("Found {} existing parameters in database", existingParameters.size());
             } catch (Exception e) {
                 log.error("Error loading existing parameters: {}", e.getMessage(), e);
                 logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0,
@@ -485,16 +341,15 @@ public class AsbisSyncService {
                     boolean isNew = (parameter == null);
 
                     if (isNew) {
-                        try {
-                            parameter = createAsbisParameter(parameterKey, rootCategory);
-                            if (parameter == null) {
-                                log.error("createAsbisParameter returned null for key: {}", parameterKey);
-                                totalErrors++;
-                                continue;
-                            }
-                            totalCreated++;
-                        } catch (Exception e) {
-                            log.error("Error creating parameter for key '{}': {}", parameterKey, e.getMessage(), e);
+                        // Create parameter in ALL categories where it might be used
+                        List<Parameter> createdParams = createParameterInAllCategories(parameterKey, asbisCategories);
+                        if (!createdParams.isEmpty()) {
+                            parameter = createdParams.get(0); // Use first one as reference
+                            totalCreated += createdParams.size();
+                            Map<String, Parameter> finalExistingParameters = existingParameters;
+                            createdParams.forEach(p -> finalExistingParameters.put(p.getAsbisKey(), p));
+                        } else {
+                            log.error("Failed to create parameter in any category for key: {}", parameterKey);
                             totalErrors++;
                             continue;
                         }
@@ -502,21 +357,7 @@ public class AsbisSyncService {
                         totalUpdated++;
                     }
 
-                    try {
-                        parameter = parameterRepository.save(parameter);
-                        if (parameter.getId() == null) {
-                            log.error("Parameter save returned null ID for key: {}", parameterKey);
-                            totalErrors++;
-                            continue;
-                        }
-                        existingParameters.put(parameterKey, parameter);
-                    } catch (Exception e) {
-                        log.error("Error saving parameter '{}': {}", parameterKey, e.getMessage(), e);
-                        totalErrors++;
-                        continue;
-                    }
-
-                    // Sync parameter options
+                    // Sync parameter options for the main parameter
                     try {
                         ParameterOptionResult optionResult = syncAsbisParameterOptions(
                                 parameter, parameterValues);
@@ -574,10 +415,6 @@ public class AsbisSyncService {
         }
     }
 
-    // ===========================================
-    // PRODUCTS SYNC - WITH BATCH PROCESSING
-    // ===========================================
-
     @Transactional
     public void syncAsbisProducts() {
         SyncLog syncLog = logHelper.createSyncLogSimple("ASBIS_PRODUCTS");
@@ -608,8 +445,8 @@ public class AsbisSyncService {
                     log.info("  - Code: {}, Vendor: {}, Category: '{}', Type: '{}', Name: {}",
                             getString(p, "productcode"),
                             getString(p, "vendor"),
-                            getString(p, "productcategory"),  // Level 1
-                            getString(p, "producttype"),      // Level 2
+                            getString(p, "productcategory"),
+                            getString(p, "producttype"),
                             getString(p, "productdescription"))
             );
 
@@ -617,14 +454,19 @@ public class AsbisSyncService {
             log.info("STEP 2: Loading categories and manufacturers...");
             long lookupStart = System.currentTimeMillis();
 
-            // Categories by Asbis ID
-            Map<String, Category> categoriesByAsbisId = categoryRepository.findAll().stream()
-                    .filter(cat -> cat.getAsbisId() != null && !cat.getAsbisId().isEmpty())
-                    .collect(Collectors.toMap(
-                            Category::getAsbisId,
-                            cat -> cat,
-                            (existing, duplicate) -> existing
-                    ));
+            // Categories by Asbis ID and name
+            Map<String, Category> categoriesByAsbisId = new HashMap<>();
+            Map<String, Category> categoriesByName = new HashMap<>();
+
+            List<Category> allCategories = categoryRepository.findAll();
+            for (Category cat : allCategories) {
+                if (cat.getAsbisId() != null && !cat.getAsbisId().isEmpty()) {
+                    categoriesByAsbisId.put(cat.getAsbisId(), cat);
+                }
+                if (cat.getNameBg() != null && !cat.getNameBg().isEmpty()) {
+                    categoriesByName.put(cat.getNameBg().toLowerCase(), cat);
+                }
+            }
 
             Map<String, Manufacturer> manufacturersMap = manufacturerRepository.findAll().stream()
                     .filter(m -> m.getName() != null && !m.getName().isEmpty())
@@ -634,9 +476,14 @@ public class AsbisSyncService {
                             (existing, duplicate) -> existing
                     ));
 
+            // Load all parameters for quick access
+            Map<String, List<Parameter>> parametersByKey = parameterRepository.findAll().stream()
+                    .filter(p -> p.getAsbisKey() != null && !p.getAsbisKey().isEmpty())
+                    .collect(Collectors.groupingBy(Parameter::getAsbisKey));
+
             long lookupDuration = System.currentTimeMillis() - lookupStart;
-            log.info("✓ Lookup maps loaded in {}ms: {} categories, {} manufacturers",
-                    lookupDuration, categoriesByAsbisId.size(), manufacturersMap.size());
+            log.info("✓ Lookup maps loaded in {}ms: {} categories, {} manufacturers, {} parameters",
+                    lookupDuration, categoriesByAsbisId.size(), manufacturersMap.size(), parametersByKey.size());
 
             // STEP 3: Process products in batches
             log.info("STEP 3: Processing {} products in batches of {}...",
@@ -656,7 +503,8 @@ public class AsbisSyncService {
                     log.info("=== Processing batch [{}/{}] with {} products ===",
                             batchIndex + 1, batches.size(), batch.size());
 
-                    BatchResult result = processProductsBatch(batch, categoriesByAsbisId, manufacturersMap);
+                    BatchResult result = processProductsBatch(batch, categoriesByAsbisId,
+                            categoriesByName, manufacturersMap, parametersByKey);
 
                     totalProcessed += result.processed;
                     totalCreated += result.created;
@@ -719,12 +567,14 @@ public class AsbisSyncService {
     }
 
     // ===========================================
-    // BATCH PROCESSING HELPER
+    // BATCH PROCESSING HELPER - ПОПРАВЕН
     // ===========================================
 
     private BatchResult processProductsBatch(List<Map<String, Object>> batch,
                                              Map<String, Category> categoriesByAsbisId,
-                                             Map<String, Manufacturer> manufacturersMap) {
+                                             Map<String, Category> categoriesByName,
+                                             Map<String, Manufacturer> manufacturersMap,
+                                             Map<String, List<Parameter>> parametersByKey) {
         long processed = 0, created = 0, updated = 0, errors = 0, skippedNoCategory = 0;
 
         for (Map<String, Object> rawProduct : batch) {
@@ -738,8 +588,8 @@ public class AsbisSyncService {
                     continue;
                 }
 
-                // Find category using new method
-                Category category = findCategoryByProductType(rawProduct, categoriesByAsbisId);
+                // Find category using improved method
+                Category category = findCategoryForProduct(rawProduct, categoriesByAsbisId, categoriesByName);
 
                 if (category == null) {
                     String productCategory = getString(rawProduct, "productcategory");
@@ -759,6 +609,8 @@ public class AsbisSyncService {
                     Manufacturer manufacturer = manufacturersMap.get(vendorName);
                     if (manufacturer != null) {
                         product.setManufacturer(manufacturer);
+                    } else {
+                        log.warn("Manufacturer not found for product {}: {}", productCode, vendorName);
                     }
                 }
 
@@ -767,8 +619,8 @@ public class AsbisSyncService {
                 // Update product fields
                 updateAsbisProductFields(product, rawProduct, category);
 
-                // Set parameters from AttrList
-                setParametersToAsbisProduct(product, rawProduct);
+                // Set parameters from AttrList - ПОПРАВЕН МЕТОД
+                setParametersToProduct(product, rawProduct, parametersByKey);
 
                 // Save product
                 product = productRepository.save(product);
@@ -791,7 +643,7 @@ public class AsbisSyncService {
             } catch (Exception e) {
                 errors++;
                 log.error("Error processing product {}: {}",
-                        getString(rawProduct, "productcode"), e.getMessage());
+                        getString(rawProduct, "productcode"), e.getMessage(), e);
             }
         }
 
@@ -799,35 +651,45 @@ public class AsbisSyncService {
     }
 
     // ===========================================
-    // HELPER METHODS
+    // ПОПРАВЕНИ HELPER METHODS
     // ===========================================
 
-    private Category findCategoryByProductType(Map<String, Object> rawProduct,
-                                               Map<String, Category> categoriesByAsbisId) {
+    private Category findCategoryForProduct(Map<String, Object> rawProduct,
+                                            Map<String, Category> categoriesByAsbisId,
+                                            Map<String, Category> categoriesByName) {
         String productCategory = getString(rawProduct, "productcategory"); // Level 1
         String productType = getString(rawProduct, "producttype");         // Level 2
         String sku = getString(rawProduct, "productcode");
 
-        // STRATEGY 1: Try Level 2 first (most specific - ProductType)
-        if (productType != null && !productType.trim().isEmpty() &&
-                productCategory != null && !productCategory.trim().isEmpty()) {
-
-            String level2Key = productCategory + "|" + productType;
-            Category category = categoriesByAsbisId.get(level2Key);
-
+        // STRATEGY 1: Try to find by Asbis ID (most reliable)
+        if (productType != null && !productType.trim().isEmpty()) {
+            Category category = categoriesByAsbisId.get(productType);
             if (category != null) {
-                log.debug("✓ Product {} matched Level 2: '{}' (parent: '{}')",
-                        sku, productType, productCategory);
+                log.debug("✓ Product {} matched by Asbis ID: '{}'", sku, productType);
                 return category;
             }
         }
 
-        // STRATEGY 2: Fallback to Level 1 (ProductCategory)
+        // STRATEGY 2: Try to find by name
+        if (productType != null && !productType.trim().isEmpty()) {
+            Category category = categoriesByName.get(productType.toLowerCase());
+            if (category != null) {
+                log.debug("✓ Product {} matched by name: '{}'", sku, productType);
+                return category;
+            }
+        }
+
+        // STRATEGY 3: Fallback to Level 1 category
         if (productCategory != null && !productCategory.trim().isEmpty()) {
             Category category = categoriesByAsbisId.get(productCategory);
-
             if (category != null) {
                 log.debug("✓ Product {} matched Level 1: '{}'", sku, productCategory);
+                return category;
+            }
+
+            category = categoriesByName.get(productCategory.toLowerCase());
+            if (category != null) {
+                log.debug("✓ Product {} matched Level 1 by name: '{}'", sku, productCategory);
                 return category;
             }
         }
@@ -836,6 +698,123 @@ public class AsbisSyncService {
         log.warn("✗ No category match for product {}: productCategory='{}', productType='{}'",
                 sku, productCategory, productType);
         return null;
+    }
+
+    private void setParametersToProduct(Product product, Map<String, Object> rawProduct,
+                                        Map<String, List<Parameter>> parametersByKey) {
+        if (product.getCategory() == null) {
+            log.warn("Product {} has no category, cannot set parameters", product.getSku());
+            return;
+        }
+
+        Set<ProductParameter> productParameters = new HashSet<>();
+
+        Object attrListObj = rawProduct.get("attrlist");
+        if (!(attrListObj instanceof Map)) {
+            product.setProductParameters(productParameters);
+            return;
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, String> attrList = (Map<String, String>) attrListObj;
+
+        int mappedCount = 0;
+        int notFoundCount = 0;
+
+        for (Map.Entry<String, String> attrEntry : attrList.entrySet()) {
+            try {
+                String parameterKey = attrEntry.getKey();
+                String parameterValue = attrEntry.getValue();
+
+                if (parameterValue == null || parameterValue.trim().isEmpty()) {
+                    continue;
+                }
+
+                // Find parameter in pre-loaded map
+                List<Parameter> parameters = parametersByKey.get(parameterKey);
+                if (parameters == null || parameters.isEmpty()) {
+                    notFoundCount++;
+                    continue;
+                }
+
+                // Find parameter that belongs to product's category or its parents
+                Parameter parameter = findParameterForCategory(parameters, product.getCategory());
+                if (parameter == null) {
+                    notFoundCount++;
+                    continue;
+                }
+
+                // Find or create parameter option
+                ParameterOption option = findOrCreateAsbisParameterOption(parameter, parameterValue);
+                if (option == null) {
+                    notFoundCount++;
+                    continue;
+                }
+
+                ProductParameter productParam = new ProductParameter();
+                productParam.setProduct(product);
+                productParam.setParameter(parameter);
+                productParam.setParameterOption(option);
+                productParameters.add(productParam);
+
+                mappedCount++;
+
+            } catch (Exception e) {
+                log.error("Error mapping parameter {} for product {}: {}",
+                        attrEntry.getKey(), product.getSku(), e.getMessage());
+                notFoundCount++;
+            }
+        }
+
+        product.setProductParameters(productParameters);
+
+        if (mappedCount > 0 || notFoundCount > 0) {
+            log.info("Product {} parameter mapping: {} mapped, {} not found",
+                    product.getSku(), mappedCount, notFoundCount);
+        }
+    }
+
+    private Parameter findParameterForCategory(List<Parameter> parameters, Category targetCategory) {
+        // First try to find parameter in the exact category
+        for (Parameter param : parameters) {
+            if (param.getCategory().getId().equals(targetCategory.getId())) {
+                return param;
+            }
+        }
+
+        // If not found, try parent categories
+        Category currentCategory = targetCategory.getParent();
+        while (currentCategory != null) {
+            for (Parameter param : parameters) {
+                if (param.getCategory().getId().equals(currentCategory.getId())) {
+                    return param;
+                }
+            }
+            currentCategory = currentCategory.getParent();
+        }
+
+        // If still not found, return the first parameter (global fallback)
+        return parameters.isEmpty() ? null : parameters.get(0);
+    }
+
+    private List<Parameter> createParameterInAllCategories(String parameterKey, List<Category> categories) {
+        List<Parameter> createdParameters = new ArrayList<>();
+
+        for (Category category : categories) {
+            try {
+                Parameter parameter = createAsbisParameter(parameterKey, category);
+                if (parameter != null) {
+                    parameter = parameterRepository.save(parameter);
+                    createdParameters.add(parameter);
+                    log.debug("Created parameter '{}' in category '{}'", parameterKey, category.getNameBg());
+                }
+            } catch (Exception e) {
+                log.error("Error creating parameter '{}' in category '{}': {}",
+                        parameterKey, category.getNameBg(), e.getMessage());
+            }
+        }
+
+        return createdParameters;
     }
 
     private Category createAsbisCategoryFromExternal(Map<String, Object> extCategory,
@@ -847,14 +826,10 @@ public class AsbisSyncService {
         String parentId = getString(extCategory, "parent");
         String fullPath = getString(extCategory, "fullPath");
 
-        // Validate lengths (after migration: asbisId=500, names=255, categoryPath already 500 in entity)
-        validateStringLength(asbisId, "Category Asbis ID", CATEGORY_ID_MAX_LENGTH);
-        validateStringLength(name, "Category name", 255);
-
         category.setAsbisId(asbisId);
         category.setNameBg(name);
         category.setNameEn(name);
-        category.setCategoryPath(fullPath);  // Already 500 chars in entity
+        category.setCategoryPath(fullPath);
 
         // Set parent if exists
         if (parentId != null && !parentId.isEmpty()) {
@@ -877,13 +852,12 @@ public class AsbisSyncService {
         String fullPath = getString(extCategory, "fullPath");
 
         if (name != null) {
-            validateStringLength(name, "Category name", 255);
             category.setNameBg(name);
             category.setNameEn(name);
         }
 
         if (fullPath != null) {
-            category.setCategoryPath(fullPath);  // Already 500 chars in entity
+            category.setCategoryPath(fullPath);
         }
 
         // Update parent if changed
@@ -896,8 +870,6 @@ public class AsbisSyncService {
     }
 
     private Manufacturer createAsbisManufacturer(String name) {
-        validateStringLength(name, "Manufacturer name", MANUFACTURER_NAME_MAX_LENGTH);
-
         Manufacturer manufacturer = new Manufacturer();
         manufacturer.setName(name);
         manufacturer.setInformationName(name);
@@ -916,9 +888,6 @@ public class AsbisSyncService {
         }
 
         try {
-            // Validate length - after migration this is 500 chars
-            validateStringLength(parameterKey, "Parameter key", PARAM_KEY_MAX_LENGTH);
-
             Parameter parameter = new Parameter();
             parameter.setAsbisKey(parameterKey);
             parameter.setCategory(category);
@@ -970,10 +939,6 @@ public class AsbisSyncService {
                         continue;
                     }
 
-                    // Validate length - after migration this is 1000 chars (the critical fix!)
-                    validateStringLength(value, "Parameter option value for '" + parameter.getNameBg() + "'",
-                            PARAM_OPTION_MAX_LENGTH);
-
                     ParameterOption option = existingOptions.get(value);
 
                     if (option == null) {
@@ -987,15 +952,14 @@ public class AsbisSyncService {
                             parameterOptionRepository.save(option);
                             created++;
                         } catch (Exception e) {
-                            log.error("Error saving parameter option (length: {}) for parameter '{}': {}",
-                                    value.length(), parameter.getNameBg(), e.getMessage());
+                            log.error("Error saving parameter option for parameter '{}': {}",
+                                    parameter.getNameBg(), e.getMessage());
                         }
                     } else {
                         updated++;
                     }
                 } catch (Exception e) {
-                    log.error("Error processing parameter option (length: {}): {}",
-                            value != null ? value.length() : 0, e.getMessage());
+                    log.error("Error processing parameter option: {}", e.getMessage());
                 }
             }
         } catch (Exception e) {
@@ -1032,13 +996,9 @@ public class AsbisSyncService {
         String productDescription = getString(rawData, "productdescription");
         String productCategory = getString(rawData, "productcategory");
 
-        // Validate lengths (note: product names are TEXT in entity, so no limit there)
-        validateStringLength(productCode, "Product code", 255);
-        validateStringLength(productCategory, "Product model", PRODUCT_MODEL_MAX_LENGTH);
-
         product.setReferenceNumber(productCode);
-        product.setNameBg(productDescription);  // TEXT field - no length limit
-        product.setNameEn(productDescription);  // TEXT field - no length limit
+        product.setNameBg(productDescription);
+        product.setNameEn(productDescription);
 
         if (productCategory != null) {
             product.setModel(productCategory);
@@ -1065,92 +1025,15 @@ public class AsbisSyncService {
             }
         }
 
-        // For now, set default status (Asbis XML doesn't have stock/price info in this format)
+        // For now, set default status
         product.setShow(true);
         product.setStatus(ProductStatus.AVAILABLE);
 
         product.calculateFinalPrice();
     }
 
-    private void setParametersToAsbisProduct(Product product, Map<String, Object> rawProduct) {
-        if (product.getCategory() == null) {
-            log.warn("Product {} has no category, cannot set parameters", product.getSku());
-            return;
-        }
-
-        Set<ProductParameter> productParameters = new HashSet<>();
-
-        Object attrListObj = rawProduct.get("attrlist");
-        if (!(attrListObj instanceof Map)) {
-            product.setProductParameters(productParameters);
-            return;
-        }
-
-        @SuppressWarnings("unchecked")
-        Map<String, String> attrList = (Map<String, String>) attrListObj;
-
-        int mappedCount = 0;
-        int notFoundCount = 0;
-
-        for (Map.Entry<String, String> attrEntry : attrList.entrySet()) {
-            try {
-                String parameterKey = attrEntry.getKey();
-                String parameterValue = attrEntry.getValue();
-
-                if (parameterValue == null || parameterValue.trim().isEmpty()) {
-                    continue;
-                }
-
-                // Find parameter by Asbis key
-                Optional<Parameter> parameterOpt = parameterRepository
-                        .findByCategoryId(product.getCategory().getId())
-                        .stream()
-                        .filter(p -> parameterKey.equals(p.getAsbisKey()))
-                        .findFirst();
-
-                if (parameterOpt.isEmpty()) {
-                    notFoundCount++;
-                    continue;
-                }
-
-                Parameter parameter = parameterOpt.get();
-
-                // Find or create parameter option
-                ParameterOption option = findOrCreateAsbisParameterOption(parameter, parameterValue);
-                if (option == null) {
-                    notFoundCount++;
-                    continue;
-                }
-
-                ProductParameter productParam = new ProductParameter();
-                productParam.setProduct(product);
-                productParam.setParameter(parameter);
-                productParam.setParameterOption(option);
-                productParameters.add(productParam);
-
-                mappedCount++;
-
-            } catch (Exception e) {
-                log.error("Error mapping parameter {} for product {}: {}",
-                        attrEntry.getKey(), product.getSku(), e.getMessage());
-                notFoundCount++;
-            }
-        }
-
-        product.setProductParameters(productParameters);
-
-        if (mappedCount > 0) {
-            log.debug("Product {} parameter mapping: {} mapped, {} not found",
-                    product.getSku(), mappedCount, notFoundCount);
-        }
-    }
-
     private ParameterOption findOrCreateAsbisParameterOption(Parameter parameter, String value) {
         try {
-            // Validate length - after migration this is 1000 chars
-            validateStringLength(value, "Parameter option value for '" + parameter.getNameBg() + "'",
-                    PARAM_OPTION_MAX_LENGTH);
-
             // Try to find existing option
             Optional<ParameterOption> option = parameterOptionRepository
                     .findByParameterAndNameBg(parameter, value);
@@ -1172,10 +1055,8 @@ public class AsbisSyncService {
             return parameterOptionRepository.save(newOption);
 
         } catch (Exception e) {
-            log.error("Error finding/creating parameter option (length: {}) for {} = {}: {}",
-                    value != null ? value.length() : 0, parameter.getNameBg(),
-                    value != null && value.length() > 100 ? value.substring(0, 100) + "..." : value,
-                    e.getMessage());
+            log.error("Error finding/creating parameter option for {} = {}: {}",
+                    parameter.getNameBg(), value, e.getMessage());
             return null;
         }
     }
@@ -1241,48 +1122,6 @@ public class AsbisSyncService {
             return null;
         }
     }
-
-    /**
-     * Validate string length and log warning if exceeds database column limit
-     * Note: For TEXT columns, we only log warnings for extremely long values (> 10000 chars)
-     * @param str String to validate
-     * @param fieldName Field name for logging
-     * @param maxLength Maximum allowed length (database column size, or -1 for TEXT)
-     * @return Original string (no truncation)
-     */
-    private String validateStringLength(String str, String fieldName, int maxLength) {
-        if (str == null) {
-            return null;
-        }
-
-        // -1 means TEXT column (unlimited)
-        if (maxLength == -1) {
-            // Only warn for VERY long values
-            if (str.length() > 10000) {
-                log.warn("⚠️ {} is very long: {} chars. Value: '{}'...",
-                        fieldName, str.length(),
-                        str.substring(0, Math.min(100, str.length())));
-            }
-            return str;
-        }
-
-        // For VARCHAR columns
-        if (str.length() > maxLength) {
-            log.warn("⚠️ {} exceeds max length: {} chars (max: {}). Value: '{}'...",
-                    fieldName, str.length(), maxLength,
-                    str.substring(0, Math.min(100, str.length())));
-            log.warn("⚠️ This value will likely cause a database error! Consider increasing column size.");
-        }
-        return str;
-    }
-
-    // Database column size constants (after migration)
-    private static final int PARAM_NAME_MAX_LENGTH = 500;      // parameters.name_bg/name_en
-    private static final int PARAM_KEY_MAX_LENGTH = 500;       // parameters.asbis_key/tekra_key
-    private static final int PARAM_OPTION_MAX_LENGTH = -1;     // parameter_options.name_bg/name_en (TEXT = unlimited)
-    private static final int PRODUCT_MODEL_MAX_LENGTH = 500;   // products.model
-    private static final int CATEGORY_ID_MAX_LENGTH = 500;     // categories.asbis_id
-    private static final int MANUFACTURER_NAME_MAX_LENGTH = 255; // manufacturers.name
 
     // ===========================================
     // RESULT CLASSES
