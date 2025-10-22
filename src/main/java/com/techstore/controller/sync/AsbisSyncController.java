@@ -7,6 +7,7 @@ import com.techstore.service.sync.AsbisSyncService;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -281,6 +282,29 @@ public class AsbisSyncController {
                     .success(false)
                     .message("Error: " + e.getMessage())
                     .build());
+        }
+    }
+
+    @PostMapping("/prices")
+    public ResponseEntity<?> syncAsbisPrices() {
+        try {
+            log.info("Starting Asbis prices and availability synchronization via API");
+
+            // Execute sync asynchronously if needed
+            asbisSyncService.syncAsbisPricesAndAvailability();
+
+            return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "message", "Asbis prices and availability synchronization completed"
+            ));
+
+        } catch (Exception e) {
+            log.error("Error during Asbis prices synchronization", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "status", "error",
+                            "message", e.getMessage()
+                    ));
         }
     }
 

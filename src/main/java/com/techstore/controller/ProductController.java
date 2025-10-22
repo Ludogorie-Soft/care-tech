@@ -1,5 +1,6 @@
 package com.techstore.controller;
 
+import com.techstore.dto.response.ManufacturerResponseDto;
 import com.techstore.dto.response.ProductResponseDTO;
 import com.techstore.dto.filter.AdvancedFilterRequestDTO;
 import com.techstore.dto.request.ProductCreateRequestDTO;
@@ -7,6 +8,7 @@ import com.techstore.dto.request.ProductImageOperationsDTO;
 import com.techstore.dto.request.ProductImageUpdateDTO;
 import com.techstore.dto.request.ProductUpdateRequestDTO;
 import com.techstore.dto.response.ProductImageUploadResponseDTO;
+import com.techstore.entity.Manufacturer;
 import com.techstore.enums.ProductStatus;
 import com.techstore.service.FilteringService;
 import com.techstore.service.ProductService;
@@ -63,6 +65,14 @@ public class ProductController {
 
         Page<ProductResponseDTO> products = productService.getAllProducts(pageable, language);
         return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/manufacturers")
+    public ResponseEntity<List<ManufacturerResponseDto>> getManufacturersByCategoryId(
+            @RequestParam("categoryId") Long categoryId
+    ) {
+        List<ManufacturerResponseDto> response = productService.getManufacturersByCategory(categoryId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/{id}")
@@ -151,7 +161,6 @@ public class ProductController {
 //        return ResponseEntity.ok(products);
 //    }
 
-    @Hidden
     @GetMapping(value = "/filter")
     @Operation(summary = "Filter products", description = "Filter products with multiple criteria")
     public ResponseEntity<Page<ProductResponseDTO>> filterProducts(
@@ -179,7 +188,6 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-    @Hidden
     @PostMapping(value = "/filter/advanced")
     @Operation(summary = "Advanced product filtering", description = "Filter products with advanced specification-based filters")
     public ResponseEntity<Page<ProductResponseDTO>> filterProductsAdvanced(

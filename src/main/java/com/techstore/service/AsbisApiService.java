@@ -242,6 +242,211 @@ public class AsbisApiService {
         return parametersMap;
     }
 
+    public String getRawPriceAvailXML() {
+        if (!asbisApiEnabled) {
+            return "Asbis API is disabled";
+        }
+
+        try {
+            String url = buildApiUrl("PriceAvail.xml");
+            log.info("Fetching PriceAvail.xml from: {}", url);
+            return restTemplate.getForObject(url, String.class);
+        } catch (Exception e) {
+            log.error("Error getting raw PriceAvail XML", e);
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Get all price and availability data from Asbis API
+     * Returns a list of maps containing:
+     * - productcode: Product SKU
+     * - price: Current price
+     * - stock: Stock quantity
+     * - availability: Availability status
+     * - availabilitydate: Date when product will be available
+     */
+    public List<Map<String, Object>> getAllPriceAvailability() {
+        if (!asbisApiEnabled) {
+            log.warn("Asbis API is disabled");
+            return new ArrayList<>();
+        }
+
+        try {
+            log.info("Fetching price and availability data from Asbis API");
+            long startTime = System.currentTimeMillis();
+
+            String xmlResponse = getRawPriceAvailXML();
+
+            if (xmlResponse == null || xmlResponse.isEmpty()) {
+                log.error("Received null or empty PriceAvail XML response");
+                return new ArrayList<>();
+            }
+
+            List<Map<String, Object>> priceData = parsePriceAvailFromXML(xmlResponse);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Fetched {} price/availability records from Asbis API in {}ms",
+                    priceData.size(), duration);
+
+            return priceData;
+
+        } catch (Exception e) {
+            log.error("Error fetching price/availability from Asbis API", e);
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Parse price and availability data from XML
+     */
+    private List<Map<String, Object>> parsePriceAvailFromXML(String xmlResponse) {
+        List<Map<String, Object>> priceData = new ArrayList<>();
+
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new ByteArrayInputStream(xmlResponse.getBytes("UTF-8")));
+
+            // PriceAvail XML usually has structure like:
+            // <PriceAvail>
+            //   <Product>
+            //     <ProductCode>ABC123</ProductCode>
+            //     <Price>100.50</Price>
+            //     <Stock>15</Stock>
+            //     <Availability>Available</Availability>
+            //     <AvailabilityDate>2025-11-01</AvailabilityDate>
+            //   </Product>
+            // </PriceAvail>
+
+            NodeList productNodes = document.getElementsByTagName("Product");
+            log.info("Found {} Product nodes in PriceAvail XML", productNodes.getLength());
+
+            for (int i = 0; i < productNodes.getLength(); i++) {
+                Node productNode = productNodes.item(i);
+                if (productNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element productElement = (Element) productNode;
+                    Map<String, Object> priceItem = extractPriceAvailFromElement(productElement);
+
+                    if (priceItem != null && !priceItem.isEmpty()) {
+                        priceData.add(priceItem);
+
+                        // Log first 3 samples
+                        if (i < 3) {
+                            log.debug("Sample price data #{}: code={}, price={}, stock={}, availability={}",
+                                    i + 1,
+                                    priceItem.get("productcode"),
+                                    priceItem.get("price"),
+                                    priceItem.get("stock"),
+                                    priceItem.get("availability"));
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("Error parsing PriceAvail XML", e);
+        }
+
+        return priceData;
+    }
+
+    /**
+     * Extract price and availability data from single XML element
+     */
+    private Map<String, Object> extractPriceAvailFromElement(Element element) {
+        Map<String, Object> data = new HashMap<>();
+
+        try {
+            // Extract product code (mandatory)
+            String productCode = getElementText(element, "ProductCode");
+            if (productCode == null || productCode.trim().isEmpty()) {
+                log.warn("Skipping price record with missing ProductCode");
+                return null;
+            }
+            data.put("productcode", productCode);
+
+            // Extract price
+            String priceStr = getElementText(element, "Price");
+            if (priceStr != null && !priceStr.trim().isEmpty()) {
+                try {
+                    BigDecimal price = new BigDecimal(priceStr.trim().replaceAll("[^0-9.]", ""));
+                    data.put("price", price);
+                } catch (Exception e) {
+                    log.debug("Could not parse price for product {}: {}", productCode, priceStr);
+                    data.put("price", null);
+                }
+            }
+
+            // Extract stock quantity
+            String stockStr = getElementText(element, "Stock");
+            if (stockStr != null && !stockStr.trim().isEmpty()) {
+                try {
+                    Integer stock = Integer.parseInt(stockStr.trim());
+                    data.put("stock", stock);
+                } catch (Exception e) {
+                    log.debug("Could not parse stock for product {}: {}", productCode, stockStr);
+                    data.put("stock", 0);
+                }
+            } else {
+                data.put("stock", 0);
+            }
+
+            // Extract availability status
+            String availability = getElementText(element, "Availability");
+            data.put("availability", availability);
+
+            // Extract availability date
+            String availDate = getElementText(element, "AvailabilityDate");
+            data.put("availabilitydate", availDate);
+
+            // Additional fields that might exist
+            data.put("currency", getElementText(element, "Currency"));
+            data.put("warehouse", getElementText(element, "Warehouse"));
+
+        } catch (Exception e) {
+            log.error("Error extracting price/availability from XML element", e);
+            return null;
+        }
+
+        return data;
+    }
+
+    /**
+     * Get price and availability statistics
+     */
+    public Map<String, Object> getPriceAvailabilityStatistics() {
+        try {
+            List<Map<String, Object>> priceData = getAllPriceAvailability();
+
+            long totalRecords = priceData.size();
+            long withPrice = priceData.stream()
+                    .filter(p -> p.get("price") != null)
+                    .count();
+            long inStock = priceData.stream()
+                    .filter(p -> {
+                        Object stock = p.get("stock");
+                        return stock != null && ((Integer) stock) > 0;
+                    })
+                    .count();
+            long outOfStock = totalRecords - inStock;
+
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("totalRecords", totalRecords);
+            stats.put("withPrice", withPrice);
+            stats.put("inStock", inStock);
+            stats.put("outOfStock", outOfStock);
+
+            return stats;
+
+        } catch (Exception e) {
+            log.error("Error getting price/availability statistics", e);
+            Map<String, Object> errorStats = new HashMap<>();
+            errorStats.put("error", e.getMessage());
+            return errorStats;
+        }
+    }
+
     private List<Map<String, Object>> parseProductsFromXML(String xmlResponse) {
         List<Map<String, Object>> products = new ArrayList<>();
 

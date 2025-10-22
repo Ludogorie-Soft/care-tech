@@ -1,11 +1,7 @@
 package com.techstore.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import com.techstore.enums.Platform;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
@@ -20,6 +16,10 @@ import java.util.Set;
 @Getter
 @Setter
 public class Manufacturer extends BaseEntity {
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "platform")
+    private Platform platform;
 
     @Column(name = "external_id", unique = true)
     private Long externalId;

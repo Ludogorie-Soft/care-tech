@@ -7,6 +7,7 @@ import com.techstore.entity.ParameterOption;
 import com.techstore.entity.Product;
 import com.techstore.entity.ProductParameter;
 import com.techstore.entity.SyncLog;
+import com.techstore.enums.Platform;
 import com.techstore.enums.ProductStatus;
 import com.techstore.repository.CategoryRepository;
 import com.techstore.repository.ManufacturerRepository;
@@ -515,6 +516,7 @@ public class TekraSyncService {
                                 parameter.setNameBg(parameterName);
                                 parameter.setNameEn(translateParameterName(parameterName));
                                 parameter.setOrder(getParameterOrder(parameterKey));
+                                parameter.setPlatform(Platform.TEKRA);
                                 isNewParameter = true;
                             }
 
@@ -751,6 +753,7 @@ public class TekraSyncService {
                     }
 
                     boolean isNew = (product.getId() == null);
+                    product.setPlatform(Platform.TEKRA);
 
                     // ✅ Запазваме продукта ПРЕДИ параметрите
                     product = productRepository.save(product);
@@ -1620,6 +1623,7 @@ public class TekraSyncService {
             category.setSlug(uniqueSlug);
 
             category.setCategoryPath(category.generateCategoryPath());
+            category.setPlatform(Platform.TEKRA);
 
             category = categoryRepository.save(category);
             categoryRepository.flush();
@@ -1648,6 +1652,7 @@ public class TekraSyncService {
             Manufacturer manufacturer = new Manufacturer();
             manufacturer.setName(manufacturerName);
             manufacturer.setInformationName(manufacturerName);
+            manufacturer.setPlatform(Platform.TEKRA);
             return manufacturer;
         } catch (Exception e) {
             log.error("Error creating manufacturer: {}", e.getMessage());

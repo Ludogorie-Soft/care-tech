@@ -1,6 +1,7 @@
 package com.techstore.service.sync;
 
 import com.techstore.entity.*;
+import com.techstore.enums.Platform;
 import com.techstore.enums.ProductStatus;
 import com.techstore.repository.*;
 import com.techstore.service.AsbisApiService;
@@ -566,9 +567,270 @@ public class AsbisSyncService {
         }
     }
 
-    // ===========================================
-    // BATCH PROCESSING HELPER - ПОПРАВЕН
-    // ===========================================
+    @Transactional
+    public void syncAsbisPricesAndAvailability() {
+        SyncLog syncLog = logHelper.createSyncLogSimple("ASBIS_PRICES");
+        long startTime = System.currentTimeMillis();
+
+        try {
+            log.info("=== STARTING Asbis prices and availability synchronization ===");
+
+            // STEP 1: Fetch price and availability data from API
+            log.info("STEP 1: Fetching price and availability data from Asbis API...");
+            long apiStart = System.currentTimeMillis();
+            List<Map<String, Object>> priceData = asbisApiService.getAllPriceAvailability();
+            long apiDuration = System.currentTimeMillis() - apiStart;
+
+            log.info("✓ Asbis API call completed in {}ms ({:.1f} sec), returned {} price records",
+                    apiDuration, apiDuration / 1000.0, priceData.size());
+
+            if (priceData.isEmpty()) {
+                log.warn("No price data returned from Asbis API");
+                logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, 0, 0, 0, 0,
+                        "No price data found", startTime);
+                return;
+            }
+
+            // Show sample records
+            log.info("Sample price records:");
+            priceData.stream().limit(3).forEach(p ->
+                    log.info("  - Code: {}, Price: {}, Stock: {}, Availability: {}",
+                            getString(p, "productcode"),
+                            p.get("price"),
+                            p.get("stock"),
+                            getString(p, "availability"))
+            );
+
+            // STEP 2: Create lookup map by product code
+            log.info("STEP 2: Creating price lookup map...");
+            Map<String, Map<String, Object>> priceMap = new HashMap<>();
+            for (Map<String, Object> item : priceData) {
+                String productCode = getString(item, "productcode");
+                if (productCode != null && !productCode.isEmpty()) {
+                    priceMap.put(productCode, item);
+                }
+            }
+            log.info("✓ Created price map with {} entries", priceMap.size());
+
+            // STEP 3: Load all Asbis products
+            log.info("STEP 3: Loading Asbis products from database...");
+            long loadStart = System.currentTimeMillis();
+
+            // Find all products that have SKU (which matches Asbis ProductCode)
+            List<Product> asbisProducts = productRepository.findAll().stream()
+                    .filter(p -> p.getSku() != null && !p.getSku().isEmpty())
+                    .toList();
+
+            long loadDuration = System.currentTimeMillis() - loadStart;
+            log.info("✓ Loaded {} products with SKU in {}ms", asbisProducts.size(), loadDuration);
+
+            if (asbisProducts.isEmpty()) {
+                log.warn("No Asbis products found in database");
+                logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, 0, 0, 0, 0,
+                        "No Asbis products found", startTime);
+                return;
+            }
+
+            // STEP 4: Process products in batches
+            log.info("STEP 4: Processing {} products in batches of {}...",
+                    asbisProducts.size(), batchSize);
+
+            List<List<Product>> batches = partitionList(asbisProducts, batchSize);
+            log.info("Created {} batches for processing", batches.size());
+
+            long totalProcessed = 0, totalUpdated = 0, totalSkipped = 0, totalErrors = 0;
+            long totalPriceUpdates = 0, totalStockUpdates = 0, totalStatusChanges = 0;
+
+            for (int batchIndex = 0; batchIndex < batches.size(); batchIndex++) {
+                List<Product> batch = batches.get(batchIndex);
+                long batchStart = System.currentTimeMillis();
+
+                try {
+                    log.info("=== Processing batch [{}/{}] with {} products ===",
+                            batchIndex + 1, batches.size(), batch.size());
+
+                    PriceSyncBatchResult result = processPriceBatch(batch, priceMap);
+
+                    totalProcessed += result.processed;
+                    totalUpdated += result.updated;
+                    totalSkipped += result.skipped;
+                    totalErrors += result.errors;
+                    totalPriceUpdates += result.priceUpdates;
+                    totalStockUpdates += result.stockUpdates;
+                    totalStatusChanges += result.statusChanges;
+
+                    long batchDuration = System.currentTimeMillis() - batchStart;
+                    double productsPerSecond = result.processed / (batchDuration / 1000.0);
+
+                    log.info("✓ Batch [{}/{}] complete in {}ms ({:.1f} products/sec): " +
+                                    "processed={}, updated={}, skipped={}, errors={}",
+                            batchIndex + 1, batches.size(), batchDuration, productsPerSecond,
+                            result.processed, result.updated, result.skipped, result.errors);
+
+                    // Flush and clear after each batch
+                    entityManager.flush();
+                    entityManager.clear();
+
+                    // Overall progress log
+                    double progressPercent = ((double)(batchIndex + 1) / batches.size()) * 100;
+                    long elapsedTime = System.currentTimeMillis() - startTime;
+                    long estimatedTotal = (long)(elapsedTime / progressPercent * 100);
+                    long estimatedRemaining = estimatedTotal - elapsedTime;
+
+                    log.info("=== OVERALL PROGRESS: {}/{} products ({:.1f}%) ===",
+                            totalProcessed, asbisProducts.size(), progressPercent);
+                    log.info("Elapsed: {:.1f}min, Estimated remaining: {:.1f}min",
+                            elapsedTime / 60000.0, estimatedRemaining / 60000.0);
+
+                } catch (Exception e) {
+                    log.error("Error processing price batch {}: {}", batchIndex + 1, e.getMessage(), e);
+                    totalErrors += batch.size();
+                }
+            }
+
+            String message = String.format(
+                    "Updated: %d products | Price changes: %d | Stock updates: %d | Status changes: %d | Skipped: %d | Errors: %d",
+                    totalUpdated, totalPriceUpdates, totalStockUpdates, totalStatusChanges,
+                    totalSkipped, totalErrors);
+
+            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed,
+                    0, totalUpdated, totalErrors, message, startTime);
+
+            long totalDuration = System.currentTimeMillis() - startTime;
+            log.info("=== COMPLETE: Asbis prices/availability sync finished ===");
+            log.info("Total time: {}ms ({:.1f} min)", totalDuration, totalDuration / 60000.0);
+            log.info("Statistics: Updated={}, Price changes={}, Stock updates={}, Status changes={}, Skipped={}, Errors={}",
+                    totalUpdated, totalPriceUpdates, totalStockUpdates, totalStatusChanges,
+                    totalSkipped, totalErrors);
+
+        } catch (Exception e) {
+            log.error("=== FAILED: Asbis prices/availability synchronization ===", e);
+            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0,
+                    e.getMessage(), startTime);
+            throw e;
+        }
+    }
+
+    private PriceSyncBatchResult processPriceBatch(List<Product> batch,
+                                                   Map<String, Map<String, Object>> priceMap) {
+        long processed = 0, updated = 0, skipped = 0, errors = 0;
+        long priceUpdates = 0, stockUpdates = 0, statusChanges = 0;
+
+        for (Product product : batch) {
+            try {
+                String sku = product.getSku();
+
+                if (sku == null || sku.isEmpty()) {
+                    log.debug("Skipping product with no SKU: {}", product.getId());
+                    skipped++;
+                    continue;
+                }
+
+                // Find price data for this product
+                Map<String, Object> priceInfo = priceMap.get(sku);
+
+                if (priceInfo == null) {
+                    log.debug("No price data found for product SKU: {}", sku);
+                    skipped++;
+                    processed++;
+                    continue;
+                }
+
+                boolean productUpdated = false;
+
+                // Update price
+                Object priceObj = priceInfo.get("price");
+                if (priceObj instanceof BigDecimal) {
+                    BigDecimal newPrice = (BigDecimal) priceObj;
+
+                    // Only update if price changed
+                    if (product.getPriceClient() == null ||
+                            product.getPriceClient().compareTo(newPrice) != 0) {
+
+                        BigDecimal oldPrice = product.getPriceClient();
+                        product.setPriceClient(newPrice);
+                        product.calculateFinalPrice();
+                        productUpdated = true;
+                        priceUpdates++;
+
+                        log.info("✓ Price updated for {}: {} -> {}",
+                                sku, oldPrice, newPrice);
+                    }
+                }
+
+                // Update stock and status based on availability
+                Object stockObj = priceInfo.get("stock");
+                if (stockObj != null) {
+                    Integer stock = (Integer) stockObj;
+
+                    // Determine new status based on stock
+                    ProductStatus newStatus;
+                    if (stock > 0) {
+                        newStatus = ProductStatus.AVAILABLE;
+                    } else {
+                        newStatus = ProductStatus.NOT_AVAILABLE;
+                    }
+
+                    // Update status if changed
+                    if (product.getStatus() != newStatus) {
+                        ProductStatus oldStatus = product.getStatus();
+                        product.setStatus(newStatus);
+                        productUpdated = true;
+                        statusChanges++;
+
+                        log.info("✓ Status changed for {}: {} -> {} (stock: {})",
+                                sku, oldStatus, newStatus, stock);
+                    }
+
+                    stockUpdates++;
+                }
+
+                // Save if product was updated
+                if (productUpdated) {
+                    productRepository.save(product);
+                    updated++;
+                    log.debug("✓ Updated product: {} ({})", product.getNameBg(), sku);
+                }
+
+                processed++;
+
+                // Periodic flush within batch
+                if (processed % 20 == 0) {
+                    entityManager.flush();
+                }
+
+            } catch (Exception e) {
+                errors++;
+                log.error("Error processing price for product {}: {}",
+                        product.getSku(), e.getMessage(), e);
+            }
+        }
+
+        return new PriceSyncBatchResult(processed, updated, skipped, errors,
+                priceUpdates, stockUpdates, statusChanges);
+    }
+
+    private static class PriceSyncBatchResult {
+        long processed;
+        long updated;
+        long skipped;
+        long errors;
+        long priceUpdates;
+        long stockUpdates;
+        long statusChanges;
+
+        PriceSyncBatchResult(long processed, long updated, long skipped, long errors,
+                             long priceUpdates, long stockUpdates, long statusChanges) {
+            this.processed = processed;
+            this.updated = updated;
+            this.skipped = skipped;
+            this.errors = errors;
+            this.priceUpdates = priceUpdates;
+            this.stockUpdates = stockUpdates;
+            this.statusChanges = statusChanges;
+        }
+    }
+
 
     private BatchResult processProductsBatch(List<Map<String, Object>> batch,
                                              Map<String, Category> categoriesByAsbisId,
@@ -804,6 +1066,7 @@ public class AsbisSyncService {
             try {
                 Parameter parameter = createAsbisParameter(parameterKey, category);
                 if (parameter != null) {
+                    parameter.setPlatform(Platform.ASBIS);
                     parameter = parameterRepository.save(parameter);
                     createdParameters.add(parameter);
                     log.debug("Created parameter '{}' in category '{}'", parameterKey, category.getNameBg());
@@ -830,6 +1093,7 @@ public class AsbisSyncService {
         category.setNameBg(name);
         category.setNameEn(name);
         category.setCategoryPath(fullPath);
+        category.setPlatform(Platform.ASBIS);
 
         // Set parent if exists
         if (parentId != null && !parentId.isEmpty()) {
@@ -873,6 +1137,7 @@ public class AsbisSyncService {
         Manufacturer manufacturer = new Manufacturer();
         manufacturer.setName(name);
         manufacturer.setInformationName(name);
+        manufacturer.setPlatform(Platform.ASBIS);
         return manufacturer;
     }
 
@@ -987,6 +1252,7 @@ public class AsbisSyncService {
             product.setSku(productCode);
         }
 
+        product.setPlatform(Platform.ASBIS);
         product.setCategory(category);
         return product;
     }
@@ -1024,12 +1290,6 @@ public class AsbisSyncService {
                 }
             }
         }
-
-        // For now, set default status
-        product.setShow(true);
-        product.setStatus(ProductStatus.AVAILABLE);
-
-        product.calculateFinalPrice();
     }
 
     private ParameterOption findOrCreateAsbisParameterOption(Parameter parameter, String value) {

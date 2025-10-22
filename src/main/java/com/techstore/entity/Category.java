@@ -1,13 +1,7 @@
 package com.techstore.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import com.techstore.enums.Platform;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
@@ -20,6 +14,10 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = false, exclude = {"parent", "children", "products"})
 public class Category extends BaseEntity {
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "platform")
+    private Platform platform;
 
     @Column(name = "tekra_id")
     private String tekraId;

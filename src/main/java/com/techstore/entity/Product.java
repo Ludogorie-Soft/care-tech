@@ -1,5 +1,6 @@
 package com.techstore.entity;
 
+import com.techstore.enums.Platform;
 import com.techstore.enums.ProductStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -30,6 +31,10 @@ import java.util.Set;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class Product extends BaseEntity {
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "platform")
+    private Platform platform;
 
     @Column(name = "tekra_id")
     private String tekraId;

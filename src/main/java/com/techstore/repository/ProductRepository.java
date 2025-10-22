@@ -1,5 +1,6 @@
 package com.techstore.repository;
 
+import com.techstore.entity.Manufacturer;
 import com.techstore.entity.Product;
 import com.techstore.enums.ProductStatus;
 import org.springframework.data.domain.Page;
@@ -121,5 +122,10 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT p.asbisCode, COUNT(p) FROM Product p WHERE p.asbisCode IS NOT NULL " +
             "GROUP BY p.asbisCode HAVING COUNT(p) > 1")
     List<Object[]> findDuplicateProductsByAsbisCode();
+
+    @Query("SELECT DISTINCT p.manufacturer FROM Product p " +
+            "WHERE p.category.id = :categoryId " +
+            "AND p.manufacturer IS NOT NULL")
+    List<Manufacturer> findManufacturersByCategoryId(@Param("categoryId") Long categoryId);
 
 }

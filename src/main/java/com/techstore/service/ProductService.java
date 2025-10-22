@@ -5,12 +5,7 @@ import com.techstore.dto.request.ProductImageOperationsDTO;
 import com.techstore.dto.request.ProductImageUpdateDTO;
 import com.techstore.dto.request.ProductParameterCreateDTO;
 import com.techstore.dto.request.ProductUpdateRequestDTO;
-import com.techstore.dto.response.CategorySummaryDTO;
-import com.techstore.dto.response.ManufacturerSummaryDto;
-import com.techstore.dto.response.ParameterOptionResponseDto;
-import com.techstore.dto.response.ProductImageUploadResponseDTO;
-import com.techstore.dto.response.ProductParameterResponseDto;
-import com.techstore.dto.response.ProductResponseDTO;
+import com.techstore.dto.response.*;
 import com.techstore.entity.Category;
 import com.techstore.entity.Manufacturer;
 import com.techstore.entity.Parameter;
@@ -21,6 +16,7 @@ import com.techstore.enums.ProductStatus;
 import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.DuplicateResourceException;
 import com.techstore.exception.ValidationException;
+import com.techstore.mapper.ManufacturerMapper;
 import com.techstore.mapper.ParameterMapper;
 import com.techstore.repository.CategoryRepository;
 import com.techstore.repository.ManufacturerRepository;
@@ -63,11 +59,18 @@ public class ProductService {
     private final ParameterOptionRepository parameterOptionRepository;
     private final S3Service s3Service;
     private final ParameterMapper parameterMapper;
+    private final ManufacturerMapper manufacturerMapper;
 
     // Constants for validation
     private static final int MAX_IMAGES_PER_PRODUCT = 20;
     private static final int MAX_PARAMETERS_PER_PRODUCT = 100;
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+    @Transactional(readOnly = true)
+    public List<ManufacturerResponseDto> getManufacturersByCategory(Long categoryId) {
+        return productRepository.findManufacturersByCategoryId(categoryId).stream()
+                .map(manufacturerMapper::toResponseDto).toList();
+    }
 
     // ============ CREATE OPERATIONS ============
 

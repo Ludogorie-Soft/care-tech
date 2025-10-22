@@ -14,6 +14,7 @@ import com.techstore.entity.ParameterOption;
 import com.techstore.entity.Product;
 import com.techstore.entity.ProductParameter;
 import com.techstore.entity.SyncLog;
+import com.techstore.enums.Platform;
 import com.techstore.enums.ProductStatus;
 import com.techstore.repository.CategoryRepository;
 import com.techstore.repository.ManufacturerRepository;
@@ -67,10 +68,6 @@ public class ValiSyncService {
     @Value("${app.sync.max-chunk-duration-minutes:5}")
     private int maxChunkDurationMinutes;
 
-    // ===========================================
-    // MANUFACTURERS SYNC
-    // ===========================================
-
     @Transactional
     public void syncManufacturers() {
         String syncType = "MANUFACTURERS";
@@ -111,10 +108,6 @@ public class ValiSyncService {
             throw new RuntimeException(e);
         }
     }
-
-    // ===========================================
-    // CATEGORIES SYNC
-    // ===========================================
 
     @Transactional
     public void syncCategories() {
@@ -164,10 +157,6 @@ public class ValiSyncService {
             throw new RuntimeException(e);
         }
     }
-
-    // ===========================================
-    // PARAMETERS SYNC
-    // ===========================================
 
     @Transactional
     public void syncParameters() {
@@ -256,10 +245,6 @@ public class ValiSyncService {
         }
     }
 
-    // ===========================================
-    // PRODUCTS SYNC
-    // ===========================================
-
     @Transactional
     public void syncProducts() {
         String syncType = "PRODUCTS";
@@ -297,10 +282,6 @@ public class ValiSyncService {
             throw new RuntimeException(e);
         }
     }
-
-    // ===========================================
-    // PARAMETER OPTIONS SYNC
-    // ===========================================
 
     private void syncValiParameterOptions(Parameter parameter, List<ParameterOptionRequestDto> externalOptions) {
         if (externalOptions == null || externalOptions.isEmpty()) {
@@ -464,6 +445,7 @@ public class ValiSyncService {
         category.setExternalId(extCategory.getId());
         category.setShow(extCategory.getShow());
         category.setSortOrder(extCategory.getOrder());
+        category.setPlatform(Platform.VALI);
 
         if (extCategory.getName() != null) {
             extCategory.getName().forEach(name -> {
@@ -576,6 +558,7 @@ public class ValiSyncService {
         Manufacturer manufacturer = new Manufacturer();
         manufacturer.setExternalId(extManufacturer.getId());
         manufacturer.setName(extManufacturer.getName());
+        manufacturer.setPlatform(Platform.VALI);
 
         if (extManufacturer.getInformation() != null) {
             manufacturer.setInformationName(extManufacturer.getInformation().getName());
@@ -617,6 +600,7 @@ public class ValiSyncService {
         parameter.setExternalId(extParameter.getId());
         parameter.setCategory(category);
         parameter.setOrder(extParameter.getOrder());
+        parameter.setPlatform(Platform.VALI);
 
         if (extParameter.getName() != null) {
             extParameter.getName().forEach(name -> {
@@ -788,6 +772,7 @@ public class ValiSyncService {
         product.setShow(extProduct.getShow());
         product.setWarranty(extProduct.getWarranty());
         product.setWeight(extProduct.getWeight());
+        product.setPlatform(Platform.VALI);
 
         setCategoryToProduct(product, extProduct);
         setImagesToProduct(product, extProduct);
