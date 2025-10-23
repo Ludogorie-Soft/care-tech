@@ -118,38 +118,19 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-    @GetMapping(value = "/featured")
-    @Operation(summary = "Get featured products", description = "Retrieve featured products")
-    public ResponseEntity<Page<ProductResponseDTO>> getFeaturedProducts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "en") String language) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<ProductResponseDTO> products = productService.getFeaturedProducts(pageable, language);
-        return ResponseEntity.ok(products);
-    }
-
-    @GetMapping(value = "/on-sale")
-    @Operation(summary = "Get products on sale", description = "Retrieve products with discounts")
-    public ResponseEntity<Page<ProductResponseDTO>> getProductsOnSale(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "en") String language) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("discount").descending());
-        Page<ProductResponseDTO> products = productService.getProductsOnSale(pageable, language);
-        return ResponseEntity.ok(products);
-    }
-
-//    @Hidden
-//    @GetMapping(value = "/search")
-//    @Operation(summary = "Search products", description = "Search products by text query")
-//    public ResponseEntity<Page<ProductResponseDTO>> searchProducts(
-//            @RequestParam String q,
+//    @GetMapping(value = "/filter")
+//    @Operation(summary = "Filter products", description = "Filter products with multiple criteria")
+//    public ResponseEntity<Page<ProductResponseDTO>> filterProducts(
+//            @RequestParam(required = false) Long categoryId,
+//            @RequestParam(required = false) Long brandId,
+//            @RequestParam(required = false) BigDecimal minPrice,
+//            @RequestParam(required = false) BigDecimal maxPrice,
+//            @RequestParam(required = false) String status,
+//            @RequestParam(required = false) Boolean onSale,
+//            @RequestParam(required = false) String q,
 //            @RequestParam(defaultValue = "0") int page,
 //            @RequestParam(defaultValue = "20") int size,
-//            @RequestParam(defaultValue = "nameЕn") String sortBy,
+//            @RequestParam(defaultValue = "nameEn") String sortBy,
 //            @RequestParam(defaultValue = "asc") String sortDir,
 //            @RequestParam(defaultValue = "en") String language) {
 //
@@ -157,54 +138,30 @@ public class ProductController {
 //                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
 //        Pageable pageable = PageRequest.of(page, size, sort);
 //
-//        Page<ProductResponseDTO> products = productService.searchProducts(q, pageable, language);
+//        ProductStatus productStatus = status != null ? ProductStatus.valueOf(status) : null;
+//
+//        Page<ProductResponseDTO> products = productService.filterProducts(
+//                categoryId, brandId, minPrice, maxPrice, productStatus, onSale, q, pageable, language);
 //        return ResponseEntity.ok(products);
 //    }
-
-    @GetMapping(value = "/filter")
-    @Operation(summary = "Filter products", description = "Filter products with multiple criteria")
-    public ResponseEntity<Page<ProductResponseDTO>> filterProducts(
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long brandId,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) Boolean onSale,
-            @RequestParam(required = false) String q,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "nameEn") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir,
-            @RequestParam(defaultValue = "en") String language) {
-
-        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        ProductStatus productStatus = status != null ? ProductStatus.valueOf(status) : null;
-
-        Page<ProductResponseDTO> products = productService.filterProducts(
-                categoryId, brandId, minPrice, maxPrice, productStatus, onSale, q, pageable, language);
-        return ResponseEntity.ok(products);
-    }
-
-    @PostMapping(value = "/filter/advanced")
-    @Operation(summary = "Advanced product filtering", description = "Filter products with advanced specification-based filters")
-    public ResponseEntity<Page<ProductResponseDTO>> filterProductsAdvanced(
-            @RequestBody AdvancedFilterRequestDTO filterRequest,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "nameEn") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir,
-            @RequestParam(defaultValue = "en") String language) {
-
-        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        Page<ProductResponseDTO> products = filteringService.filterProductsAdvanced(filterRequest, pageable, language);
-        return ResponseEntity.ok(products);
-    }
+//
+//    @PostMapping(value = "/filter/advanced")
+//    @Operation(summary = "Advanced product filtering", description = "Filter products with advanced specification-based filters")
+//    public ResponseEntity<Page<ProductResponseDTO>> filterProductsAdvanced(
+//            @RequestBody AdvancedFilterRequestDTO filterRequest,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "20") int size,
+//            @RequestParam(defaultValue = "nameEn") String sortBy,
+//            @RequestParam(defaultValue = "asc") String sortDir,
+//            @RequestParam(defaultValue = "en") String language) {
+//
+//        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+//                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+//        Pageable pageable = PageRequest.of(page, size, sort);
+//
+//        Page<ProductResponseDTO> products = filteringService.filterProductsAdvanced(filterRequest, pageable, language);
+//        return ResponseEntity.ok(products);
+//    }
 
     @Hidden
     @GetMapping(value = "/{id}/related")

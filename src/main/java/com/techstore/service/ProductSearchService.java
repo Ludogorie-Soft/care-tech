@@ -1,16 +1,19 @@
 package com.techstore.service;
 
 import com.techstore.dto.request.ProductSearchRequest;
+import com.techstore.dto.response.FacetValue;
 import com.techstore.dto.response.ProductSearchResponse;
 import com.techstore.repository.ProductSearchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -20,33 +23,42 @@ public class ProductSearchService {
 
     private final ProductSearchRepository searchRepository;
 
+    /**
+     * Main search method with parameter filtering support
+     */
     public ProductSearchResponse searchProducts(ProductSearchRequest request) {
         long startTime = System.currentTimeMillis();
 
         try {
-            log.debug("Searching products with query: '{}', language: {}", request.getQuery(), request.getLanguage());
+            log.debug("Searching products with query: '{}', language: {}, filters: {}",
+                    request.getQuery(), request.getLanguage(), request.getFilters());
 
             // Validate and sanitize input
             validateSearchRequest(request);
 
-            // Perform search
+            // Perform search with parameter filtering
             ProductSearchResponse response = searchRepository.searchProducts(request);
 
             // Set actual search time
             long searchTime = System.currentTimeMillis() - startTime;
             response.setSearchTime(searchTime);
 
-            log.debug("Search completed in {}ms, found {} products",
-                    searchTime, response.getTotalElements());
+            log.debug("Search completed in {}ms, found {} products, {} facets",
+                    searchTime, response.getTotalElements(),
+                    response.getFacets() != null ? response.getFacets().size() : 0);
 
             return response;
 
         } catch (Exception e) {
-            log.error("PostgreSQL search failed for query: '{}'", request.getQuery(), e);
+            log.error("Search failed for query: '{}', filters: {}",
+                    request.getQuery(), request.getFilters(), e);
             throw new RuntimeException("Search failed", e);
         }
     }
 
+    /**
+     * Get autocomplete suggestions
+     */
     public List<String> getSearchSuggestions(String query, String language, int maxSuggestions) {
         if (!StringUtils.hasText(query) || query.length() < 2) {
             return Collections.emptyList();
@@ -66,27 +78,140 @@ public class ProductSearchService {
         }
     }
 
+    /**
+     * Get available parameters and options for a category
+     * This is used to build the filter UI dynamically
+     *
+     * @param categoryId Category ID
+     * @param language Language code (bg or en)
+     * @return Map of parameter names to lists of option values
+     */
+    @Cacheable(value = "categoryParameters", key = "#categoryId + '_' + #language")
+    public Map<String, List<String>> getAvailableParametersForCategory(Long categoryId, String language) {
+        try {
+            log.debug("Fetching parameters for category: {}, language: {}", categoryId, language);
+
+            Map<String, List<String>> parameters =
+                    searchRepository.getAvailableParametersForCategory(categoryId, language);
+
+            log.debug("Found {} parameters for category {}", parameters.size(), categoryId);
+            return parameters;
+
+        } catch (Exception e) {
+            log.error("Failed to get parameters for category: {}", categoryId, e);
+            return Collections.emptyMap();
+        }
+    }
+
+    /**
+     * Get available parameters with product counts for a category
+     * More detailed version that includes counts for each option
+     *
+     * @param categoryId Category ID
+     * @param language Language code (bg or en)
+     * @return Map of parameter names to lists of FacetValue objects (with counts)
+     */
+    @Cacheable(value = "categoryParametersWithCounts", key = "#categoryId + '_' + #language")
+    public Map<String, List<FacetValue>> getAvailableParametersWithCountsForCategory(
+            Long categoryId, String language) {
+        try {
+            log.debug("Fetching parameters with counts for category: {}, language: {}", categoryId, language);
+
+            Map<String, List<FacetValue>> parameters =
+                    searchRepository.getAvailableParametersWithCountsForCategory(categoryId, language);
+
+            log.debug("Found {} parameters with counts for category {}", parameters.size(), categoryId);
+            return parameters;
+
+        } catch (Exception e) {
+            log.error("Failed to get parameters with counts for category: {}", categoryId, e);
+            return Collections.emptyMap();
+        }
+    }
+
+    /**
+     * Validate and sanitize search request
+     */
     private void validateSearchRequest(ProductSearchRequest request) {
+        // Validate page size
         if (request.getSize() > 100) {
             throw new IllegalArgumentException("Page size cannot exceed 100");
         }
+        if (request.getSize() < 1) {
+            throw new IllegalArgumentException("Page size must be at least 1");
+        }
+
+        // Validate page number
         if (request.getPage() < 0) {
             throw new IllegalArgumentException("Page number cannot be negative");
         }
+
+        // Validate query length
         if (request.getQuery() != null && request.getQuery().length() > 200) {
-            throw new IllegalArgumentException("Search query too long");
+            throw new IllegalArgumentException("Search query too long (max 200 characters)");
         }
+
+        // Validate price range
         if (request.getMinPrice() != null && request.getMaxPrice() != null &&
                 request.getMinPrice().compareTo(request.getMaxPrice()) > 0) {
             throw new IllegalArgumentException("Minimum price cannot be greater than maximum price");
+        }
+
+        // Validate filters
+        if (request.getFilters() != null) {
+            for (Map.Entry<String, List<String>> filter : request.getFilters().entrySet()) {
+                String paramName = filter.getKey();
+                List<String> options = filter.getValue();
+
+                if (!StringUtils.hasText(paramName)) {
+                    throw new IllegalArgumentException("Filter parameter name cannot be empty");
+                }
+
+                if (paramName.length() > 100) {
+                    throw new IllegalArgumentException("Filter parameter name too long (max 100 characters)");
+                }
+
+                if (options != null && options.size() > 50) {
+                    throw new IllegalArgumentException(
+                            "Too many filter options for parameter '" + paramName + "' (max 50)");
+                }
+
+                // Validate each option value
+                if (options != null) {
+                    for (String option : options) {
+                        if (option != null && option.length() > 200) {
+                            throw new IllegalArgumentException(
+                                    "Filter option value too long (max 200 characters)");
+                        }
+                    }
+                }
+            }
         }
 
         // Sanitize query
         if (StringUtils.hasText(request.getQuery())) {
             request.setQuery(sanitizeQuery(request.getQuery()));
         }
+
+        // Sanitize filter values
+        if (request.getFilters() != null) {
+            request.getFilters().forEach((paramName, options) -> {
+                if (options != null) {
+                    List<String> sanitizedOptions = options.stream()
+                            .filter(StringUtils::hasText)
+                            .map(this::sanitizeQuery)
+                            .filter(s -> s.length() >= 1)
+                            .distinct()
+                            .toList();
+                    request.getFilters().put(paramName, sanitizedOptions);
+                }
+            });
+        }
     }
 
+    /**
+     * Sanitize query string to prevent SQL injection and other issues
+     */
     private String sanitizeQuery(String query) {
         if (!StringUtils.hasText(query)) {
             return "";
@@ -104,5 +229,50 @@ public class ProductSearchService {
         }
 
         return sanitized;
+    }
+
+    /**
+     * Helper method to search products by category
+     */
+    public ProductSearchResponse searchByCategory(String categoryName, String language, int page, int size) {
+        ProductSearchRequest request = ProductSearchRequest.builder()
+                .categories(List.of(categoryName))
+                .language(language)
+                .page(page)
+                .size(size)
+                .sortBy("relevance")
+                .build();
+
+        return searchProducts(request);
+    }
+
+    /**
+     * Helper method to search featured products
+     */
+    public ProductSearchResponse searchFeaturedProducts(String language, int page, int size) {
+        ProductSearchRequest request = ProductSearchRequest.builder()
+                .featured(true)
+                .language(language)
+                .page(page)
+                .size(size)
+                .sortBy("featured")
+                .build();
+
+        return searchProducts(request);
+    }
+
+    /**
+     * Helper method to search products on sale
+     */
+    public ProductSearchResponse searchProductsOnSale(String language, int page, int size) {
+        ProductSearchRequest request = ProductSearchRequest.builder()
+                .onSale(true)
+                .language(language)
+                .page(page)
+                .size(size)
+                .sortBy("price_desc")
+                .build();
+
+        return searchProducts(request);
     }
 }

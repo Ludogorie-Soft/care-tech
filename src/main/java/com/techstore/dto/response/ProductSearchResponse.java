@@ -21,3 +21,5 @@ public class ProductSearchResponse {
     private List<String> suggestions;
     private long searchTime;
 }
+
+
