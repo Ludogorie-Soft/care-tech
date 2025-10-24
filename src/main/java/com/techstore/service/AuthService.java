@@ -356,7 +356,7 @@ public class AuthService {
         }
 
         if (!StringUtils.hasText(loginRequest.getUsernameOrEmail())) {
-            throw new ValidationException("Username or email is required");
+            throw new ValidationException("Email is required");
         }
 
         if (!StringUtils.hasText(loginRequest.getPassword())) {
@@ -364,7 +364,7 @@ public class AuthService {
         }
 
         if (loginRequest.getUsernameOrEmail().trim().length() > 200) {
-            throw new ValidationException("Username or email is too long");
+            throw new ValidationException("Email is too long");
         }
     }
 
@@ -388,12 +388,12 @@ public class AuthService {
         // Validate username format
         String username = registerRequest.getUsername().trim();
         if (username.length() < 3 || username.length() > 100) {
-            throw new ValidationException("Username must be between 3 and 100 characters");
+            throw new ValidationException("Email must be between 3 and 100 characters");
         }
 
-        if (!username.matches("^[a-zA-Z0-9_]+$")) {
-            throw new ValidationException("Username can only contain letters, numbers, and underscores");
-        }
+//        if (!username.matches("^[a-zA-Z0-9_]+$")) {
+//            throw new ValidationException("Username can only contain letters, numbers, and underscores");
+//        }
 
         // Validate email format
         validateEmail(registerRequest.getEmail());

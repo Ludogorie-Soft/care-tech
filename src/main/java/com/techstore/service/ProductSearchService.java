@@ -67,6 +67,7 @@ public class ProductSearchService {
         }
 
         try {
+            // Sanitize query for suggestions
             String sanitizedQuery = sanitizeQuery(query);
             if (sanitizedQuery.length() < 2) {
                 return Collections.emptyList();
@@ -79,6 +80,64 @@ public class ProductSearchService {
             return Collections.emptyList();
         }
     }
+
+    private void validateSearchRequest(ProductSearchRequest request) {
+        if (request.getSize() > 100) {
+            throw new IllegalArgumentException("Page size cannot exceed 100");
+        }
+        if (request.getPage() < 0) {
+            throw new IllegalArgumentException("Page number cannot be negative");
+        }
+        if (request.getQuery() != null && request.getQuery().length() > 200) {
+            throw new IllegalArgumentException("Search query too long");
+        }
+        if (request.getMinPrice() != null && request.getMaxPrice() != null &&
+                request.getMinPrice().compareTo(request.getMaxPrice()) > 0) {
+            throw new IllegalArgumentException("Minimum price cannot be greater than maximum price");
+        }
+
+        // Sanitize query
+        if (StringUtils.hasText(request.getQuery())) {
+            request.setQuery(sanitizeQuery(request.getQuery()));
+        }
+    }
+
+    private String sanitizeQuery(String query) {
+        if (!StringUtils.hasText(query)) {
+            return "";
+        }
+
+        // Remove potentially dangerous characters for SQL
+        String sanitized = query.replaceAll("[';\"\\\\]", " ");
+
+        // Remove extra whitespace
+        sanitized = sanitized.replaceAll("\\s+", " ").trim();
+
+        // Limit length
+        if (sanitized.length() > 200) {
+            sanitized = sanitized.substring(0, 200);
+        }
+
+        return sanitized;
+    }
+//    public List<String> getSearchSuggestions(String query, String language, int maxSuggestions) {
+//        if (!StringUtils.hasText(query) || query.length() < 2) {
+//            return Collections.emptyList();
+//        }
+//
+//        try {
+//            String sanitizedQuery = sanitizeQuery(query);
+//            if (sanitizedQuery.length() < 2) {
+//                return Collections.emptyList();
+//            }
+//
+//            return searchRepository.getSearchSuggestions(sanitizedQuery, language, maxSuggestions);
+//
+//        } catch (Exception e) {
+//            log.error("Failed to get search suggestions for query: '{}'", query, e);
+//            return Collections.emptyList();
+//        }
+//    }
 
     /**
      * Get available parameters and options for a category
@@ -135,89 +194,89 @@ public class ProductSearchService {
      * Validate and sanitize search request
      * SIMPLIFIED: ID-based filters need much less validation!
      */
-    private void validateSearchRequest(ProductSearchRequest request) {
-        // Validate page size
-        if (request.getSize() > 100) {
-            throw new IllegalArgumentException("Page size cannot exceed 100");
-        }
-        if (request.getSize() < 1) {
-            throw new IllegalArgumentException("Page size must be at least 1");
-        }
-
-        // Validate page number
-        if (request.getPage() < 0) {
-            throw new IllegalArgumentException("Page number cannot be negative");
-        }
-
-        // Validate query length
-        if (request.getQuery() != null && request.getQuery().length() > 200) {
-            throw new IllegalArgumentException("Search query too long (max 200 characters)");
-        }
-
-        // Validate price range
-        if (request.getMinPrice() != null && request.getMaxPrice() != null &&
-                request.getMinPrice().compareTo(request.getMaxPrice()) > 0) {
-            throw new IllegalArgumentException("Minimum price cannot be greater than maximum price");
-        }
-
-        // ============================================================
-        // SIMPLIFIED FILTER VALIDATION - ID-BASED
-        // Much simpler than text-based validation!
-        // ============================================================
-        if (request.getFilters() != null) {
-            for (Map.Entry<Long, List<Long>> filter : request.getFilters().entrySet()) {
-                Long parameterId = filter.getKey();
-                List<Long> optionIds = filter.getValue();
-
-                // Basic validation
-                if (parameterId == null || parameterId <= 0) {
-                    throw new IllegalArgumentException("Invalid parameter ID: " + parameterId);
-                }
-
-                if (optionIds != null && optionIds.size() > 50) {
-                    throw new IllegalArgumentException(
-                            "Too many filter options for parameter " + parameterId + " (max 50)");
-                }
-
-                // Validate each option ID
-                if (optionIds != null) {
-                    for (Long optionId : optionIds) {
-                        if (optionId == null || optionId <= 0) {
-                            throw new IllegalArgumentException(
-                                    "Invalid option ID: " + optionId + " for parameter " + parameterId);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Sanitize query (only the query needs sanitization now!)
-        if (StringUtils.hasText(request.getQuery())) {
-            request.setQuery(sanitizeQuery(request.getQuery()));
-        }
-    }
+//    private void validateSearchRequest(ProductSearchRequest request) {
+//        // Validate page size
+//        if (request.getSize() > 100) {
+//            throw new IllegalArgumentException("Page size cannot exceed 100");
+//        }
+//        if (request.getSize() < 1) {
+//            throw new IllegalArgumentException("Page size must be at least 1");
+//        }
+//
+//        // Validate page number
+//        if (request.getPage() < 0) {
+//            throw new IllegalArgumentException("Page number cannot be negative");
+//        }
+//
+//        // Validate query length
+//        if (request.getQuery() != null && request.getQuery().length() > 200) {
+//            throw new IllegalArgumentException("Search query too long (max 200 characters)");
+//        }
+//
+//        // Validate price range
+//        if (request.getMinPrice() != null && request.getMaxPrice() != null &&
+//                request.getMinPrice().compareTo(request.getMaxPrice()) > 0) {
+//            throw new IllegalArgumentException("Minimum price cannot be greater than maximum price");
+//        }
+//
+//        // ============================================================
+//        // SIMPLIFIED FILTER VALIDATION - ID-BASED
+//        // Much simpler than text-based validation!
+//        // ============================================================
+//        if (request.getFilters() != null) {
+//            for (Map.Entry<Long, List<Long>> filter : request.getFilters().entrySet()) {
+//                Long parameterId = filter.getKey();
+//                List<Long> optionIds = filter.getValue();
+//
+//                // Basic validation
+//                if (parameterId == null || parameterId <= 0) {
+//                    throw new IllegalArgumentException("Invalid parameter ID: " + parameterId);
+//                }
+//
+//                if (optionIds != null && optionIds.size() > 50) {
+//                    throw new IllegalArgumentException(
+//                            "Too many filter options for parameter " + parameterId + " (max 50)");
+//                }
+//
+//                // Validate each option ID
+//                if (optionIds != null) {
+//                    for (Long optionId : optionIds) {
+//                        if (optionId == null || optionId <= 0) {
+//                            throw new IllegalArgumentException(
+//                                    "Invalid option ID: " + optionId + " for parameter " + parameterId);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Sanitize query (only the query needs sanitization now!)
+//        if (StringUtils.hasText(request.getQuery())) {
+//            request.setQuery(sanitizeQuery(request.getQuery()));
+//        }
+//    }
 
     /**
      * Sanitize query string to prevent SQL injection and other issues
      */
-    private String sanitizeQuery(String query) {
-        if (!StringUtils.hasText(query)) {
-            return "";
-        }
-
-        // Remove potentially dangerous characters for SQL
-        String sanitized = query.replaceAll("[';\"\\\\]", " ");
-
-        // Remove extra whitespace
-        sanitized = sanitized.replaceAll("\\s+", " ").trim();
-
-        // Limit length
-        if (sanitized.length() > 200) {
-            sanitized = sanitized.substring(0, 200);
-        }
-
-        return sanitized;
-    }
+//    private String sanitizeQuery(String query) {
+//        if (!StringUtils.hasText(query)) {
+//            return "";
+//        }
+//
+//        // Remove potentially dangerous characters for SQL
+//        String sanitized = query.replaceAll("[';\"\\\\]", " ");
+//
+//        // Remove extra whitespace
+//        sanitized = sanitized.replaceAll("\\s+", " ").trim();
+//
+//        // Limit length
+//        if (sanitized.length() > 200) {
+//            sanitized = sanitized.substring(0, 200);
+//        }
+//
+//        return sanitized;
+//    }
 
     /**
      * Helper method to search products by category

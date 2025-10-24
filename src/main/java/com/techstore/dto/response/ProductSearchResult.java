@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
@@ -24,5 +25,7 @@ public class ProductSearchResult {
     private String categoryName;
     private Boolean featured;
     private Boolean onSale;
-    private Float score; // Search relevance score
+    private Float score;
+    private String status;
+    private List<ProductParameterResponseDto>specifications;
 }
