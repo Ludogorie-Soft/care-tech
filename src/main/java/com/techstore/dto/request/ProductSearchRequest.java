@@ -26,7 +26,22 @@ public class ProductSearchRequest {
     private int page = 0;
     private int size = 20;
 
-    private Map<String, List<String>> filters; // parameter filters
+    /**
+     * Parameter filtering by IDs: Map<parameterId, List<parameterOptionId>>
+     *
+     * Example:
+     * {
+     *   5: [12, 13],  // Parameter 5 (RAM) must be 8GB (12) OR 16GB (13)
+     *   7: [25]       // AND Parameter 7 (Color) must be Black (25)
+     * }
+     *
+     * This means:
+     * - Products must have (RAM=8GB OR RAM=16GB) AND (Color=Black)
+     * - Multiple options for same parameter = OR logic
+     * - Multiple parameters = AND logic
+     */
+    private Map<Long, List<Long>> filters;
+
     private Boolean featured;
     private Boolean onSale;
 }

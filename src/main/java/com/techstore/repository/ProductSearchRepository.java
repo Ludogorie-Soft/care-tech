@@ -118,40 +118,41 @@ public class ProductSearchRepository {
         }
 
         // ============================================================
-        // PARAMETER FILTERING - NEW IMPLEMENTATION
+        // IMPROVED PARAMETER FILTERING - BY ID (MUCH FASTER!)
         // ============================================================
-        // AND logic between different parameters (e.g., RAM=8GB AND Color=Black)
-        // OR logic within the same parameter (e.g., RAM=8GB OR RAM=16GB)
+        // Benefits:
+        // 1. No language dependency (no name_en vs name_bg)
+        // 2. Much faster (indexed ID comparison vs text LOWER())
+        // 3. Stable (IDs don't change, names can be edited)
+        // 4. No encoding issues (16GB vs 16 GB vs 16gb)
+        // 5. Cleaner API
+        //
+        // Logic:
+        // - AND between different parameters (parameterId1 AND parameterId2)
+        // - OR within same parameter (optionId1 OR optionId2)
+        // ============================================================
         if (request.getFilters() != null && !request.getFilters().isEmpty()) {
             int filterIndex = 0;
-            for (Map.Entry<String, List<String>> filter : request.getFilters().entrySet()) {
-                String parameterName = filter.getKey();
-                List<String> optionValues = filter.getValue();
+            for (Map.Entry<Long, List<Long>> filter : request.getFilters().entrySet()) {
+                Long parameterId = filter.getKey();
+                List<Long> optionIds = filter.getValue();
 
                 // Skip empty filters
-                if (optionValues == null || optionValues.isEmpty()) {
+                if (optionIds == null || optionIds.isEmpty()) {
                     continue;
                 }
 
-                // Use language-specific field names
-                String paramNameField = request.getLanguage().equals("en") ? "param.name_en" : "param.name_bg";
-                String optionNameField = request.getLanguage().equals("en") ? "po.name_en" : "po.name_bg";
-
-                // EXISTS subquery ensures the product has at least one of the specified options
+                // EXISTS subquery: product must have at least one of the specified options
+                // for this parameter
                 whereClause.append("AND EXISTS (")
                         .append("SELECT 1 FROM product_parameters pp ")
-                        .append("JOIN parameters param ON pp.parameter_id = param.id ")
-                        .append("JOIN parameter_options po ON pp.parameter_option_id = po.id ")
                         .append("WHERE pp.product_id = p.id ")
-                        .append("AND LOWER(").append(paramNameField).append(") = LOWER(:paramName").append(filterIndex).append(") ")
-                        .append("AND LOWER(").append(optionNameField).append(") IN (:paramValues").append(filterIndex).append(")) ");
+                        .append("AND pp.parameter_id = :parameterId").append(filterIndex).append(" ")
+                        .append("AND pp.parameter_option_id IN (:optionIds").append(filterIndex).append(")) ");
 
-                // Add parameters (case-insensitive)
-                params.put("paramName" + filterIndex, parameterName);
-                List<String> lowerOptionValues = optionValues.stream()
-                        .map(String::toLowerCase)
-                        .toList();
-                params.put("paramValues" + filterIndex, lowerOptionValues);
+                // Add parameters - simple ID comparison, no LOWER() needed!
+                params.put("parameterId" + filterIndex, parameterId);
+                params.put("optionIds" + filterIndex, optionIds);
 
                 filterIndex++;
             }
@@ -216,6 +217,8 @@ public class ProductSearchRepository {
     /**
      * Build facets (aggregations) for filtering UI
      * Returns available filter options based on current search results
+     *
+     * IMPROVED: Now returns parameter and option IDs along with names
      */
     private Map<String, List<FacetValue>> buildFacets(
             ProductSearchRequest request,
@@ -229,9 +232,13 @@ public class ProductSearchRepository {
             String paramNameField = language.equals("en") ? "param.name_en" : "param.name_bg";
             String optionNameField = language.equals("en") ? "po.name_en" : "po.name_bg";
 
-            // Get parameter facets from current search results
-            String facetSql = "SELECT " + paramNameField + " as param_name, "
-                    + optionNameField + " as option_name, COUNT(DISTINCT p.id) as count " +
+            // Get parameter facets with IDs from current search results
+            String facetSql = "SELECT " +
+                    "param.id as param_id, " +
+                    paramNameField + " as param_name, " +
+                    "po.id as option_id, " +
+                    optionNameField + " as option_name, " +
+                    "COUNT(DISTINCT p.id) as count " +
                     "FROM products p " +
                     "LEFT JOIN manufacturers m ON p.manufacturer_id = m.id " +
                     "LEFT JOIN categories c ON p.category_id = c.id " +
@@ -239,28 +246,32 @@ public class ProductSearchRepository {
                     "JOIN parameters param ON pp.parameter_id = param.id " +
                     "JOIN parameter_options po ON pp.parameter_option_id = po.id " +
                     whereClause +
-                    "GROUP BY param_name, option_name " +
+                    "GROUP BY param.id, param_name, po.id, option_name " +
                     "ORDER BY param_name, count DESC";
 
             namedJdbcTemplate.query(facetSql, params, rs -> {
+                Long paramId = rs.getLong("param_id");
                 String paramName = rs.getString("param_name");
+                Long optionId = rs.getLong("option_id");
                 String optionName = rs.getString("option_name");
                 Long count = rs.getLong("count");
 
                 // Check if this option is currently selected
                 boolean isSelected = request.getFilters() != null &&
-                        request.getFilters().containsKey(paramName) &&
-                        request.getFilters().get(paramName) != null &&
-                        request.getFilters().get(paramName).stream()
-                                .anyMatch(opt -> opt.equalsIgnoreCase(optionName));
+                        request.getFilters().containsKey(paramId) &&
+                        request.getFilters().get(paramId) != null &&
+                        request.getFilters().get(paramId).contains(optionId);
 
                 FacetValue facetValue = FacetValue.builder()
+                        .id(optionId)  // NOW WE HAVE THE ID!
                         .value(optionName)
                         .count(count)
                         .selected(isSelected)
                         .build();
 
-                facets.computeIfAbsent(paramName, k -> new ArrayList<>())
+                // Use "param_id:param_name" as key to keep both ID and name
+                String facetKey = paramId + ":" + paramName;
+                facets.computeIfAbsent(facetKey, k -> new ArrayList<>())
                         .add(facetValue);
             });
 
@@ -280,7 +291,7 @@ public class ProductSearchRepository {
                 .referenceNumber(rs.getString("reference_number"))
                 .finalPrice(rs.getBigDecimal("final_price"))
                 .discount(rs.getBigDecimal("discount"))
-                .primaryImageUrl(rs.getString("image_url"))
+                .primaryImageUrl("/api/images/product/" + rs.getLong("id") + "/primary")
                 .manufacturerName(rs.getString("manufacturer_name"))
                 .categoryName(rs.getString("category_name"))
                 .featured(rs.getBoolean("featured"))
@@ -347,6 +358,8 @@ public class ProductSearchRepository {
     /**
      * Get available parameters and their options for a category
      * Useful for building filter UI dynamically
+     *
+     * IMPROVED: Now returns IDs along with names
      */
     public Map<String, List<String>> getAvailableParametersForCategory(Long categoryId, String language) {
         Map<String, List<String>> parameters = new HashMap<>();
@@ -355,8 +368,11 @@ public class ProductSearchRepository {
             String paramNameField = language.equals("en") ? "param.name_en" : "param.name_bg";
             String optionNameField = language.equals("en") ? "po.name_en" : "po.name_bg";
 
-            String sql = "SELECT DISTINCT " + paramNameField + " as param_name, "
-                    + optionNameField + " as option_name " +
+            String sql = "SELECT DISTINCT " +
+                    "param.id as param_id, " +
+                    paramNameField + " as param_name, " +
+                    "po.id as option_id, " +
+                    optionNameField + " as option_name " +
                     "FROM parameters param " +
                     "JOIN parameter_options po ON po.parameter_id = param.id " +
                     "WHERE param.category_id = :categoryId " +
@@ -366,11 +382,18 @@ public class ProductSearchRepository {
             params.put("categoryId", categoryId);
 
             namedJdbcTemplate.query(sql, params, rs -> {
+                Long paramId = rs.getLong("param_id");
                 String paramName = rs.getString("param_name");
+                Long optionId = rs.getLong("option_id");
                 String optionName = rs.getString("option_name");
 
-                parameters.computeIfAbsent(paramName, k -> new java.util.ArrayList<>())
-                        .add(optionName);
+                // Use "param_id:param_name" as key
+                String key = paramId + ":" + paramName;
+                // Store "option_id:option_name" as value
+                String value = optionId + ":" + optionName;
+
+                parameters.computeIfAbsent(key, k -> new java.util.ArrayList<>())
+                        .add(value);
             });
 
         } catch (Exception e) {
@@ -382,7 +405,7 @@ public class ProductSearchRepository {
 
     /**
      * Get available parameters with counts for a category (includes product counts)
-     * More detailed version that returns FacetValue objects
+     * More detailed version that returns FacetValue objects with IDs
      */
     public Map<String, List<FacetValue>> getAvailableParametersWithCountsForCategory(
             Long categoryId, String language) {
@@ -393,32 +416,40 @@ public class ProductSearchRepository {
             String paramNameField = language.equals("en") ? "param.name_en" : "param.name_bg";
             String optionNameField = language.equals("en") ? "po.name_en" : "po.name_bg";
 
-            String sql = "SELECT " + paramNameField + " as param_name, "
-                    + optionNameField + " as option_name, " +
+            String sql = "SELECT " +
+                    "param.id as param_id, " +
+                    paramNameField + " as param_name, " +
+                    "po.id as option_id, " +
+                    optionNameField + " as option_name, " +
                     "COUNT(DISTINCT pp.product_id) as product_count " +
                     "FROM parameters param " +
                     "JOIN parameter_options po ON po.parameter_id = param.id " +
                     "LEFT JOIN product_parameters pp ON pp.parameter_option_id = po.id " +
                     "LEFT JOIN products p ON pp.product_id = p.id AND p.active = true AND p.show_flag = true " +
                     "WHERE param.category_id = :categoryId " +
-                    "GROUP BY param_name, option_name, param.sort_order, po.sort_order " +
+                    "GROUP BY param.id, param_name, po.id, option_name, param.sort_order, po.sort_order " +
                     "ORDER BY param.sort_order, param_name, po.sort_order, option_name";
 
             Map<String, Object> params = new HashMap<>();
             params.put("categoryId", categoryId);
 
             namedJdbcTemplate.query(sql, params, rs -> {
+                Long paramId = rs.getLong("param_id");
                 String paramName = rs.getString("param_name");
+                Long optionId = rs.getLong("option_id");
                 String optionName = rs.getString("option_name");
                 Long productCount = rs.getLong("product_count");
 
                 FacetValue facetValue = FacetValue.builder()
+                        .id(optionId)  // ID IS HERE!
                         .value(optionName)
                         .count(productCount)
                         .selected(false)
                         .build();
 
-                parameters.computeIfAbsent(paramName, k -> new ArrayList<>())
+                // Use "param_id:param_name" as key
+                String key = paramId + ":" + paramName;
+                parameters.computeIfAbsent(key, k -> new ArrayList<>())
                         .add(facetValue);
             });
 

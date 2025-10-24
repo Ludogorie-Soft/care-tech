@@ -3,6 +3,7 @@ package com.techstore.service;
 import com.techstore.dto.request.ProductSearchRequest;
 import com.techstore.dto.response.FacetValue;
 import com.techstore.dto.response.ProductSearchResponse;
+import com.techstore.dto.response.ProductSearchResult;
 import com.techstore.repository.ProductSearchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +26,7 @@ public class ProductSearchService {
     private final ProductSearchRepository searchRepository;
 
     /**
-     * Main search method with parameter filtering support
+     * Main search method with parameter filtering support (ID-based)
      */
     public ProductSearchResponse searchProducts(ProductSearchRequest request) {
         long startTime = System.currentTimeMillis();
@@ -84,7 +86,7 @@ public class ProductSearchService {
      *
      * @param categoryId Category ID
      * @param language Language code (bg or en)
-     * @return Map of parameter names to lists of option values
+     * @return Map with keys "paramId:paramName" and values "optionId:optionName"
      */
     @Cacheable(value = "categoryParameters", key = "#categoryId + '_' + #language")
     public Map<String, List<String>> getAvailableParametersForCategory(Long categoryId, String language) {
@@ -109,7 +111,7 @@ public class ProductSearchService {
      *
      * @param categoryId Category ID
      * @param language Language code (bg or en)
-     * @return Map of parameter names to lists of FacetValue objects (with counts)
+     * @return Map with keys "paramId:paramName" and values List<FacetValue> (with IDs and counts)
      */
     @Cacheable(value = "categoryParametersWithCounts", key = "#categoryId + '_' + #language")
     public Map<String, List<FacetValue>> getAvailableParametersWithCountsForCategory(
@@ -131,6 +133,7 @@ public class ProductSearchService {
 
     /**
      * Validate and sanitize search request
+     * SIMPLIFIED: ID-based filters need much less validation!
      */
     private void validateSearchRequest(ProductSearchRequest request) {
         // Validate page size
@@ -157,55 +160,40 @@ public class ProductSearchService {
             throw new IllegalArgumentException("Minimum price cannot be greater than maximum price");
         }
 
-        // Validate filters
+        // ============================================================
+        // SIMPLIFIED FILTER VALIDATION - ID-BASED
+        // Much simpler than text-based validation!
+        // ============================================================
         if (request.getFilters() != null) {
-            for (Map.Entry<String, List<String>> filter : request.getFilters().entrySet()) {
-                String paramName = filter.getKey();
-                List<String> options = filter.getValue();
+            for (Map.Entry<Long, List<Long>> filter : request.getFilters().entrySet()) {
+                Long parameterId = filter.getKey();
+                List<Long> optionIds = filter.getValue();
 
-                if (!StringUtils.hasText(paramName)) {
-                    throw new IllegalArgumentException("Filter parameter name cannot be empty");
+                // Basic validation
+                if (parameterId == null || parameterId <= 0) {
+                    throw new IllegalArgumentException("Invalid parameter ID: " + parameterId);
                 }
 
-                if (paramName.length() > 100) {
-                    throw new IllegalArgumentException("Filter parameter name too long (max 100 characters)");
-                }
-
-                if (options != null && options.size() > 50) {
+                if (optionIds != null && optionIds.size() > 50) {
                     throw new IllegalArgumentException(
-                            "Too many filter options for parameter '" + paramName + "' (max 50)");
+                            "Too many filter options for parameter " + parameterId + " (max 50)");
                 }
 
-                // Validate each option value
-                if (options != null) {
-                    for (String option : options) {
-                        if (option != null && option.length() > 200) {
+                // Validate each option ID
+                if (optionIds != null) {
+                    for (Long optionId : optionIds) {
+                        if (optionId == null || optionId <= 0) {
                             throw new IllegalArgumentException(
-                                    "Filter option value too long (max 200 characters)");
+                                    "Invalid option ID: " + optionId + " for parameter " + parameterId);
                         }
                     }
                 }
             }
         }
 
-        // Sanitize query
+        // Sanitize query (only the query needs sanitization now!)
         if (StringUtils.hasText(request.getQuery())) {
             request.setQuery(sanitizeQuery(request.getQuery()));
-        }
-
-        // Sanitize filter values
-        if (request.getFilters() != null) {
-            request.getFilters().forEach((paramName, options) -> {
-                if (options != null) {
-                    List<String> sanitizedOptions = options.stream()
-                            .filter(StringUtils::hasText)
-                            .map(this::sanitizeQuery)
-                            .filter(s -> s.length() >= 1)
-                            .distinct()
-                            .toList();
-                    request.getFilters().put(paramName, sanitizedOptions);
-                }
-            });
         }
     }
 

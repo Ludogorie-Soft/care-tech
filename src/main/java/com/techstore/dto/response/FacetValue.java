@@ -5,28 +5,31 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Represents a single facet value with its count
- * Used for building filter UI with product counts
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class FacetValue {
+    /**
+     * The ID of the parameter option (for filtering)
+     * Example: 12 (for "8GB" RAM option)
+     */
+    private Long id;
 
     /**
-     * The value/option name (e.g., "8GB", "Черен", "Intel Core i7")
+     * The display name of the option
+     * Example: "8GB", "Black", "Intel Core i7"
      */
     private String value;
 
     /**
-     * Number of products matching this facet value
+     * Number of products that have this option
+     * Example: 45 products have "8GB" RAM
      */
     private Long count;
 
     /**
-     * Whether this facet value is currently selected in the search
+     * Whether this option is currently selected in the filter
      */
     private Boolean selected;
 }
