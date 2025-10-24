@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Repository
@@ -219,10 +218,6 @@ public class ProductSearchRepository {
         }
     }
 
-    /**
-     * Зарежда параметрите за списък от продукти
-     * Връща Map<ProductId, List<ProductParameterResponseDto>>
-     */
     private Map<Long, List<ProductParameterResponseDto>> loadProductParameters(List<Long> productIds, String language) {
         String paramNameField = language.equals("en") ? "param.name_en" : "param.name_bg";
         String optionNameField = language.equals("en") ? "po.name_en" : "po.name_bg";
@@ -293,12 +288,6 @@ public class ProductSearchRepository {
         return result;
     }
 
-    /**
-     * Build facets (aggregations) for filtering UI
-     * Returns available filter options based on current search results
-     *
-     * IMPROVED: Now returns parameter and option IDs along with names
-     */
     private Map<String, List<FacetValue>> buildFacets(
             ProductSearchRequest request,
             Map<String, Object> params,
@@ -311,7 +300,6 @@ public class ProductSearchRepository {
             String paramNameField = language.equals("en") ? "param.name_en" : "param.name_bg";
             String optionNameField = language.equals("en") ? "po.name_en" : "po.name_bg";
 
-            // Get parameter facets with IDs from current search results
             String facetSql = "SELECT " +
                     "param.id as param_id, " +
                     paramNameField + " as param_name, " +
@@ -342,7 +330,7 @@ public class ProductSearchRepository {
                         request.getFilters().get(paramId).contains(optionId);
 
                 FacetValue facetValue = FacetValue.builder()
-                        .id(optionId)  // NOW WE HAVE THE ID!
+                        .id(optionId)
                         .value(optionName)
                         .count(count)
                         .selected(isSelected)
@@ -380,67 +368,6 @@ public class ProductSearchRepository {
                 .build();
     }
 
-    public List<String> getSearchSuggestions(String query, String language, int maxSuggestions) {
-        if (!StringUtils.hasText(query) || query.length() < 2) {
-            return Collections.emptyList();
-        }
-
-        try {
-            String nameField = language.equals("en") ? "name_en" : "name_bg";
-
-            String sql = "SELECT DISTINCT " + nameField + ", " +
-                    "similarity(" + nameField + ", :query) as sim " +
-                    "FROM products " +
-                    "WHERE " + nameField + " % :query " +
-                    "AND active = true AND show_flag = true " +
-                    "AND " + nameField + " IS NOT NULL " +
-                    "ORDER BY sim DESC, " + nameField + " " +
-                    "LIMIT :limit";
-
-            Map<String, Object> params = new HashMap<>();
-            params.put("query", query);
-            params.put("limit", maxSuggestions);
-
-            return namedJdbcTemplate.query(sql, params, (rs, rowNum) -> rs.getString(nameField))
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .toList();
-
-        } catch (Exception e) {
-            log.warn("Trigram suggestions failed, falling back to LIKE: {}", e.getMessage());
-
-            try {
-                String nameField = language.equals("en") ? "name_en" : "name_bg";
-                String sql = "SELECT DISTINCT " + nameField + " " +
-                        "FROM products " +
-                        "WHERE LOWER(" + nameField + ") LIKE LOWER(:query) " +
-                        "AND active = true AND show_flag = true " +
-                        "AND " + nameField + " IS NOT NULL " +
-                        "ORDER BY " + nameField + " " +
-                        "LIMIT :limit";
-
-                Map<String, Object> params = new HashMap<>();
-                params.put("query", query + "%");
-                params.put("limit", maxSuggestions);
-
-                return namedJdbcTemplate.query(sql, params, (rs, rowNum) -> rs.getString(nameField))
-                        .stream()
-                        .filter(Objects::nonNull)
-                        .toList();
-
-            } catch (Exception fallbackError) {
-                log.error("Both trigram and LIKE suggestions failed: {}", fallbackError.getMessage());
-                return Collections.emptyList();
-            }
-        }
-    }
-
-    /**
-     * Get available parameters and their options for a category
-     * Useful for building filter UI dynamically
-     *
-     * IMPROVED: Now returns IDs along with names
-     */
     public Map<String, List<String>> getAvailableParametersForCategory(Long categoryId, String language) {
         Map<String, List<String>> parameters = new HashMap<>();
 
@@ -483,10 +410,6 @@ public class ProductSearchRepository {
         return parameters;
     }
 
-    /**
-     * Get available parameters with counts for a category (includes product counts)
-     * More detailed version that returns FacetValue objects with IDs
-     */
     public Map<String, List<FacetValue>> getAvailableParametersWithCountsForCategory(
             Long categoryId, String language) {
 
