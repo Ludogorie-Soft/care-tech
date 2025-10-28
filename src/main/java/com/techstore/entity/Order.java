@@ -144,6 +144,15 @@ public class Order extends BaseEntity {
 
     private Boolean isToSpeedyOffice;
 
+    @Column(name = "insurance_offer", nullable = false)
+    private Boolean insuranceOffer = false;
+
+    @Column(name = "installment_offer", nullable = false)
+    private Boolean installmentOffer = false;
+
+    @Column(name = "terms_agreed", nullable = false)
+    private Boolean termsAgreed = false;
+
     // Helper методи
     public void calculateTotals() {
         this.subtotal = orderItems.stream()

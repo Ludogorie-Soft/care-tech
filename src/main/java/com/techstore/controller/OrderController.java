@@ -48,15 +48,12 @@ public class OrderController {
      * Взема поръчка по ID
      */
     @GetMapping("/{orderId}")
-//    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<OrderResponseDTO> getOrderById(
             @PathVariable Long orderId) {
 
         User currentUser = securityHelper.getCurrentUser();
         OrderResponseDTO order = orderService.getOrderById(orderId);
 
-        // Проверка дали потребителят има право да вижда тази поръчка
-        // (само собственик или админ)
         if (!currentUser.isAdmin() && !order.getCustomerEmail().equals(currentUser.getEmail())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -68,7 +65,6 @@ public class OrderController {
      * Взема поръчка по номер
      */
     @GetMapping("/number/{orderNumber}")
-//    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<OrderResponseDTO> getOrderByNumber(
             @PathVariable String orderNumber) {
 
@@ -86,7 +82,6 @@ public class OrderController {
      * Взема поръчките на текущия потребител
      */
     @GetMapping("/my-orders")
-//    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<OrderResponseDTO>> getMyOrders(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -98,37 +93,9 @@ public class OrderController {
     }
 
     /**
-     * Взема всички поръчки (само админ)
-     */
-    @GetMapping("/admin/all")
-//    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<OrderResponseDTO>> getAllOrders(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<OrderResponseDTO> orders = orderService.getAllOrders(pageable);
-        return ResponseEntity.ok(orders);
-    }
-
-    /**
-     * Променя статуса на поръчка (само админ)
-     */
-    @PutMapping("/{orderId}/status")
-//    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<OrderResponseDTO> updateOrderStatus(
-            @PathVariable Long orderId,
-            @Valid @RequestBody OrderStatusUpdateDTO request) {
-
-        OrderResponseDTO order = orderService.updateOrderStatus(orderId, request);
-        return ResponseEntity.ok(order);
-    }
-
-    /**
      * Отказва поръчка
      */
     @PostMapping("/{orderId}/cancel")
-//    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<OrderResponseDTO> cancelOrder(
             @PathVariable Long orderId,
             @RequestParam String reason) {
@@ -136,7 +103,6 @@ public class OrderController {
         User currentUser = securityHelper.getCurrentUser();
         OrderResponseDTO order = orderService.getOrderById(orderId);
 
-        // Само собственик или админ могат да откажат
         if (!currentUser.isAdmin() && !order.getCustomerEmail().equals(currentUser.getEmail())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }

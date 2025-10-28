@@ -84,10 +84,11 @@ public class ProductSearchController {
             @PathVariable String categoryId,
             @RequestParam(defaultValue = "bg") String language,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "price_asc") String sortBy) {
 
         ProductSearchResponse response =
-                searchService.searchByCategory(categoryId, language, page, size);
+                searchService.searchByCategory(categoryId, language, page, size, sortBy);
 
         return ResponseEntity.ok(response);
     }

@@ -22,7 +22,10 @@ public class ProductSearchRequest {
     private BigDecimal maxPrice;
     private Boolean inStock;
     private Boolean active = true;
-    private String sortBy = "relevance"; // relevance, price_asc, price_desc, name, newest
+
+    @Builder.Default
+    private String sortBy = "price_asc"; // relevance, price_asc, price_desc, name, newest
+
     private int page = 0;
     private int size = 20;
 

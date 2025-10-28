@@ -2,6 +2,7 @@ package com.techstore.dto.request;
 
 import com.techstore.enums.PaymentMethod;
 import com.techstore.enums.ShippingMethod;
+import jakarta.persistence.Column;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -92,6 +93,15 @@ public class OrderCreateRequestDTO {
 
     @NotNull(message = "Payment method is required")
     private Boolean isToSpeedyOffice = true;
+
+    @NotNull
+    private Boolean insuranceOffer = false;
+
+    @NotNull
+    private Boolean installmentOffer = false;
+
+    @NotNull
+    private Boolean termsAgreed = false;
 
     private ShippingMethod shippingMethod;
     private Long shippingSpeedySiteId;

@@ -82,6 +82,10 @@ public class OrderService {
 
         order.setIsToSpeedyOffice(request.getIsToSpeedyOffice());
 
+        order.setInsuranceOffer(request.getInsuranceOffer());
+        order.setInstallmentOffer(request.getInstallmentOffer());
+        order.setTermsAgreed(request.getTermsAgreed());
+
         // Shipping address
         order.setShippingAddress(request.getShippingAddress());
         order.setShippingCity(request.getShippingCity());
@@ -468,6 +472,9 @@ public class OrderService {
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .isToSpeedyOffice(order.getIsToSpeedyOffice())
+                .insuranceOffer(order.getInsuranceOffer())
+                .installmentOffer(order.getInstallmentOffer())
+                .termsAgreed(order.getTermsAgreed())
                 .build();
     }
 

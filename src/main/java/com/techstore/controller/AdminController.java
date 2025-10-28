@@ -1,9 +1,17 @@
 package com.techstore.controller;
 
+import com.techstore.dto.request.OrderStatusUpdateDTO;
 import com.techstore.dto.request.ProductPromoRequest;
+import com.techstore.dto.response.OrderResponseDTO;
 import com.techstore.dto.response.ProductResponseDTO;
+import com.techstore.service.OrderService;
 import com.techstore.service.admin.AdminService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +26,7 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    private final OrderService orderService;
 
     @PutMapping("/products/promo")
     public ResponseEntity<ProductResponseDTO> createPromo(@RequestBody ProductPromoRequest request, @RequestParam(defaultValue = "en") String language) {
@@ -45,5 +54,24 @@ public class AdminController {
         List<ProductResponseDTO> response = adminService.createPromoByManufacturer(manufacturerId, discount, lang);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/orders/all")
+    public ResponseEntity<Page<OrderResponseDTO>> getAllOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<OrderResponseDTO> orders = orderService.getAllOrders(pageable);
+        return ResponseEntity.ok(orders);
+    }
+
+    @PutMapping("/orders/{orderId}/status")
+    public ResponseEntity<OrderResponseDTO> updateOrderStatus(
+            @PathVariable Long orderId,
+            @Valid @RequestBody OrderStatusUpdateDTO request) {
+
+        OrderResponseDTO order = orderService.updateOrderStatus(orderId, request);
+        return ResponseEntity.ok(order);
     }
 }

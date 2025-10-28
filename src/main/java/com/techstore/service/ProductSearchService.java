@@ -112,13 +112,13 @@ public class ProductSearchService {
         }
     }
 
-    public ProductSearchResponse searchByCategory(String categoryName, String language, int page, int size) {
+    public ProductSearchResponse searchByCategory(String categoryId, String language, int page, int size, String sortBy) {
         ProductSearchRequest request = ProductSearchRequest.builder()
-                .categories(List.of(categoryName))
+                .categories(List.of(categoryId))
                 .language(language)
                 .page(page)
                 .size(size)
-                .sortBy("relevance")
+                .sortBy(sortBy != null ? sortBy : "price_asc")
                 .build();
 
         return searchProducts(request);
