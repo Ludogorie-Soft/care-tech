@@ -43,4 +43,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @Query("SELECT COUNT(c) FROM Category c WHERE c.asbisId IS NOT NULL")
     Long countAsbisCategories();
+
+    List<Category> findByIsPromoActiveTrue();
 }

@@ -74,7 +74,7 @@ public class OrderCreateRequestDTO {
 
     @NotNull(message = "Shipping cost is required")
     @DecimalMin(value = "0.0", message = "Shipping cost must be positive")
-    private BigDecimal shippingCost = BigDecimal.ZERO;
+    private BigDecimal shippingCost;
 
     @Size(max = 1000)
     private String customerNotes;

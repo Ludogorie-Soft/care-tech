@@ -24,4 +24,5 @@ public class CategoryResponseDTO {
     private LocalDateTime updatedAt;
     private Boolean isParentCategory;
     private Boolean show;
+    private Boolean isPromoActive;
 }

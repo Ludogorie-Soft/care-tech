@@ -2,6 +2,8 @@ package com.techstore.controller;
 
 import com.techstore.dto.request.OrderStatusUpdateDTO;
 import com.techstore.dto.request.ProductPromoRequest;
+import com.techstore.dto.response.CategorySummaryDTO;
+import com.techstore.dto.response.ManufacturerSummaryDto;
 import com.techstore.dto.response.OrderResponseDTO;
 import com.techstore.dto.response.ProductResponseDTO;
 import com.techstore.service.OrderService;
@@ -34,13 +36,26 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/categories/promo")
+    public ResponseEntity<List<CategorySummaryDTO>> getAllPromoCategories() {
+        List<CategorySummaryDTO> response = adminService.findByIsCategoryPromoActive();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/manufacturers/promo")
+    public ResponseEntity<List<ManufacturerSummaryDto>> getAllPromoManufacturers() {
+        List<ManufacturerSummaryDto> response = adminService.findByIsManufacturerPromoActive();
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/products/promo-by-category")
     public ResponseEntity<List<ProductResponseDTO>> createPromoByCategory(
             @RequestParam("categoryId") Long categoryId,
             @RequestParam("discount")BigDecimal discount,
+            @RequestParam("isPromo") Boolean isPromo,
             @RequestParam(defaultValue = "en", name = "lang") String lang
             ) {
-        List<ProductResponseDTO> response = adminService.createPromoByCategory(categoryId, discount, lang);
+        List<ProductResponseDTO> response = adminService.createPromoByCategory(categoryId, isPromo, discount, lang);
 
         return ResponseEntity.ok(response);
     }
@@ -49,9 +64,10 @@ public class AdminController {
     public ResponseEntity<List<ProductResponseDTO>> createPromoByManufacturer(
             @RequestParam("manufacturerId") Long manufacturerId,
             @RequestParam("discount") BigDecimal discount,
+            @RequestParam("isPromo") Boolean isPromo,
             @RequestParam(defaultValue = "en", name = "lang") String lang
     ) {
-        List<ProductResponseDTO> response = adminService.createPromoByManufacturer(manufacturerId, discount, lang);
+        List<ProductResponseDTO> response = adminService.createPromoByManufacturer(manufacturerId, isPromo, discount, lang);
 
         return ResponseEntity.ok(response);
     }

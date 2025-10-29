@@ -17,4 +17,5 @@ public class ManufacturerResponseDto {
     private String euRepresentativeAddress;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean isPromoActive;
 }

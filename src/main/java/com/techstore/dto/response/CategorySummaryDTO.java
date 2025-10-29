@@ -15,4 +15,6 @@ public class CategorySummaryDTO {
     private String nameBg;
     private String slug;
     private Boolean show;
+    private CategorySummaryDTO parent;
+    private Boolean isPromoActive;
 }

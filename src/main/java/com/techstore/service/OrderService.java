@@ -138,6 +138,8 @@ public class OrderService {
         // Calculate totals
         order.calculateTotals();
 
+        order.setShippingCost(request.getShippingCost());
+
         // Save order
         order = orderRepository.save(order);
 
@@ -167,46 +169,45 @@ public class OrderService {
     /**
      * Calculate shipping cost based on shipping method
      */
-    private BigDecimal calculateShippingCost(OrderCreateRequestDTO request) {
-        if (request.getShippingMethod() == ShippingMethod.SPEEDY) {
-            try {
-                // Calculate order weight
-                BigDecimal totalWeight = calculateOrderWeight(request.getItems());
-
-                // Calculate Speedy shipping price
-                SpeedyCalculatePriceResponse speedyResponse = speedyService.calculateShippingPrice(
-                        request.getShippingSpeedySiteId(),
-                        totalWeight,
-                        1 // number of parcels
-                );
-
-                // Extract price from response
-                if (speedyResponse != null &&
-                        speedyResponse.getCalculations() != null &&
-                        !speedyResponse.getCalculations().isEmpty()) {
-
-                    SpeedyCalculatePriceResponse.Calculation calculation = speedyResponse.getCalculations().get(0);
-                    if (calculation.getPrice() != null) {
-                        BigDecimal total = calculation.getPrice().getTotal();
-                        log.info("Calculated Speedy shipping cost: {} {}", total, calculation.getPrice().getCurrency());
-                        return total;
-                    }
-                }
-
-                log.error("Invalid Speedy response structure");
-                throw new RuntimeException("Failed to extract shipping cost from Speedy response");
-
-            } catch (Exception e) {
-                log.error("Failed to calculate Speedy shipping cost: {}", e.getMessage(), e);
-                throw new RuntimeException("Failed to calculate shipping cost: " + e.getMessage());
-            }
-        } else if (request.getShippingMethod() == ShippingMethod.FREE) {
-            return BigDecimal.ZERO;
-        } else {
-            // Fixed shipping cost for other methods
-            return request.getShippingCost() != null ? request.getShippingCost() : new BigDecimal("5.00");
-        }
-    }
+//    private BigDecimal calculateShippingCost(OrderCreateRequestDTO request) {
+//        if (request.getShippingMethod() == ShippingMethod.SPEEDY) {
+//            try {
+//                // Calculate order weight
+//                BigDecimal totalWeight = calculateOrderWeight(request.getItems());
+//
+//                // Calculate Speedy shipping price
+//                SpeedyCalculatePriceResponse speedyResponse = speedyService.calculateShippingPrice(
+//                        request.getShippingSpeedySiteId(),
+//                        totalWeight,
+//                        1 // number of parcels
+//                );
+//
+//                // Extract price from response
+//                if (speedyResponse != null &&
+//                        speedyResponse.getCalculations() != null &&
+//                        !speedyResponse.getCalculations().isEmpty()) {
+//
+//                    SpeedyCalculatePriceResponse.Calculation calculation = speedyResponse.getCalculations().get(0);
+//                    if (calculation.getPrice() != null) {
+//                        BigDecimal total = calculation.getPrice().getTotal();
+//                        log.info("Calculated Speedy shipping cost: {} {}", total, calculation.getPrice().getCurrency());
+//                        return total;
+//                    }
+//                }
+//
+//                log.error("Invalid Speedy response structure");
+//                throw new RuntimeException("Failed to extract shipping cost from Speedy response");
+//
+//            } catch (Exception e) {
+//                log.error("Failed to calculate Speedy shipping cost: {}", e.getMessage(), e);
+//                throw new RuntimeException("Failed to calculate shipping cost: " + e.getMessage());
+//            }
+//        } else if (request.getShippingMethod() == ShippingMethod.FREE) {
+//            return BigDecimal.ZERO;
+//        } else {
+//            return request.getShippingCost() != null ? request.getShippingCost() : new BigDecimal("5.90");
+//        }
+//    }
 
     /**
      * Calculate total order weight
@@ -475,6 +476,7 @@ public class OrderService {
                 .insuranceOffer(order.getInsuranceOffer())
                 .installmentOffer(order.getInstallmentOffer())
                 .termsAgreed(order.getTermsAgreed())
+                .shippingCost(order.getShippingCost())
                 .build();
     }
 

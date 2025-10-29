@@ -26,6 +26,6 @@ public class ProductSearchResult {
     private Boolean featured;
     private Boolean onSale;
     private Float score;
-    private String status;
+    private int status;
     private List<ProductParameterResponseDto>specifications;
 }

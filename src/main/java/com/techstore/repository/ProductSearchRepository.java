@@ -6,6 +6,7 @@ import com.techstore.dto.response.ProductSearchResponse;
 import com.techstore.dto.response.ProductSearchResult;
 import com.techstore.dto.response.ProductParameterResponseDto;
 import com.techstore.dto.response.ParameterOptionResponseDto;
+import com.techstore.enums.ProductStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -350,6 +351,8 @@ public class ProductSearchRepository {
     }
 
     private ProductSearchResult mapRowToProduct(ResultSet rs, int rowNum, String language) throws SQLException {
+        String st = rs.getString("status");
+        ProductStatus status = ProductStatus.valueOf(st);
         return ProductSearchResult.builder()
                 .id(rs.getLong("id"))
                 .name(rs.getString(language.equals("en") ? "name_en" : "name_bg"))
@@ -358,7 +361,7 @@ public class ProductSearchRepository {
                 .referenceNumber(rs.getString("reference_number"))
                 .finalPrice(rs.getBigDecimal("final_price"))
                 .discount(rs.getBigDecimal("discount"))
-                .status(rs.getString("status"))
+                .status(status.getCode())
                 .primaryImageUrl("/api/images/product/" + rs.getLong("id") + "/primary")
                 .manufacturerName(rs.getString("manufacturer_name"))
                 .categoryName(rs.getString("category_name"))

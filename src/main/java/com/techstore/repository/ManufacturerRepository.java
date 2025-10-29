@@ -1,5 +1,6 @@
 package com.techstore.repository;
 
+import com.techstore.entity.Category;
 import com.techstore.entity.Manufacturer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,4 +32,6 @@ public interface ManufacturerRepository extends JpaRepository<Manufacturer, Long
 
     @Query("SELECT COUNT(m) FROM Manufacturer m WHERE m.asbisCode IS NOT NULL")
     Long countAsbisManufacturers();
+
+    List<Manufacturer> findByIsPromoActiveTrue();
 }

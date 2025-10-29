@@ -1,0 +1,6 @@
+ALTER TABLE categories
+ADD COLUMN is_promo_active BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE manufacturers
+ADD COLUMN is_promo_active BOOLEAN NOT NULL DEFAULT FALSE;
+

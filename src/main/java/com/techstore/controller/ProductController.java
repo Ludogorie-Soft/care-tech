@@ -59,8 +59,10 @@ public class ProductController {
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(defaultValue = "en") String language) {
 
+        String validSortBy = mapSortField(sortBy);
+
         Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+                Sort.by(validSortBy).descending() : Sort.by(validSortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<ProductResponseDTO> products = productService.getAllProducts(pageable, language);
@@ -77,13 +79,14 @@ public class ProductController {
 
     @GetMapping(value = "/{id}")
     @Operation(summary = "Get product by ID", description = "Retrieve detailed product information")
-    public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id, @RequestParam(defaultValue = "en") String language) {
+    public ResponseEntity<ProductResponseDTO> getProductById(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "en") String language) {
         ProductResponseDTO product = productService.getProductById(id, language);
         return ResponseEntity.ok(product);
     }
 
     @GetMapping(value = "/category/{categoryId}")
-    @Operation(summary = "Get products by category", description = "Retrieve products filtered by category")
     public ResponseEntity<Page<ProductResponseDTO>> getProductsByCategory(
             @PathVariable Long categoryId,
             @RequestParam(defaultValue = "0") int page,
@@ -92,8 +95,10 @@ public class ProductController {
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(defaultValue = "en") String language) {
 
+        String validSortBy = mapSortField(sortBy);
+
         Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+                Sort.by(validSortBy).descending() : Sort.by(validSortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<ProductResponseDTO> products = productService.getProductsByCategory(categoryId, pageable, language);
@@ -110,12 +115,71 @@ public class ProductController {
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(defaultValue = "en") String language) {
 
+        String validSortBy = mapSortField(sortBy);
+
         Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+                Sort.by(validSortBy).descending() : Sort.by(validSortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<ProductResponseDTO> products = productService.getProductsByBrand(brandId, pageable, language);
         return ResponseEntity.ok(products);
+    }
+
+    /**
+     * Maps user-friendly sort field names to actual entity field names.
+     * Handles common aliases and prevents errors from invalid field names.
+     *
+     * @param sortBy the sort field name from the request
+     * @return the validated entity field name
+     */
+    private String mapSortField(String sortBy) {
+        if (sortBy == null || sortBy.trim().isEmpty()) {
+            return "id";
+        }
+
+        return switch (sortBy.toLowerCase().trim()) {
+            // Price fields
+            case "price" -> "finalPrice";
+            case "finalprice" -> "finalPrice";
+            case "priceclient" -> "priceClient";
+            case "pricepartner" -> "pricePartner";
+
+            // Name fields
+            case "name" -> "nameEn";
+            case "nameen" -> "nameEn";
+            case "namebg" -> "nameBg";
+
+            // Date fields
+            case "created" -> "createdAt";
+            case "createdat" -> "createdAt";
+            case "updated" -> "updatedAt";
+            case "updatedat" -> "updatedAt";
+
+            // Other fields
+            case "model" -> "model";
+            case "reference" -> "referenceNumber";
+            case "referencenumber" -> "referenceNumber";
+            case "featured" -> "featured";
+            case "active" -> "active";
+            case "discount" -> "discount";
+
+            // Default - return as-is if already valid
+            default -> {
+                // List of valid entity fields
+                List<String> validFields = List.of(
+                        "id", "nameEn", "nameBg", "finalPrice", "priceClient",
+                        "pricePartner", "model", "referenceNumber", "createdAt",
+                        "updatedAt", "featured", "active", "discount", "barcode"
+                );
+
+                if (validFields.contains(sortBy)) {
+                    yield sortBy;
+                } else {
+                    log.warn("Invalid sort field '{}', using default 'id'", sortBy);
+                    yield "id";
+                }
+            }
+        };
     }
 
 //    @GetMapping(value = "/filter")
@@ -134,8 +198,10 @@ public class ProductController {
 //            @RequestParam(defaultValue = "asc") String sortDir,
 //            @RequestParam(defaultValue = "en") String language) {
 //
+//        String validSortBy = mapSortField(sortBy);
+//
 //        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-//                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+//                Sort.by(validSortBy).descending() : Sort.by(validSortBy).ascending();
 //        Pageable pageable = PageRequest.of(page, size, sort);
 //
 //        ProductStatus productStatus = status != null ? ProductStatus.valueOf(status) : null;
@@ -155,8 +221,10 @@ public class ProductController {
 //            @RequestParam(defaultValue = "asc") String sortDir,
 //            @RequestParam(defaultValue = "en") String language) {
 //
+//        String validSortBy = mapSortField(sortBy);
+//
 //        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-//                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+//                Sort.by(validSortBy).descending() : Sort.by(validSortBy).ascending();
 //        Pageable pageable = PageRequest.of(page, size, sort);
 //
 //        Page<ProductResponseDTO> products = filteringService.filterProductsAdvanced(filterRequest, pageable, language);

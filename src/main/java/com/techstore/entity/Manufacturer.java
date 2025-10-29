@@ -17,6 +17,9 @@ import java.util.Set;
 @Setter
 public class Manufacturer extends BaseEntity {
 
+    @Column(name = "is_promo_active", nullable = false)
+    private Boolean isPromoActive = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "platform")
     private Platform platform;

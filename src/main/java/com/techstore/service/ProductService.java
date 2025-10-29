@@ -1465,6 +1465,7 @@ public class ProductService {
                 .nameBg(category.getNameBg())
                 .slug(category.getSlug())
                 .show(category.getShow())
+                .parent(category.getParent() != null ? convertToCategorySummary(category.getParent()) : null)
                 .build();
     }
 
