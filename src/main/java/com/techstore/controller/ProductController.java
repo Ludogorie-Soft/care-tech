@@ -2,15 +2,11 @@ package com.techstore.controller;
 
 import com.techstore.dto.response.ManufacturerResponseDto;
 import com.techstore.dto.response.ProductResponseDTO;
-import com.techstore.dto.filter.AdvancedFilterRequestDTO;
 import com.techstore.dto.request.ProductCreateRequestDTO;
 import com.techstore.dto.request.ProductImageOperationsDTO;
 import com.techstore.dto.request.ProductImageUpdateDTO;
 import com.techstore.dto.request.ProductUpdateRequestDTO;
 import com.techstore.dto.response.ProductImageUploadResponseDTO;
-import com.techstore.entity.Manufacturer;
-import com.techstore.enums.ProductStatus;
-import com.techstore.service.FilteringService;
 import com.techstore.service.ProductService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -48,10 +43,8 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
-    private final FilteringService filteringService;
 
     @GetMapping
-//    @Operation(summary = "Get all products", description = "Retrieve paginated list of active products")
     public ResponseEntity<Page<ProductResponseDTO>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -59,10 +52,10 @@ public class ProductController {
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(defaultValue = "en") String language) {
 
-        String validSortBy = mapSortField(sortBy);
+        SortInfo sortInfo = parseSortBy(sortBy, sortDir);
 
-        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                Sort.by(validSortBy).descending() : Sort.by(validSortBy).ascending();
+        Sort sort = sortInfo.direction().equalsIgnoreCase("desc") ?
+                Sort.by(sortInfo.field()).descending() : Sort.by(sortInfo.field()).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<ProductResponseDTO> products = productService.getAllProducts(pageable, language);
@@ -95,10 +88,13 @@ public class ProductController {
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(defaultValue = "en") String language) {
 
-        String validSortBy = mapSortField(sortBy);
+        SortInfo sortInfo = parseSortBy(sortBy, sortDir);
 
-        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                Sort.by(validSortBy).descending() : Sort.by(validSortBy).ascending();
+        log.debug("Category {} - sortBy: '{}' -> field: '{}', direction: '{}'",
+                categoryId, sortBy, sortInfo.field(), sortInfo.direction());
+
+        Sort sort = sortInfo.direction().equalsIgnoreCase("desc") ?
+                Sort.by(sortInfo.field()).descending() : Sort.by(sortInfo.field()).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<ProductResponseDTO> products = productService.getProductsByCategory(categoryId, pageable, language);
@@ -115,10 +111,10 @@ public class ProductController {
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(defaultValue = "en") String language) {
 
-        String validSortBy = mapSortField(sortBy);
+        SortInfo sortInfo = parseSortBy(sortBy, sortDir);
 
-        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                Sort.by(validSortBy).descending() : Sort.by(validSortBy).ascending();
+        Sort sort = sortInfo.direction().equalsIgnoreCase("desc") ?
+                Sort.by(sortInfo.field()).descending() : Sort.by(sortInfo.field()).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<ProductResponseDTO> products = productService.getProductsByBrand(brandId, pageable, language);
@@ -126,46 +122,50 @@ public class ProductController {
     }
 
     /**
-     * Maps user-friendly sort field names to actual entity field names.
-     * Handles common aliases and prevents errors from invalid field names.
+     * Parses sortBy parameter and extracts field name and direction.
+     * Supports formats like: "price_asc", "price_desc", or just "price"
      *
-     * @param sortBy the sort field name from the request
-     * @return the validated entity field name
+     * @param sortBy the sort field name (may contain _asc or _desc suffix)
+     * @param defaultDirection the default sort direction if not specified in sortBy
+     * @return SortInfo containing the validated field name and direction
      */
-    private String mapSortField(String sortBy) {
+    private SortInfo parseSortBy(String sortBy, String defaultDirection) {
         if (sortBy == null || sortBy.trim().isEmpty()) {
-            return "id";
+            return new SortInfo("id", defaultDirection);
         }
 
-        return switch (sortBy.toLowerCase().trim()) {
-            // Price fields
-            case "price" -> "finalPrice";
-            case "finalprice" -> "finalPrice";
+        String lower = sortBy.toLowerCase().trim();
+        String direction = defaultDirection;
+
+        // Extract direction from suffix
+        if (lower.endsWith("_desc")) {
+            direction = "desc";
+            lower = lower.substring(0, lower.length() - 5); // Remove "_desc"
+            log.debug("Extracted 'desc' from sortBy '{}'", sortBy);
+        } else if (lower.endsWith("_asc")) {
+            direction = "asc";
+            lower = lower.substring(0, lower.length() - 4); // Remove "_asc"
+            log.debug("Extracted 'asc' from sortBy '{}'", sortBy);
+        }
+
+        // Map field name
+        String field = switch (lower) {
+            case "price", "finalprice" -> "finalPrice";
             case "priceclient" -> "priceClient";
             case "pricepartner" -> "pricePartner";
-
-            // Name fields
-            case "name" -> "nameEn";
-            case "nameen" -> "nameEn";
+            case "name", "nameen" -> "nameEn";
             case "namebg" -> "nameBg";
-
-            // Date fields
-            case "created" -> "createdAt";
-            case "createdat" -> "createdAt";
-            case "updated" -> "updatedAt";
-            case "updatedat" -> "updatedAt";
-
-            // Other fields
+            case "created", "createdat" -> "createdAt";
+            case "updated", "updatedat" -> "updatedAt";
             case "model" -> "model";
-            case "reference" -> "referenceNumber";
-            case "referencenumber" -> "referenceNumber";
+            case "reference", "referencenumber" -> "referenceNumber";
             case "featured" -> "featured";
             case "active" -> "active";
             case "discount" -> "discount";
-
-            // Default - return as-is if already valid
+            case "id" -> "id";
+            case "barcode" -> "barcode";
             default -> {
-                // List of valid entity fields
+                // Check if it's already a valid field name
                 List<String> validFields = List.of(
                         "id", "nameEn", "nameBg", "finalPrice", "priceClient",
                         "pricePartner", "model", "referenceNumber", "createdAt",
@@ -180,56 +180,15 @@ public class ProductController {
                 }
             }
         };
+
+        log.debug("Parsed sortBy '{}' -> field: '{}', direction: '{}'", sortBy, field, direction);
+        return new SortInfo(field, direction);
     }
 
-//    @GetMapping(value = "/filter")
-//    @Operation(summary = "Filter products", description = "Filter products with multiple criteria")
-//    public ResponseEntity<Page<ProductResponseDTO>> filterProducts(
-//            @RequestParam(required = false) Long categoryId,
-//            @RequestParam(required = false) Long brandId,
-//            @RequestParam(required = false) BigDecimal minPrice,
-//            @RequestParam(required = false) BigDecimal maxPrice,
-//            @RequestParam(required = false) String status,
-//            @RequestParam(required = false) Boolean onSale,
-//            @RequestParam(required = false) String q,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "20") int size,
-//            @RequestParam(defaultValue = "nameEn") String sortBy,
-//            @RequestParam(defaultValue = "asc") String sortDir,
-//            @RequestParam(defaultValue = "en") String language) {
-//
-//        String validSortBy = mapSortField(sortBy);
-//
-//        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-//                Sort.by(validSortBy).descending() : Sort.by(validSortBy).ascending();
-//        Pageable pageable = PageRequest.of(page, size, sort);
-//
-//        ProductStatus productStatus = status != null ? ProductStatus.valueOf(status) : null;
-//
-//        Page<ProductResponseDTO> products = productService.filterProducts(
-//                categoryId, brandId, minPrice, maxPrice, productStatus, onSale, q, pageable, language);
-//        return ResponseEntity.ok(products);
-//    }
-//
-//    @PostMapping(value = "/filter/advanced")
-//    @Operation(summary = "Advanced product filtering", description = "Filter products with advanced specification-based filters")
-//    public ResponseEntity<Page<ProductResponseDTO>> filterProductsAdvanced(
-//            @RequestBody AdvancedFilterRequestDTO filterRequest,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "20") int size,
-//            @RequestParam(defaultValue = "nameEn") String sortBy,
-//            @RequestParam(defaultValue = "asc") String sortDir,
-//            @RequestParam(defaultValue = "en") String language) {
-//
-//        String validSortBy = mapSortField(sortBy);
-//
-//        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-//                Sort.by(validSortBy).descending() : Sort.by(validSortBy).ascending();
-//        Pageable pageable = PageRequest.of(page, size, sort);
-//
-//        Page<ProductResponseDTO> products = filteringService.filterProductsAdvanced(filterRequest, pageable, language);
-//        return ResponseEntity.ok(products);
-//    }
+    /**
+     * Record to hold sort field and direction information
+     */
+    private record SortInfo(String field, String direction) {}
 
     @Hidden
     @GetMapping(value = "/{id}/related")
@@ -244,7 +203,6 @@ public class ProductController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @Operation(summary = "Create product", description = "Create a new product with required images in single operation")
     public ResponseEntity<ProductResponseDTO> createProduct(
             @RequestPart("product") @Valid ProductCreateRequestDTO productData,
@@ -263,7 +221,6 @@ public class ProductController {
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @Operation(summary = "Update product with image management", description = "Update product and manage images in single operation")
     public ResponseEntity<ProductResponseDTO> updateProduct(
             @PathVariable Long id,
@@ -282,7 +239,6 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @Operation(summary = "Delete product", description = "Soft delete a product (Admin only)")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         log.info("Deleting product with id: {}", id);
@@ -291,7 +247,6 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}/permanent")
-//    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @Operation(summary = "Permanently delete product", description = "Permanently delete a product (Super Admin only)")
     public ResponseEntity<Void> permanentDeleteProduct(@PathVariable Long id) {
         log.info("Permanently deleting product with id: {}", id);
@@ -301,7 +256,6 @@ public class ProductController {
 
     @Hidden
     @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @Operation(summary = "Add image to existing product", description = "Add single image to existing product")
     public ResponseEntity<ProductImageUploadResponseDTO> addImageToProduct(
             @PathVariable Long id,
@@ -315,7 +269,6 @@ public class ProductController {
 
     @Hidden
     @DeleteMapping("/{id}/images")
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @Operation(summary = "Delete product image", description = "Delete specific image from product")
     public ResponseEntity<Void> deleteProductImage(
             @PathVariable Long id,
@@ -328,7 +281,6 @@ public class ProductController {
 
     @Hidden
     @PutMapping(value = "/{id}/images/reorder")
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     @Operation(summary = "Reorder product images", description = "Reorder existing product images")
     public ResponseEntity<ProductResponseDTO> reorderProductImages(
             @PathVariable Long id,

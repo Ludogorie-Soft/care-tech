@@ -49,7 +49,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Page<Product> searchProducts(@Param("query") String query, Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.active = true AND p.show = true AND " +
-            "p.priceClientPromo >= :minPrice AND p.priceClientPromo <= :maxPrice")
+            "p.finalPrice >= :minPrice AND p.finalPrice <= :maxPrice")
     Page<Product> findByPriceRange(@Param("minPrice") BigDecimal minPrice,
                                    @Param("maxPrice") BigDecimal maxPrice,
                                    Pageable pageable);
@@ -58,8 +58,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             "AND p.show = true " +
             "AND (:categoryId IS NULL OR p.category.id = :categoryId) " +
             "AND (:manufacturerId IS NULL OR p.manufacturer.id = :manufacturerId) " +
-            "AND (:minPrice IS NULL OR p.priceClientPromo >= :minPrice) " +
-            "AND (:maxPrice IS NULL OR p.priceClientPromo <= :maxPrice) " +
+            "AND (:minPrice IS NULL OR p.finalPrice >= :minPrice) " +
+            "AND (:maxPrice IS NULL OR p.finalPrice <= :maxPrice) " +
             "AND (:status IS NULL OR p.status = :status) " +
             "AND (:onSale IS NULL OR (:onSale = true AND p.discount IS NOT NULL AND p.discount <> 0) OR (:onSale = false)) " +
             "AND (:query IS NULL OR LOWER(p.nameEn) LIKE LOWER(CONCAT('%', :query, '%')) " +
@@ -89,8 +89,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("SELECT p.externalId, COUNT(p) FROM Product p WHERE p.externalId IS NOT NULL GROUP BY p.externalId HAVING COUNT(p) > 1")
     List<Object[]> findDuplicateProductsByExternalId();
-
-    ;
 
     @Query("SELECT p FROM Product p WHERE p.externalId = :externalId")
     List<Product> findProductsByExternalId(@Param("externalId") Long externalId);
@@ -127,5 +125,4 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             "WHERE p.category.id = :categoryId " +
             "AND p.manufacturer IS NOT NULL")
     List<Manufacturer> findManufacturersByCategoryId(@Param("categoryId") Long categoryId);
-
 }
