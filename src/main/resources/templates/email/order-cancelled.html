@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поръчката е отменена</title>
+</head>
+<body style="margin:0; padding:0; font-family:Arial,sans-serif; background-color:#0a0a0a;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0a0a;">
+    <tr>
+        <td align="center" style="padding:20px 10px;">
+            <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
+                
+                <!-- Header -->
+                <tr>
+                    <td align="center" style="background-color:#ef4444; padding:40px 20px;">
+                        <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
+                    </td>
+                </tr>
+                
+                <!-- Cancelled Icon -->
+                <tr>
+                    <td align="center" style="padding:40px 20px; background-color:#1a1a1a;">
+                        <div style="width:80px; height:80px; background-color:#f59e0b; border-radius:50%; margin:0 auto 20px; display:inline-block; text-align:center; line-height:80px;">
+                            <span style="color:#ffffff; font-size:40px; font-weight:bold;">⚠</span>
+                        </div>
+                        <h2 style="color:#ffffff; font-size:24px; margin:0 0 10px 0;">Поръчката е отменена</h2>
+                        <p style="color:#929497; font-size:15px; line-height:1.6; margin:0;">
+                            Здравейте, <span th:text="${customerName}" style="color:#ffffff;">Клиент</span>.<br/>
+                            Съжаляваме да Ви информираме, че поръчката Ви е била отменена.
+                        </p>
+                    </td>
+                </tr>
+                
+                <!-- Order Number -->
+                <tr>
+                    <td style="padding:0 20px 30px;">
+                        <table width="100%" cellpadding="20" cellspacing="0" border="0" style="background-color:#262626; border:2px solid #f59e0b; border-radius:8px;">
+                            <tr>
+                                <td align="center">
+                                    <p style="color:#929497; font-size:12px; text-transform:uppercase; letter-spacing:1px; margin:0 0 8px 0;">Номер на поръчка</p>
+                                    <p style="color:#f59e0b; font-size:24px; font-weight:bold; margin:0; letter-spacing:1px;" th:text="${orderNumber}">ORD-2025-00024</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                
+                <!-- Content -->
+                <tr>
+                    <td style="padding:0 20px 30px; background-color:#1a1a1a;">
+                        
+                        <!-- Cancel Reason (if available) -->
+                        <div th:if="${order.adminNotes}">
+                            <table width="100%" cellpadding="15" cellspacing="0" border="0" style="background-color:#262626; border-left:4px solid #f59e0b; border-radius:6px; margin-bottom:20px;">
+                                <tr>
+                                    <td>
+                                        <p style="color:#ffffff; font-size:14px; font-weight:600; margin:0 0 8px 0;">Причина за отмяна</p>
+                                        <p style="color:#929497; font-size:13px; line-height:1.6; margin:0;" th:text="${order.adminNotes}">Продуктът е изчерпан от склада</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <!-- Refund Info -->
+                        <table width="100%" cellpadding="25" cellspacing="0" border="0" style="background-color:#10b981; border-radius:12px; margin-bottom:20px;">
+                            <tr>
+                                <td align="center">
+                                    <div style="width:50px; height:50px; background-color:rgba(255,255,255,0.2); border-radius:50%; margin:0 auto 12px; display:inline-block; text-align:center; line-height:50px;">
+                                        <span style="color:#ffffff; font-size:24px;">✓</span>
+                                    </div>
+                                    <p style="color:#ffffff; font-size:17px; font-weight:bold; margin:0 0 10px 0;">Възстановяване на средства</p>
+                                    <p style="color:rgba(255,255,255,0.95); font-size:13px; line-height:1.6; margin:0;">
+                                        Ако сте извършили плащане, сумата ще бъде възстановена<br/>
+                                        в рамките на <strong style="color:#ffffff;">5-7 работни дни</strong>.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- What's Next -->
+                        <h3 style="color:#ffffff; font-size:18px; margin:20px 0 15px 0;">Какво следва?</h3>
+                        
+                        <table width="100%" cellpadding="15" cellspacing="0" border="0" style="background-color:#262626; border-radius:6px; margin-bottom:20px;">
+                            <tr>
+                                <td>
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="32" valign="top" style="padding:8px 0;">
+                                                <div style="width:28px; height:28px; background-color:#ed1c24; border-radius:50%; text-align:center; line-height:28px;">
+                                                    <span style="color:#ffffff; font-size:14px; font-weight:bold;">1</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding:8px 0 8px 12px;">
+                                                <p style="color:#f5f5f5; font-size:14px; font-weight:600; margin:0 0 3px 0;">Потвърждение</p>
+                                                <p style="color:#929497; font-size:13px; line-height:1.5; margin:0;">Ще получите имейл потвърждение за отмяната</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border-top:1px solid #333333;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="32" valign="top" style="padding:8px 0;">
+                                                <div style="width:28px; height:28px; background-color:#ed1c24; border-radius:50%; text-align:center; line-height:28px;">
+                                                    <span style="color:#ffffff; font-size:14px; font-weight:bold;">2</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding:8px 0 8px 12px;">
+                                                <p style="color:#f5f5f5; font-size:14px; font-weight:600; margin:0 0 3px 0;">Възстановяване</p>
+                                                <p style="color:#929497; font-size:13px; line-height:1.5; margin:0;">Средствата ще бъдат върнати по същия начин на плащане</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border-top:1px solid #333333;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="32" valign="top" style="padding:8px 0;">
+                                                <div style="width:28px; height:28px; background-color:#ed1c24; border-radius:50%; text-align:center; line-height:28px;">
+                                                    <span style="color:#ffffff; font-size:14px; font-weight:bold;">3</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding:8px 0 8px 12px;">
+                                                <p style="color:#f5f5f5; font-size:14px; font-weight:600; margin:0 0 3px 0;">Нова поръчка</p>
+                                                <p style="color:#929497; font-size:13px; line-height:1.5; margin:0;">Можете да направите нова поръчка по всяко време</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Help Section -->
+                        <h3 style="color:#ffffff; font-size:18px; margin:20px 0 15px 0;">Имате въпроси?</h3>
+                        
+                        <table width="100%" cellpadding="20" cellspacing="0" border="0" style="background-color:#262626; border-radius:6px; margin-bottom:20px;">
+                            <tr>
+                                <td align="center">
+                                    <p style="color:#929497; font-size:13px; line-height:1.6; margin:0 0 15px 0;">
+                                        Нашият екип е на разположение да отговори на всички Ваши въпроси
+                                    </p>
+                                    
+                                    <!-- Contact Methods -->
+                                    <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+                                        <tr>
+                                            <td style="padding:5px;">
+                                                <a href="mailto:support@caretech.com" style="display:inline-block; background-color:#1f1f1f; color:#f5f5f5; text-decoration:none; padding:10px 15px; border-radius:6px; font-size:12px;">
+                                                    <span style="color:#ed1c24;">✉</span> Имейл
+                                                </a>
+                                            </td>
+                                            <td style="padding:5px;">
+                                                <a href="tel:+359888123456" style="display:inline-block; background-color:#1f1f1f; color:#f5f5f5; text-decoration:none; padding:10px 15px; border-radius:6px; font-size:12px;">
+                                                    <span style="color:#ed1c24;">☎</span> Телефон
+                                                </a>
+                                            </td>
+                                            <td style="padding:5px;">
+                                                <a href="#" style="display:inline-block; background-color:#1f1f1f; color:#f5f5f5; text-decoration:none; padding:10px 15px; border-radius:6px; font-size:12px;">
+                                                    <span style="color:#ed1c24;">💬</span> Чат
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- CTA Buttons -->
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td align="center" style="padding:10px 0;">
+                                    <a th:href="${appUrl}" style="display:inline-block; background-color:#ed1c24; color:#ffffff; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:15px; font-weight:600; margin:5px;">Разгледайте продуктите</a>
+                                    <a th:href="${appUrl} + '/contact'" style="display:inline-block; background-color:#6c6e70; color:#ffffff; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:15px; font-weight:600; margin:5px;">Свържете се с нас</a>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                    </td>
+                </tr>
+                
+                <!-- Footer -->
+                <tr>
+                    <td align="center" style="background-color:#0f0f0f; padding:25px 20px; border-top:2px solid #f59e0b;">
+                        <p style="color:#6c6e70; font-size:13px; margin:0 0 12px 0;">
+                            Надяваме се да продължим да Ви обслужваме в бъдеще.
+                        </p>
+                        <p style="margin:10px 0;">
+                            <a th:href="${appUrl}" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Начало</a>
+                            <a th:href="${appUrl} + '/contact'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Контакти</a>
+                            <a th:href="${appUrl} + '/support'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Поддръжка</a>
+                        </p>
+                        <p style="color:#6c6e70; font-size:11px; margin:10px 0 0 0;">
+                            &copy; 2025 <span th:text="${appName}">CareTech</span>. Всички права запазени.
+                        </p>
+                    </td>
+                </tr>
+                
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

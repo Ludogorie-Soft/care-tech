@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Промяна в статуса на поръчка</title>
+</head>
+<body style="margin:0; padding:0; font-family:Arial,sans-serif; background-color:#0a0a0a;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0a0a;">
+    <tr>
+        <td align="center" style="padding:20px 10px;">
+            <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
+                
+                <!-- Header -->
+                <tr>
+                    <td align="center" style="background-color:#ed1c24; padding:40px 20px;">
+                        <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
+                    </td>
+                </tr>
+                
+                <!-- Status Update Icon -->
+                <tr>
+                    <td align="center" style="padding:40px 20px; background-color:#1a1a1a;">
+                        <div style="width:80px; height:80px; background-color:#3b82f6; border-radius:50%; margin:0 auto 20px; display:inline-block; text-align:center; line-height:80px;">
+                            <span style="color:#ffffff; font-size:40px; font-weight:bold;">ℹ</span>
+                        </div>
+                        <h2 style="color:#ffffff; font-size:24px; margin:0 0 10px 0;">Промяна в статуса</h2>
+                        <p style="color:#929497; font-size:15px; line-height:1.6; margin:0;">
+                            Здравейте, <span th:text="${customerName}" style="color:#ffffff;">Клиент</span>!<br/>
+                            Статусът на вашата поръчка е актуализиран.
+                        </p>
+                    </td>
+                </tr>
+                
+                <!-- Order Number -->
+                <tr>
+                    <td style="padding:0 20px 30px;">
+                        <table width="100%" cellpadding="20" cellspacing="0" border="0" style="background-color:#262626; border:2px solid #3b82f6; border-radius:8px;">
+                            <tr>
+                                <td align="center">
+                                    <p style="color:#929497; font-size:12px; text-transform:uppercase; letter-spacing:1px; margin:0 0 8px 0;">Номер на поръчка</p>
+                                    <p style="color:#3b82f6; font-size:24px; font-weight:bold; margin:0; letter-spacing:1px;" th:text="${orderNumber}">ORD-2025-00024</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                
+                <!-- Content -->
+                <tr>
+                    <td style="padding:0 20px 30px; background-color:#1a1a1a;">
+                        
+                        <!-- Status Timeline -->
+                        <h3 style="color:#ffffff; font-size:18px; margin:0 0 20px 0;">Промяна на статус</h3>
+                        
+                        <table width="100%" cellpadding="20" cellspacing="0" border="0" style="background-color:#262626; border-radius:6px; margin-bottom:20px;">
+                            <!-- Previous Status -->
+                            <tr>
+                                <td style="padding:15px; border-bottom:1px solid #333333;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="40" valign="top">
+                                                <div style="width:32px; height:32px; background-color:#6c6e70; border-radius:50%; text-align:center; line-height:32px;">
+                                                    <span style="color:#ffffff; font-size:16px;">→</span>
+                                                </div>
+                                            </td>
+                                            <td valign="top" style="padding-left:10px;">
+                                                <p style="color:#6c6e70; font-size:13px; font-weight:600; margin:0 0 3px 0;">Предишен статус</p>
+                                                <p style="color:#929497; font-size:14px; margin:0;" th:text="${previousStatus}">Изчакваща</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            
+                            <!-- Current Status -->
+                            <tr>
+                                <td style="padding:15px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="40" valign="top">
+                                                <div style="width:32px; height:32px; background-color:#ed1c24; border-radius:50%; text-align:center; line-height:32px;">
+                                                    <span style="color:#ffffff; font-size:16px;">✓</span>
+                                                </div>
+                                            </td>
+                                            <td valign="top" style="padding-left:10px;">
+                                                <p style="color:#ffffff; font-size:13px; font-weight:600; margin:0 0 3px 0;">Текущ статус</p>
+                                                <p style="color:#f5f5f5; font-size:14px; font-weight:600; margin:0;" th:text="${newStatus}">Потвърдена</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Tracking Number (if available) -->
+                        <div th:if="${trackingNumber != null}">
+                            <table width="100%" cellpadding="20" cellspacing="0" border="0" style="background-color:#262626; border:2px solid #ed1c24; border-radius:8px; margin-bottom:20px;">
+                                <tr>
+                                    <td align="center">
+                                        <p style="color:#929497; font-size:12px; text-transform:uppercase; letter-spacing:1px; margin:0 0 8px 0;">Номер за проследяване</p>
+                                        <p style="color:#ed1c24; font-size:22px; font-weight:bold; margin:0; letter-spacing:2px; word-break:break-all;" th:text="${trackingNumber}">TRACK123456789</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <!-- Info Box -->
+                        <table width="100%" cellpadding="15" cellspacing="0" border="0" style="background-color:#262626; border-left:4px solid #3b82f6; border-radius:4px; margin-bottom:20px;">
+                            <tr>
+                                <td>
+                                    <p style="color:#929497; font-size:13px; line-height:1.6; margin:0;">
+                                        Ще продължим да Ви информираме за статуса на поръчката по имейл. 
+                                        Ако имате въпроси, моля свържете се с нас.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- CTA Button -->
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td align="center" style="padding:20px 0;">
+                                    <a th:href="${orderUrl}" style="display:inline-block; background-color:#ed1c24; color:#ffffff; text-decoration:none; padding:14px 35px; border-radius:6px; font-size:15px; font-weight:600;">Преглед на поръчката</a>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                    </td>
+                </tr>
+                
+                <!-- Footer -->
+                <tr>
+                    <td align="center" style="background-color:#0f0f0f; padding:25px 20px; border-top:2px solid #ed1c24;">
+                        <p style="color:#6c6e70; font-size:13px; margin:0 0 12px 0;">
+                            Благодарим Ви за доверието!
+                        </p>
+                        <p style="margin:10px 0;">
+                            <a th:href="${appUrl}" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Начало</a>
+                            <a th:href="${appUrl} + '/contact'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Контакти</a>
+                            <a th:href="${appUrl} + '/orders'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Моите поръчки</a>
+                        </p>
+                        <p style="color:#6c6e70; font-size:11px; margin:10px 0 0 0;">
+                            &copy; 2025 <span th:text="${appName}">CareTech</span>. Всички права запазени.
+                        </p>
+                    </td>
+                </tr>
+                
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

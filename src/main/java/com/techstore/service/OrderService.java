@@ -13,6 +13,8 @@ import com.techstore.entity.User;
 import com.techstore.enums.OrderStatus;
 import com.techstore.enums.PaymentStatus;
 import com.techstore.enums.ShippingMethod;
+import com.techstore.event.OrderCreatedEvent;
+import com.techstore.event.OrderStatusChangedEvent;
 import com.techstore.exception.ResourceNotFoundException;
 import com.techstore.repository.CartItemRepository;
 import com.techstore.repository.OrderItemRepository;
@@ -22,6 +24,7 @@ import com.techstore.repository.UserRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,12 +42,12 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
     private final SpeedyService speedyService;
     private final UserService userService;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Creates a new order
@@ -148,124 +151,12 @@ public class OrderService {
 
         log.info("Order created successfully: {}", order.getOrderNumber());
 
+        // Publish order created event
+        eventPublisher.publishEvent(new OrderCreatedEvent(this, order));
+
         return mapToResponseDTO(order);
     }
 
-    /**
-     * Creates order with Speedy shipping calculation
-     */
-//    @Transactional
-//    public OrderResponseDTO createOrderWithSpeedy(OrderCreateRequestDTO request, Long userId) {
-//        log.info("Creating order with Speedy shipping for user: {}", userId);
-//
-//        // Validate Speedy data
-//        if (request.getShippingMethod() == ShippingMethod.SPEEDY && request.getShippingSpeedySiteId() == null) {
-//            throw new IllegalArgumentException("Speedy site ID is required for Speedy shipping");
-//        }
-//
-//        return createOrder(request);
-//    }
-
-    /**
-     * Calculate shipping cost based on shipping method
-     */
-//    private BigDecimal calculateShippingCost(OrderCreateRequestDTO request) {
-//        if (request.getShippingMethod() == ShippingMethod.SPEEDY) {
-//            try {
-//                // Calculate order weight
-//                BigDecimal totalWeight = calculateOrderWeight(request.getItems());
-//
-//                // Calculate Speedy shipping price
-//                SpeedyCalculatePriceResponse speedyResponse = speedyService.calculateShippingPrice(
-//                        request.getShippingSpeedySiteId(),
-//                        totalWeight,
-//                        1 // number of parcels
-//                );
-//
-//                // Extract price from response
-//                if (speedyResponse != null &&
-//                        speedyResponse.getCalculations() != null &&
-//                        !speedyResponse.getCalculations().isEmpty()) {
-//
-//                    SpeedyCalculatePriceResponse.Calculation calculation = speedyResponse.getCalculations().get(0);
-//                    if (calculation.getPrice() != null) {
-//                        BigDecimal total = calculation.getPrice().getTotal();
-//                        log.info("Calculated Speedy shipping cost: {} {}", total, calculation.getPrice().getCurrency());
-//                        return total;
-//                    }
-//                }
-//
-//                log.error("Invalid Speedy response structure");
-//                throw new RuntimeException("Failed to extract shipping cost from Speedy response");
-//
-//            } catch (Exception e) {
-//                log.error("Failed to calculate Speedy shipping cost: {}", e.getMessage(), e);
-//                throw new RuntimeException("Failed to calculate shipping cost: " + e.getMessage());
-//            }
-//        } else if (request.getShippingMethod() == ShippingMethod.FREE) {
-//            return BigDecimal.ZERO;
-//        } else {
-//            return request.getShippingCost() != null ? request.getShippingCost() : new BigDecimal("5.90");
-//        }
-//    }
-
-    /**
-     * Calculate total order weight
-     */
-    private BigDecimal calculateOrderWeight(List<OrderCreateRequestDTO.OrderItemRequestDTO> items) {
-        BigDecimal totalWeight = BigDecimal.ZERO;
-
-        for (var item : items) {
-            Product product = productRepository.findById(item.getProductId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
-
-            // Use product weight if available, otherwise default to 0.5kg
-            BigDecimal itemWeight = product.getWeight() != null ?
-                    product.getWeight() : new BigDecimal("0.5");
-
-            totalWeight = totalWeight.add(itemWeight.multiply(BigDecimal.valueOf(item.getQuantity())));
-        }
-
-        log.debug("Calculated order weight: {} kg", totalWeight);
-        return totalWeight;
-    }
-
-
-    /**
-     * Calculate shipping cost for order preview
-     */
-    public BigDecimal calculateShippingCostPreview(Long speedySiteId, List<OrderCreateRequestDTO.OrderItemRequestDTO> items) {
-        try {
-            BigDecimal totalWeight = calculateOrderWeight(items);
-            SpeedyCalculatePriceResponse speedyResponse = speedyService.calculateShippingPrice(
-                    speedySiteId,
-                    totalWeight,
-                    1
-            );
-
-            // Extract price from response
-            if (speedyResponse != null &&
-                    speedyResponse.getCalculations() != null &&
-                    !speedyResponse.getCalculations().isEmpty()) {
-
-                SpeedyCalculatePriceResponse.Calculation calculation = speedyResponse.getCalculations().get(0);
-                if (calculation.getPrice() != null) {
-                    return calculation.getPrice().getTotal();
-                }
-            }
-
-            log.error("Invalid Speedy response structure");
-            throw new RuntimeException("Failed to extract shipping cost from Speedy response");
-
-        } catch (Exception e) {
-            log.error("Failed to calculate shipping cost preview: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to calculate shipping cost: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Get order by ID
-     */
     @Transactional(readOnly = true)
     public OrderResponseDTO getOrderById(Long orderId) {
         Order order = orderRepository.findById(orderId)
@@ -344,6 +235,9 @@ public class OrderService {
         log.info("Order {} status updated from {} to {}",
                 order.getOrderNumber(), previousStatus, request.getStatus());
 
+        // Publish order status changed event
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, previousStatus, request.getStatus()));
+
         return mapToResponseDTO(order);
     }
 
@@ -379,6 +273,7 @@ public class OrderService {
             throw new IllegalStateException("Cannot cancel shipped order. Please contact customer service.");
         }
 
+        OrderStatus previousStatus = order.getStatus();
         order.setStatus(OrderStatus.CANCELLED);
         String cancellationNote = "Cancellation reason: " + reason + " (at: " + LocalDateTime.now() + ")";
         order.setAdminNotes(order.getAdminNotes() != null ?
@@ -387,6 +282,9 @@ public class OrderService {
         order = orderRepository.save(order);
 
         log.info("Order {} cancelled. Reason: {}", order.getOrderNumber(), reason);
+
+        // Publish order status changed event
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, previousStatus, OrderStatus.CANCELLED));
 
         return mapToResponseDTO(order);
     }

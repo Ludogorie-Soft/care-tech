@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поръчката е доставена</title>
+</head>
+<body style="margin:0; padding:0; font-family:Arial,sans-serif; background-color:#0a0a0a;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0a0a;">
+    <tr>
+        <td align="center" style="padding:20px 10px;">
+            <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
+                
+                <!-- Header -->
+                <tr>
+                    <td align="center" style="background-color:#10b981; padding:40px 20px;">
+                        <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
+                    </td>
+                </tr>
+                
+                <!-- Delivered Icon -->
+                <tr>
+                    <td align="center" style="padding:40px 20px; background-color:#1a1a1a;">
+                        <div style="width:100px; height:100px; background-color:#10b981; border-radius:50%; margin:0 auto 15px; display:inline-block; text-align:center; line-height:100px;">
+                            <span style="color:#ffffff; font-size:50px; font-weight:bold;">✓</span>
+                        </div>
+                        <p style="font-size:35px; margin:0 0 15px 0;">🎉</p>
+                        <h2 style="color:#ffffff; font-size:28px; margin:0 0 10px 0;">Поръчката е доставена!</h2>
+                        <p style="color:#929497; font-size:15px; line-height:1.6; margin:0;">
+                            Страхотно, <span th:text="${customerName}" style="color:#ffffff;">Клиент</span>!<br/>
+                            Вашата поръчка е успешно доставена. Надяваме се да сте доволни!
+                        </p>
+                    </td>
+                </tr>
+                
+                <!-- Order Number -->
+                <tr>
+                    <td style="padding:0 20px 30px;">
+                        <table width="100%" cellpadding="20" cellspacing="0" border="0" style="background-color:#262626; border:2px solid #10b981; border-radius:8px;">
+                            <tr>
+                                <td align="center">
+                                    <p style="color:#929497; font-size:12px; text-transform:uppercase; letter-spacing:1px; margin:0 0 8px 0;">Номер на поръчка</p>
+                                    <p style="color:#10b981; font-size:24px; font-weight:bold; margin:0; letter-spacing:1px;" th:text="${orderNumber}">ORD-2025-00024</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                
+                <!-- Celebration Box -->
+                <tr>
+                    <td style="padding:0 20px 30px;">
+                        <table width="100%" cellpadding="25" cellspacing="0" border="0" style="background-color:#10b981; border-radius:12px;">
+                            <tr>
+                                <td align="center">
+                                    <p style="color:#ffffff; font-size:18px; font-weight:bold; margin:0 0 12px 0;">✨ Благодарим Ви за покупката! ✨</p>
+                                    <p style="color:rgba(255,255,255,0.95); font-size:14px; line-height:1.6; margin:0;">
+                                        Надяваме се продуктите да надминат очакванията Ви.<br/>
+                                        Вашето мнение е важно за нас!
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                
+                <!-- Content -->
+                <tr>
+                    <td style="padding:0 20px 30px; background-color:#1a1a1a;">
+                        
+                        <!-- Feedback Section -->
+                        <table width="100%" cellpadding="25" cellspacing="0" border="0" style="background-color:#262626; border-radius:8px; margin-bottom:20px;">
+                            <tr>
+                                <td align="center">
+                                    <h3 style="color:#ffffff; font-size:20px; margin:0 0 10px 0;">Споделете мнението си</h3>
+                                    <p style="color:#929497; font-size:14px; line-height:1.6; margin:0 0 20px 0;">
+                                        Доволни ли сте от покупката? Вашият отзив помага на други клиенти.
+                                    </p>
+                                    
+                                    <!-- Stars -->
+                                    <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 20px;">
+                                        <tr>
+                                            <td style="padding:0 5px;">
+                                                <div style="width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px;">
+                                                    <span style="color:#ed1c24; font-size:20px;">★</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding:0 5px;">
+                                                <div style="width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px;">
+                                                    <span style="color:#ed1c24; font-size:20px;">★</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding:0 5px;">
+                                                <div style="width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px;">
+                                                    <span style="color:#ed1c24; font-size:20px;">★</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding:0 5px;">
+                                                <div style="width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px;">
+                                                    <span style="color:#ed1c24; font-size:20px;">★</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding:0 5px;">
+                                                <div style="width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px;">
+                                                    <span style="color:#ed1c24; font-size:20px;">★</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <a href="#" style="display:inline-block; background-color:#10b981; color:#ffffff; text-decoration:none; padding:14px 35px; border-radius:6px; font-size:15px; font-weight:600;">Оставете отзив</a>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- What's Next -->
+                        <h3 style="color:#ffffff; font-size:18px; margin:20px 0 15px 0;">Имате въпрос?</h3>
+                        
+                        <table width="100%" cellpadding="15" cellspacing="0" border="0" style="background-color:#262626; border-radius:6px; margin-bottom:20px;">
+                            <tr>
+                                <td>
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="36" valign="top" style="padding:8px 0;">
+                                                <div style="width:32px; height:32px; background-color:#ed1c24; border-radius:6px; text-align:center; line-height:32px;">
+                                                    <span style="color:#ffffff; font-size:18px;">?</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding:8px 0 8px 12px;">
+                                                <p style="color:#ffffff; font-size:14px; font-weight:600; margin:0 0 3px 0;">Нужда от помощ?</p>
+                                                <p style="color:#929497; font-size:13px; line-height:1.5; margin:0;">Свържете се с нашия екип за поддръжка ако имате въпроси</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border-top:1px solid #333333;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="36" valign="top" style="padding:8px 0;">
+                                                <div style="width:32px; height:32px; background-color:#ed1c24; border-radius:6px; text-align:center; line-height:32px;">
+                                                    <span style="color:#ffffff; font-size:18px;">↩</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding:8px 0 8px 12px;">
+                                                <p style="color:#ffffff; font-size:14px; font-weight:600; margin:0 0 3px 0;">Връщане и рекламации</p>
+                                                <p style="color:#929497; font-size:13px; line-height:1.5; margin:0;">Имате право на връщане в срок от 14 дни</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border-top:1px solid #333333;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="36" valign="top" style="padding:8px 0;">
+                                                <div style="width:32px; height:32px; background-color:#ed1c24; border-radius:6px; text-align:center; line-height:32px;">
+                                                    <span style="color:#ffffff; font-size:18px;">%</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding:8px 0 8px 12px;">
+                                                <p style="color:#ffffff; font-size:14px; font-weight:600; margin:0 0 3px 0;">Специални оферти</p>
+                                                <p style="color:#929497; font-size:13px; line-height:1.5; margin:0;">Разгледайте нашите промоции и спестете</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Info Box -->
+                        <table width="100%" cellpadding="15" cellspacing="0" border="0" style="background-color:#262626; border-left:4px solid #10b981; border-radius:4px; margin-bottom:20px;">
+                            <tr>
+                                <td>
+                                    <p style="color:#929497; font-size:13px; line-height:1.6; margin:0;">
+                                        <strong style="color:#ffffff;">Благодарим Ви!</strong> Вашата поръчка е доставена успешно. Ако откриете проблем с продукта, моля свържете се с нас.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- CTA Buttons -->
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td align="center" style="padding:10px 0;">
+                                    <a th:href="${orderUrl}" style="display:inline-block; background-color:#ed1c24; color:#ffffff; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:15px; font-weight:600; margin:5px;">Преглед на поръчката</a>
+                                    <a th:href="${appUrl}" style="display:inline-block; background-color:#6c6e70; color:#ffffff; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:15px; font-weight:600; margin:5px;">Продължи пазаруването</a>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                    </td>
+                </tr>
+                
+                <!-- Footer -->
+                <tr>
+                    <td align="center" style="background-color:#0f0f0f; padding:25px 20px; border-top:2px solid #10b981;">
+                        <p style="color:#6c6e70; font-size:13px; margin:0 0 12px 0;">
+                            Радваме се, че избрахте <span th:text="${appName}" style="color:#929497;">CareTech</span>!
+                        </p>
+                        <p style="margin:10px 0;">
+                            <a th:href="${appUrl}" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Начало</a>
+                            <a th:href="${appUrl} + '/contact'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Контакти</a>
+                            <a th:href="${appUrl} + '/support'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Поддръжка</a>
+                        </p>
+                        <p style="color:#6c6e70; font-size:11px; margin:10px 0 0 0;">
+                            &copy; 2025 <span th:text="${appName}">CareTech</span>. Всички права запазени.
+                        </p>
+                    </td>
+                </tr>
+                
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
