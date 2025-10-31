@@ -11,4 +11,5 @@ public class ProductSummaryDto {
     private String nameBg;
     private BigDecimal finalPrice;
     private String primaryImageUrl;
+    private BigDecimal discount;
 }
