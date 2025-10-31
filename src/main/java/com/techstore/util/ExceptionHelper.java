@@ -20,14 +20,20 @@ public class ExceptionHelper {
     public static <T> T wrapDatabaseOperation(Supplier<T> operation, String context) {
         try {
             return operation.get();
-        } catch (DataIntegrityViolationException e) {
+        } catch (ValidationException | BusinessLogicException | DuplicateResourceException | ResourceNotFoundException e) {
+            log.debug("Business exception in {}: {}", context, e.getMessage());
+            throw e;
+        }
+        catch (DataIntegrityViolationException e) {
             String message = parseDatabaseConstraintError(e, context);
             log.error("Database constraint violation in {}: {}", context, e.getMessage());
             throw new DuplicateResourceException(message);
-        } catch (EmptyResultDataAccessException | EntityNotFoundException e) {
+        }
+        catch (EmptyResultDataAccessException | EntityNotFoundException e) {
             log.error("Entity not found in {}: {}", context, e.getMessage());
             throw new ResourceNotFoundException("Resource not found in " + context);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("Unexpected database error in {}: {}", context, e.getMessage(), e);
             throw new BusinessLogicException("Database operation failed: " + e.getMessage());
         }
@@ -49,6 +55,8 @@ public class ExceptionHelper {
     public static <T> T wrapBusinessOperation(Supplier<T> operation, String context) {
         try {
             return operation.get();
+        } catch (ValidationException | BusinessLogicException | DuplicateResourceException | ResourceNotFoundException e) {
+            throw e;
         } catch (IllegalArgumentException e) {
             log.error("Invalid argument in {}: {}", context, e.getMessage());
             throw new ValidationException("Invalid input: " + e.getMessage());

@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -73,6 +72,7 @@ public class UserService {
         return convertToResponseDTO(user);
     }
 
+    @Transactional
     public UserResponseDTO createUser(UserRequestDTO requestDTO) {
         log.info("Creating new user with username: {}", requestDTO.getUsername());
 
@@ -98,6 +98,7 @@ public class UserService {
         }, context);
     }
 
+    @Transactional
     public UserResponseDTO updateUser(Long id, UserRequestDTO requestDTO) {
         log.info("Updating user with id: {}", id);
 
@@ -124,6 +125,7 @@ public class UserService {
         }, context);
     }
 
+    @Transactional
     public void deleteUser(Long id) {
         log.info("Deleting user with id: {}", id);
 

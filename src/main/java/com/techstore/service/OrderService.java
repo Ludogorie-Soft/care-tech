@@ -15,7 +15,9 @@ import com.techstore.enums.PaymentStatus;
 import com.techstore.enums.ShippingMethod;
 import com.techstore.event.OrderCreatedEvent;
 import com.techstore.event.OrderStatusChangedEvent;
+import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.ResourceNotFoundException;
+import com.techstore.exception.ValidationException;
 import com.techstore.repository.CartItemRepository;
 import com.techstore.repository.OrderItemRepository;
 import com.techstore.repository.OrderRepository;
@@ -56,14 +58,26 @@ public class OrderService {
     public OrderResponseDTO createOrder(OrderCreateRequestDTO request) {
 
         if (request.getPassword() != null && request.getConfirmPassword() != null) {
+
+            if (!request.getPassword().equals(request.getConfirmPassword())) {
+                throw new BusinessLogicException("Passwords do not match");
+            }
+
+            if (userRepository.existsByEmail(request.getCustomerEmail())) {
+                throw new BusinessLogicException("User with this email already exists. Please login!");
+            }
+
             UserRequestDTO userRequestDTO = getUserRequestDTO(request);
-            userService.createUser(userRequestDTO);
+
+            try {
+                userService.createUser(userRequestDTO);
+                log.info("New user created during checkout: {}", request.getCustomerEmail());
+            } catch (ValidationException e) {
+                throw new BusinessLogicException("Password validation failed: " + e.getMessage());
+            }
         }
 
         User user = userRepository.findByEmail(request.getCustomerEmail()).orElse(null);
-
-        // Calculate shipping cost if Speedy is selected
-//        BigDecimal shippingCost = calculateShippingCost(request);
 
         // Create order
         Order order = new Order();
@@ -395,14 +409,15 @@ public class OrderService {
                 .build();
     }
 
-    private static UserRequestDTO getUserRequestDTO(OrderCreateRequestDTO request) {
+    private UserRequestDTO getUserRequestDTO(OrderCreateRequestDTO request) {
         UserRequestDTO userRequestDTO = new UserRequestDTO();
         userRequestDTO.setFirstName(request.getCustomerFirstName());
         userRequestDTO.setLastName(request.getCustomerLastName());
         userRequestDTO.setPhone(request.getCustomerPhone());
         userRequestDTO.setEmail(request.getCustomerEmail());
         userRequestDTO.setRole(String.valueOf(User.Role.USER));
-        userRequestDTO.setUsername(request.getCustomerFirstName());
+        userRequestDTO.setUsername(request.getCustomerEmail());
+        userRequestDTO.setPassword(request.getPassword());
         userRequestDTO.setActive(true);
         return userRequestDTO;
     }
