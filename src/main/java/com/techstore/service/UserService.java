@@ -255,10 +255,10 @@ public class UserService {
             throw new ValidationException("Username cannot exceed 100 characters");
         }
 
-        if (isForRequest && !USERNAME_PATTERN.matcher(trimmed).matches()) {
-            throw new ValidationException(
-                    "Username can only contain letters, numbers, and underscores");
-        }
+//        if (isForRequest && !USERNAME_PATTERN.matcher(trimmed).matches()) {
+//            throw new ValidationException(
+//                    "Username can only contain letters, numbers, and underscores");
+//        }
     }
 
     private void validateEmail(String email) {

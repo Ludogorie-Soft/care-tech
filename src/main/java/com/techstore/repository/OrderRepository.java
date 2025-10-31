@@ -11,65 +11,114 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    // Existing methods you have
     Optional<Order> findByOrderNumber(String orderNumber);
+
     Page<Order> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
-    @Query("SELECT o FROM Order o WHERE EXTRACT(YEAR FROM o.createdAt) = :year AND EXTRACT(MONTH FROM o.createdAt) = :month")
-    List<Order> findOrdersByYearAndMonth(@Param("year") int year, @Param("month") int month);
+    Page<Order> findByStatusOrderByCreatedAtDesc(OrderStatus status, Pageable pageable);
 
-    // New methods for order filtering and statistics
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);
-
-    Page<Order> findByPaymentStatus(PaymentStatus paymentStatus, Pageable pageable);
-
-    Page<Order> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     Long countByStatus(OrderStatus status);
 
-    // Search orders by multiple criteria
-    @Query("SELECT o FROM Order o WHERE " +
-            "LOWER(o.customerFirstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(o.customerLastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(o.customerEmail) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(o.orderNumber) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    Page<Order> searchOrders(@Param("searchTerm") String searchTerm, Pageable pageable);
-
-    // Calculate total revenue for delivered orders
-    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE o.status = :status")
-    BigDecimal sumTotalByStatus(@Param("status") OrderStatus status);
-
-    // Find orders by shipping method
-    Page<Order> findByShippingMethod(String shippingMethod, Pageable pageable);
-
-    // Find orders by date range
-    @Query("SELECT o FROM Order o WHERE o.createdAt BETWEEN :startDate AND :endDate")
-    Page<Order> findByCreatedAtBetween(@Param("startDate") LocalDateTime startDate,
-                                       @Param("endDate") LocalDateTime endDate,
-                                       Pageable pageable);
-
-    // Count orders by payment status
-    Long countByPaymentStatus(PaymentStatus paymentStatus);
-
-    // Find orders with specific tracking number
-    Optional<Order> findByTrackingNumber(String trackingNumber);
-
-    // Find orders that need shipping (pending or confirmed status)
-    @Query("SELECT o FROM Order o WHERE o.status IN :statuses ORDER BY o.createdAt DESC")
-    Page<Order> findByStatusIn(@Param("statuses") List<OrderStatus> statuses, Pageable pageable);
-
-    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE o.status = 'DELIVERED'")
-    BigDecimal calculateTotalRevenue();
-
-    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE o.status = 'DELIVERED'")
+    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE o.paymentStatus = 'PAID'")
     BigDecimal sumTotalAmount();
 
-    Page<Order> findByStatusOrderByCreatedAtDesc(OrderStatus status, Pageable pageable);
+    @Query("SELECT o FROM Order o WHERE YEAR(o.createdAt) = :year AND MONTH(o.createdAt) = :month")
+    List<Order> findOrdersByYearAndMonth(@Param("year") int year, @Param("month") int month);
+
+    // Revenue statistics
+    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o " +
+            "WHERE o.paymentStatus = 'PAID' " +
+            "AND YEAR(o.createdAt) = YEAR(CURRENT_DATE) " +
+            "AND MONTH(o.createdAt) = MONTH(CURRENT_DATE) " +
+            "AND DAY(o.createdAt) = DAY(CURRENT_DATE)")
+    BigDecimal sumDailyRevenue();
+
+    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o " +
+            "WHERE o.paymentStatus = 'PAID' " +
+            "AND YEAR(o.createdAt) = YEAR(CURRENT_DATE) " +
+            "AND MONTH(o.createdAt) = MONTH(CURRENT_DATE)")
+    BigDecimal sumMonthlyRevenue();
+
+    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o " +
+            "WHERE o.paymentStatus = 'PAID' " +
+            "AND YEAR(o.createdAt) = YEAR(CURRENT_DATE)")
+    BigDecimal sumYearlyRevenue();
+
+    // Order count statistics
+    @Query("SELECT COUNT(o) FROM Order o " +
+            "WHERE YEAR(o.createdAt) = YEAR(CURRENT_DATE) " +
+            "AND MONTH(o.createdAt) = MONTH(CURRENT_DATE) " +
+            "AND DAY(o.createdAt) = DAY(CURRENT_DATE)")
+    Long countOrdersToday();
+
+    @Query("SELECT COUNT(o) FROM Order o " +
+            "WHERE YEAR(o.createdAt) = YEAR(CURRENT_DATE) " +
+            "AND MONTH(o.createdAt) = MONTH(CURRENT_DATE)")
+    Long countOrdersThisMonth();
+
+    @Query("SELECT COUNT(o) FROM Order o " +
+            "WHERE YEAR(o.createdAt) = YEAR(CURRENT_DATE)")
+    Long countOrdersThisYear();
+
+    // Customer statistics
+    @Query("SELECT COUNT(DISTINCT o.customerEmail) FROM Order o")
+    Long countTotalCustomers();
+
+    @Query("SELECT COUNT(DISTINCT o.customerEmail) FROM Order o " +
+            "WHERE YEAR(o.createdAt) = YEAR(CURRENT_DATE) " +
+            "AND MONTH(o.createdAt) = MONTH(CURRENT_DATE) " +
+            "AND DAY(o.createdAt) = DAY(CURRENT_DATE)")
+    Long countNewCustomersToday();
+
+    @Query("SELECT COUNT(DISTINCT o.customerEmail) FROM Order o " +
+            "WHERE YEAR(o.createdAt) = YEAR(CURRENT_DATE) " +
+            "AND MONTH(o.createdAt) = MONTH(CURRENT_DATE)")
+    Long countNewCustomersThisMonth();
+
+    @Query("SELECT COUNT(DISTINCT o.customerEmail) FROM Order o " +
+            "WHERE YEAR(o.createdAt) = YEAR(CURRENT_DATE)")
+    Long countNewCustomersThisYear();
+
+    // Average order value
+    @Query("SELECT COALESCE(AVG(o.total), 0) FROM Order o WHERE o.paymentStatus = 'PAID'")
+    BigDecimal calculateAverageOrderValue();
+
+    @Query("SELECT COALESCE(AVG(o.total), 0) FROM Order o " +
+            "WHERE o.paymentStatus = 'PAID' " +
+            "AND YEAR(o.createdAt) = YEAR(CURRENT_DATE) " +
+            "AND MONTH(o.createdAt) = MONTH(CURRENT_DATE)")
+    BigDecimal calculateAverageOrderValueThisMonth();
+
+    // Payment statistics
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.paymentStatus = 'PAID'")
+    Long countPaidOrders();
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.paymentStatus != 'PAID'")
+    Long countUnpaidOrders();
+
+    @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o " +
+            "WHERE o.paymentStatus != 'PAID' " +
+            "AND o.status != 'CANCELLED'")
+    BigDecimal sumUnpaidRevenue();
+
+    // Min/Max order values
+    @Query("SELECT COALESCE(MAX(o.total), 0) FROM Order o")
+    BigDecimal findHighestOrderValue();
+
+    @Query("SELECT COALESCE(MIN(o.total), 0) FROM Order o WHERE o.total > 0")
+    BigDecimal findLowestOrderValue();
+
+    // Active orders count
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.status IN ('PENDING', 'PROCESSING', 'SHIPPED')")
+    Long countActiveOrders();
+
+    Long countByPaymentStatus(PaymentStatus paymentStatus);
 }

@@ -5,11 +5,14 @@ import com.techstore.dto.request.ProductPromoRequest;
 import com.techstore.dto.response.CategorySummaryDTO;
 import com.techstore.dto.response.ManufacturerSummaryDto;
 import com.techstore.dto.response.OrderResponseDTO;
+import com.techstore.dto.response.OrderStatisticsResponseDTO;
 import com.techstore.dto.response.ProductResponseDTO;
+import com.techstore.enums.OrderStatus;
 import com.techstore.service.OrderService;
 import com.techstore.service.admin.AdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +28,7 @@ import java.util.List;
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@Slf4j
 public class AdminController {
 
     private final AdminService adminService;
@@ -54,9 +58,8 @@ public class AdminController {
             @RequestParam("discount")BigDecimal discount,
             @RequestParam("isPromo") Boolean isPromo,
             @RequestParam(defaultValue = "en", name = "lang") String lang
-            ) {
+    ) {
         List<ProductResponseDTO> response = adminService.createPromoByCategory(categoryId, isPromo, discount, lang);
-
         return ResponseEntity.ok(response);
     }
 
@@ -68,20 +71,67 @@ public class AdminController {
             @RequestParam(defaultValue = "en", name = "lang") String lang
     ) {
         List<ProductResponseDTO> response = adminService.createPromoByManufacturer(manufacturerId, isPromo, discount, lang);
-
         return ResponseEntity.ok(response);
     }
 
+    // ============ ORDER MANAGEMENT ENDPOINTS ============
+
+    /**
+     * Get all orders with pagination and sorting
+     */
     @GetMapping("/orders/all")
     public ResponseEntity<Page<OrderResponseDTO>> getAllOrders(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Sort sort = sortDirection.equalsIgnoreCase("ASC")
+                ? Sort.by("createdAt").ascending()
+                : Sort.by("createdAt").descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<OrderResponseDTO> orders = orderService.getAllOrders(pageable);
         return ResponseEntity.ok(orders);
     }
 
+    /**
+     * Get orders by status with sorting by date
+     *
+     * Example: GET /api/admin/orders/by-status/PENDING?page=0&size=20&sortDirection=DESC
+     */
+    @GetMapping("/orders/by-status/{status}")
+    public ResponseEntity<Page<OrderResponseDTO>> getOrdersByStatus(
+            @PathVariable OrderStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+
+        log.info("Getting orders by status: {} with sort direction: {}", status, sortDirection);
+
+        Sort sort = sortDirection.equalsIgnoreCase("ASC")
+                ? Sort.by("createdAt").ascending()
+                : Sort.by("createdAt").descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<OrderResponseDTO> orders = orderService.getOrdersByStatus(status, pageable);
+
+        log.info("Found {} orders with status {}", orders.getTotalElements(), status);
+        return ResponseEntity.ok(orders);
+    }
+
+    /**
+     * Get comprehensive order statistics
+     */
+    @GetMapping("/orders/statistics")
+    public ResponseEntity<OrderStatisticsResponseDTO> getOrderStatistics() {
+        log.info("Getting order statistics");
+        OrderStatisticsResponseDTO statistics = orderService.getOrderStatistics();
+        return ResponseEntity.ok(statistics);
+    }
+
+    /**
+     * Update order status
+     */
     @PutMapping("/orders/{orderId}/status")
     public ResponseEntity<OrderResponseDTO> updateOrderStatus(
             @PathVariable Long orderId,

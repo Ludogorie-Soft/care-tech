@@ -5,7 +5,7 @@ import com.techstore.dto.request.OrderStatusUpdateDTO;
 import com.techstore.dto.request.UserRequestDTO;
 import com.techstore.dto.response.OrderItemResponseDTO;
 import com.techstore.dto.response.OrderResponseDTO;
-import com.techstore.dto.speedy.SpeedyCalculatePriceResponse;
+import com.techstore.dto.response.OrderStatisticsResponseDTO;
 import com.techstore.entity.Order;
 import com.techstore.entity.OrderItem;
 import com.techstore.entity.Product;
@@ -19,16 +19,16 @@ import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.ResourceNotFoundException;
 import com.techstore.exception.ValidationException;
 import com.techstore.repository.CartItemRepository;
-import com.techstore.repository.OrderItemRepository;
 import com.techstore.repository.OrderRepository;
 import com.techstore.repository.ProductRepository;
 import com.techstore.repository.UserRepository;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -132,7 +132,6 @@ public class OrderService {
 
         // Notes and shipping cost
         order.setCustomerNotes(request.getCustomerNotes());
-//        order.setShippingCost(shippingCost);
 
         // Add order items
         for (var itemDto : request.getItems()) {
@@ -213,6 +212,53 @@ public class OrderService {
     public Page<OrderResponseDTO> getOrdersByStatus(OrderStatus status, Pageable pageable) {
         Page<Order> orders = orderRepository.findByStatusOrderByCreatedAtDesc(status, pageable);
         return orders.map(this::mapToResponseDTO);
+    }
+
+    /**
+     * Get comprehensive order statistics
+     */
+    @Transactional(readOnly = true)
+    public OrderStatisticsResponseDTO getOrderStatistics() {
+        return OrderStatisticsResponseDTO.builder()
+                // Revenue statistics
+                .dailyRevenue(orderRepository.sumDailyRevenue())
+                .monthlyRevenue(orderRepository.sumMonthlyRevenue())
+                .yearlyRevenue(orderRepository.sumYearlyRevenue())
+                .totalRevenue(orderRepository.sumTotalAmount())
+
+                // Order counts by status
+                .totalOrders(orderRepository.count())
+                .pendingOrders(orderRepository.countByStatus(OrderStatus.PENDING))
+                .processingOrders(orderRepository.countByStatus(OrderStatus.PROCESSING))
+                .shippedOrders(orderRepository.countByStatus(OrderStatus.SHIPPED))
+                .deliveredOrders(orderRepository.countByStatus(OrderStatus.DELIVERED))
+                .cancelledOrders(orderRepository.countByStatus(OrderStatus.CANCELLED))
+                .activeOrders(orderRepository.countActiveOrders())
+
+                // Customer statistics
+                .totalCustomers(orderRepository.countTotalCustomers())
+                .newCustomersToday(orderRepository.countNewCustomersToday())
+                .newCustomersThisMonth(orderRepository.countNewCustomersThisMonth())
+                .newCustomersThisYear(orderRepository.countNewCustomersThisYear())
+
+                // Order statistics
+                .ordersToday(orderRepository.countOrdersToday())
+                .ordersThisMonth(orderRepository.countOrdersThisMonth())
+                .ordersThisYear(orderRepository.countOrdersThisYear())
+
+                // Average order value
+                .averageOrderValue(orderRepository.calculateAverageOrderValue())
+                .averageOrderValueThisMonth(orderRepository.calculateAverageOrderValueThisMonth())
+
+                // Payment statistics
+                .paidOrders(orderRepository.countPaidOrders())
+                .unpaidOrders(orderRepository.countUnpaidOrders())
+                .unpaidRevenue(orderRepository.sumUnpaidRevenue())
+
+                // Top performing metrics
+                .highestOrderValue(orderRepository.findHighestOrderValue())
+                .lowestOrderValue(orderRepository.findLowestOrderValue())
+                .build();
     }
 
     /**
@@ -312,22 +358,6 @@ public class OrderService {
     }
 
     /**
-     * Get order statistics
-     */
-    @Transactional(readOnly = true)
-    public OrderStatistics getOrderStatistics() {
-        OrderStatistics stats = new OrderStatistics();
-        stats.setTotalOrders(orderRepository.count());
-        stats.setPendingOrders(orderRepository.countByStatus(OrderStatus.PENDING));
-        stats.setShippedOrders(orderRepository.countByStatus(OrderStatus.SHIPPED));
-        stats.setDeliveredOrders(orderRepository.countByStatus(OrderStatus.DELIVERED));
-        stats.setCancelledOrders(orderRepository.countByStatus(OrderStatus.CANCELLED));
-        stats.setTotalRevenue(orderRepository.sumTotalAmount());
-
-        return stats;
-    }
-
-    /**
      * Generate unique order number
      */
     private String generateOrderNumber() {
@@ -420,18 +450,5 @@ public class OrderService {
         userRequestDTO.setPassword(request.getPassword());
         userRequestDTO.setActive(true);
         return userRequestDTO;
-    }
-
-    /**
-     * Inner class for order statistics
-     */
-    @Data
-    public static class OrderStatistics {
-        private Long totalOrders;
-        private Long pendingOrders;
-        private Long shippedOrders;
-        private Long deliveredOrders;
-        private Long cancelledOrders;
-        private BigDecimal totalRevenue;
     }
 }
