@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Year;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -215,6 +216,48 @@ public class OrderService {
     }
 
     /**
+     * Search orders by order number
+     */
+    @Transactional(readOnly = true)
+    public Page<OrderResponseDTO> searchByOrderNumber(String orderNumber, Pageable pageable) {
+        Page<Order> orders = orderRepository.findByOrderNumberContainingIgnoreCase(orderNumber, pageable);
+        return orders.map(this::mapToResponseDTO);
+    }
+
+    /**
+     * Get orders by date range
+     */
+    @Transactional(readOnly = true)
+    public Page<OrderResponseDTO> getOrdersByDateRange(LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable) {
+        Page<Order> orders = orderRepository.findByCreatedAtBetween(dateFrom, dateTo, pageable);
+        return orders.map(this::mapToResponseDTO);
+    }
+
+    /**
+     * Get latest N orders
+     */
+    @Transactional(readOnly = true)
+    public List<OrderResponseDTO> getLatestOrders(int limit) {
+        List<Order> orders;
+        switch (limit) {
+            case 10:
+                orders = orderRepository.findTop10ByOrderByCreatedAtDesc();
+                break;
+            case 20:
+                orders = orderRepository.findTop20ByOrderByCreatedAtDesc();
+                break;
+            case 50:
+                orders = orderRepository.findTop50ByOrderByCreatedAtDesc();
+                break;
+            default:
+                orders = orderRepository.findTop10ByOrderByCreatedAtDesc();
+        }
+        return orders.stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Get comprehensive order statistics
      */
     @Transactional(readOnly = true)
@@ -302,22 +345,6 @@ public class OrderService {
     }
 
     /**
-     * Update payment status
-     */
-    @Transactional
-    public OrderResponseDTO updatePaymentStatus(Long orderId, PaymentStatus paymentStatus) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-
-        order.setPaymentStatus(paymentStatus);
-        order = orderRepository.save(order);
-
-        log.info("Order {} payment status updated to {}", order.getOrderNumber(), paymentStatus);
-
-        return mapToResponseDTO(order);
-    }
-
-    /**
      * Cancel order
      */
     @Transactional
@@ -347,14 +374,6 @@ public class OrderService {
         eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, previousStatus, OrderStatus.CANCELLED));
 
         return mapToResponseDTO(order);
-    }
-
-    /**
-     * Get orders for specific month (for NAP file)
-     */
-    @Transactional(readOnly = true)
-    public List<Order> getOrdersForMonth(int year, int month) {
-        return orderRepository.findOrdersByYearAndMonth(year, month);
     }
 
     /**

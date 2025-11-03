@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,15 +24,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Page<Order> findByStatusOrderByCreatedAtDesc(OrderStatus status, Pageable pageable);
 
-    Page<Order> findByStatus(OrderStatus status, Pageable pageable);
-
     Long countByStatus(OrderStatus status);
 
     @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o WHERE o.paymentStatus = 'PAID'")
     BigDecimal sumTotalAmount();
-
-    @Query("SELECT o FROM Order o WHERE YEAR(o.createdAt) = :year AND MONTH(o.createdAt) = :month")
-    List<Order> findOrdersByYearAndMonth(@Param("year") int year, @Param("month") int month);
 
     // Revenue statistics
     @Query("SELECT COALESCE(SUM(o.total), 0) FROM Order o " +
@@ -120,5 +116,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT COUNT(o) FROM Order o WHERE o.status IN ('PENDING', 'PROCESSING', 'SHIPPED')")
     Long countActiveOrders();
 
-    Long countByPaymentStatus(PaymentStatus paymentStatus);
+    // Search by order number (partial match)
+    Page<Order> findByOrderNumberContainingIgnoreCase(String orderNumber, Pageable pageable);
+
+    // Date range filtering
+    Page<Order> findByCreatedAtBetween(LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable);
+
+    // Latest N orders
+    List<Order> findTop10ByOrderByCreatedAtDesc();
+    List<Order> findTop20ByOrderByCreatedAtDesc();
+    List<Order> findTop50ByOrderByCreatedAtDesc();
 }

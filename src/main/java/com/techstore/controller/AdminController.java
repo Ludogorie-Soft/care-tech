@@ -22,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -116,6 +117,82 @@ public class AdminController {
         Page<OrderResponseDTO> orders = orderService.getOrdersByStatus(status, pageable);
 
         log.info("Found {} orders with status {}", orders.getTotalElements(), status);
+        return ResponseEntity.ok(orders);
+    }
+
+    /**
+     * Search orders by order number
+     *
+     * Example: GET /api/admin/orders/search-by-order-number?orderNumber=ORD-2025-00123&page=0&size=20
+     */
+    @GetMapping("/orders/search-by-order-number")
+    public ResponseEntity<Page<OrderResponseDTO>> searchOrders(
+            @RequestParam String orderNumber,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+
+        log.info("Searching orders by order number: {}", orderNumber);
+
+        Sort sort = sortDirection.equalsIgnoreCase("ASC")
+                ? Sort.by("createdAt").ascending()
+                : Sort.by("createdAt").descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<OrderResponseDTO> orders = orderService.searchByOrderNumber(orderNumber, pageable);
+
+        log.info("Found {} orders matching '{}'", orders.getTotalElements(), orderNumber);
+        return ResponseEntity.ok(orders);
+    }
+
+    /**
+     * Get orders by date range
+     *
+     * Example: GET /api/admin/orders/date-range?dateFrom=2025-01-01T00:00:00&dateTo=2025-01-31T23:59:59&page=0&size=20
+     */
+    @GetMapping("/orders/date-range")
+    public ResponseEntity<Page<OrderResponseDTO>> getOrdersByDateRange(
+            @RequestParam String dateFrom,
+            @RequestParam String dateTo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+
+        log.info("Getting orders from {} to {}", dateFrom, dateTo);
+
+        LocalDateTime from = LocalDateTime.parse(dateFrom);
+        LocalDateTime to = LocalDateTime.parse(dateTo);
+
+        Sort sort = sortDirection.equalsIgnoreCase("ASC")
+                ? Sort.by("createdAt").ascending()
+                : Sort.by("createdAt").descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<OrderResponseDTO> orders = orderService.getOrdersByDateRange(from, to, pageable);
+
+        log.info("Found {} orders in date range", orders.getTotalElements());
+        return ResponseEntity.ok(orders);
+    }
+
+    /**
+     * Get latest N orders (for dashboard widgets)
+     *
+     * Example: GET /api/admin/orders/latest?limit=10
+     */
+    @GetMapping("/orders/latest")
+    public ResponseEntity<List<OrderResponseDTO>> getLatestOrders(
+            @RequestParam(defaultValue = "10") int limit) {
+
+        log.info("Getting latest {} orders", limit);
+
+        // Validate limit
+        if (limit != 10 && limit != 20 && limit != 50) {
+            limit = 10; // Default to 10 if invalid
+        }
+
+        List<OrderResponseDTO> orders = orderService.getLatestOrders(limit);
+
+        log.info("Returning {} latest orders", orders.size());
         return ResponseEntity.ok(orders);
     }
 
