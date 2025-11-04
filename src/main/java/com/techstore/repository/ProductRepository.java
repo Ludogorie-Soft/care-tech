@@ -32,8 +32,11 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     Page<Product> findByActiveTrueAndFeaturedTrue(Pageable pageable);
 
-    Page<Product> findByActiveTrueAndCategoryIdAndStatusNot(Long categoryId, ProductStatus status, Pageable pageable);
+    @Query("SELECT p FROM Product p WHERE p.active = true AND p.category.id = :categoryId AND p.status <> 'NOT_AVAILABLE'")
+    Page<Product> findActiveByCategoryExcludingNotAvailable(@Param("categoryId") Long categoryId, Pageable pageable);
 
+    @Query("SELECT p FROM Product p WHERE p.active = true AND p.category.id = :categoryId AND p.status <> 'NOT_AVAILABLE'")
+    List<Product> findActiveByCategoryExcludingNotAvailable(@Param("categoryId") Long categoryId);
 
     Page<Product> findByActiveTrueAndManufacturerId(Long brandId, Pageable pageable);
 

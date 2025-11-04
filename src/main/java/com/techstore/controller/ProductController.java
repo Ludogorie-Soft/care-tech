@@ -1,12 +1,14 @@
 package com.techstore.controller;
 
 import com.techstore.dto.response.ManufacturerResponseDto;
+import com.techstore.dto.response.ProductParameterResponseDto;
 import com.techstore.dto.response.ProductResponseDTO;
 import com.techstore.dto.request.ProductCreateRequestDTO;
 import com.techstore.dto.request.ProductImageOperationsDTO;
 import com.techstore.dto.request.ProductImageUpdateDTO;
 import com.techstore.dto.request.ProductUpdateRequestDTO;
 import com.techstore.dto.response.ProductImageUploadResponseDTO;
+import com.techstore.entity.ProductParameter;
 import com.techstore.service.ProductService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/products")
@@ -119,6 +122,16 @@ public class ProductController {
 
         Page<ProductResponseDTO> products = productService.getProductsByBrand(brandId, pageable, language);
         return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/parameters/category")
+    @Operation(summary = "Get products parameters by category")
+    public ResponseEntity<Set<ProductParameterResponseDto>> getProductParametersByCategory(
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam(name = "lang", defaultValue = "en") String lang
+    ) {
+        Set<ProductParameterResponseDto> response = productService.getProductsParametersByCategory(categoryId, lang);
+        return ResponseEntity.ok(response);
     }
 
     /**

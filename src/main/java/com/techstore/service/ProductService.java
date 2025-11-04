@@ -208,7 +208,7 @@ public class ProductService {
             // Verify category exists
             findCategoryByIdOrThrow(categoryId);
 
-            return productRepository.findByActiveTrueAndCategoryIdAndStatusNot(categoryId, ProductStatus.NOT_AVAILABLE, pageable)
+            return productRepository.findActiveByCategoryExcludingNotAvailable(categoryId, pageable)
                     .map(p -> convertToResponseDTO(p, lang));
         }, context);
     }
@@ -259,6 +259,22 @@ public class ProductService {
                     .map(p -> convertToResponseDTO(p, lang))
                     .toList();
         }, context);
+    }
+
+    @Transactional(readOnly = true)
+    public Set<ProductParameterResponseDto> getProductsParametersByCategory(Long categoryId, String lang) {
+        List<Product> products = productRepository.findActiveByCategoryExcludingNotAvailable(categoryId);
+
+        Set<ProductParameter> productParameters = new HashSet<>();
+
+        for (Product product : products) {
+            Set<ProductParameter> parameters = product.getProductParameters();
+            productParameters.addAll(parameters);
+        }
+
+        return productParameters.stream()
+                .map(productParameter -> convertToProductParameterResponse(productParameter, lang))
+                .collect(Collectors.toSet());
     }
 
     @Transactional(readOnly = true)
@@ -1249,6 +1265,7 @@ public class ProductService {
         dto.setNameBg(product.getNameBg());
         dto.setDescriptionEn(product.getDescriptionEn());
         dto.setDescriptionBg(product.getDescriptionBg());
+        dto.setSlug(product.getSlug());
 
         dto.setReferenceNumber(product.getReferenceNumber());
         dto.setModel(product.getModel());
@@ -1504,50 +1521,5 @@ public class ProductService {
                                 .map(p -> convertToResponseDTO(p, lang)),
                 "fetch products on sale"
         );
-    }
-
-    @Transactional(readOnly = true)
-    public Page<ProductResponseDTO> filterProducts(Long categoryId, Long brandId,
-                                                   BigDecimal minPrice, BigDecimal maxPrice,
-                                                   ProductStatus status, Boolean onSale, String query,
-                                                   Pageable pageable, String lang) {
-        log.debug("Filtering products with multiple criteria");
-
-        String context = ExceptionHelper.createErrorContext(
-                "filterProducts", "Product", null,
-                String.format("categoryId: %s, brandId: %s, query: %s", categoryId, brandId, query));
-
-        return ExceptionHelper.wrapDatabaseOperation(() -> {
-            validatePaginationParameters(pageable);
-            validateLanguage(lang);
-
-            if (categoryId != null) {
-                validateCategoryId(categoryId);
-            }
-
-            if (brandId != null) {
-                validateManufacturerId(brandId);
-            }
-
-            if (StringUtils.hasText(query)) {
-                validateSearchQuery(query);
-            }
-
-            if (minPrice != null && minPrice.compareTo(BigDecimal.ZERO) < 0) {
-                throw new ValidationException("Minimum price cannot be negative");
-            }
-
-            if (maxPrice != null && maxPrice.compareTo(BigDecimal.ZERO) < 0) {
-                throw new ValidationException("Maximum price cannot be negative");
-            }
-
-            if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
-                throw new ValidationException("Minimum price cannot be greater than maximum price");
-            }
-
-            return productRepository.findProductsWithFilters(categoryId, brandId, minPrice, maxPrice,
-                            status, onSale, query, pageable)
-                    .map(p -> convertToResponseDTO(p, lang));
-        }, context);
     }
 }

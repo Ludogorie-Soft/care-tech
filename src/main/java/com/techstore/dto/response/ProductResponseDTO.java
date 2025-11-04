@@ -44,4 +44,5 @@ public class ProductResponseDTO {
     private BigDecimal finalPrice;
     private boolean show;
     private Long workflowId;
+    private String slug;
 }
