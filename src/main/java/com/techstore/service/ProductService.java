@@ -208,7 +208,7 @@ public class ProductService {
             // Verify category exists
             findCategoryByIdOrThrow(categoryId);
 
-            return productRepository.findByActiveTrueAndCategoryId(categoryId, pageable)
+            return productRepository.findByActiveTrueAndCategoryIdAndStatusNot(categoryId, ProductStatus.NOT_AVAILABLE, pageable)
                     .map(p -> convertToResponseDTO(p, lang));
         }, context);
     }

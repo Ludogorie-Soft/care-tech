@@ -26,15 +26,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.Year;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,7 +45,6 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
-    private final SpeedyService speedyService;
     private final UserService userService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -141,6 +137,7 @@ public class OrderService {
 
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(product);
+            orderItem.setDiscountAmount(product.getDiscount());
             orderItem.setProductName(product.getNameBg());
             orderItem.setProductSku(product.getSku());
             orderItem.setProductModel(product.getModel());

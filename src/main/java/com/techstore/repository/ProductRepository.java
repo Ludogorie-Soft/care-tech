@@ -32,7 +32,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     Page<Product> findByActiveTrueAndFeaturedTrue(Pageable pageable);
 
-    Page<Product> findByActiveTrueAndCategoryId(Long categoryId, Pageable pageable);
+    Page<Product> findByActiveTrueAndCategoryIdAndStatusNot(Long categoryId, ProductStatus status, Pageable pageable);
+
 
     Page<Product> findByActiveTrueAndManufacturerId(Long brandId, Pageable pageable);
 
