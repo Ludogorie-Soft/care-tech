@@ -68,7 +68,9 @@ public class ProductSearchRepository {
                 .append("LEFT JOIN manufacturers m ON p.manufacturer_id = m.id ")
                 .append("LEFT JOIN categories c ON p.category_id = c.id ");
 
-        StringBuilder whereClause = new StringBuilder("WHERE p.active = true AND p.show_flag = true ");
+        StringBuilder whereClause = new StringBuilder(
+                "WHERE p.active = true AND p.show_flag = true AND p.status != 'NOT_AVAILABLE' "
+        );
 
         if (StringUtils.hasText(request.getQuery())) {
             whereClause.append("AND (")
@@ -122,9 +124,6 @@ public class ProductSearchRepository {
             whereClause.append("AND p.discount > 0 ");
         }
 
-        // ============================================================
-        // IMPROVED PARAMETER FILTERING - BY ID (MUCH FASTER!)
-        // ============================================================
         if (request.getFilters() != null && !request.getFilters().isEmpty()) {
             int filterIndex = 0;
             for (Map.Entry<Long, List<Long>> filter : request.getFilters().entrySet()) {

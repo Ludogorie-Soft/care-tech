@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Нова поръчка</title>
+</head>
+<body style="margin:0; padding:0; font-family:Arial,sans-serif; background-color:#0a0a0a;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0a0a;">
+    <tr>
+        <td align="center" style="padding:20px 10px;">
+            <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
+                <!-- Header -->
+                <tr>
+                    <td align="center" style="background-color:#ed1c24; padding:40px 20px;">
+                        <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
+                    </td>
+                </tr>
+
+                <!-- New Order Icon -->
+                <tr>
+                    <td align="center" style="padding:40px 20px; background-color:#1a1a1a;">
+<!--                        <div style="width:80px; height:80px; background-color:#ed1c24; border-radius:50%; margin:0 auto 20px; display:inline-block; text-align:center; line-height:80px;">-->
+<!--                            <span style="color:#ffffff; font-size:40px; font-weight:bold;">!</span>-->
+<!--                        </div>-->
+                        <h2 style="color:#ffffff; font-size:24px; margin:0 0 10px 0;">Нова поръчка получена!</h2>
+                        <p style="color:#929497; font-size:15px; line-height:1.6; margin:0;">
+                            Клиент: <span th:text="${customerName}" style="color:#ffffff;">Игнат Игнатов</span><br/>
+                            Номер на поръчка: <strong th:text="${orderNumber}" style="color:#ed1c24;">ORD-2025-00024</strong><br/>
+                            Дата: <span th:text="${orderDate}">30.10.2025 12:04</span>
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Order Details -->
+                <tr>
+                    <td style="padding:0 20px 30px;">
+                        <table width="100%" cellpadding="10" cellspacing="0" border="0" style="background-color:#262626; border-radius:8px;">
+                            <tr>
+                                <td style="color:#929497; font-size:14px;">Метод на плащане:</td>
+                                <td align="right" style="color:#ffffff; font-size:14px;" th:text="${order.paymentMethod.displayName}">CASH_ON_DELIVERY</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#929497; font-size:14px;">Метод на доставка:</td>
+                                <td align="right" style="color:#ffffff; font-size:14px;" th:text="${order.shippingMethod}">Speedy</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#929497; font-size:14px;">Общо:</td>
+                                <td align="right" style="color:#ed1c24; font-size:16px; font-weight:bold;" th:text="${#numbers.formatDecimal(order.total, 1, 2)} + ' лв.'">154.80 лв.</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- CTA -->
+                <tr>
+                    <td align="center" style="padding:20px;">
+                        <a th:href="${orderUrl}" style="display:inline-block; background-color:#ed1c24; color:#ffffff; text-decoration:none; padding:14px 35px; border-radius:6px; font-size:15px; font-weight:600;">Преглед на поръчката в админ панела</a>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td align="center" style="background-color:#0f0f0f; padding:25px 20px; border-top:2px solid #ed1c24;">
+                        <p style="color:#6c6e70; font-size:12px; margin:0;">
+                            Това е автоматично известие от <span th:text="${appName}" style="color:#929497;">CareTech</span>.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

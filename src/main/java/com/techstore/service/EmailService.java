@@ -56,7 +56,7 @@ public class EmailService {
             variables.put("items", order.getOrderItems());
             variables.put("appName", appName);
             variables.put("appUrl", appUrl);
-            variables.put("orderUrl", appUrl + "/orders/" + order.getOrderNumber());
+            variables.put("orderUrl", appUrl + "/orders/" + order.getId());
 
             String subject = appName + " - Потвърждение на поръчка #" + order.getOrderNumber();
             sendHtmlEmail(order.getCustomerEmail(), subject, "order-confirmation", variables);
@@ -66,6 +66,34 @@ public class EmailService {
             log.error("Failed to send order confirmation email to: {}", order.getCustomerEmail(), e);
         }
     }
+
+    /**
+     * Send email to admin
+     */
+    @Async
+    public void sendNewOrderNotificationToAdmin(Order order) {
+        try {
+            log.info("Sending admin order notification email to: {}", fromEmail);
+
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("customerName", order.getCustomerFirstName() + " " + order.getCustomerLastName());
+            variables.put("orderNumber", order.getOrderNumber());
+            variables.put("orderDate", order.getCreatedAt().format(DATE_FORMATTER));
+            variables.put("order", order);
+            variables.put("items", order.getOrderItems());
+            variables.put("appName", appName);
+            variables.put("appUrl", appUrl);
+            variables.put("orderUrl", appUrl + "/admin/orders/" + order.getId());
+
+            String subject = appName + " - Нова поръчка #" + order.getOrderNumber();
+            sendHtmlEmail(fromEmail, subject, "admin-new-order", variables);
+
+            log.info("Admin order notification email sent successfully to: {}", fromEmail);
+        } catch (Exception e) {
+            log.error("Failed to send admin order notification email", e);
+        }
+    }
+
 
     /**
      * Send order status update email
@@ -84,7 +112,7 @@ public class EmailService {
             variables.put("order", order);
             variables.put("appName", appName);
             variables.put("appUrl", appUrl);
-            variables.put("orderUrl", appUrl + "/orders/" + order.getOrderNumber());
+            variables.put("orderUrl", appUrl + "/orders/" + order.getId());
             variables.put("trackingNumber", order.getTrackingNumber());
 
             String subject = appName + " - Промяна в статуса на поръчка #" + order.getOrderNumber();
@@ -112,7 +140,7 @@ public class EmailService {
             variables.put("order", order);
             variables.put("appName", appName);
             variables.put("appUrl", appUrl);
-            variables.put("orderUrl", appUrl + "/orders/" + order.getOrderNumber());
+            variables.put("orderUrl", appUrl + "/orders/" + order.getId());
 
             String subject = appName + " - Вашата поръчка е изпратена #" + order.getOrderNumber();
             sendHtmlEmail(order.getCustomerEmail(), subject, "order-shipped", variables);
@@ -137,7 +165,7 @@ public class EmailService {
             variables.put("order", order);
             variables.put("appName", appName);
             variables.put("appUrl", appUrl);
-            variables.put("orderUrl", appUrl + "/orders/" + order.getOrderNumber());
+            variables.put("orderUrl", appUrl + "/orders/" + order.getId());
 
             String subject = appName + " - Вашата поръчка е доставена #" + order.getOrderNumber();
             sendHtmlEmail(order.getCustomerEmail(), subject, "order-delivered", variables);

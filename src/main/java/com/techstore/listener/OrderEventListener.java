@@ -25,6 +25,7 @@ public class OrderEventListener {
     /**
      * Handle order created event
      * Sends confirmation email to customer
+     * Sends email to admin
      */
     @EventListener
     @Async
@@ -34,6 +35,7 @@ public class OrderEventListener {
         try {
             Order order = event.getOrder();
             emailService.sendOrderConfirmationEmail(order);
+            emailService.sendNewOrderNotificationToAdmin(order);
         } catch (Exception e) {
             log.error("Error handling order created event", e);
         }
