@@ -43,6 +43,7 @@ public class ProductSearchRepository {
 
         sql.append("SELECT p.id, p.name_bg, p.name_en, p.description_bg, p.description_en, ")
                 .append("p.model, p.reference_number, p.final_price, p.discount, p.featured, p.status, ")
+                .append("p.slug, ")
                 .append("m.name as manufacturer_name, c.")
                 .append(nameField)
                 .append(" as category_name ");
@@ -367,6 +368,7 @@ public class ProductSearchRepository {
                 .featured(rs.getBoolean("featured"))
                 .onSale(rs.getBigDecimal("discount") != null && rs.getBigDecimal("discount").compareTo(BigDecimal.ZERO) > 0)
                 .score(rs.getFloat("search_rank"))
+                .slug(rs.getString("slug"))
                 .build();
     }
 

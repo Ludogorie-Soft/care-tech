@@ -228,7 +228,7 @@ public class ProductService {
             // Verify manufacturer exists
             findManufacturerByIdOrThrow(brandId);
 
-            return productRepository.findByActiveTrueAndManufacturerId(brandId, pageable)
+            return productRepository.findActiveByManufacturerExcludingNotAvailable(brandId, pageable)
                     .map(p -> convertToResponseDTO(p, lang));
         }, context);
     }

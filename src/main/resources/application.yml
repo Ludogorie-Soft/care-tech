@@ -172,6 +172,7 @@ app:
     name: CareTech
     url: http://63.180.10.154:3000
     email:
+      info: ignatov_rs@abv.bg
       from: orders@caretech.bg
       enabled: true
     search:

@@ -3,7 +3,6 @@ package com.techstore.service;
 import com.techstore.dto.request.ProductSearchRequest;
 import com.techstore.dto.response.FacetValue;
 import com.techstore.dto.response.ProductSearchResponse;
-import com.techstore.dto.response.ProductSearchResult;
 import com.techstore.repository.ProductSearchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

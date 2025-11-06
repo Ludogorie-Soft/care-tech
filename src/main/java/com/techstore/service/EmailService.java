@@ -1,5 +1,6 @@
 package com.techstore.service;
 
+import com.techstore.dto.request.MessageToAdmin;
 import com.techstore.entity.Order;
 import com.techstore.enums.OrderStatus;
 import jakarta.mail.MessagingException;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +39,9 @@ public class EmailService {
 
     @Value("${app.url:http://63.180.10.154:3000}")
     private String appUrl;
+
+    @Value("${app.email.info:info@caretech.bg}")
+    private String infoEmail;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
@@ -197,6 +202,87 @@ public class EmailService {
             log.info("Order cancelled email sent successfully to: {}", order.getCustomerEmail());
         } catch (Exception e) {
             log.error("Failed to send order cancelled email to: {}", order.getCustomerEmail(), e);
+        }
+    }
+
+    /**
+     * Send password reset email
+     */
+    @Async
+    public void sendPasswordResetEmail(String email, String resetToken) {
+        try {
+            log.info("Sending password reset email to: {}", email);
+
+            // Create reset URL
+            String resetUrl = appUrl + "/reset-password?token=" + resetToken;
+
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("appName", appName);
+            variables.put("appUrl", appUrl);
+            variables.put("customerName", email);
+            variables.put("resetUrl", resetUrl);
+            variables.put("resetToken", resetToken);
+            variables.put("validUntil", "1 час");
+
+            String subject = appName + " - Нулиране на парола";
+            sendHtmlEmail(email, subject, "password-reset-email", variables);
+
+            log.info("Password reset email sent successfully to: {}", email);
+        } catch (Exception e) {
+            log.error("Failed to send password reset email to: {}", email, e);
+        }
+    }
+
+    /**
+     * Send password changed confirmation email
+     */
+    @Async
+    public void sendPasswordChangedEmail(String email, String username) {
+        try {
+            log.info("Sending password changed confirmation email to: {}", email);
+
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("appName", appName);
+            variables.put("appUrl", appUrl);
+            variables.put("customerName", username);
+            variables.put("changeTime", LocalDateTime.now().format(DATE_FORMATTER));
+
+            String subject = appName + " - Паролата е променена успешно";
+            sendHtmlEmail(email, subject, "password-changed-confirmation", variables);
+
+            log.info("Password changed confirmation email sent successfully to: {}", email);
+        } catch (Exception e) {
+            log.error("Failed to send password changed confirmation email to: {}", email, e);
+        }
+    }
+
+    @Async
+    public void sendMessageToAdmin(MessageToAdmin dto) {
+        try {
+            MimeMessage mime = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mime, true, "UTF-8");
+
+            Context ctx = new Context();
+            ctx.setVariable("name", dto.getName());
+            ctx.setVariable("email", dto.getEmail());
+            ctx.setVariable("phone", dto.getPhone());
+            ctx.setVariable("message", dto.getMessage());
+            ctx.setVariable("appName", appName);
+
+            String html = templateEngine.process("email/message-to-admin", ctx);
+
+            helper.setFrom(fromEmail);
+            helper.setReplyTo(dto.getEmail());
+            helper.setTo(infoEmail);
+            helper.setSubject("Ново съобщение от " + dto.getName());
+            helper.setText(html, true);
+
+            mailSender.send(mime);
+
+            log.info("Admin message sent from {} <{}>", dto.getName(), dto.getEmail());
+
+        } catch (Exception e) {
+            log.error("Failed to send admin message: {}", dto, e);
         }
     }
 

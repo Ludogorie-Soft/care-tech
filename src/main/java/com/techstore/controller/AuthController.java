@@ -2,6 +2,7 @@ package com.techstore.controller;
 
 import com.techstore.dto.UserResponseDTO;
 import com.techstore.dto.request.LoginRequestDTO;
+import com.techstore.dto.request.ResetPasswordRequestDTO;
 import com.techstore.dto.request.UserRequestDTO;
 import com.techstore.dto.response.LoginResponseDTO;
 import com.techstore.service.AuthService;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -61,12 +65,22 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(
-            @RequestParam String token,
-            @RequestParam String newPassword) {
+    public ResponseEntity<Map<String, String>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequestDTO request) {
         log.info("Password reset attempt with token");
-        authService.resetPassword(token, newPassword);
-        return ResponseEntity.ok("Password reset successfully");
+
+        // Validate that passwords match
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Passwords do not match");
+            return ResponseEntity.badRequest().body(error);
+        }
+
+        authService.resetPassword(request.getToken(), request.getNewPassword());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Password reset successfully");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/verify-email")

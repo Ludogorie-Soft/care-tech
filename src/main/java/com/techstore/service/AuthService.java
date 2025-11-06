@@ -11,6 +11,8 @@ import com.techstore.entity.CartItem;
 import com.techstore.entity.Product;
 import com.techstore.entity.User;
 import com.techstore.entity.UserFavorite;
+import com.techstore.event.OnPasswordChangedEvent;
+import com.techstore.event.OnPasswordResetRequestEvent;
 import com.techstore.exception.AccountNotActivatedException;
 import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.DuplicateResourceException;
@@ -25,6 +27,7 @@ import com.techstore.util.ExceptionHelper;
 import com.techstore.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -63,6 +66,7 @@ public class AuthService {
     private final UserFavoriteService userFavoriteService;
     private final CartItemRepository cartItemRepository;
     private final UserFavoriteRepository userFavoriteRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$"
@@ -234,13 +238,15 @@ public class AuthService {
 
             User user = findUserByEmailOrThrow(email);
 
-            // Generate password reset token
-            String resetToken = jwtUtil.generatePasswordResetToken(user);
+            // Check if user is active
+            if (!user.getActive()) {
+                throw new AccountNotActivatedException("Account is deactivated. Please contact support.");
+            }
 
-            // Send password reset email (implementation would depend on email service)
-            sendPasswordResetEmailSafely(user, resetToken);
+            OnPasswordResetRequestEvent event = new OnPasswordResetRequestEvent(email);
+             eventPublisher.publishEvent(event);
 
-            log.info("Password reset email sent to: {}", email);
+            log.info("Password reset request processed for: {}", email);
             return null;
         }, context);
     }
@@ -263,28 +269,48 @@ public class AuthService {
             validatePassword(newPassword);
 
             try {
-                String username = jwtUtil.extractUsername(token);
-                User user = findUserByUsernameOrThrow(username);
-
-                if (jwtUtil.isPasswordResetTokenValid(token)) {
-                    user.setPassword(passwordEncoder.encode(newPassword));
-                    userRepository.save(user);
-
-                    log.info("Password reset successfully for user: {}", username);
-                } else {
+                // Validate token first
+                if (!jwtUtil.isPasswordResetTokenValid(token)) {
                     throw new InvalidTokenException("Invalid or expired reset token");
                 }
 
+                String username = jwtUtil.extractUsername(token);
+                User user = findUserByUsernameOrThrow(username);
+
+                // Check if user is active
+                if (!user.getActive()) {
+                    throw new AccountNotActivatedException("Account is deactivated. Please contact support.");
+                }
+
+                // Update password
+                user.setPassword(passwordEncoder.encode(newPassword));
+                userRepository.save(user);
+
+                // Publish event for confirmation email
+                eventPublisher.publishEvent(new OnPasswordChangedEvent(user.getEmail()));
+
+                log.info("Password reset successfully for user: {}", username);
+
+            } catch (InvalidTokenException | AccountNotActivatedException e) {
+                throw e;
             } catch (Exception e) {
                 log.error("Password reset failed: {}", e.getMessage());
-                if (e instanceof RuntimeException) {
-                    throw e;
-                }
                 throw new InvalidTokenException("Password reset failed: " + e.getMessage());
             }
 
             return null;
         }, context);
+    }
+
+    // Optional: Send confirmation email after password change
+    private void sendPasswordChangedConfirmationEmail(User user) {
+        try {
+            // Publish event or call email service directly
+            log.info("Password changed confirmation email would be sent to: {}", user.getEmail());
+            // emailService.sendPasswordChangedEmail(user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send password changed confirmation email to {}: {}", user.getEmail(), e.getMessage());
+        }
     }
 
     public void verifyEmail(String token) {

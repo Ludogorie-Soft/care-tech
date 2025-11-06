@@ -28,4 +28,5 @@ public class ProductSearchResult {
     private Float score;
     private int status;
     private List<ProductParameterResponseDto>specifications;
+    private String slug;
 }
