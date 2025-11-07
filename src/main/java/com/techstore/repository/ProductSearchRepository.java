@@ -17,11 +17,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -271,7 +267,7 @@ public class ProductSearchRepository {
                         .parameterId(parameterId)
                         .parameterNameEn(parameterNameEn)
                         .parameterNameBg(parameterNameBg)
-                        .options(new ArrayList<>())
+                        .options(new HashSet<>())
                         .build();
                 productParams.put(parameterId, paramDto);
             }

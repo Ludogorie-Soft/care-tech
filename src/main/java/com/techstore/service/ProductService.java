@@ -1357,7 +1357,7 @@ public class ProductService {
                 log.debug("DUPLICATE Parameter ID found: {}. Merging options...", parameterId);
 
                 ProductParameterResponseDto existing = uniqueSpecs.get(parameterId);
-                List<ParameterOptionResponseDto> combinedOptions = new ArrayList<>();
+                Set<ParameterOptionResponseDto> combinedOptions = new HashSet<>();
                 combinedOptions.addAll(existing.getOptions());
                 combinedOptions.addAll(converted.getOptions());
 
@@ -1365,7 +1365,7 @@ public class ProductService {
                         existing.getOptions().size(), converted.getOptions().size());
 
                 // Remove duplicate options by ID
-                List<ParameterOptionResponseDto> uniqueOptions = combinedOptions.stream()
+                Set<ParameterOptionResponseDto> uniqueOptions = combinedOptions.stream()
                         .collect(Collectors.toMap(
                                 ParameterOptionResponseDto::getId,
                                 option -> option,
@@ -1376,7 +1376,7 @@ public class ProductService {
                         .values()
                         .stream()
                         .sorted(Comparator.comparing(ParameterOptionResponseDto::getOrder))
-                        .toList();
+                        .collect(Collectors.toSet());
 
                 existing.setOptions(uniqueOptions);
                 log.debug("After merge - Final options count: {}", uniqueOptions.size());
@@ -1457,7 +1457,7 @@ public class ProductService {
                 .parameterId(parameter.getId())
                 .parameterNameEn(parameter.getNameEn())
                 .parameterNameBg(parameter.getNameBg())
-                .options(List.of(optionDto))  // Само избраната опция
+                .options(Set.of(optionDto))  // Само избраната опция
                 .build();
 
         log.debug("Built ProductParameterResponseDto: Parameter ID={}, Options count={}",
