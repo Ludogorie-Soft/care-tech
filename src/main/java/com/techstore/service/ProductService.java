@@ -36,14 +36,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -266,15 +259,50 @@ public class ProductService {
         List<Product> products = productRepository.findActiveByCategoryExcludingNotAvailable(categoryId);
 
         Set<ProductParameter> productParameters = new HashSet<>();
-
         for (Product product : products) {
-            Set<ProductParameter> parameters = product.getProductParameters();
-            productParameters.addAll(parameters);
+            productParameters.addAll(product.getProductParameters());
         }
 
-        return productParameters.stream()
-                .map(productParameter -> convertToProductParameterResponse(productParameter, lang))
-                .collect(Collectors.toSet());
+        Map<Long, ProductParameterResponseDto> parameterMap = new HashMap<>();
+
+        for (ProductParameter productParameter : productParameters) {
+            if (productParameter.getParameter() == null || productParameter.getParameterOption() == null) {
+                continue;
+            }
+
+            Long parameterId = productParameter.getParameter().getId();
+            Parameter parameter = productParameter.getParameter();
+
+            if (parameterMap.containsKey(parameterId)) {
+                ProductParameterResponseDto existing = parameterMap.get(parameterId);
+                ParameterOptionResponseDto optionDto = parameterMapper.toOptionResponseDto(
+                        productParameter.getParameterOption(), lang
+                );
+                existing.getOptions().add(optionDto);
+            } else {
+                ParameterOptionResponseDto optionDto = parameterMapper.toOptionResponseDto(
+                        productParameter.getParameterOption(), lang
+                );
+
+                ProductParameterResponseDto dto = ProductParameterResponseDto.builder()
+                        .parameterId(parameter.getId())
+                        .parameterNameEn(parameter.getNameEn())
+                        .parameterNameBg(parameter.getNameBg())
+                        .options(new HashSet<>(Set.of(optionDto)))
+                        .build();
+
+                parameterMap.put(parameterId, dto);
+            }
+        }
+
+        parameterMap.values().forEach(param -> {
+            Set<ParameterOptionResponseDto> sortedOptions = param.getOptions().stream()
+                    .sorted(Comparator.comparing(ParameterOptionResponseDto::getOrder))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            param.setOptions(sortedOptions);
+        });
+
+        return new HashSet<>(parameterMap.values());
     }
 
     @Transactional(readOnly = true)
