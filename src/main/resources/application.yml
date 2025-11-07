@@ -173,7 +173,7 @@ logging:
 # Application Specific Configuration
 app:
     name: CareTech
-    url: http://63.180.10.154:3000
+    url: ${REACT_APP_API_URL:http://18.196.230.194:3000}
     email:
       info: ${CARETECH_INFO_EMAIL:info@caretech.bg}
       from: ${CARETECH_ORDERS_EMAIL:orders@caretech.bg}

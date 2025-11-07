@@ -109,10 +109,11 @@ public class ProductSearchController {
     public ResponseEntity<ProductSearchResponse> getProductsOnSale(
             @RequestParam(defaultValue = "bg") String language,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "price_asc") String sortBy) {
 
         ProductSearchResponse response =
-                searchService.searchProductsOnSale(language, page, size);
+                searchService.searchProductsOnSale(language, page, size, sortBy);
 
         return ResponseEntity.ok(response);
     }

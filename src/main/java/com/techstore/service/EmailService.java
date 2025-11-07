@@ -37,7 +37,7 @@ public class EmailService {
     @Value("${app.name:CareTech}")
     private String appName;
 
-    @Value("${app.url:http://63.180.10.154:3000}")
+    @Value("${app.url:http://18.196.230.194:3000}")
     private String appUrl;
 
     @Value("${app.email.info:info@caretech.bg}")

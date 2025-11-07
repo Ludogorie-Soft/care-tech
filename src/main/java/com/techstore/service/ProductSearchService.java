@@ -134,13 +134,13 @@ public class ProductSearchService {
         return searchProducts(request);
     }
 
-    public ProductSearchResponse searchProductsOnSale(String language, int page, int size) {
+    public ProductSearchResponse searchProductsOnSale(String language, int page, int size, String sortBy) {
         ProductSearchRequest request = ProductSearchRequest.builder()
                 .onSale(true)
                 .language(language)
                 .page(page)
                 .size(size)
-                .sortBy("price_desc")
+                .sortBy(sortBy != null ? sortBy : "price_asc")
                 .build();
 
         return searchProducts(request);
