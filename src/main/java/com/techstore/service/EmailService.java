@@ -64,7 +64,7 @@ public class EmailService {
             variables.put("orderUrl", appUrl + "/orders/" + order.getId());
 
             String subject = appName + " - Потвърждение на поръчка #" + order.getOrderNumber();
-            sendHtmlEmail(order.getCustomerEmail(), subject, "order-confirmation", variables);
+            sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-confirmation", variables);
 
             log.info("Order confirmation email sent successfully to: {}", order.getCustomerEmail());
         } catch (Exception e) {
@@ -91,7 +91,7 @@ public class EmailService {
             variables.put("orderUrl", appUrl + "/admin/orders/" + order.getId());
 
             String subject = appName + " - Нова поръчка #" + order.getOrderNumber();
-            sendHtmlEmail(fromEmail, subject, "admin-new-order", variables);
+            sendHtmlEmail(fromEmail, fromEmail, subject, "admin-new-order", variables);
 
             log.info("Admin order notification email sent successfully to: {}", fromEmail);
         } catch (Exception e) {
@@ -121,7 +121,7 @@ public class EmailService {
             variables.put("trackingNumber", order.getTrackingNumber());
 
             String subject = appName + " - Промяна в статуса на поръчка #" + order.getOrderNumber();
-            sendHtmlEmail(order.getCustomerEmail(), subject, "order-status-update", variables);
+            sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-status-update", variables);
 
             log.info("Order status update email sent successfully to: {}", order.getCustomerEmail());
         } catch (Exception e) {
@@ -148,7 +148,7 @@ public class EmailService {
             variables.put("orderUrl", appUrl + "/orders/" + order.getId());
 
             String subject = appName + " - Вашата поръчка е изпратена #" + order.getOrderNumber();
-            sendHtmlEmail(order.getCustomerEmail(), subject, "order-shipped", variables);
+            sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-shipped", variables);
 
             log.info("Order shipped email sent successfully to: {}", order.getCustomerEmail());
         } catch (Exception e) {
@@ -173,7 +173,7 @@ public class EmailService {
             variables.put("orderUrl", appUrl + "/orders/" + order.getId());
 
             String subject = appName + " - Вашата поръчка е доставена #" + order.getOrderNumber();
-            sendHtmlEmail(order.getCustomerEmail(), subject, "order-delivered", variables);
+            sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-delivered", variables);
 
             log.info("Order delivered email sent successfully to: {}", order.getCustomerEmail());
         } catch (Exception e) {
@@ -197,7 +197,7 @@ public class EmailService {
             variables.put("appUrl", appUrl);
 
             String subject = appName + " - Вашата поръчка е отменена #" + order.getOrderNumber();
-            sendHtmlEmail(order.getCustomerEmail(), subject, "order-cancelled", variables);
+            sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-cancelled", variables);
 
             log.info("Order cancelled email sent successfully to: {}", order.getCustomerEmail());
         } catch (Exception e) {
@@ -225,7 +225,7 @@ public class EmailService {
             variables.put("validUntil", "1 час");
 
             String subject = appName + " - Нулиране на парола";
-            sendHtmlEmail(email, subject, "password-reset-email", variables);
+            sendHtmlEmail(infoEmail, email, subject, "password-reset-email", variables);
 
             log.info("Password reset email sent successfully to: {}", email);
         } catch (Exception e) {
@@ -248,7 +248,7 @@ public class EmailService {
             variables.put("changeTime", LocalDateTime.now().format(DATE_FORMATTER));
 
             String subject = appName + " - Паролата е променена успешно";
-            sendHtmlEmail(email, subject, "password-changed-confirmation", variables);
+            sendHtmlEmail(infoEmail, email, subject, "password-changed-confirmation", variables);
 
             log.info("Password changed confirmation email sent successfully to: {}", email);
         } catch (Exception e) {
@@ -271,7 +271,7 @@ public class EmailService {
 
             String html = templateEngine.process("email/message-to-admin", ctx);
 
-            helper.setFrom(fromEmail);
+            helper.setFrom(infoEmail);
             helper.setReplyTo(dto.getEmail());
             helper.setTo(infoEmail);
             helper.setSubject("Ново съобщение от " + dto.getName());
@@ -289,7 +289,7 @@ public class EmailService {
     /**
      * Send HTML email using Thymeleaf template
      */
-    private void sendHtmlEmail(String to, String subject, String templateName, Map<String, Object> variables)
+    private void sendHtmlEmail(String from, String to, String subject, String templateName, Map<String, Object> variables)
             throws MessagingException {
 
         MimeMessage message = mailSender.createMimeMessage();
@@ -300,7 +300,7 @@ public class EmailService {
 
         String htmlContent = templateEngine.process("email/" + templateName, context);
 
-        helper.setFrom(fromEmail);
+        helper.setFrom(from);
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(htmlContent, true);

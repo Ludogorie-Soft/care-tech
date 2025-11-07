@@ -710,15 +710,6 @@ public class ProductService {
         if (requestDTO.getPricePartner() != null && requestDTO.getPricePartner().compareTo(BigDecimal.ZERO) < 0) {
             throw new ValidationException("Partner price cannot be negative");
         }
-
-        if (requestDTO.getMarkupPercentage() != null) {
-            if (requestDTO.getMarkupPercentage().compareTo(BigDecimal.valueOf(-50.0)) < 0) {
-                throw new ValidationException("Markup percentage cannot be less than -50%");
-            }
-            if (requestDTO.getMarkupPercentage().compareTo(BigDecimal.valueOf(200.0)) > 0) {
-                throw new ValidationException("Markup percentage cannot exceed 200%");
-            }
-        }
     }
 
     private void validateProductMeasurements(ProductCreateRequestDTO requestDTO) {

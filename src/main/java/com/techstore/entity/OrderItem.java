@@ -48,11 +48,8 @@ public class OrderItem extends BaseEntity {
     @Column(name = "discount_amount", precision = 10, scale = 2)
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
-    // Helper методи
     public void calculateLineTotals() {
-        this.lineTotal = this.unitPrice
-                .multiply(new BigDecimal(quantity))
-                .subtract(this.discountAmount != null ? this.discountAmount : BigDecimal.ZERO);
+        this.lineTotal = this.unitPrice.multiply(new BigDecimal(quantity));
 
         this.lineTax = this.lineTotal
                 .multiply(this.taxRate)

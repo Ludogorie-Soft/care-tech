@@ -59,10 +59,7 @@ public class ProductCreateRequestDTO {
     @Digits(integer = 8, fraction = 2, message = "Price format is invalid")
     private BigDecimal priceClientPromo;
 
-    @DecimalMin(value = "-50.0", message = "Markup percentage must be at least -50%")
-    @DecimalMax(value = "200.0", message = "Markup percentage must not exceed 200%")
-    @Digits(integer = 3, fraction = 2, message = "Markup percentage format is invalid")
-    private BigDecimal markupPercentage = BigDecimal.valueOf(20.0);
+    private BigDecimal markupPercentage;
 
     private Boolean show = true;
 

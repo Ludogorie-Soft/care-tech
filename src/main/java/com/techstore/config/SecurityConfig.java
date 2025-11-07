@@ -3,6 +3,7 @@ package com.techstore.config;
 import com.techstore.repository.UserRepository;
 import com.techstore.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,6 +37,9 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+
+    @Value("${spring.cors.allowedOrigins}")
+    private String[] allowedOrigins;
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -126,7 +130,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000,http://63.180.10.154:3000"));
+        configuration.setAllowedOriginPatterns(List.of(allowedOrigins));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

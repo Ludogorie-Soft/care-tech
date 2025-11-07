@@ -1,5 +1,8 @@
 spring:
 
+    cors:
+      allowedOrigins: ${CORS_ALLOWED_ORIGINS}
+
     # Thymeleaf Configuration
     thymeleaf:
       prefix: classpath:/templates/
@@ -172,8 +175,8 @@ app:
     name: CareTech
     url: http://63.180.10.154:3000
     email:
-      info: ignatov_rs@abv.bg
-      from: orders@caretech.bg
+      info: ${CARETECH_INFO_EMAIL:info@caretech.bg}
+      from: ${CARETECH_ORDERS_EMAIL:orders@caretech.bg}
       enabled: true
     search:
         postgresql:

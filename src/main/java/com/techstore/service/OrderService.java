@@ -1,5 +1,6 @@
 package com.techstore.service;
 
+import com.techstore.config.ShippingConfig;
 import com.techstore.dto.request.OrderCreateRequestDTO;
 import com.techstore.dto.request.OrderStatusUpdateDTO;
 import com.techstore.dto.request.UserRequestDTO;
@@ -47,6 +48,7 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final UserService userService;
     private final ApplicationEventPublisher eventPublisher;
+    private final ShippingConfig shippingConfig;
 
     /**
      * Creates a new order
@@ -129,6 +131,12 @@ public class OrderService {
 
         // Notes and shipping cost
         order.setCustomerNotes(request.getCustomerNotes());
+//        BigDecimal shippingCost = BigDecimal.valueOf(5.90);
+//        if (order.getTotal().compareTo(BigDecimal.valueOf(250)) > 0) {
+//            shippingCost = BigDecimal.ZERO;
+//        }
+//
+//        order.setShippingCost(shippingCost);
 
         // Add order items
         for (var itemDto : request.getItems()) {
@@ -137,32 +145,32 @@ public class OrderService {
 
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(product);
-            orderItem.setDiscountAmount(product.getDiscount());
             orderItem.setProductName(product.getNameBg());
             orderItem.setProductSku(product.getSku());
             orderItem.setProductModel(product.getModel());
             orderItem.setQuantity(itemDto.getQuantity());
-            orderItem.setUnitPrice(product.getPriceClient()); // Price without VAT
-            orderItem.setTaxRate(new BigDecimal("20.00")); // 20% VAT
+
+            orderItem.setUnitPrice(product.getFinalPrice() != null ? product.getFinalPrice() : product.getPriceClient());
+            orderItem.setTaxRate(new BigDecimal("20.00"));
+
+            orderItem.setDiscountAmount(product.getDiscount());
 
             orderItem.calculateLineTotals();
             order.addOrderItem(orderItem);
         }
 
-        // Calculate totals
+        order.calculateTotals();
+        BigDecimal calculatedShippingCost = shippingConfig.calculateShippingCost(order.getSubtotal());
+        order.setShippingCost(calculatedShippingCost);
+
         order.calculateTotals();
 
-        order.setShippingCost(request.getShippingCost());
-
-        // Save order
         order = orderRepository.save(order);
 
-        // Clear user's cart
         cartItemRepository.deleteByUserEmail(request.getCustomerEmail());
 
         log.info("Order created successfully: {}", order.getOrderNumber());
 
-        // Publish order created event
         eventPublisher.publishEvent(new OrderCreatedEvent(this, order));
 
         return mapToResponseDTO(order);

@@ -91,7 +91,7 @@ public class Product extends BaseEntity {
     private BigDecimal priceClientPromo;
 
     @Column(name = "markup_percentage", precision = 5, scale = 2)
-    private BigDecimal markupPercentage = BigDecimal.valueOf(20.0);
+    private BigDecimal markupPercentage = BigDecimal.ZERO;
 
     @Column(name = "final_price", precision = 10, scale = 2)
     private BigDecimal finalPrice;
@@ -151,25 +151,29 @@ public class Product extends BaseEntity {
     }
 
     public void calculateFinalPrice() {
-        if (priceClient == null || markupPercentage == null) {
+        if (priceClient == null) {
             this.finalPrice = null;
             return;
         }
 
-        BigDecimal markup = priceClient.multiply(markupPercentage.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+        BigDecimal markup = BigDecimal.ZERO;
+        if (markupPercentage != null && markupPercentage.compareTo(BigDecimal.ZERO) > 0) {
+            markup = priceClient.multiply(markupPercentage.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+        }
+
         BigDecimal basePrice = priceClient.add(markup);
 
-        if (discount != null && discount.compareTo(BigDecimal.ZERO) != 0) {
+        if (discount != null && discount.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal discountPercent = discount.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
             BigDecimal discountAmount = basePrice.multiply(discountPercent);
-            this.finalPrice = basePrice.add(discountAmount);
+            this.finalPrice = basePrice.subtract(discountAmount);
         } else {
             this.finalPrice = basePrice;
         }
     }
 
     public boolean isOnSale() {
-        return discount != null && discount.compareTo(BigDecimal.ZERO) < 0;
+        return discount != null && discount.compareTo(BigDecimal.ZERO) > 0;
     }
 
     private String transliterate(String text) {

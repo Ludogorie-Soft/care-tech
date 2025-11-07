@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -153,18 +154,20 @@ public class Order extends BaseEntity {
     @Column(name = "terms_agreed", nullable = false)
     private Boolean termsAgreed = false;
 
-    // Helper методи
     public void calculateTotals() {
         this.subtotal = orderItems.stream()
                 .map(OrderItem::getLineTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        this.taxAmount = this.subtotal.multiply(new BigDecimal("0.20")); // 20% ДДС
+        this.taxAmount = orderItems.stream()
+                .map(OrderItem::getLineTax)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        this.discountAmount = BigDecimal.ZERO;
 
         this.total = this.subtotal
                 .add(this.taxAmount)
-//                .add(this.shippingCost)
-                .subtract(this.discountAmount != null ? this.discountAmount : BigDecimal.ZERO);
+                .add(this.shippingCost != null ? this.shippingCost : BigDecimal.ZERO);
     }
 
     public void addOrderItem(OrderItem item) {

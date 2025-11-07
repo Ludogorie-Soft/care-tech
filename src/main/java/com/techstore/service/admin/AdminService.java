@@ -124,7 +124,6 @@ public class AdminService {
         dto.setFeatured(product.getFeatured());
         dto.setShow(product.getShow());
 
-        // Set proxy image URLs
         if (product.getPrimaryImageUrl() != null) {
             dto.setPrimaryImageUrl("/api/images/product/" + product.getId() + "/primary");
         }
