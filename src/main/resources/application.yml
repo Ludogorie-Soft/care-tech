@@ -69,6 +69,7 @@ spring:
                 search:
                     backend:
                         type: lucene
+                        lucene_version: LATEST
                         directory:
                             root: ${SPRING_JPA_PROPERTIES_HIBERNATE_SEARCH_BACKEND_DIRECTORY_ROOT}
 
