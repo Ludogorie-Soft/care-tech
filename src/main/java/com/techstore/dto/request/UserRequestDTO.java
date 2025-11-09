@@ -18,8 +18,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserRequestDTO {
 
-    @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 100, message = "Username must be between 3 and 100 characters")
     private String username;
 
     @NotBlank(message = "Email is required")

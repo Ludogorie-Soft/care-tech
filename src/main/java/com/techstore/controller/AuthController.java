@@ -38,7 +38,6 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRequestDTO registerRequest, @RequestParam(defaultValue = "en") String language) {
-        log.info("Registration attempt for user: {}", registerRequest.getUsername());
         UserResponseDTO response = authService.register(registerRequest, language);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

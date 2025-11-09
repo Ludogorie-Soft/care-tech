@@ -470,7 +470,6 @@ public class OrderService {
         userRequestDTO.setPhone(request.getCustomerPhone());
         userRequestDTO.setEmail(request.getCustomerEmail());
         userRequestDTO.setRole(String.valueOf(User.Role.USER));
-        userRequestDTO.setUsername(request.getCustomerEmail());
         userRequestDTO.setPassword(request.getPassword());
         userRequestDTO.setActive(true);
         return userRequestDTO;

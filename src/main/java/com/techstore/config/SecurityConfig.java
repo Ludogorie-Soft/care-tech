@@ -93,6 +93,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/subscriptions/**").permitAll()
                         .requestMatchers("/api/sync/**").permitAll()
                         .requestMatchers("/api/contact/**").permitAll()
+                        .requestMatchers("/api/internal/**").permitAll()
 
                         // Swagger/OpenAPI endpoints
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
