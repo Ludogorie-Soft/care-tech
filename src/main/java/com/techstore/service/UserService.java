@@ -28,13 +28,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // Validation patterns
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$"
-    );
-    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_]{3,100}$");
-    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
-            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"
     );
 
     @Transactional(readOnly = true)
@@ -58,15 +53,15 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponseDTO getUserByUsername(String username) {
-        log.debug("Fetching user with username: {}", username);
+    public UserResponseDTO getUserByEmail(String email) {
+        log.debug("Fetching user with email: {}", email);
 
-        validateUsername(username, false);
+        validateEmail(email);
 
         User user = ExceptionHelper.findOrThrow(
-                userRepository.findByUsername(username).orElse(null),
+                userRepository.findByEmail(email.trim().toLowerCase()).orElse(null),
                 "User",
-                "username: " + username
+                "email: " + email
         );
 
         return convertToResponseDTO(user);
@@ -74,24 +69,20 @@ public class UserService {
 
     @Transactional
     public UserResponseDTO createUser(UserRequestDTO requestDTO) {
-        log.info("Creating new user with username: {}", requestDTO.getUsername());
+        log.info("Creating new user with email: {}", requestDTO.getEmail());
 
         String context = ExceptionHelper.createErrorContext(
-                "createUser", "User", null, requestDTO.getUsername());
+                "createUser", "User", null, requestDTO.getEmail());
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            // Comprehensive validation
             validateUserRequest(requestDTO, true);
 
-            // Check for duplicates
             checkForDuplicateUser(requestDTO);
 
-            // Create user
             User user = createUserFromRequest(requestDTO);
 
-
-            log.info("User created successfully with id: {} and username: {}",
-                    user.getId(), user.getUsername());
+            log.info("User created successfully with id: {} and email: {}",
+                    user.getId(), user.getEmail());
 
             return convertToResponseDTO(user);
 
@@ -105,17 +96,13 @@ public class UserService {
         String context = ExceptionHelper.createErrorContext("updateUser", "User", id, null);
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            // Validate inputs
             validateUserId(id);
             validateUserRequest(requestDTO, false);
 
-            // Find existing user
             User existingUser = findUserByIdOrThrow(id);
 
-            // Check for username/email conflicts
             checkForUserConflicts(requestDTO, id);
 
-            // Update user
             updateUserFromRequest(existingUser, requestDTO);
             User updatedUser = userRepository.save(existingUser);
 
@@ -136,10 +123,8 @@ public class UserService {
 
             User user = findUserByIdOrThrow(id);
 
-            // Business validation for deletion
             validateUserDeletion(user);
 
-            // Soft delete
             user.setActive(false);
             userRepository.save(user);
 
@@ -158,7 +143,6 @@ public class UserService {
 
             User user = findUserByIdOrThrow(id);
 
-            // Strict validation for permanent deletion
             validatePermanentUserDeletion(user);
 
             userRepository.deleteById(id);
@@ -166,15 +150,6 @@ public class UserService {
             log.warn("User permanently deleted with id: {}", id);
             return null;
         }, context);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isUsernameAvailable(String username) {
-        if (!StringUtils.hasText(username)) {
-            return false;
-        }
-
-        return !userRepository.existsByUsername(username.trim());
     }
 
     @Transactional(readOnly = true)
@@ -222,43 +197,15 @@ public class UserService {
             throw new ValidationException("User request cannot be null");
         }
 
-        // Validate username
-        validateUsername(requestDTO.getUsername(), true);
-
-        // Validate email
         validateEmail(requestDTO.getEmail());
 
-        // Validate password (required for create, optional for update)
         if (isCreate || StringUtils.hasText(requestDTO.getPassword())) {
             validatePassword(requestDTO.getPassword());
         }
 
-        // Validate role
         validateRole(requestDTO.getRole());
 
-        // Validate optional fields
         validateOptionalFields(requestDTO);
-    }
-
-    private void validateUsername(String username, boolean isForRequest) {
-        if (!StringUtils.hasText(username)) {
-            throw new ValidationException("Username is required");
-        }
-
-        String trimmed = username.trim();
-
-        if (trimmed.length() < 3) {
-            throw new ValidationException("Username must be at least 3 characters long");
-        }
-
-        if (trimmed.length() > 100) {
-            throw new ValidationException("Username cannot exceed 100 characters");
-        }
-
-//        if (isForRequest && !USERNAME_PATTERN.matcher(trimmed).matches()) {
-//            throw new ValidationException(
-//                    "Username can only contain letters, numbers, and underscores");
-//        }
     }
 
     private void validateEmail(String email) {
@@ -290,13 +237,6 @@ public class UserService {
             throw new ValidationException("Password cannot exceed 100 characters");
         }
 
-        if (!PASSWORD_PATTERN.matcher(password).matches()) {
-            throw new ValidationException(
-                    "Password must contain at least one uppercase letter, one lowercase letter, " +
-                            "one number, and one special character (@$!%*?&)");
-        }
-
-        // Check for common weak passwords
         String[] weakPasswords = {"password", "12345678", "password123", "admin123"};
         if (Arrays.stream(weakPasswords).anyMatch(weak -> weak.equalsIgnoreCase(password))) {
             throw new ValidationException("Password is too common. Please choose a stronger password.");
@@ -327,39 +267,29 @@ public class UserService {
     }
 
     private void validateUserDeletion(User user) {
-        // Check if user is super admin
         if (user.isSuperAdmin()) {
             throw new BusinessLogicException("Cannot delete super admin users");
         }
 
-        // Check if user has important data that would be lost
-        // (You might want to check for orders, favorites, etc.)
         validateUserDataDependencies(user);
     }
 
     private void validatePermanentUserDeletion(User user) {
         validateUserDeletion(user);
 
-        // Additional strict validation for permanent deletion
         if (user.getActive()) {
             throw new BusinessLogicException("User must be deactivated before permanent deletion");
         }
-
-        // Could add additional checks like "deleted more than 30 days ago"
     }
 
     private void validateUserDataDependencies(User user) {
-        // Check for user's cart items
         if (user.getCartItems() != null && !user.getCartItems().isEmpty()) {
             log.info("User {} has {} cart items that will be deleted", user.getId(), user.getCartItems().size());
         }
 
-        // Check for user's favorites
         if (user.getFavorites() != null && !user.getFavorites().isEmpty()) {
             log.info("User {} has {} favorites that will be deleted", user.getId(), user.getFavorites().size());
         }
-
-        // In a real application, you might want to check for orders, reviews, etc.
     }
 
     // ========== PRIVATE HELPER METHODS ==========
@@ -373,11 +303,6 @@ public class UserService {
     }
 
     private void checkForDuplicateUser(UserRequestDTO requestDTO) {
-        if (userRepository.existsByUsername(requestDTO.getUsername().trim())) {
-            throw new DuplicateResourceException(
-                    "User with username '" + requestDTO.getUsername() + "' already exists");
-        }
-
         if (userRepository.existsByEmail(requestDTO.getEmail().trim().toLowerCase())) {
             throw new DuplicateResourceException(
                     "User with email '" + requestDTO.getEmail() + "' already exists");
@@ -385,11 +310,6 @@ public class UserService {
     }
 
     private void checkForUserConflicts(UserRequestDTO requestDTO, Long userId) {
-        if (userRepository.existsByUsernameAndIdNot(requestDTO.getUsername().trim(), userId)) {
-            throw new DuplicateResourceException(
-                    "User with username '" + requestDTO.getUsername() + "' already exists");
-        }
-
         if (userRepository.existsByEmailAndIdNot(requestDTO.getEmail().trim().toLowerCase(), userId)) {
             throw new DuplicateResourceException(
                     "User with email '" + requestDTO.getEmail() + "' already exists");
@@ -399,23 +319,20 @@ public class UserService {
     private User createUserFromRequest(UserRequestDTO requestDTO) {
         User user = new User();
 
-        user.setUsername(requestDTO.getUsername().trim());
         user.setEmail(requestDTO.getEmail().trim().toLowerCase());
         user.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
         user.setFirstName(StringUtils.hasText(requestDTO.getFirstName()) ? requestDTO.getFirstName().trim() : null);
         user.setLastName(StringUtils.hasText(requestDTO.getLastName()) ? requestDTO.getLastName().trim() : null);
         user.setRole(User.Role.valueOf(requestDTO.getRole().toUpperCase()));
         user.setActive(requestDTO.getActive() != null ? requestDTO.getActive() : true);
-        user.setEmailVerified(true); // New users must verify email
+        user.setEmailVerified(true);
         user = userRepository.save(user);
         return user;
     }
 
     private void updateUserFromRequest(User user, UserRequestDTO requestDTO) {
-        user.setUsername(requestDTO.getUsername().trim());
         user.setEmail(requestDTO.getEmail().trim().toLowerCase());
 
-        // Only update password if provided
         if (StringUtils.hasText(requestDTO.getPassword())) {
             user.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
         }
@@ -432,7 +349,6 @@ public class UserService {
     private UserResponseDTO convertToResponseDTO(User user) {
         return UserResponseDTO.builder()
                 .id(user.getId())
-                .username(user.getUsername())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())

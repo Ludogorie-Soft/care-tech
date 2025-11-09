@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String username;
+        final String email;
 
         String requestPath = request.getRequestURI();
         if (isPublicEndpoint(requestPath)) {
@@ -52,15 +52,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             jwt = authHeader.substring(7);
-            username = jwtUtil.extractUsername(jwt);
+            email = jwtUtil.extractEmail(jwt);
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 // Проверка за кеширан потребител
-                UserDetails userDetails = getCachedUserDetails(username);
+                UserDetails userDetails = getCachedUserDetails(email);
 
                 if (userDetails == null) {
-                    userDetails = userDetailsService.loadUserByUsername(username);
-                    cacheUserDetails(username, userDetails);
+                    userDetails = userDetailsService.loadUserByUsername(email);
+                    cacheUserDetails(email, userDetails);
                 }
 
                 if (jwtUtil.isTokenValid(jwt, userDetails)) {
@@ -77,19 +77,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private UserDetails getCachedUserDetails(String username) {
-        Long timestamp = cacheTimestamps.get(username);
+    private UserDetails getCachedUserDetails(String email) {
+        Long timestamp = cacheTimestamps.get(email);
         if (timestamp != null && (System.currentTimeMillis() - timestamp) < CACHE_EXPIRY) {
-            return userCache.get(username);
+            return userCache.get(email);
         }
-        // Изчисти остарели entries
         cleanupCache();
         return null;
     }
 
-    private void cacheUserDetails(String username, UserDetails userDetails) {
-        userCache.put(username, userDetails);
-        cacheTimestamps.put(username, System.currentTimeMillis());
+    private void cacheUserDetails(String email, UserDetails userDetails) {
+        userCache.put(email, userDetails);
+        cacheTimestamps.put(email, System.currentTimeMillis());
     }
 
     private void cleanupCache() {

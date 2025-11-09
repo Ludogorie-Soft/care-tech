@@ -35,6 +35,10 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public String extractEmail(String token) {
+        return extractUsername(token);
+    }
+
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
@@ -66,23 +70,23 @@ public class JwtUtil {
         claims.put("role", user.getRole().name());
         claims.put("email", user.getEmail());
         claims.put("userId", user.getId());
-        return createToken(claims, user.getUsername(), jwtExpiration);
+        return createToken(claims, user.getEmail(), jwtExpiration);
     }
 
     public String generateRefreshToken(User user) {
-        return createToken(new HashMap<>(), user.getUsername(), refreshExpiration);
+        return createToken(new HashMap<>(), user.getEmail(), refreshExpiration);
     }
 
     public String generatePasswordResetToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("type", "password-reset");
-        return createToken(claims, user.getUsername(), 3600000L); // 1 hour
+        return createToken(claims, user.getEmail(), 3600000L); // 1 hour
     }
 
     public String generateEmailVerificationToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("type", "email-verification");
-        return createToken(claims, user.getUsername(), 86400000L); // 24 hours
+        return createToken(claims, user.getEmail(), 86400000L); // 24 hours
     }
 
     private String createToken(Map<String, Object> claims, String subject, Long expiration) {
@@ -96,8 +100,8 @@ public class JwtUtil {
     }
 
     public Boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final String email = extractEmail(token);
+        return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
     public Boolean isPasswordResetTokenValid(String token) {

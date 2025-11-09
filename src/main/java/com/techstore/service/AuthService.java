@@ -44,8 +44,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -74,7 +72,7 @@ public class AuthService {
 
     @Transactional
     public LoginResponseDTO login(LoginRequestDTO loginRequest, String lang) {
-        log.info("Login attempt for user: {}", loginRequest.getUsernameOrEmail());
+        log.info("Login attempt for email: {}", loginRequest.getUsernameOrEmail());
 
         String context = ExceptionHelper.createErrorContext(
                 "login", "User", null, loginRequest.getUsernameOrEmail());
@@ -85,7 +83,7 @@ public class AuthService {
             try {
                 Authentication authentication = authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
-                                loginRequest.getUsernameOrEmail().trim(),
+                                loginRequest.getUsernameOrEmail().trim().toLowerCase(),
                                 loginRequest.getPassword()
                         )
                 );
@@ -105,7 +103,7 @@ public class AuthService {
                 user = userRepository.findByIdWithCartItemsAndFavorites(user.getId())
                         .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-                log.info("User {} logged in successfully", user.getUsername());
+                log.info("User {} logged in successfully", user.getEmail());
 
                 return LoginResponseDTO.builder()
                         .token(token)
@@ -114,8 +112,8 @@ public class AuthService {
                         .build();
 
             } catch (BadCredentialsException e) {
-                log.warn("Invalid credentials for user: {}", loginRequest.getUsernameOrEmail());
-                throw new InvalidCredentialsException("Invalid username/email or password");
+                log.warn("Invalid credentials for email: {}", loginRequest.getUsernameOrEmail());
+                throw new InvalidCredentialsException("Invalid email or password");
 
             } catch (DisabledException e) {
                 log.warn("Attempt to login with disabled account: {}", loginRequest.getUsernameOrEmail());
@@ -126,33 +124,29 @@ public class AuthService {
                 throw new AccountNotActivatedException("Account is locked. Please contact support.");
 
             } catch (AuthenticationException e) {
-                log.error("Authentication failed for user {}: {}", loginRequest.getUsernameOrEmail(), e.getMessage());
+                log.error("Authentication failed for email {}: {}", loginRequest.getUsernameOrEmail(), e.getMessage());
                 throw new InvalidCredentialsException("Authentication failed: " + e.getMessage());
             }
         }, context);
     }
 
     public UserResponseDTO register(UserRequestDTO registerRequest, String lang) {
-        log.info("Registration attempt for user: {}", registerRequest.getUsername());
+        log.info("Registration attempt for email: {}", registerRequest.getEmail());
 
         String context = ExceptionHelper.createErrorContext(
-                "register", "User", null, registerRequest.getUsername());
+                "register", "User", null, registerRequest.getEmail());
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            // Comprehensive validation
             validateRegistrationRequest(registerRequest);
 
-            // Check for existing users
             checkForExistingUser(registerRequest);
 
-            // Create new user
             User user = createUserFromRegistration(registerRequest);
             user = userRepository.save(user);
 
-            // Send verification email (implementation would depend on email service)
             sendVerificationEmailSafely(user);
 
-            log.info("User {} registered successfully", user.getUsername());
+            log.info("User {} registered successfully", user.getEmail());
             return convertToUserResponseDTO(user, lang);
 
         }, context);
@@ -162,23 +156,19 @@ public class AuthService {
         log.info("User logout request received");
 
         try {
-            // Extract username from token for logging
-            String username = null;
+            String email = null;
             if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
                 try {
-                    username = jwtUtil.extractUsername(token.substring(7));
+                    email = jwtUtil.extractEmail(token.substring(7));
                 } catch (Exception e) {
-                    log.debug("Could not extract username from token for logout logging");
+                    log.debug("Could not extract email from token for logout logging");
                 }
             }
 
-            // In a production system, you would add the token to a blacklist
-            // For now, we just log the logout
-            log.info("User {} logged out successfully", username != null ? username : "unknown");
+            log.info("User {} logged out successfully", email != null ? email : "unknown");
 
         } catch (Exception e) {
             log.error("Error during logout: {}", e.getMessage());
-            // Don't throw exception for logout - it should always succeed
         }
     }
 
@@ -188,25 +178,22 @@ public class AuthService {
         String context = ExceptionHelper.createErrorContext("refreshToken", "Token", null, null);
 
         return ExceptionHelper.wrapBusinessOperation(() -> {
-            // Validate token format
             if (!StringUtils.hasText(token)) {
                 throw new InvalidTokenException("Token is required");
             }
 
-            // Remove "Bearer " prefix if present
             String cleanToken = token.startsWith("Bearer ") ? token.substring(7) : token;
 
             try {
-                String username = jwtUtil.extractUsername(cleanToken);
-                User user = findUserByUsernameOrThrow(username);
+                String email = jwtUtil.extractEmail(cleanToken);
+                User user = findUserByEmailOrThrow(email);
 
-                // Validate user is still active and email verified
                 validateUserForTokenRefresh(user);
 
                 if (jwtUtil.isTokenValid(cleanToken, user)) {
                     String newToken = jwtUtil.generateToken(user);
 
-                    log.info("Token refreshed successfully for user: {}", username);
+                    log.info("Token refreshed successfully for email: {}", email);
 
                     return LoginResponseDTO.builder()
                             .token(newToken)
@@ -233,18 +220,16 @@ public class AuthService {
         String context = ExceptionHelper.createErrorContext("forgotPassword", "User", null, email);
 
         ExceptionHelper.wrapBusinessOperation(() -> {
-            // Validate email format
             validateEmail(email);
 
             User user = findUserByEmailOrThrow(email);
 
-            // Check if user is active
             if (!user.getActive()) {
                 throw new AccountNotActivatedException("Account is deactivated. Please contact support.");
             }
 
             OnPasswordResetRequestEvent event = new OnPasswordResetRequestEvent(email);
-             eventPublisher.publishEvent(event);
+            eventPublisher.publishEvent(event);
 
             log.info("Password reset request processed for: {}", email);
             return null;
@@ -257,7 +242,6 @@ public class AuthService {
         String context = ExceptionHelper.createErrorContext("resetPassword", "User", null, null);
 
         ExceptionHelper.wrapDatabaseOperation(() -> {
-            // Validate inputs
             if (!StringUtils.hasText(token)) {
                 throw new InvalidTokenException("Reset token is required");
             }
@@ -269,27 +253,23 @@ public class AuthService {
             validatePassword(newPassword);
 
             try {
-                // Validate token first
                 if (!jwtUtil.isPasswordResetTokenValid(token)) {
                     throw new InvalidTokenException("Invalid or expired reset token");
                 }
 
-                String username = jwtUtil.extractUsername(token);
-                User user = findUserByUsernameOrThrow(username);
+                String email = jwtUtil.extractEmail(token);
+                User user = findUserByEmailOrThrow(email);
 
-                // Check if user is active
                 if (!user.getActive()) {
                     throw new AccountNotActivatedException("Account is deactivated. Please contact support.");
                 }
 
-                // Update password
                 user.setPassword(passwordEncoder.encode(newPassword));
                 userRepository.save(user);
 
-                // Publish event for confirmation email
                 eventPublisher.publishEvent(new OnPasswordChangedEvent(user.getEmail()));
 
-                log.info("Password reset successfully for user: {}", username);
+                log.info("Password reset successfully for email: {}", email);
 
             } catch (InvalidTokenException | AccountNotActivatedException e) {
                 throw e;
@@ -300,17 +280,6 @@ public class AuthService {
 
             return null;
         }, context);
-    }
-
-    // Optional: Send confirmation email after password change
-    private void sendPasswordChangedConfirmationEmail(User user) {
-        try {
-            // Publish event or call email service directly
-            log.info("Password changed confirmation email would be sent to: {}", user.getEmail());
-            // emailService.sendPasswordChangedEmail(user.getEmail());
-        } catch (Exception e) {
-            log.error("Failed to send password changed confirmation email to {}: {}", user.getEmail(), e.getMessage());
-        }
     }
 
     public void verifyEmail(String token) {
@@ -324,8 +293,8 @@ public class AuthService {
             }
 
             try {
-                String username = jwtUtil.extractUsername(token);
-                User user = findUserByUsernameOrThrow(username);
+                String email = jwtUtil.extractEmail(token);
+                User user = findUserByEmailOrThrow(email);
 
                 if (user.getEmailVerified()) {
                     throw new BusinessLogicException("Email is already verified");
@@ -335,7 +304,7 @@ public class AuthService {
                     user.setEmailVerified(true);
                     userRepository.save(user);
 
-                    log.info("Email verified successfully for user: {}", username);
+                    log.info("Email verified successfully: {}", email);
                 } else {
                     throw new InvalidTokenException("Invalid or expired verification token");
                 }
@@ -366,7 +335,6 @@ public class AuthService {
                 throw new BusinessLogicException("Email is already verified");
             }
 
-            // Send verification email
             sendVerificationEmailSafely(user);
 
             log.info("Verification email resent to: {}", email);
@@ -399,10 +367,6 @@ public class AuthService {
             throw new ValidationException("Registration request cannot be null");
         }
 
-        if (!StringUtils.hasText(registerRequest.getUsername())) {
-            throw new ValidationException("Username is required");
-        }
-
         if (!StringUtils.hasText(registerRequest.getEmail())) {
             throw new ValidationException("Email is required");
         }
@@ -411,20 +375,8 @@ public class AuthService {
             throw new ValidationException("Password is required");
         }
 
-        // Validate username format
-        String username = registerRequest.getUsername().trim();
-        if (username.length() < 3 || username.length() > 100) {
-            throw new ValidationException("Email must be between 3 and 100 characters");
-        }
-
-//        if (!username.matches("^[a-zA-Z0-9_]+$")) {
-//            throw new ValidationException("Username can only contain letters, numbers, and underscores");
-//        }
-
-        // Validate email format
         validateEmail(registerRequest.getEmail());
 
-        // Validate password strength
         validatePassword(registerRequest.getPassword());
     }
 
@@ -456,23 +408,6 @@ public class AuthService {
         if (password.length() > 100) {
             throw new ValidationException("Password cannot exceed 100 characters");
         }
-
-        // Check password complexity
-        if (!password.matches(".*[a-z].*")) {
-            throw new ValidationException("Password must contain at least one lowercase letter");
-        }
-
-        if (!password.matches(".*[A-Z].*")) {
-            throw new ValidationException("Password must contain at least one uppercase letter");
-        }
-
-        if (!password.matches(".*[0-9].*")) {
-            throw new ValidationException("Password must contain at least one number");
-        }
-
-        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
-            throw new ValidationException("Password must contain at least one special character");
-        }
     }
 
     private void validateUserForLogin(User user) {
@@ -495,14 +430,6 @@ public class AuthService {
         }
     }
 
-    private User findUserByUsernameOrThrow(String username) {
-        return ExceptionHelper.findOrThrow(
-                userRepository.findByUsername(username).orElse(null),
-                "User",
-                "username: " + username
-        );
-    }
-
     private User findUserByEmailOrThrow(String email) {
         return ExceptionHelper.findOrThrow(
                 userRepository.findByEmail(email.trim().toLowerCase()).orElse(null),
@@ -512,10 +439,6 @@ public class AuthService {
     }
 
     private void checkForExistingUser(UserRequestDTO registerRequest) {
-        if (userRepository.existsByUsername(registerRequest.getUsername().trim())) {
-            throw new DuplicateResourceException("Username already exists");
-        }
-
         if (userRepository.existsByEmail(registerRequest.getEmail().trim().toLowerCase())) {
             throw new DuplicateResourceException("Email already exists");
         }
@@ -523,7 +446,6 @@ public class AuthService {
 
     private User createUserFromRegistration(UserRequestDTO registerRequest) {
         User user = new User();
-        user.setUsername(registerRequest.getUsername().trim());
         user.setEmail(registerRequest.getEmail().trim().toLowerCase());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setFirstName(StringUtils.hasText(registerRequest.getFirstName()) ?
@@ -574,15 +496,14 @@ public class AuthService {
         }
     }
 
-
     private CartItem createCartItem(CartItemRequestDto request, User user) {
         Product product = productService.findProductByIdOrThrow(request.getProductId());
         CartItem cartItem = new CartItem();
         cartItem.setUser(user);
         cartItem.setProduct(product);
         cartItem.setQuantity(request.getQuantity());
-        cartItem.setCreatedBy(user.getUsername());
-        cartItem.setLastModifiedBy(user.getUsername());
+        cartItem.setCreatedBy(user.getEmail());
+        cartItem.setLastModifiedBy(user.getEmail());
         return cartItem;
     }
 
@@ -591,8 +512,8 @@ public class AuthService {
         UserFavorite favorite = new UserFavorite();
         favorite.setUser(user);
         favorite.setProduct(product);
-        favorite.setCreatedBy(user.getUsername());
-        favorite.setLastModifiedBy(user.getUsername());
+        favorite.setCreatedBy(user.getEmail());
+        favorite.setLastModifiedBy(user.getEmail());
         return favorite;
     }
 
@@ -601,7 +522,7 @@ public class AuthService {
             user.setLastLoginAt(LocalDateTime.now());
             userRepository.save(user);
         } catch (Exception e) {
-            log.error("Failed to update last login time for user {}: {}", user.getUsername(), e.getMessage());
+            log.error("Failed to update last login time for email {}: {}", user.getEmail(), e.getMessage());
         }
     }
 
@@ -612,15 +533,6 @@ public class AuthService {
             log.info("Verification email would be sent to: {} with token: {}", user.getEmail(), verificationToken);
         } catch (Exception e) {
             log.error("Failed to send verification email to {}: {}", user.getEmail(), e.getMessage());
-        }
-    }
-
-    private void sendPasswordResetEmailSafely(User user, String resetToken) {
-        try {
-            // In a real implementation, you would send an email here
-            log.info("Password reset email would be sent to: {} with token: {}", user.getEmail(), resetToken);
-        } catch (Exception e) {
-            log.error("Failed to send password reset email to {}: {}", user.getEmail(), e.getMessage());
         }
     }
 
@@ -640,7 +552,6 @@ public class AuthService {
         }
         return UserResponseDTO.builder()
                 .id(user.getId())
-                .username(user.getUsername())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())

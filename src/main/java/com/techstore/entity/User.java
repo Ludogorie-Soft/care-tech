@@ -26,9 +26,6 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = false)
 public class User extends BaseEntity implements UserDetails {
 
-    @Column(unique = true, nullable = false, length = 100)
-    private String username;
-
     @Column(unique = true, nullable = false, length = 200)
     private String email;
 
@@ -80,6 +77,11 @@ public class User extends BaseEntity implements UserDetails {
     }
 
     @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
     public boolean isAccountNonExpired() {
         return true;
     }
@@ -107,7 +109,7 @@ public class User extends BaseEntity implements UserDetails {
         } else if (lastName != null) {
             return lastName;
         }
-        return username;
+        return email;
     }
 
     public boolean isAdmin() {

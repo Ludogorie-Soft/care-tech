@@ -25,9 +25,9 @@ public class SecurityHelper {
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof UserDetails) {
-            String username = ((UserDetails) principal).getUsername();
-            return userRepository.findByUsername(username)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+            String email = ((UserDetails) principal).getUsername(); // getUsername() връща email
+            return userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
         }
 
         throw new IllegalStateException("Invalid authentication principal");
@@ -37,7 +37,7 @@ public class SecurityHelper {
         return getCurrentUser().getId();
     }
 
-    public String getCurrentUsername() {
+    public String getCurrentUserEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated()) {
