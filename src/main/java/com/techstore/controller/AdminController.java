@@ -57,10 +57,9 @@ public class AdminController {
     public ResponseEntity<List<ProductResponseDTO>> createPromoByCategory(
             @RequestParam("categoryId") Long categoryId,
             @RequestParam("discount")BigDecimal discount,
-            @RequestParam("isPromo") Boolean isPromo,
             @RequestParam(defaultValue = "en", name = "lang") String lang
     ) {
-        List<ProductResponseDTO> response = adminService.createPromoByCategory(categoryId, isPromo, discount, lang);
+        List<ProductResponseDTO> response = adminService.createPromoByCategory(categoryId, discount, lang);
         return ResponseEntity.ok(response);
     }
 
@@ -68,10 +67,9 @@ public class AdminController {
     public ResponseEntity<List<ProductResponseDTO>> createPromoByManufacturer(
             @RequestParam("manufacturerId") Long manufacturerId,
             @RequestParam("discount") BigDecimal discount,
-            @RequestParam("isPromo") Boolean isPromo,
             @RequestParam(defaultValue = "en", name = "lang") String lang
     ) {
-        List<ProductResponseDTO> response = adminService.createPromoByManufacturer(manufacturerId, isPromo, discount, lang);
+        List<ProductResponseDTO> response = adminService.createPromoByManufacturer(manufacturerId, discount, lang);
         return ResponseEntity.ok(response);
     }
 

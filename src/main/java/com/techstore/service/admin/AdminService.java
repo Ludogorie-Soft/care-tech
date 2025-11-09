@@ -26,12 +26,16 @@ public class AdminService {
     private final CategoryRepository categoryRepository;
     private final ParameterMapper parameterMapper;
 
-    public List<ProductResponseDTO> createPromoByManufacturer(Long manufacturerId, Boolean isPromo, BigDecimal discount, String lang) {
+    public List<ProductResponseDTO> createPromoByManufacturer(Long manufacturerId, BigDecimal discount, String lang) {
         Manufacturer manufacturer = manufacturerRepository.findById(manufacturerId).orElseThrow(
                 () -> new ResourceNotFoundException("Manufacturer not found with id " + manufacturerId)
         );
 
-        manufacturer.setIsPromoActive(isPromo);
+        if (discount.compareTo(BigDecimal.ZERO) > 0) {
+            manufacturer.setIsPromoActive(true);
+        } else {
+            manufacturer.setIsPromoActive(false);
+        }
         manufacturerRepository.save(manufacturer);
 
         List<Product> products = productRepository.findByManufacturerId(manufacturerId);
@@ -59,12 +63,17 @@ public class AdminService {
                 .toList();
     }
 
-    public List<ProductResponseDTO> createPromoByCategory(Long categoryId, Boolean isPromo, BigDecimal discount, String language) {
+    public List<ProductResponseDTO> createPromoByCategory(Long categoryId, BigDecimal discount, String language) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(
                 () -> new ResourceNotFoundException("Category not found with id " + categoryId)
         );
 
-        category.setIsPromoActive(isPromo);
+        if (discount.compareTo(BigDecimal.ZERO) > 0) {
+            category.setIsPromoActive(true);
+        } else {
+            category.setIsPromoActive(false);
+        }
+
         categoryRepository.save(category);
 
         List<Product> products = productRepository.findAllByCategoryId(category.getId());
