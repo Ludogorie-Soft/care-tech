@@ -27,7 +27,7 @@ ParameterRepository extends JpaRepository<Parameter, Long> {
     @Query("SELECT DISTINCT p FROM Parameter p " +
             "JOIN p.category c " +
             "WHERE c.id = :categoryId " +
-            "AND EXISTS (SELECT prod FROM Product prod WHERE prod.category.id = c.id AND prod.status <> com.techstore.enums.ProductStatus.NOT_AVAILABLE) " +
+            "AND EXISTS (SELECT prod FROM Product prod WHERE prod.category.id = c.id AND prod.status != com.techstore.enums.ProductStatus.NOT_AVAILABLE AND prod.active = true) " +
             "ORDER BY p.order ASC")
     List<Parameter> findParametersForAvailableProductsByCategory(@Param("categoryId") Long categoryId);
 

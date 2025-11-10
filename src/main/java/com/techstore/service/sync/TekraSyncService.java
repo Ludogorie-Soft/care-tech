@@ -1238,35 +1238,76 @@ public class TekraSyncService {
     private Map<String, String> extractTekraParameters(Map<String, Object> rawProduct) {
         Map<String, String> parameters = new HashMap<>();
 
+        // ✅ Списък на полета, които НЕ са параметри (системни полета от Tekra)
+        Set<String> systemFields = Set.of(
+                // Основна информация
+                "id", "sku", "name", "model", "manufacturer",
+
+                // Ценова информация
+                "price", "partner_price", "quantity",
+
+                // Описания и съдържание
+                "description", "short_description",
+
+                // Физически характеристики (тези обикновено са в отделни полета)
+                "weight", "net_weight", "volume",
+
+                // Изображения и файлове
+                "image", "gallery", "files",
+
+                // Категории и URL
+                "category_1", "category_2", "category_3",
+                "url", "link", "slug",
+
+                // Допълнителна информация
+                "partner_product", "in_stock", "availability",
+                "created_at", "updated_at", "status",
+
+                // Други системни полета
+                "barcode", "ean", "isbn", "warranty"
+        );
+
+        // ✅ ОСНОВНА ЛОГИКА: Извличаме ВСИЧКИ полета, които не са системни
         for (Map.Entry<String, Object> entry : rawProduct.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
 
-            if (key != null && key.startsWith("prop_") && value != null) {
-                String paramKey = key.substring(5);
-                String paramValue = value.toString().trim();
-
-                if (!paramValue.isEmpty()) {
-                    parameters.put(paramKey, paramValue);
-                    log.trace("Found parameter: {} = {}", paramKey, paramValue);
-                }
+            // Пропускаме null стойности
+            if (value == null) {
+                continue;
             }
+
+            // Пропускаме системните полета
+            if (systemFields.contains(key)) {
+                continue;
+            }
+
+            // Пропускаме сложни структури (списъци и вложени обекти)
+            if (value instanceof List || value instanceof Map) {
+                log.trace("Skipping complex field: {}", key);
+                continue;
+            }
+
+            // Конвертираме стойността в String
+            String stringValue = value.toString().trim();
+
+            // Пропускаме празни стойности и "null" стрингове
+            if (stringValue.isEmpty() || "null".equalsIgnoreCase(stringValue)) {
+                continue;
+            }
+
+            // Ако ключът започва с prop_, премахваме префикса
+            String paramKey = key.startsWith("prop_") ? key.substring(5) : key;
+
+            parameters.put(paramKey, stringValue);
+            log.trace("Found parameter: {} = {}", paramKey, stringValue);
         }
 
         if (parameters.isEmpty()) {
-            String[] possibleParameters = {
-                    "cvjat", "merna", "model", "rezolyutsiya", "ir_podsvetka",
-                    "razmer", "zvuk", "wdr", "obektiv", "korpus",
-                    "stepen_na_zashtita", "kompresiya", "poe_portove",
-                    "broy_izhodi", "raboten_tok", "moshtnost", "seriya_eco"
-            };
-
-            for (String paramKey : possibleParameters) {
-                String value = getString(rawProduct, paramKey);
-                if (value != null && !value.trim().isEmpty()) {
-                    parameters.put(paramKey, value.trim());
-                }
-            }
+            log.debug("⚠️ No parameters found for product: {}", rawProduct.get("sku"));
+        } else {
+            log.debug("✓ Extracted {} parameters for product {}: {}",
+                    parameters.size(), rawProduct.get("sku"), parameters.keySet());
         }
 
         return parameters;

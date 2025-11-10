@@ -18,11 +18,7 @@ import com.techstore.exception.DuplicateResourceException;
 import com.techstore.exception.ValidationException;
 import com.techstore.mapper.ManufacturerMapper;
 import com.techstore.mapper.ParameterMapper;
-import com.techstore.repository.CategoryRepository;
-import com.techstore.repository.ManufacturerRepository;
-import com.techstore.repository.ParameterOptionRepository;
-import com.techstore.repository.ParameterRepository;
-import com.techstore.repository.ProductRepository;
+import com.techstore.repository.*;
 import com.techstore.util.ExceptionHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +49,7 @@ public class ProductService {
     private final S3Service s3Service;
     private final ParameterMapper parameterMapper;
     private final ManufacturerMapper manufacturerMapper;
+    private final ProductParameterRepository productParameterRepository;
 
     // Constants for validation
     private static final int MAX_IMAGES_PER_PRODUCT = 20;
@@ -256,53 +253,68 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Set<ProductParameterResponseDto> getProductsParametersByCategory(Long categoryId, String lang) {
-        List<Product> products = productRepository.findActiveByCategoryExcludingNotAvailable(categoryId);
+        log.info("=== FETCHING PARAMETERS FOR CATEGORY {} ===", categoryId);
 
-        Set<ProductParameter> productParameters = new HashSet<>();
-        for (Product product : products) {
-            productParameters.addAll(product.getProductParameters());
-        }
+        List<Object[]> results = productParameterRepository.findParameterOptionsByCategoryAndActiveProducts(categoryId);
 
-        Map<Long, ProductParameterResponseDto> parameterMap = new HashMap<>();
+        log.info("Query returned {} parameter-option combinations from active products", results.size());
 
-        for (ProductParameter productParameter : productParameters) {
-            if (productParameter.getParameter() == null || productParameter.getParameterOption() == null) {
-                continue;
-            }
+        Map<Long, ProductParameterResponseDto> resultMap = new HashMap<>();
 
-            Long parameterId = productParameter.getParameter().getId();
-            Parameter parameter = productParameter.getParameter();
+        for (Object[] row : results) {
+            Long parameterId = (Long) row[0];
+            String parameterNameEn = (String) row[1];
+            String parameterNameBg = (String) row[2];
+            Long optionId = (Long) row[3];
+            String optionNameEn = (String) row[4];
+            String optionNameBg = (String) row[5];
+            Integer optionOrder = (Integer) row[6];
 
-            if (parameterMap.containsKey(parameterId)) {
-                ProductParameterResponseDto existing = parameterMap.get(parameterId);
-                ParameterOptionResponseDto optionDto = parameterMapper.toOptionResponseDto(
-                        productParameter.getParameterOption(), lang
-                );
-                existing.getOptions().add(optionDto);
+            ParameterOptionResponseDto optionDto = ParameterOptionResponseDto.builder()
+                    .id(optionId)
+                    .name("en".equals(lang) ? optionNameEn : optionNameBg)
+                    .order(optionOrder != null ? optionOrder : 0)
+                    .build();
+
+            if (resultMap.containsKey(parameterId)) {
+                resultMap.get(parameterId).getOptions().add(optionDto);
             } else {
-                ParameterOptionResponseDto optionDto = parameterMapper.toOptionResponseDto(
-                        productParameter.getParameterOption(), lang
-                );
+                Set<ParameterOptionResponseDto> options = new HashSet<>();
+                options.add(optionDto);
 
-                ProductParameterResponseDto dto = ProductParameterResponseDto.builder()
-                        .parameterId(parameter.getId())
-                        .parameterNameEn(parameter.getNameEn())
-                        .parameterNameBg(parameter.getNameBg())
-                        .options(new HashSet<>(Set.of(optionDto)))
+                ProductParameterResponseDto paramDto = ProductParameterResponseDto.builder()
+                        .parameterId(parameterId)
+                        .parameterNameEn(parameterNameEn)
+                        .parameterNameBg(parameterNameBg)
+                        .options(options)
                         .build();
 
-                parameterMap.put(parameterId, dto);
+                resultMap.put(parameterId, paramDto);
             }
         }
 
-        parameterMap.values().forEach(param -> {
-            Set<ParameterOptionResponseDto> sortedOptions = param.getOptions().stream()
+        // Сортираме опциите и премахваме дубликати
+        resultMap.values().forEach(param -> {
+            Set<ParameterOptionResponseDto> uniqueOptions = param.getOptions().stream()
+                    .collect(Collectors.toMap(
+                            ParameterOptionResponseDto::getId,
+                            opt -> opt,
+                            (opt1, opt2) -> opt1 // Keep first if duplicate
+                    ))
+                    .values()
+                    .stream()
                     .sorted(Comparator.comparing(ParameterOptionResponseDto::getOrder))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
-            param.setOptions(sortedOptions);
+
+            param.setOptions(uniqueOptions);
+
+            log.debug("Parameter {}: {} has {} unique options",
+                    param.getParameterId(), param.getParameterNameEn(), uniqueOptions.size());
         });
 
-        return new HashSet<>(parameterMap.values());
+        log.info("Returning {} parameters for category {}", resultMap.size(), categoryId);
+
+        return new HashSet<>(resultMap.values());
     }
 
     @Transactional(readOnly = true)
