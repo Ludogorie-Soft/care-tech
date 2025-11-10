@@ -24,13 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.techstore.util.LogHelper.LOG_STATUS_FAILED;
@@ -1186,23 +1180,39 @@ public class TekraSyncService {
 
     private String translateParameterName(String bulgarianName) {
         Map<String, String> translations = Map.ofEntries(
+                Map.entry("Аудио входове/изходи", "Audio In/Out"),
+                Map.entry("Брой HDD", "HDD Count"),
                 Map.entry("Цвят", "Color"),
+                Map.entry("IP канали", "IP Channels"),
+                Map.entry("IR подсветка", "IR Illumination"),
+                Map.entry("Компресия", "Compression"),
+                Map.entry("Корпус", "Body Type"),
+                Map.entry("LED подсветка", "LED Illumination"),
+                Map.entry("Мощност", "Power"),
+                Map.entry("Обектив", "Lens"),
+                Map.entry("Оптично увеличение", "Optical Zoom"),
+                Map.entry("PoE портове", "PoE Ports"),
+                Map.entry("Работен ток", "Operating Current"),
+                Map.entry("Размери", "Dimensions"),
+                Map.entry("Резолюция", "Resolution"),
+                Map.entry("Резолюция на запис", "Recording Resolution"),
+                Map.entry("Степен на защита", "Protection Rating"),
+                Map.entry("WDR", "WDR"),
+                Map.entry("Звук", "Audio"),
                 Map.entry("Мерна единица", "Unit"),
                 Map.entry("Модел", "Model"),
-                Map.entry("Резолюция", "Resolution"),
-                Map.entry("IR подсветка", "IR Illumination"),
-                Map.entry("Размери", "Dimensions"),
-                Map.entry("Звук", "Audio"),
-                Map.entry("WDR", "WDR"),
-                Map.entry("Обектив", "Lens"),
-                Map.entry("Корпус", "Body Type"),
-                Map.entry("Степен на защита", "Protection Rating"),
-                Map.entry("Компресия", "Compression"),
-                Map.entry("PoE портове", "PoE Ports"),
-                Map.entry("Брой изходи", "Number of Outputs"),
-                Map.entry("Работен ток", "Operating Current"),
-                Map.entry("Мощност", "Power"),
-                Map.entry("Еco серия", "Eco Series")
+                Map.entry("Eco серия", "Eco Series"),
+                Map.entry("Брой канали", "Channels Count"),
+                Map.entry("Брой изходи", "Outputs Count"),
+                Map.entry("Технология", "Technology"),
+                Map.entry("Капацитет", "Capacity"),
+                Map.entry("Подсветка", "Backlight"),
+                Map.entry("Протокол", "Protocol"),
+                Map.entry("Аналогови канали", "Analog Channels"),
+                Map.entry("Алармени входове/изходи", "Alarm In/Out"),
+                Map.entry("Серийни портове", "Serial Ports"),
+                Map.entry("Термална резолюция", "Thermal Resolution"),
+                Map.entry("Тип управление", "Type Of Control")
         );
 
         return translations.getOrDefault(bulgarianName, bulgarianName);
@@ -1210,64 +1220,112 @@ public class TekraSyncService {
 
     private String convertTekraParameterKeyToName(String parameterKey) {
         Map<String, String> parameterTranslations = Map.ofEntries(
+                // От твоя списък
+                Map.entry("audio_vhodove_izhodi", "Аудио входове/изходи"),
+                Map.entry("broy_hdd", "Брой HDD"),
                 Map.entry("cvjat", "Цвят"),
+                Map.entry("ip_kanali", "IP канали"),
+                Map.entry("ir_podsvetka", "IR подсветка"),
+                Map.entry("kompresiya", "Компресия"),
+                Map.entry("korpus", "Корпус"),
+                Map.entry("led_podsvetka", "LED подсветка"),
+                Map.entry("moshtnost", "Мощност"),
+                Map.entry("obektiv", "Обектив"),
+                Map.entry("optichno_uvelichenie", "Оптично увеличение"),
+                Map.entry("poe_portove", "PoE портове"),
+                Map.entry("raboten_tok", "Работен ток"),
+                Map.entry("razmer", "Размери"),
+                Map.entry("rezolyutsiya", "Резолюция"),
+                Map.entry("rezolyutsiya_na_zapis", "Резолюция на запис"),
+                Map.entry("stepen_na_zashtita", "Степен на защита"),
+                Map.entry("wdr", "WDR"),
+                Map.entry("zvuk", "Звук"),
+                Map.entry("tehnologiya", "Технология"),
+                Map.entry("kapatsitet", "Капацитет"),
+                Map.entry("podsvetka", "Подсветка"),
+                Map.entry("protokol", "Протокол"),
+                Map.entry("analogovi_kanali", "Аналогови канали"),
+                Map.entry("alarmeni_vhodove_izhodi", "Алармени входове/изходи"),
+                Map.entry("seriyni_portove", "Серийни портове"),
+                Map.entry("termalna_rezolyutsiya", "Термална резолюция"),
+                Map.entry("tip_upravlenie", "Тип управление"),
+
+                // Допълнителни
                 Map.entry("merna", "Мерна единица"),
                 Map.entry("model", "Модел"),
-                Map.entry("rezolyutsiya", "Резолюция"),
-                Map.entry("ir_podsvetka", "IR подсветка"),
-                Map.entry("razmer", "Размери"),
-                Map.entry("zvuk", "Звук"),
-                Map.entry("wdr", "WDR"),
-                Map.entry("obektiv", "Обектив"),
-                Map.entry("korpus", "Корпус"),
-                Map.entry("stepen_na_zashtita", "Степен на защита"),
-                Map.entry("kompresiya", "Компресия"),
-                Map.entry("poe_portove", "PoE портове"),
+                Map.entry("seriya_eco", "Eco серия"),
+                Map.entry("broy_kanali", "Брой канали"),
                 Map.entry("broy_izhodi", "Брой изходи"),
-                Map.entry("raboten_tok", "Работен ток"),
-                Map.entry("moshtnost", "Мощност"),
-                Map.entry("seriya_eco", "Еco серия")
+                Map.entry("max_ports", "Максимални портове"),
+                Map.entry("ports_count", "Брой портове")
         );
 
         return parameterTranslations.getOrDefault(parameterKey,
-                parameterKey.substring(0, 1).toUpperCase() +
-                        parameterKey.substring(1).replace("_", " ")
+                // Fallback: Форматираме ключа
+                Arrays.stream(parameterKey.split("_"))
+                        .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
+                        .collect(Collectors.joining(" "))
         );
     }
 
     private Map<String, String> extractTekraParameters(Map<String, Object> rawProduct) {
         Map<String, String> parameters = new HashMap<>();
 
-        // ✅ Списък на полета, които НЕ са параметри (системни полета от Tekra)
+        // ✅ Системни полета (НЕ параметри)
         Set<String> systemFields = Set.of(
-                // Основна информация
                 "id", "sku", "name", "model", "manufacturer",
-
-                // Ценова информация
                 "price", "partner_price", "quantity",
-
-                // Описания и съдържание
                 "description", "short_description",
-
-                // Физически характеристики (тези обикновено са в отделни полета)
                 "weight", "net_weight", "volume",
-
-                // Изображения и файлове
                 "image", "gallery", "files",
-
-                // Категории и URL
                 "category_1", "category_2", "category_3",
                 "url", "link", "slug",
-
-                // Допълнителна информация
                 "partner_product", "in_stock", "availability",
                 "created_at", "updated_at", "status",
-
-                // Други системни полета
-                "barcode", "ean", "isbn", "warranty"
+                "barcode", "ean", "isbn", "warranty",
+                "reference_number", "merna", "outlet", "promo"
         );
 
-        // ✅ ОСНОВНА ЛОГИКА: Извличаме ВСИЧКИ полета, които не са системни
+        // ✅ ИЗВЕСТНИ параметри от Tekra
+        Set<String> knownTekraParameters = Set.of(
+                "audio_vhodove_izhodi",
+                "broy_hdd",
+                "cvjat",
+                "ip_kanali",
+                "ir_podsvetka",
+                "kompresiya",
+                "korpus",
+                "led_podsvetka",
+                "moshtnost",
+                "obektiv",
+                "optichno_uvelichenie",
+                "poe_portove",
+                "raboten_tok",
+                "razmer",
+                "rezolyutsiya",
+                "rezolyutsiya_na_zapis",
+                "stepen_na_zashtita",
+                "wdr",
+                "zvuk",
+                "seriya_eco",
+                "broy_kanali",
+                "broy_izhodi",
+                "max_ports",
+                "ports_count",
+                "tehnologiya",
+                "kapatsitet",
+                "podsvetka",
+                "protokol",
+                "analogovi_kanali",
+                "alarmeni_vhodove_izhodi",
+                "seriyni_portove",
+                "termalna_rezolyutsiya",
+                "tip_upravlenie"
+                );
+
+        int unknownFieldsCount = 0;
+        List<String> unknownFields = new ArrayList<>();
+
         for (Map.Entry<String, Object> entry : rawProduct.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
@@ -1277,40 +1335,124 @@ public class TekraSyncService {
                 continue;
             }
 
+            // ✅ КРИТИЧНО: Пропускаме ПРАЗНИ ключове
+            if (key == null || key.trim().isEmpty()) {
+                log.trace("Skipping entry with empty key, value: {}", value);
+                continue;
+            }
+
             // Пропускаме системните полета
             if (systemFields.contains(key)) {
                 continue;
             }
 
-            // Пропускаме сложни структури (списъци и вложени обекти)
+            // Пропускаме сложни структури
             if (value instanceof List || value instanceof Map) {
-                log.trace("Skipping complex field: {}", key);
                 continue;
             }
 
-            // Конвертираме стойността в String
             String stringValue = value.toString().trim();
 
-            // Пропускаме празни стойности и "null" стрингове
+            // Пропускаме празни стойности и "null" текст
             if (stringValue.isEmpty() || "null".equalsIgnoreCase(stringValue)) {
                 continue;
             }
 
-            // Ако ключът започва с prop_, премахваме префикса
-            String paramKey = key.startsWith("prop_") ? key.substring(5) : key;
+            // Пропускаме URL-и (често са в полета като "files", "documents")
+            if (stringValue.startsWith("http://") || stringValue.startsWith("https://")) {
+                continue;
+            }
 
-            parameters.put(paramKey, stringValue);
-            log.trace("Found parameter: {} = {}", paramKey, stringValue);
+            // Пропускаме твърде дълги стойности (вероятно описания или HTML)
+            if (stringValue.length() > 200) {
+                log.trace("Skipping long value for key '{}': {} chars", key, stringValue.length());
+                continue;
+            }
+
+            // ✅ ПРИОРИТЕТ 1: Известни Tekra параметри
+            if (knownTekraParameters.contains(key)) {
+                String paramKey = key.startsWith("prop_") ? key.substring(5) : key;
+                parameters.put(paramKey, stringValue);
+                log.trace("✓ Known parameter: {} = {}", paramKey, stringValue);
+                continue;
+            }
+
+            // ✅ ПРИОРИТЕТ 2: Полета с prefix "prop_"
+            if (key.startsWith("prop_")) {
+                String paramKey = key.substring(5);
+                parameters.put(paramKey, stringValue);
+                log.trace("✓ Prop parameter: {} = {}", paramKey, stringValue);
+                continue;
+            }
+
+            // ✅ ПРИОРИТЕТ 3: Други полета, които изглеждат като параметри
+            if (looksLikeParameter(key, stringValue)) {
+                parameters.put(key, stringValue);
+                unknownFieldsCount++;
+                unknownFields.add(key + " = " + stringValue);
+                log.trace("? Unknown parameter: {} = {}", key, stringValue);
+                continue;
+            }
+
+            // Логваме какво пропускаме
+            log.trace("✗ Skipped: {} = {}", key, stringValue);
+        }
+
+        // ✅ ВАЖНО: Логваме статистика за неизвестни полета
+        if (unknownFieldsCount > 0) {
+            log.debug("⚠️ Product {} has {} UNKNOWN parameters: {}",
+                    rawProduct.get("sku"), unknownFieldsCount,
+                    unknownFields.stream().limit(5).collect(Collectors.joining(", ")));
         }
 
         if (parameters.isEmpty()) {
-            log.debug("⚠️ No parameters found for product: {}", rawProduct.get("sku"));
+            log.warn("⚠️ NO parameters found for product: {} - Available keys: {}",
+                    rawProduct.get("sku"),
+                    rawProduct.keySet().stream()
+                            .filter(k -> k != null && !k.isEmpty())
+                            .filter(k -> !systemFields.contains(k))
+                            .collect(Collectors.joining(", ")));
         } else {
             log.debug("✓ Extracted {} parameters for product {}: {}",
                     parameters.size(), rawProduct.get("sku"), parameters.keySet());
         }
 
         return parameters;
+    }
+
+    // ✅ Helper метод за проверка дали полето е параметър
+    private boolean looksLikeParameter(String key, String value) {
+        // Пропускаме URL-и
+        if (key.contains("http") || value.contains("http")) {
+            return false;
+        }
+
+        // Пропускаме файлови пътища
+        if (key.contains("/") || value.contains("/uploads/")) {
+            return false;
+        }
+
+        // Пропускаме твърде дълги ключове (вероятно описания)
+        if (key.length() > 50) {
+            return false;
+        }
+
+        // Пропускаме ключове с празни символи (вероятно грешка в XML)
+        if (key.contains(" ")) {
+            return false;
+        }
+
+        // Приемаме числа (включително 0)
+        if (value.matches("^\\d+(\\.\\d+)?$")) {
+            return true;
+        }
+
+        // Приемаме кратки текстове (вероятно опции на параметри)
+        if (value.length() < 100 && !value.contains("\n")) {
+            return true;
+        }
+
+        return false;
     }
 
     private boolean isValidCategory(Category category) {
