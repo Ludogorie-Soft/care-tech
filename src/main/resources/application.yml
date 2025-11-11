@@ -13,8 +13,8 @@ spring:
 
     mail:
       host: mail.caretech.bg
-      port: 465
-      protocol: smtps
+      port: 587
+      protocol: smtp
       username: orders@caretech.bg
       password: 184562@!Zas2
       properties:
@@ -22,12 +22,14 @@ spring:
           smtp:
             auth: true
             ssl:
-              enable: true
-            starttls:
               enable: false
-            connectiontimeout: 5000
-            timeout: 5000
-            writetimeout: 5000
+              trust: mail.caretech.bg
+            starttls:
+              enable: true
+              required: true
+            connectiontimeout: 10000
+            timeout: 10000
+            writetimeout: 10000
 
     cache:
         type: caffeine
