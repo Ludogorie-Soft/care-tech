@@ -10,6 +10,8 @@ import com.techstore.repository.ManufacturerRepository;
 import com.techstore.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,6 +27,7 @@ public class AdminService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ParameterMapper parameterMapper;
+    private final CacheManager cacheManager;
 
     public List<ProductResponseDTO> createPromoByManufacturer(Long manufacturerId, BigDecimal discount, String lang) {
         Manufacturer manufacturer = manufacturerRepository.findById(manufacturerId).orElseThrow(
@@ -42,11 +45,11 @@ public class AdminService {
 
         if (!products.isEmpty()) {
             for (Product product : products) {
-                product.setDiscount(discount);
-                product.calculateFinalPrice();
-                productRepository.save(product);
+                setDiscountToProduct(discount, product);
             }
         }
+
+        clearProductCache();
 
         return products.stream().map(p -> convertToResponseDTO(p, lang)).toList();
     }
@@ -80,11 +83,11 @@ public class AdminService {
 
         if (!products.isEmpty()) {
             for (Product product : products) {
-                product.setDiscount(discount);
-                product.calculateFinalPrice();
-                productRepository.save(product);
+                setDiscountToProduct(discount, product);
             }
         }
+
+        clearProductCache();
 
         return products.stream().map(p -> convertToResponseDTO(p, language)).toList();
     }
@@ -92,9 +95,10 @@ public class AdminService {
     public ProductResponseDTO createPromo(ProductPromoRequest request, String lang) {
         Product product = getProduct(request.getId());
 
-        product.setDiscount(request.getDiscount());
-        product.calculateFinalPrice();
-        productRepository.save(product);
+        setDiscountToProduct(request.getDiscount(), product);
+
+        clearProductCache();
+
         return convertToResponseDTO(product, lang);
     }
 
@@ -341,6 +345,19 @@ public class AdminService {
                 .name(manufacturer.getName())
                 .isPromoActive(manufacturer.getIsPromoActive())
                 .build();
+    }
+
+    private void clearProductCache() {
+        Cache cache = cacheManager.getCache("products");
+        if (cache != null) {
+            cache.clear();
+        }
+    }
+
+    private void setDiscountToProduct(BigDecimal discount, Product product) {
+        product.setDiscount(discount);
+        product.calculateFinalPrice();
+        productRepository.save(product);
     }
 }
 

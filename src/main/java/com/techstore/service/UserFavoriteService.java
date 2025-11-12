@@ -347,6 +347,8 @@ public class UserFavoriteService {
         dto.setNameEn(product.getNameEn());
         dto.setNameBg(product.getNameBg());
         dto.setFinalPrice(product.getFinalPrice());
+        dto.setDiscount(product.getDiscount());
+
 
         if (product.getPrimaryImageUrl() != null) {
             dto.setPrimaryImageUrl("/api/images/product/" + product.getId() + "/primary");

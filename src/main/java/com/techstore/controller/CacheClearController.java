@@ -1,6 +1,7 @@
 package com.techstore.controller;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,13 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Hidden
 @RestController
 @RequestMapping("/api/internal/cache")
+@RequiredArgsConstructor
 public class CacheClearController {
 
     private final CacheManager cacheManager;
-
-    public CacheClearController(CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
-    }
 
     @PostMapping("/clear-all")
     public String clearAllCaches() {
