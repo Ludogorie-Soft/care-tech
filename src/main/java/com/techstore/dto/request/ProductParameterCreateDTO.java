@@ -3,6 +3,8 @@ package com.techstore.dto.request;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ProductParameterCreateDTO {
 
@@ -10,5 +12,5 @@ public class ProductParameterCreateDTO {
     private Long parameterId;
 
     @NotNull(message = "Parameter option ID is required")
-    private Long parameterOptionId;
+    private List<Long> parameterOptionId;
 }

@@ -5,14 +5,17 @@ A comprehensive Spring Boot REST API for a tech store, featuring complete produc
 ### Steps to run the app in AWS EC2
 
 #### Create logs directory and permissions
+- sudo mkdir -p /srv/techstore/logs
 - sudo chown -R 1000:1000 /srv/techstore/logs
 - sudo chmod -R 777 /srv/techstore/logs
 
 #### Create lucene directory and permissions
+- sudo mkdir -p /srv/techstore/lucene
 - sudo chown -R 1000:1000 /srv/techstore/lucene
 - sudo chmod -R 777 /srv/techstore/lucene
 
 #### Create upload directory and permissions
+- sudo mkdir -p /srv/techstore/uploads
 - sudo chown -R 1000:1000 /srv/techstore/uploads
 - sudo chmod -R 777 /srv/techstore/uploads
 
@@ -64,8 +67,8 @@ restart: unless-stopped
   - .env
   volumes:
   - /srv/techstore/uploads:/app/uploads
-  - /srv/techstore/lucene:/var/lib/techstore/lucene:rw
-  - /srv/techstore/logs:/tmp/techstore-logs:rw
+  - /srv/techstore/lucene:/app/lucene-indexes:rw
+  - /srv/techstore/logs:/app/logs:rw
 
   depends_on:
   postgres:

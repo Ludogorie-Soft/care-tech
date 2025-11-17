@@ -17,7 +17,7 @@ public class CronJobService {
     private final ValiSyncService valiSyncService;
     private final TekraSyncService tekraSyncService;
 
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     public void syncVali() {
         log.info("Starting scheduled Vali synchronization at {}", LocalDateTime.now());
         try {
@@ -27,8 +27,8 @@ public class CronJobService {
 //            valiSyncService.syncManufacturers();
 //            log.info("Scheduled manufacturers synchronization completed at {}", LocalDateTime.now());
 //
-//            valiSyncService.syncParameters();
-//            log.info("Scheduled parameters synchronization completed at {}", LocalDateTime.now());
+            valiSyncService.syncParameters();
+            log.info("Scheduled parameters synchronization completed at {}", LocalDateTime.now());
 
             valiSyncService.syncProducts();
             log.info("Scheduled products synchronization completed at {}", LocalDateTime.now());
@@ -38,7 +38,7 @@ public class CronJobService {
         }
     }
 
-    @Scheduled(cron = "0 0 4 * * ?")
+    @Scheduled(cron = "0 0 2 * * ?")
     public void syncTekra() {
         log.info("Starting scheduled Tekra synchronization at {}", LocalDateTime.now());
         try {
@@ -48,8 +48,8 @@ public class CronJobService {
 //            tekraSyncService.syncTekraManufacturers();
 //            log.info("Scheduled Tekra manufacturers synchronization completed at {}", LocalDateTime.now());
 //
-//            tekraSyncService.syncTekraParameters();
-//            log.info("Scheduled Tekra parameters synchronization completed at {}", LocalDateTime.now());
+            tekraSyncService.syncTekraParameters();
+            log.info("Scheduled Tekra parameters synchronization completed at {}", LocalDateTime.now());
 
             tekraSyncService.syncTekraProducts();
             log.info("Scheduled Tekra products synchronization completed at {}", LocalDateTime.now());

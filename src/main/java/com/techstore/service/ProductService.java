@@ -767,30 +767,37 @@ public class ProductService {
             return;
         }
 
-        if (parameters.size() > MAX_PARAMETERS_PER_PRODUCT) {
-            throw new ValidationException(
-                    String.format("Product cannot have more than %d parameters", MAX_PARAMETERS_PER_PRODUCT));
-        }
+        Set<Long> processedParameterIds = new HashSet<>();
+        int totalOptions = 0;
 
-        Set<Long> parameterIds = new HashSet<>();
-        Set<String> duplicateCheck = new HashSet<>();
-
-        for (ProductParameterCreateDTO param : parameters) {
-            if (param.getParameterId() == null) {
+        for (ProductParameterCreateDTO paramDto : parameters) {
+            if (paramDto.getParameterId() == null) {
                 throw new ValidationException("Parameter ID is required");
             }
 
-            if (param.getParameterOptionId() == null) {
-                throw new ValidationException("Parameter option ID is required");
+            if (!processedParameterIds.add(paramDto.getParameterId())) {
+                throw new ValidationException("Duplicate parameter ID found in request: " + paramDto.getParameterId());
             }
 
-            parameterIds.add(param.getParameterId());
-
-            String key = param.getParameterId() + ":" + param.getParameterOptionId();
-            if (duplicateCheck.contains(key)) {
-                throw new ValidationException("Duplicate parameter-option combination found");
+            if (paramDto.getParameterOptionId() == null || paramDto.getParameterOptionId().isEmpty()) {
+                throw new ValidationException("Parameter option ID list cannot be null or empty for parameter ID: " + paramDto.getParameterId());
             }
-            duplicateCheck.add(key);
+
+            Set<Long> uniqueOptionsForParam = new HashSet<>();
+            for (Long optionId : paramDto.getParameterOptionId()) {
+                if (optionId == null) {
+                    throw new ValidationException("Parameter option ID cannot be null for parameter ID: " + paramDto.getParameterId());
+                }
+                if (!uniqueOptionsForParam.add(optionId)) {
+                    throw new ValidationException("Duplicate option ID " + optionId + " found for parameter ID: " + paramDto.getParameterId());
+                }
+            }
+            totalOptions += paramDto.getParameterOptionId().size();
+        }
+
+        if (totalOptions > MAX_PARAMETERS_PER_PRODUCT) {
+            throw new ValidationException(
+                    String.format("Product cannot have more than %d parameter options in total", MAX_PARAMETERS_PER_PRODUCT));
         }
     }
 
@@ -1261,22 +1268,24 @@ public class ProductService {
                     "Parameter", paramDto.getParameterId()
             );
 
-            ParameterOption option = ExceptionHelper.findOrThrow(
-                    parameterOptionRepository.findById(paramDto.getParameterOptionId()).orElse(null),
-                    "ParameterOption", paramDto.getParameterOptionId()
-            );
+            for (Long optionId : paramDto.getParameterOptionId()) {
+                ParameterOption option = ExceptionHelper.findOrThrow(
+                        parameterOptionRepository.findById(optionId).orElse(null),
+                        "ParameterOption", optionId
+                );
 
-            if (!option.getParameter().getId().equals(parameter.getId())) {
-                throw new ValidationException(
-                        String.format("Parameter option %d does not belong to parameter %d",
-                                paramDto.getParameterOptionId(), paramDto.getParameterId()));
+                if (!option.getParameter().getId().equals(parameter.getId())) {
+                    throw new ValidationException(
+                            String.format("Parameter option %d does not belong to parameter %d",
+                                    optionId, paramDto.getParameterId()));
+                }
+
+                ProductParameter pp = new ProductParameter();
+                pp.setProduct(product);
+                pp.setParameter(parameter);
+                pp.setParameterOption(option);
+                newProductParameters.add(pp);
             }
-
-            ProductParameter pp = new ProductParameter();
-            pp.setProduct(product);
-            pp.setParameter(parameter);
-            pp.setParameterOption(option);
-            newProductParameters.add(pp);
         }
 
         product.setProductParameters(newProductParameters);
