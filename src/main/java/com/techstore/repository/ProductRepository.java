@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +25,11 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     boolean existsByReferenceNumberIgnoreCase(String referenceNumber);
 
+    Optional<Product> findByReferenceNumber(String referenceNumber); // Added this method
+
     Optional<Product> findByExternalId(Long externalId);
+
+    List<Product> findByExternalIdIn(Collection<Long> externalIds);
 
     Page<Product> findByActiveTrue(Pageable pageable);
 

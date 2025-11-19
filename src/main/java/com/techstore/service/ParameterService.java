@@ -153,7 +153,7 @@ public class ParameterService {
         findCategoryByIdOrThrow(categoryId);
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            List<Parameter> parameters = parameterRepository.findByCategoryIdOrderByOrderAsc(categoryId);
+            Set<Parameter> parameters = parameterRepository.findByCategoryIdOrderByOrderAsc(categoryId);
             return parameters.stream()
                     .map(parameter -> parameterMapper.toResponseDto(parameter, language))
                     .toList();

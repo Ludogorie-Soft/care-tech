@@ -42,7 +42,9 @@ public class ProductSearchRepository {
                 .append("p.slug, ")
                 .append("m.name as manufacturer_name, c.")
                 .append(nameField)
-                .append(" as category_name ");
+                .append(" as category_name ")
+                .append(", p.image_url AS primary_image_url ");
+
 
         if (StringUtils.hasText(request.getQuery())) {
             sql.append(", ts_rank(")
@@ -253,7 +255,7 @@ public class ProductSearchRepository {
             option.setExternalId(rs.getObject("option_external_id") != null ? rs.getLong("option_external_id") : null);
             option.setName(rs.getString("option_name"));
             option.setParameterId(parameterId);
-            option.setParameterName(language.equals("en") ? parameterNameEn : parameterNameBg);
+            option.setParameterName(rs.getString("option_name")); // Corrected line
             option.setOrder(rs.getObject("option_order") != null ? rs.getInt("option_order") : null);
             option.setCreatedAt(rs.getTimestamp("option_created_at") != null ? rs.getTimestamp("option_created_at").toLocalDateTime() : null);
             option.setUpdatedAt(rs.getTimestamp("option_updated_at") != null ? rs.getTimestamp("option_updated_at").toLocalDateTime() : null);
@@ -358,7 +360,8 @@ public class ProductSearchRepository {
                 .finalPrice(rs.getBigDecimal("final_price"))
                 .discount(rs.getBigDecimal("discount"))
                 .status(status.getCode())
-                .primaryImageUrl("/api/images/product/" + rs.getLong("id") + "/primary")
+//                .primaryImageUrl("/api/images/product/" + rs.getLong("id") + "/primary")
+                .primaryImageUrl(rs.getString("primary_image_url"))
                 .manufacturerName(rs.getString("manufacturer_name"))
                 .categoryName(rs.getString("category_name"))
                 .featured(rs.getBoolean("featured"))
@@ -366,48 +369,6 @@ public class ProductSearchRepository {
                 .score(rs.getFloat("search_rank"))
                 .slug(rs.getString("slug"))
                 .build();
-    }
-
-    public Map<String, List<String>> getAvailableParametersForCategory(Long categoryId, String language) {
-        Map<String, List<String>> parameters = new HashMap<>();
-
-        try {
-            String paramNameField = language.equals("en") ? "param.name_en" : "param.name_bg";
-            String optionNameField = language.equals("en") ? "po.name_en" : "po.name_bg";
-
-            String sql = "SELECT DISTINCT " +
-                    "param.id as param_id, " +
-                    paramNameField + " as param_name, " +
-                    "po.id as option_id, " +
-                    optionNameField + " as option_name " +
-                    "FROM parameters param " +
-                    "JOIN parameter_options po ON po.parameter_id = param.id " +
-                    "WHERE param.category_id = :categoryId " +
-                    "ORDER BY param.sort_order, param_name, po.sort_order, option_name";
-
-            Map<String, Object> params = new HashMap<>();
-            params.put("categoryId", categoryId);
-
-            namedJdbcTemplate.query(sql, params, rs -> {
-                Long paramId = rs.getLong("param_id");
-                String paramName = rs.getString("param_name");
-                Long optionId = rs.getLong("option_id");
-                String optionName = rs.getString("option_name");
-
-                // Use "param_id:param_name" as key
-                String key = paramId + ":" + paramName;
-                // Store "option_id:option_name" as value
-                String value = optionId + ":" + optionName;
-
-                parameters.computeIfAbsent(key, k -> new java.util.ArrayList<>())
-                        .add(value);
-            });
-
-        } catch (Exception e) {
-            log.error("Failed to get parameters for category {}: {}", categoryId, e.getMessage());
-        }
-
-        return parameters;
     }
 
     public Map<String, List<FacetValue>> getAvailableParametersWithCountsForCategory(

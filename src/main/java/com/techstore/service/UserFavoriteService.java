@@ -349,10 +349,11 @@ public class UserFavoriteService {
         dto.setFinalPrice(product.getFinalPrice());
         dto.setDiscount(product.getDiscount());
 
+        dto.setPrimaryImageUrl(product.getPrimaryImageUrl());
 
-        if (product.getPrimaryImageUrl() != null) {
-            dto.setPrimaryImageUrl("/api/images/product/" + product.getId() + "/primary");
-        }
+//        if (product.getPrimaryImageUrl() != null) {
+//            dto.setPrimaryImageUrl("/api/images/product/" + product.getId() + "/primary");
+//        }
         return dto;
     }
 }

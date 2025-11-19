@@ -135,9 +135,11 @@ public class CartService {
         dto.setFinalPrice(product.getFinalPrice());
         dto.setDiscount(product.getDiscount());
 
-        if (product.getPrimaryImageUrl() != null) {
-            dto.setPrimaryImageUrl("/api/images/product/" + product.getId() + "/primary");
-        }
+        dto.setPrimaryImageUrl(product.getPrimaryImageUrl());
+
+//        if (product.getPrimaryImageUrl() != null) {
+//            dto.setPrimaryImageUrl("/api/images/product/" + product.getId() + "/primary");
+//        }
         return dto;
     }
 }

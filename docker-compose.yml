@@ -30,6 +30,8 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    environment:
+      - JAVA_OPTS=${JAVA_OPTS}
     volumes:
       - uploads_data:/app/uploads
       - /tmp/lucene:/tmp/lucene:rw
@@ -46,6 +48,12 @@ services:
       retries: 3
       start_period: 60s
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 3g
+        reservations:
+          memory: 1g
 
 volumes:
   postgres_data:

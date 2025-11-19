@@ -57,42 +57,86 @@ public class ImageProxyController {
     }
 
     private void proxyImage(String imageUrl, HttpServletResponse response) {
-        HttpURLConnection connection = null;
-        try {
-            URL url = new URL(imageUrl);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(10000);
+        // Convert vali.bg HTTPS URLs to HTTP to avoid SSL timeout issues
+        if (imageUrl.contains("vali.bg") && imageUrl.startsWith("https://")) {
+            String originalUrl = imageUrl;
+            imageUrl = imageUrl.replace("https://", "http://");
+            log.debug("Converted Vali HTTPS URL to HTTP: {} -> {}", originalUrl, imageUrl);
+        }
 
-            // Set appropriate content type
-            String contentType = connection.getContentType();
-            if (contentType != null && contentType.startsWith("image/")) {
-                response.setContentType(contentType);
-            } else {
-                // Fallback content type based on URL extension
-                response.setContentType(getContentTypeFromUrl(imageUrl));
-            }
+        int maxRetries = 2;
+        int retryCount = 0;
 
-            // Set cache headers (1 hour cache)
-            response.setHeader("Cache-Control", "public, max-age=3600");
+        while (retryCount <= maxRetries) {
+            HttpURLConnection connection = null;
+            try {
+                URL url = new URL(imageUrl);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
 
-            // Copy image data
-            try (InputStream inputStream = connection.getInputStream();
-                 OutputStream outputStream = response.getOutputStream()) {
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, bytesRead);
+                // Increased timeouts for external APIs
+                connection.setConnectTimeout(15000); // 15 seconds
+                connection.setReadTimeout(30000);    // 30 seconds
+
+                // Add headers to avoid being blocked
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                connection.setRequestProperty("Accept", "image/webp,image/apng,image/*,*/*;q=0.8");
+                connection.setRequestProperty("Accept-Language", "bg-BG,bg;q=0.9,en;q=0.8");
+
+                // Set appropriate content type
+                String contentType = connection.getContentType();
+                if (contentType != null && contentType.startsWith("image/")) {
+                    response.setContentType(contentType);
+                } else {
+                    response.setContentType(getContentTypeFromUrl(imageUrl));
                 }
-            }
 
-        } catch (Exception e) {
-            log.error("Error proxying image from {}: {}", imageUrl, e.getMessage());
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
+                // Set cache headers (24 hours cache for external images)
+                response.setHeader("Cache-Control", "public, max-age=86400");
+                response.setHeader("Vary", "Accept-Encoding");
+
+                // Copy image data
+                try (InputStream inputStream = connection.getInputStream();
+                     OutputStream outputStream = response.getOutputStream()) {
+                    byte[] buffer = new byte[8192]; // Larger buffer
+                    int bytesRead;
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                    outputStream.flush();
+                }
+
+                // Success - exit retry loop
+                log.debug("Successfully proxied image from: {}", imageUrl);
+                return;
+
+            } catch (java.net.SocketTimeoutException e) {
+                retryCount++;
+                log.warn("Timeout proxying image from {} (attempt {}/{}): {}",
+                        imageUrl, retryCount, maxRetries + 1, e.getMessage());
+
+                if (retryCount > maxRetries) {
+                    log.error("Failed to proxy image after {} attempts: {}", maxRetries + 1, imageUrl);
+                    response.setStatus(HttpStatus.GATEWAY_TIMEOUT.value());
+                    return;
+                }
+
+                // Exponential backoff before retry
+                try {
+                    Thread.sleep(retryCount * 1000L);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+
+            } catch (Exception e) {
+                log.error("Error proxying image from {}: {} - {}", imageUrl, e.getClass().getSimpleName(), e.getMessage());
+                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                break;
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
             }
         }
     }

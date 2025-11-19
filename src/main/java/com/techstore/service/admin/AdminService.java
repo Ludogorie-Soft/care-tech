@@ -137,9 +137,11 @@ public class AdminService {
         dto.setFeatured(product.getFeatured());
         dto.setShow(product.getShow());
 
-        if (product.getPrimaryImageUrl() != null) {
-            dto.setPrimaryImageUrl("/api/images/product/" + product.getId() + "/primary");
-        }
+        dto.setPrimaryImageUrl(product.getPrimaryImageUrl());
+
+//        if (product.getPrimaryImageUrl() != null) {
+//            dto.setPrimaryImageUrl("/api/images/product/" + product.getId() + "/primary");
+//        }
 
         if (product.getAdditionalImages() != null && !product.getAdditionalImages().isEmpty()) {
             List<String> proxyAdditionalUrls = new ArrayList<>();

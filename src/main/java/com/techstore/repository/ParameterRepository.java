@@ -8,8 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface
@@ -22,7 +24,7 @@ ParameterRepository extends JpaRepository<Parameter, Long> {
     boolean existsByNameBgIgnoreCaseAndCategory(String nameBg, Category category);
     boolean existsByNameEnIgnoreCaseAndCategory(String nameEn, Category category);
 
-    List<Parameter> findByCategoryIdOrderByOrderAsc(Long categoryId);
+    Set<Parameter> findByCategoryIdOrderByOrderAsc(Long categoryId);
 
     @Query("SELECT DISTINCT p FROM Parameter p " +
             "JOIN p.category c " +
@@ -32,6 +34,8 @@ ParameterRepository extends JpaRepository<Parameter, Long> {
     List<Parameter> findParametersForAvailableProductsByCategory(@Param("categoryId") Long categoryId);
 
     Optional<Parameter> findByExternalIdAndCategoryId(Long externalId, Long categoryId);
+
+    List<Parameter> findByExternalIdInAndCategoryId(Collection<Long> externalIds, Long categoryId); // New method
 
     Optional<Parameter> findByCategoryAndNameBg(Category category, String nameBg);
 

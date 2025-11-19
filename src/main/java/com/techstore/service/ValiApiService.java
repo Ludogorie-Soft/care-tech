@@ -36,60 +36,104 @@ public class ValiApiService {
     @Value("${vali.api.token}")
     private String apiToken;
 
-    @Value("${vali.api.timeout}")
+    @Value("${vali.api.timeout:120000}")
     private int timeout;
 
-    @Value("${vali.api.retry-attempts}")
+    @Value("${vali.api.retry-attempts:3}")
     private int retryAttempts;
 
-    @Value("${vali.api.retry-delay}")
+    @Value("${vali.api.retry-delay:2000}")
     private long retryDelay;
 
-    public List<CategoryRequestFromExternalDto> getCategories() {
-        log.debug("Fetching categories from external API");
+    private HttpHeaders createHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + apiToken);
+        headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+        headers.set(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+        headers.set(HttpHeaders.ACCEPT_LANGUAGE, "bg-BG,bg;q=0.9,en;q=0.8");
+        headers.set(HttpHeaders.ACCEPT_ENCODING, "gzip, deflate, br");
+        headers.set(HttpHeaders.CONNECTION, "keep-alive");
+        headers.set("sec-ch-ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"");
+        headers.set("sec-ch-ua-mobile", "?0");
+        headers.set("sec-ch-ua-platform", "\"Windows\"");
+        headers.set("Sec-Fetch-Dest", "empty");
+        headers.set("Sec-Fetch-Mode", "cors");
+        headers.set("Sec-Fetch-Site", "same-origin");
+        return headers;
+    }
 
-        return webClient.get()
-                .uri(baseUrl + "/categories")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiToken)
-                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<CategoryRequestFromExternalDto>>() {
-                })
-                .timeout(Duration.ofMillis(timeout))
-                .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
-                .doOnError(WebClientResponseException.class, ex ->
-                        log.error("Error fetching categories: {} - {}", ex.getStatusCode(), ex.getResponseBodyAsString()))
-                .block();
+    public List<CategoryRequestFromExternalDto> getCategories() {
+        log.info("Fetching categories from Vali API");
+        log.info("Using base URL: {}", baseUrl);
+
+        String fullUrl = baseUrl + "/categories";
+        log.info("Full URL: {}", fullUrl);
+
+        try {
+            List<CategoryRequestFromExternalDto> categories = webClient.get()
+                    .uri(fullUrl)
+                    .headers(h -> h.addAll(createHeaders()))
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<CategoryRequestFromExternalDto>>() {})
+                    .timeout(Duration.ofMillis(timeout))
+                    .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay))
+                            .filter(throwable ->
+                                    throwable instanceof WebClientResponseException.TooManyRequests ||
+                                            throwable instanceof WebClientResponseException.ServiceUnavailable))
+                    .doOnError(WebClientResponseException.class, ex -> {
+                        log.error("Error fetching categories - Status: {}, Response: {}",
+                                ex.getStatusCode(), ex.getResponseBodyAsString());
+                    })
+                    .doOnError(throwable -> {
+                        log.error("Generic error fetching categories: {}", throwable.getMessage());
+                    })
+                    .block();
+
+            log.info("Successfully fetched {} categories", categories != null ? categories.size() : 0);
+            return categories;
+
+        } catch (Exception e) {
+            log.error("Failed to fetch categories from Vali API: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to fetch categories from Vali API", e);
+        }
     }
 
     public List<ManufacturerRequestDto> getManufacturers() {
-        log.debug("Fetching manufacturers from external API");
+        log.info("Fetching manufacturers from Vali API");
+        String fullUrl = baseUrl + "/manufacturers";
 
-        return webClient.get()
-                .uri(baseUrl + "/manufacturers")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiToken)
-                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<ManufacturerRequestDto>>() {
-                })
-                .timeout(Duration.ofMillis(timeout))
-                .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
-                .doOnError(WebClientResponseException.class, ex ->
-                        log.error("Error fetching manufacturers: {} - {}", ex.getStatusCode(), ex.getResponseBodyAsString()))
-                .block();
+        try {
+            List<ManufacturerRequestDto> manufacturers = webClient.get()
+                    .uri(fullUrl)
+                    .headers(h -> h.addAll(createHeaders()))
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<ManufacturerRequestDto>>() {})
+                    .timeout(Duration.ofMillis(timeout))
+                    .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
+                    .doOnError(WebClientResponseException.class, ex ->
+                            log.error("Error fetching manufacturers: {} - {}",
+                                    ex.getStatusCode(), ex.getResponseBodyAsString()))
+                    .block();
+
+            log.info("Successfully fetched {} manufacturers", manufacturers != null ? manufacturers.size() : 0);
+            return manufacturers;
+
+        } catch (Exception e) {
+            log.error("Failed to fetch manufacturers from Vali API: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to fetch manufacturers from Vali API", e);
+        }
     }
 
     public List<ParameterRequestDto> getParametersByCategory(Long categoryId) {
         log.debug("Fetching parameters for category: {}", categoryId);
+        String fullUrl = baseUrl + "/parameters/" + categoryId;
 
         try {
             List<ParameterRequestDto> parameters = webClient.get()
-                    .uri(baseUrl + "/parameters/" + categoryId)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiToken)
-                    .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                    .uri(fullUrl)
+                    .headers(h -> h.addAll(createHeaders()))
                     .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<ParameterRequestDto>>() {
-                    })
+                    .bodyToMono(new ParameterizedTypeReference<List<ParameterRequestDto>>() {})
                     .timeout(Duration.ofMillis(timeout))
                     .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
                     .onErrorResume(DataBufferLimitException.class, ex -> {
@@ -113,43 +157,46 @@ public class ValiApiService {
 
     public List<ProductRequestDto> getProductsByCategory(Long categoryId) {
         log.debug("Fetching products for category: {}", categoryId);
+        String fullUrl = baseUrl + "/products/by_category/" + categoryId + "/full";
 
-        List<ProductRequestDto> products = webClient.get()
-                .uri(baseUrl + "/products/by_category/" + categoryId + "/full")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiToken)
-                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<ProductRequestDto>>() {
-                })
-                .timeout(Duration.ofMillis(timeout))
-                .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
-                .onErrorResume(WebClientResponseException.class, ex -> {
-                    log.warn("Error fetching products for category {}: {} - {}",
-                            categoryId, ex.getStatusCode(), ex.getResponseBodyAsString());
-                    return Mono.just(List.of());
-                })
-                .block();
+        try {
+            List<ProductRequestDto> products = webClient.get()
+                    .uri(fullUrl)
+                    .headers(h -> h.addAll(createHeaders()))
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<ProductRequestDto>>() {})
+                    .timeout(Duration.ofMillis(timeout))
+                    .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
+                    .onErrorResume(WebClientResponseException.class, ex -> {
+                        log.warn("Error fetching products for category {}: {} - {}",
+                                categoryId, ex.getStatusCode(), ex.getResponseBodyAsString());
+                        return Mono.just(List.of());
+                    })
+                    .block();
 
-        if (products == null) {
-            log.warn("No products found for category {}", categoryId);
+            if (products == null) {
+                log.warn("No products found for category {}", categoryId);
+                return List.of();
+            }
+
+            log.debug("Found {} products for category {}", products.size(), categoryId);
+            return products;
+        } catch (Exception e) {
+            log.error("Failed to fetch products for category {}: {}", categoryId, e.getMessage());
             return List.of();
         }
-
-        log.debug("Found {} products for category {}", products.size(), categoryId);
-        return products;
     }
 
     public List<DocumentRequestDto> getDocumentsByProduct(Long productId) {
         log.debug("Fetching documents for product: {}", productId);
+        String fullUrl = baseUrl + "/products/" + productId + "/documents";
 
         try {
             List<DocumentRequestDto> documents = webClient.get()
-                    .uri(baseUrl + "/products/" + productId + "/documents")
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiToken)
-                    .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                    .uri(fullUrl)
+                    .headers(h -> h.addAll(createHeaders()))
                     .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<DocumentRequestDto>>() {
-                    })
+                    .bodyToMono(new ParameterizedTypeReference<List<DocumentRequestDto>>() {})
                     .timeout(Duration.ofMillis(timeout))
                     .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
                     .onErrorResume(WebClientResponseException.class, ex -> {
@@ -174,16 +221,15 @@ public class ValiApiService {
     }
 
     public List<DocumentRequestDto> getAllDocuments() {
-        log.debug("Fetching all documents from external API");
+        log.debug("Fetching all documents from Vali API");
+        String fullUrl = baseUrl + "/documents";
 
         try {
             List<DocumentRequestDto> documents = webClient.get()
-                    .uri(baseUrl + "/documents")
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiToken)
-                    .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                    .uri(fullUrl)
+                    .headers(h -> h.addAll(createHeaders()))
                     .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<DocumentRequestDto>>() {
-                    })
+                    .bodyToMono(new ParameterizedTypeReference<List<DocumentRequestDto>>() {})
                     .timeout(Duration.ofMillis(timeout))
                     .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
                     .onErrorResume(DataBufferLimitException.class, ex -> {

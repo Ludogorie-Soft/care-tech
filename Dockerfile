@@ -40,5 +40,6 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# ✅ CHANGED: Use JAVA_OPTS from environment variable
+# If JAVA_OPTS is not set, use safe defaults for 2GB instance
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS:--Xmx768m -Xms256m -XX:MaxMetaspaceSize=128m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+UseStringDeduplication -XX:+ParallelRefProcEnabled -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/techstore-logs/heap_dump.hprof} -jar app.jar"]

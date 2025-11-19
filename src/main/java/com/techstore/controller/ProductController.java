@@ -240,13 +240,12 @@ public class ProductController {
             @RequestPart("product") @Valid ProductUpdateRequestDTO productData,
             @RequestPart(value = "newPrimaryImage", required = false) MultipartFile newPrimaryImage,
             @RequestPart(value = "newAdditionalImages", required = false) List<MultipartFile> newAdditionalImages,
-            @RequestPart(value = "imageOperations", required = false) ProductImageOperationsDTO imageOperations,
-            @RequestParam(defaultValue = "en") String language) {
+            @RequestParam(defaultValue = "en") String language) { // Removed imageOperations from @RequestPart
 
         log.info("Updating product with id: {} with image operations", id);
 
         ProductResponseDTO updatedProduct = productService.updateProductWithImages(
-                id, productData, newPrimaryImage, newAdditionalImages, imageOperations, language);
+                id, productData, newPrimaryImage, newAdditionalImages, language); // Removed imageOperations from parameters
 
         return ResponseEntity.ok(updatedProduct);
     }

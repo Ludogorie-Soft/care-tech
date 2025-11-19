@@ -1,5 +1,7 @@
 package com.techstore.config;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -11,6 +13,7 @@ import reactor.netty.resources.ConnectionProvider;
 import java.time.Duration;
 
 @Configuration
+@Slf4j
 public class WebClientConfig {
 
     @Bean
@@ -39,7 +42,8 @@ public class WebClientConfig {
     }
 
     @Bean("largeResponseWebClient")
-    public WebClient largeResponseWebClient() {
+    public WebClient largeResponseWebClient(@Value("${vali.api.base-url}") String valiBaseUrl) {
+
         ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
                 .codecs(conf -> {
                     conf.defaultCodecs().maxInMemorySize(50 * 1024 * 1024);
@@ -58,9 +62,12 @@ public class WebClientConfig {
                 .responseTimeout(Duration.ofMinutes(5))
                 .keepAlive(true);
 
-        return WebClient.builder()
+        WebClient client = WebClient.builder()
+                .baseUrl(valiBaseUrl)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .exchangeStrategies(exchangeStrategies)
                 .build();
+
+        return client;
     }
 }
