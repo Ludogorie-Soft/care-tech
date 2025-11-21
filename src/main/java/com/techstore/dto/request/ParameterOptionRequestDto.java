@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class ParameterOptionRequestDto {
-    private Long id;
+    private Long externalId;
     private List<NameDto> name;
     private Integer order;
 }

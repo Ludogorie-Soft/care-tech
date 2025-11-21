@@ -186,11 +186,11 @@ public class ValiSyncService {
                     List<Parameter> parametersToSave = new ArrayList<>();
 
                     for (ParameterRequestDto extParam : externalParameters) {
-                        Parameter parameter = existingParameters.get(extParam.getId().toString());
+                        Parameter parameter = existingParameters.get(extParam.getExternalId().toString());
 
                         if (parameter == null) {
                             parameter = parameterRepository
-                                    .findByExternalIdAndCategoryId(extParam.getId(), category.getId())
+                                    .findByExternalIdAndCategoryId(extParam.getExternalId(), category.getId())
                                     .orElseGet(() -> createParameterFromExternal(extParam, category));
                             created++;
                         } else {
@@ -322,7 +322,7 @@ public class ValiSyncService {
         List<ParameterOption> optionsToSave = new ArrayList<>();
 
         for (ParameterOptionRequestDto extOption : externalOptions) {
-            ParameterOption option = existingOptions.get(extOption.getId()); // Use external ID for lookup
+            ParameterOption option = existingOptions.get(extOption.getExternalId()); // Use external ID for lookup
 
             if (option == null) {
                 option = createValiParameterOptionFromExternal(extOption, parameter);
@@ -343,7 +343,7 @@ public class ValiSyncService {
     private ParameterOption createValiParameterOptionFromExternal(ParameterOptionRequestDto extOption, Parameter parameter) {
         try {
             ParameterOption option = new ParameterOption();
-            option.setExternalId(extOption.getId());
+            option.setExternalId(extOption.getExternalId());
             option.setParameter(parameter);
             option.setOrder(extOption.getOrder());
 
@@ -359,7 +359,7 @@ public class ValiSyncService {
 
             return option;
         } catch (Exception e) {
-            log.error("Error creating Vali parameter option with external ID {}: {}", extOption.getId(), e.getMessage(), e); // Log the full exception
+            log.error("Error creating Vali parameter option with external ID {}: {}", extOption.getExternalId(), e.getMessage(), e); // Log the full exception
             return null;
         }
     }
@@ -607,7 +607,7 @@ public class ValiSyncService {
 
     private Parameter createParameterFromExternal(ParameterRequestDto extParameter, Category category) {
         Parameter parameter = new Parameter();
-        parameter.setExternalId(extParameter.getId());
+        parameter.setExternalId(extParameter.getExternalId());
         parameter.setCategory(category);
         parameter.setOrder(extParameter.getOrder());
         parameter.setPlatform(Platform.VALI);

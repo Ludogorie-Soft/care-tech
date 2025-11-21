@@ -12,13 +12,13 @@ import org.mapstruct.Mapping;
 public interface ParameterMapper {
 
     @Mapping(target = "name", expression = "java(getLocalizedName(parameter, language))")
-    @Mapping(target = "categoryId", source = "parameter.category.externalId")
+    @Mapping(target = "categoryId", source = "parameter.category.id")
     @Mapping(target = "categoryName", expression = "java(getCategoryName(parameter, language))")
     @Mapping(target = "options", expression = "java(mapOptions(parameter, language))")
     ParameterResponseDto toResponseDto(Parameter parameter, @Context String language);
 
     @Mapping(target = "name", expression = "java(getLocalizedOptionName(option, language))")
-    @Mapping(target = "parameterId", source = "parameter.externalId")
+    @Mapping(target = "parameterId", source = "parameter.id")
     @Mapping(target = "parameterName", expression = "java(getParameterName(option, language))")
     ParameterOptionResponseDto toOptionResponseDto(ParameterOption option, @Context String language);
 
@@ -41,6 +41,7 @@ public interface ParameterMapper {
     }
 
     default java.util.List<ParameterOptionResponseDto> mapOptions(Parameter parameter, String language) {
+        if (parameter.getOptions() == null) return java.util.List.of();
         return parameter.getOptions().stream()
                 .sorted((o1, o2) -> Integer.compare(o1.getOrder(), o2.getOrder()))
                 .map(option -> toOptionResponseDto(option, language))

@@ -24,7 +24,7 @@ ParameterRepository extends JpaRepository<Parameter, Long> {
     boolean existsByNameBgIgnoreCaseAndCategory(String nameBg, Category category);
     boolean existsByNameEnIgnoreCaseAndCategory(String nameEn, Category category);
 
-    Set<Parameter> findByCategoryIdOrderByOrderAsc(Long categoryId);
+    List<Parameter> findByCategoryIdOrderByOrderAsc(Long categoryId);
 
     @Query("SELECT DISTINCT p FROM Parameter p " +
             "JOIN p.category c " +
@@ -53,4 +53,13 @@ ParameterRepository extends JpaRepository<Parameter, Long> {
 
     @Query("SELECT COUNT(p) FROM Parameter p WHERE p.asbisKey IS NOT NULL")
     Long countAsbisParameters();
+
+    @Query(value = "SELECT DISTINCT ON (name_bg, name_en) * " +
+            "FROM parameters " +
+            "WHERE category_id = :categoryId " +
+            "ORDER BY name_bg, name_en, sort_order ASC",
+            nativeQuery = true)
+    List<Parameter> findUniqueByCategoryId(@Param("categoryId") Long categoryId);
+
+
 }

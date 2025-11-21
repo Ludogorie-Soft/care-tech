@@ -14,6 +14,14 @@ import java.util.Optional;
 @Repository
 public interface ParameterOptionRepository extends JpaRepository<ParameterOption, Long> {
 
+    @Query(value = "SELECT DISTINCT ON (name_bg, name_en) * " +
+            "FROM parameter_options " +
+            "WHERE parameter_id = :parameterId " +
+            "ORDER BY name_bg, name_en, sort_order ASC",
+            nativeQuery = true)
+    List<ParameterOption> findUniqueOptionsByParameter(@Param("parameterId") Long parameterId);
+
+
     Optional<ParameterOption> findByExternalIdAndParameterId(Long externalId, Long parameterId);
 
     List<ParameterOption> findByParameterIdOrderByOrderAsc(Long parameterId);

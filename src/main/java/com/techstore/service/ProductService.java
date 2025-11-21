@@ -89,6 +89,8 @@ public class ProductService {
                 product.setAdditionalImages(additionalImageUrls);
             }
 
+            product.generateSlug();
+
             product = productRepository.save(product);
             log.info("Product created successfully with id: {}", product.getId());
 
@@ -232,6 +234,7 @@ public class ProductService {
             handleImageReordering(product, productData);
             validateProductHasImages(product);
             updateProductFieldsFromRest(product, productData);
+            product.generateSlug();
             Product savedProduct = productRepository.save(product);
 
             if (!s3CleanupList.isEmpty()) {

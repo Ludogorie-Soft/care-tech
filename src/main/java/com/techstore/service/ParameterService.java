@@ -22,10 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,7 +41,7 @@ public class ParameterService {
         log.info("Creating parameter for category ID: {}", requestDto.getCategoryId());
 
         String context = ExceptionHelper.createErrorContext(
-                "createParameter", "Parameter", requestDto.getId(),
+                "createParameter", "Parameter", requestDto.getExternalId(),
                 "category: " + requestDto.getCategoryId());
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
@@ -130,17 +127,23 @@ public class ParameterService {
         log.debug("Fetching parameters for available products in category: {}", categoryId);
 
         validateCategoryId(categoryId);
-
-        // Verify category exists
         findCategoryByIdOrThrow(categoryId);
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
             List<Parameter> parameters = parameterRepository.findParametersForAvailableProductsByCategory(categoryId);
+
+            parameters.forEach(parameter -> {
+                List<ParameterOption> uniqueOptions =
+                        parameterOptionRepository.findUniqueOptionsByParameter(parameter.getId());
+                parameter.setOptions(new HashSet<>(uniqueOptions));
+            });
+
             return parameters.stream()
                     .map(parameter -> parameterMapper.toResponseDto(parameter, language))
                     .toList();
         }, "fetch parameters for category: " + categoryId);
     }
+
 
     @Transactional(readOnly = true)
     @Cacheable(value = "parameters", key = "'category_all_' + #categoryId + '_' + #language")
@@ -148,17 +151,24 @@ public class ParameterService {
         log.debug("Fetching all parameters for category: {}", categoryId);
 
         validateCategoryId(categoryId);
-
-        // Verify category exists
         findCategoryByIdOrThrow(categoryId);
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            Set<Parameter> parameters = parameterRepository.findByCategoryIdOrderByOrderAsc(categoryId);
+            List<Parameter> parameters = parameterRepository.findUniqueByCategoryId(categoryId);
+
+            parameters.forEach(parameter -> {
+                List<ParameterOption> uniqueOptions =
+                        parameterOptionRepository.findUniqueOptionsByParameter(parameter.getId());
+                parameter.setOptions(new HashSet<>(uniqueOptions));
+            });
+
             return parameters.stream()
-                    .map(parameter -> parameterMapper.toResponseDto(parameter, language))
+                    .map(p -> parameterMapper.toResponseDto(p, language))
                     .toList();
         }, "fetch all parameters for category: " + categoryId);
     }
+
+
 
     @Transactional(readOnly = true)
     @Cacheable(value = "parameters", key = "#id + '_' + #language")
@@ -229,10 +239,6 @@ public class ParameterService {
             throw new ValidationException("Parameter request cannot be null");
         }
 
-        if (isCreate && requestDto.getId() == null) {
-            throw new ValidationException("External ID is required for parameter creation");
-        }
-
         if (requestDto.getCategoryId() == null) {
             throw new ValidationException("Category ID is required");
         }
@@ -290,14 +296,10 @@ public class ParameterService {
         Set<Integer> orders = new java.util.HashSet<>();
 
         for (ParameterOptionRequestDto option : options) {
-            if (option.getId() == null) {
-                throw new ValidationException("Parameter option external ID is required");
+            if (externalIds.contains(option.getExternalId())) {
+                throw new ValidationException("Duplicate parameter option external ID: " + option.getExternalId());
             }
-
-            if (externalIds.contains(option.getId())) {
-                throw new ValidationException("Duplicate parameter option external ID: " + option.getId());
-            }
-            externalIds.add(option.getId());
+            externalIds.add(option.getExternalId());
 
             if (option.getOrder() != null) {
                 if (option.getOrder() < 0) {
@@ -410,11 +412,11 @@ public class ParameterService {
 
     private void checkForDuplicateParameter(ParameterRequestDto requestDto, Category category) {
         // Check by external ID if this is a sync operation
-        if (requestDto.getId() != null) {
-            if (parameterRepository.findByExternalIdAndCategoryId(requestDto.getId(), category.getId()).isPresent()) {
+        if (requestDto.getExternalId() != null) {
+            if (parameterRepository.findByExternalIdAndCategoryId(requestDto.getExternalId(), category.getId()).isPresent()) {
                 throw new DuplicateResourceException(
                         String.format("Parameter already exists with external ID %d in category %d",
-                                requestDto.getId(), category.getId()));
+                                requestDto.getExternalId(), category.getId()));
             }
         }
 
@@ -448,7 +450,7 @@ public class ParameterService {
 
     private Parameter createParameterFromRequest(ParameterRequestDto requestDto, Category category) {
         Parameter parameter = new Parameter();
-        parameter.setExternalId(requestDto.getId());
+        parameter.setExternalId(requestDto.getExternalId());
         parameter.setCategory(category);
         parameter.setOrder(requestDto.getOrder() != null ? requestDto.getOrder() : 0);
 
@@ -511,7 +513,7 @@ public class ParameterService {
         Set<Long> processedExternalIds = new java.util.HashSet<>();
 
         for (ParameterOptionRequestDto optionDto : optionDtos) {
-            ParameterOption option = existingOptions.get(optionDto.getId());
+            ParameterOption option = existingOptions.get(optionDto.getExternalId());
 
             if (option == null) {
                 // Create new option
@@ -522,7 +524,7 @@ public class ParameterService {
             }
 
             optionsToSave.add(option);
-            processedExternalIds.add(optionDto.getId());
+            processedExternalIds.add(optionDto.getExternalId());
         }
 
         // Delete options that are no longer in the request
@@ -541,7 +543,7 @@ public class ParameterService {
 
     private ParameterOption createParameterOptionFromRequest(ParameterOptionRequestDto optionDto, Parameter parameter) {
         ParameterOption option = new ParameterOption();
-        option.setExternalId(optionDto.getId());
+        option.setExternalId(optionDto.getExternalId());
         option.setParameter(parameter);
         option.setOrder(optionDto.getOrder() != null ? optionDto.getOrder() : 0);
 
