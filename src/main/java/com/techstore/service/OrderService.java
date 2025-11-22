@@ -35,6 +35,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -385,9 +386,8 @@ public class OrderService {
      * Generate unique order number
      */
     private String generateOrderNumber() {
-        String year = String.valueOf(Year.now().getValue());
-        long count = orderRepository.count() + 1;
-        return String.format("ORD-%s-%05d", year, count);
+        String uniqueId = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        return String.format("ORD-%s", uniqueId);
     }
 
     /**

@@ -126,4 +126,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findTop10ByOrderByCreatedAtDesc();
     List<Order> findTop20ByOrderByCreatedAtDesc();
     List<Order> findTop50ByOrderByCreatedAtDesc();
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.orderNumber LIKE :prefix%")
+    long countByOrderNumberStartingWith(@Param("prefix") String prefix);
+
+    boolean existsByOrderNumber(String orderNumber);
 }
