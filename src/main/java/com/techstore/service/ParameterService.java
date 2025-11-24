@@ -296,10 +296,12 @@ public class ParameterService {
         Set<Integer> orders = new java.util.HashSet<>();
 
         for (ParameterOptionRequestDto option : options) {
-            if (externalIds.contains(option.getExternalId())) {
-                throw new ValidationException("Duplicate parameter option external ID: " + option.getExternalId());
+            if (option.getExternalId() != null) {
+                if (externalIds.contains(option.getExternalId())) {
+                    throw new ValidationException("Duplicate parameter option external ID: " + option.getExternalId());
+                }
+                externalIds.add(option.getExternalId());
             }
-            externalIds.add(option.getExternalId());
 
             if (option.getOrder() != null) {
                 if (option.getOrder() < 0) {
@@ -502,33 +504,46 @@ public class ParameterService {
             return; // Don't update options if not provided
         }
 
-        // Get existing options
-        Map<Long, ParameterOption> existingOptions = parameterOptionRepository
+        // Get existing options and map them by external ID, handling duplicates
+        Map<Long, ParameterOption> existingOptionsByExternalId = parameterOptionRepository
                 .findByParameterIdOrderByOrderAsc(parameter.getId())
                 .stream()
-                .collect(Collectors.toMap(ParameterOption::getExternalId, option -> option));
+                .filter(opt -> opt.getExternalId() != null)
+                .collect(Collectors.toMap(
+                        ParameterOption::getExternalId,
+                        option -> option,
+                        (option1, option2) -> {
+                            log.warn("Duplicate externalId {} found for parameter options with IDs {} and {}. Keeping the one with the higher ID.",
+                                    option1.getExternalId(), option1.getId(), option2.getId());
+                            return option1.getId() > option2.getId() ? option1 : option2;
+                        }
+                ));
 
-        // Process provided options
         List<ParameterOption> optionsToSave = new ArrayList<>();
-        Set<Long> processedExternalIds = new java.util.HashSet<>();
+        Set<Long> processedExternalIds = new HashSet<>();
 
+        // Separate new options from updates
         for (ParameterOptionRequestDto optionDto : optionDtos) {
-            ParameterOption option = existingOptions.get(optionDto.getExternalId());
-
-            if (option == null) {
-                // Create new option
-                option = createParameterOptionFromRequest(optionDto, parameter);
+            if (optionDto.getExternalId() == null) {
+                // This is a new option, create it
+                optionsToSave.add(createParameterOptionFromRequest(optionDto, parameter));
             } else {
-                // Update existing option
-                updateParameterOptionFromRequest(option, optionDto);
+                // This is an option with an external ID, process as an update or create
+                processedExternalIds.add(optionDto.getExternalId());
+                ParameterOption existingOption = existingOptionsByExternalId.get(optionDto.getExternalId());
+                if (existingOption != null) {
+                    // Update existing option
+                    updateParameterOptionFromRequest(existingOption, optionDto);
+                    optionsToSave.add(existingOption);
+                } else {
+                    // Create new option with external ID
+                    optionsToSave.add(createParameterOptionFromRequest(optionDto, parameter));
+                }
             }
-
-            optionsToSave.add(option);
-            processedExternalIds.add(optionDto.getExternalId());
         }
 
-        // Delete options that are no longer in the request
-        List<ParameterOption> optionsToDelete = existingOptions.values().stream()
+        // Delete options that are no longer in the request (only those with external IDs)
+        List<ParameterOption> optionsToDelete = existingOptionsByExternalId.values().stream()
                 .filter(option -> !processedExternalIds.contains(option.getExternalId()))
                 .collect(Collectors.toList());
 
