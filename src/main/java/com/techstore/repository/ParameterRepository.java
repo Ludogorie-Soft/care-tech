@@ -2,64 +2,63 @@ package com.techstore.repository;
 
 import com.techstore.entity.Category;
 import com.techstore.entity.Parameter;
-import com.techstore.entity.ParameterOption;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface
-ParameterRepository extends JpaRepository<Parameter, Long> {
+public interface ParameterRepository extends JpaRepository<Parameter, Long> {
 
     Optional<Parameter> findByExternalId(Long externalId);
 
-    List<Parameter> findAllByCategoryId(Long categoryId);
-
-    boolean existsByNameBgIgnoreCaseAndCategory(String nameBg, Category category);
-    boolean existsByNameEnIgnoreCaseAndCategory(String nameEn, Category category);
-
-    List<Parameter> findByCategoryIdOrderByOrderAsc(Long categoryId);
-
     @Query("SELECT DISTINCT p FROM Parameter p " +
-            "JOIN p.category c " +
+            "JOIN p.categories c " +
             "WHERE c.id = :categoryId " +
-            "AND EXISTS (SELECT prod FROM Product prod WHERE prod.category.id = c.id AND prod.status != com.techstore.enums.ProductStatus.NOT_AVAILABLE AND prod.active = true) " +
+            "AND EXISTS (" +
+            "  SELECT 1 FROM Product prod " +
+            "  WHERE prod.category.id = c.id " +
+            "  AND prod.status != com.techstore.enums.ProductStatus.NOT_AVAILABLE " +
+            "  AND prod.active = true" +
+            ") " +
             "ORDER BY p.order ASC")
     List<Parameter> findParametersForAvailableProductsByCategory(@Param("categoryId") Long categoryId);
 
-    Optional<Parameter> findByExternalIdAndCategoryId(Long externalId, Long categoryId);
+    @Query("SELECT p FROM Parameter p JOIN p.categories c WHERE c.id = :categoryId")
+    List<Parameter> findByCategoryId(@Param("categoryId") Long categoryId);
 
-    List<Parameter> findByExternalIdInAndCategoryId(Collection<Long> externalIds, Long categoryId); // New method
+    @Query("SELECT p FROM Parameter p JOIN p.categories c WHERE c.id = :categoryId ORDER BY p.order ASC")
+    List<Parameter> findByCategoryIdOrderByOrderAsc(@Param("categoryId") Long categoryId);
 
-    Optional<Parameter> findByCategoryAndNameBg(Category category, String nameBg);
+    @Query("SELECT p FROM Parameter p JOIN p.categories c WHERE c.id = :categoryId AND p.externalId IN :externalIds")
+    List<Parameter> findByExternalIdInAndCategoryId(
+            @Param("externalIds") Set<Long> externalIds,
+            @Param("categoryId") Long categoryId
+    );
 
-    List<Parameter> findByCategoryId(Long categoryId);
+    @Query("SELECT p FROM Parameter p JOIN p.categories c WHERE p.tekraKey = :tekraKey AND c.id = :categoryId")
+    Optional<Parameter> findByTekraKeyAndCategoryId(
+            @Param("tekraKey") String tekraKey,
+            @Param("categoryId") Long categoryId
+    );
 
-    long countByCategoryId(Long categoryId);
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +
+            "FROM Parameter p JOIN p.categories c " +
+            "WHERE LOWER(p.nameBg) = LOWER(:nameBg) AND c = :category")
+    boolean existsByNameBgIgnoreCaseAndCategories(
+            @Param("nameBg") String nameBg,
+            @Param("category") Category category
+    );
 
-    Optional<Parameter> findByTekraKeyAndCategoryId(String tekraKey, Long categoryId);
-
-    @Query("SELECT p FROM Parameter p WHERE p.asbisKey = :key AND p.category.id = :categoryId")
-    Optional<Parameter> findByAsbisKeyAndCategoryId(@Param("key") String key, @Param("categoryId") Long categoryId);
-
-    @Query("SELECT p FROM Parameter p WHERE p.asbisKey IS NOT NULL")
-    List<Parameter> findAllAsbisParameters();
-
-    @Query("SELECT COUNT(p) FROM Parameter p WHERE p.asbisKey IS NOT NULL")
-    Long countAsbisParameters();
-
-    @Query(value = "SELECT DISTINCT ON (name_bg, name_en) * " +
-            "FROM parameters " +
-            "WHERE category_id = :categoryId " +
-            "ORDER BY name_bg, name_en, sort_order ASC",
-            nativeQuery = true)
-    List<Parameter> findUniqueByCategoryId(@Param("categoryId") Long categoryId);
-
-
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +
+            "FROM Parameter p JOIN p.categories c " +
+            "WHERE LOWER(p.nameEn) = LOWER(:nameEn) AND c = :category")
+    boolean existsByNameEnIgnoreCaseAndCategories(
+            @Param("nameEn") String nameEn,
+            @Param("category") Category category
+    );
 }

@@ -36,7 +36,7 @@ public class ParameterService {
     private final ParameterOptionRepository parameterOptionRepository;
     private final CategoryRepository categoryRepository;
 
-    @CacheEvict(value = "parameters", allEntries = true)
+    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
     public ParameterResponseDto createParameter(ParameterRequestDto requestDto, String language) {
         log.info("Creating parameter for category ID: {}", requestDto.getCategoryId());
 
@@ -45,20 +45,15 @@ public class ParameterService {
                 "category: " + requestDto.getCategoryId());
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            // Comprehensive validation
             validateParameterRequest(requestDto, true);
 
-            // Find and validate category
             Category category = findCategoryByIdOrThrow(requestDto.getCategoryId());
 
-            // Check for duplicates
             checkForDuplicateParameter(requestDto, category);
 
-            // Create parameter with options
             Parameter parameter = createParameterFromRequest(requestDto, category);
             parameter = parameterRepository.save(parameter);
 
-            // Create parameter options
             createParameterOptions(parameter, requestDto.getOptions());
 
             log.info("Parameter created successfully with id: {} and external id: {}",
@@ -69,28 +64,23 @@ public class ParameterService {
         }, context);
     }
 
-    @CacheEvict(value = "parameters", allEntries = true)
+    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
     public ParameterResponseDto updateParameter(Long id, ParameterRequestDto requestDto, String language) {
         log.info("Updating parameter with ID: {}", id);
 
         String context = ExceptionHelper.createErrorContext("updateParameter", "Parameter", id, null);
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            // Validate inputs
             validateParameterId(id);
             validateParameterRequest(requestDto, false);
 
-            // Find existing parameter
             Parameter existingParameter = findParameterByIdOrThrow(id);
 
-            // Validate parameter name uniqueness within category if changed
             validateParameterNameUniqueness(requestDto, existingParameter);
 
-            // Update parameter
             updateParameterFromRequest(existingParameter, requestDto);
             Parameter updatedParameter = parameterRepository.save(existingParameter);
 
-            // Update parameter options
             updateParameterOptions(updatedParameter, requestDto.getOptions());
 
             log.info("Parameter updated successfully with ID: {}", id);
@@ -99,7 +89,7 @@ public class ParameterService {
         }, context);
     }
 
-    @CacheEvict(value = "parameters", allEntries = true)
+    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
     public void deleteParameter(Long parameterId) {
         log.info("Deleting parameter with ID: {}", parameterId);
 
@@ -110,10 +100,8 @@ public class ParameterService {
 
             Parameter parameter = findParameterByIdOrThrow(parameterId);
 
-            // Business validation for deletion
             validateParameterDeletion(parameter);
 
-            // Delete parameter (cascade will handle options and product parameters)
             parameterRepository.delete(parameter);
 
             log.info("Parameter deleted successfully with ID: {}", parameterId);
@@ -144,7 +132,6 @@ public class ParameterService {
         }, "fetch parameters for category: " + categoryId);
     }
 
-
     @Transactional(readOnly = true)
     @Cacheable(value = "parameters", key = "'category_all_' + #categoryId + '_' + #language")
     public List<ParameterResponseDto> findByCategory(Long categoryId, String language) {
@@ -154,7 +141,8 @@ public class ParameterService {
         findCategoryByIdOrThrow(categoryId);
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            List<Parameter> parameters = parameterRepository.findUniqueByCategoryId(categoryId);
+            // ✅ Използваме новия Many-to-Many метод
+            List<Parameter> parameters = parameterRepository.findByCategoryIdOrderByOrderAsc(categoryId);
 
             parameters.forEach(parameter -> {
                 List<ParameterOption> uniqueOptions =
@@ -167,8 +155,6 @@ public class ParameterService {
                     .toList();
         }, "fetch all parameters for category: " + categoryId);
     }
-
-
 
     @Transactional(readOnly = true)
     @Cacheable(value = "parameters", key = "#id + '_' + #language")
@@ -205,9 +191,10 @@ public class ParameterService {
 
         Category category = findCategoryByIdOrThrow(categoryId);
 
+        // ✅ Използваме новия Many-to-Many query
         return "bg".equalsIgnoreCase(language) ?
-                parameterRepository.existsByNameBgIgnoreCaseAndCategory(parameterName.trim(), category) :
-                parameterRepository.existsByNameEnIgnoreCaseAndCategory(parameterName.trim(), category);
+                parameterRepository.existsByNameBgIgnoreCaseAndCategories(parameterName.trim(), category) :
+                parameterRepository.existsByNameEnIgnoreCaseAndCategories(parameterName.trim(), category);
     }
 
     // ========== PRIVATE VALIDATION METHODS ==========
@@ -247,15 +234,12 @@ public class ParameterService {
             throw new ValidationException("Parameter name is required");
         }
 
-        // Validate parameter names
         validateParameterNames(requestDto.getName());
 
-        // Validate order
         if (requestDto.getOrder() != null && requestDto.getOrder() < 0) {
             throw new ValidationException("Parameter order cannot be negative");
         }
 
-        // Validate options if provided
         if (requestDto.getOptions() != null && !requestDto.getOptions().isEmpty()) {
             validateParameterOptions(requestDto.getOptions());
         }
@@ -289,11 +273,11 @@ public class ParameterService {
 
     private void validateParameterOptions(List<ParameterOptionRequestDto> options) {
         if (options.isEmpty()) {
-            return; // Options are optional
+            return;
         }
 
-        Set<Long> externalIds = new java.util.HashSet<>();
-        Set<Integer> orders = new java.util.HashSet<>();
+        Set<Long> externalIds = new HashSet<>();
+        Set<Integer> orders = new HashSet<>();
 
         for (ParameterOptionRequestDto option : options) {
             if (option.getExternalId() != null) {
@@ -349,7 +333,6 @@ public class ParameterService {
     }
 
     private void validateParameterDeletion(Parameter parameter) {
-        // Check if parameter has product parameters (is being used by products)
         if (parameter.getOptions() != null) {
             long totalProductUsages = parameter.getOptions().stream()
                     .mapToLong(option -> option.getProductParameters() != null ?
@@ -363,6 +346,14 @@ public class ParameterService {
                                 getParameterDisplayName(parameter), totalProductUsages));
             }
         }
+
+        // ✅ Провери дали параметърът се използва в множество категории
+        if (parameter.getCategories() != null && parameter.getCategories().size() > 1) {
+            throw new BusinessLogicException(
+                    String.format("Cannot delete parameter '%s' because it is shared across %d categories. " +
+                                    "Please remove it from all categories first.",
+                            getParameterDisplayName(parameter), parameter.getCategories().size()));
+        }
     }
 
     private void validateParameterNameUniqueness(ParameterRequestDto requestDto, Parameter existingParameter) {
@@ -370,7 +361,6 @@ public class ParameterService {
             return;
         }
 
-        // Check if names are actually changing
         boolean nameChanged = false;
 
         for (var nameDto : requestDto.getName()) {
@@ -383,14 +373,17 @@ public class ParameterService {
                 currentName = existingParameter.getNameEn();
             }
 
-            if (!java.util.Objects.equals(newName, currentName)) {
+            if (!Objects.equals(newName, currentName)) {
                 nameChanged = true;
                 break;
             }
         }
 
         if (nameChanged) {
-            checkForDuplicateParameterNames(requestDto, existingParameter.getCategory());
+            // ✅ Проверяваме във ВСИЧКИ категории на параметъра
+            for (Category category : existingParameter.getCategories()) {
+                checkForDuplicateParameterNames(requestDto, category, existingParameter.getId());
+            }
         }
     }
 
@@ -413,20 +406,30 @@ public class ParameterService {
     }
 
     private void checkForDuplicateParameter(ParameterRequestDto requestDto, Category category) {
-        // Check by external ID if this is a sync operation
+        // ✅ Проверка по external ID (глобално)
         if (requestDto.getExternalId() != null) {
-            if (parameterRepository.findByExternalIdAndCategoryId(requestDto.getExternalId(), category.getId()).isPresent()) {
-                throw new DuplicateResourceException(
-                        String.format("Parameter already exists with external ID %d in category %d",
-                                requestDto.getExternalId(), category.getId()));
+            Optional<Parameter> existing = parameterRepository.findByExternalId(requestDto.getExternalId());
+            if (existing.isPresent()) {
+                // Параметърът съществува глобално
+                Parameter existingParam = existing.get();
+
+                // Проверяваме дали вече е в тази категория
+                if (existingParam.getCategories().contains(category)) {
+                    throw new DuplicateResourceException(
+                            String.format("Parameter already exists with external ID %d in category %d",
+                                    requestDto.getExternalId(), category.getId()));
+                }
+
+                log.info("Parameter with external ID {} exists globally but will be linked to category {}",
+                        requestDto.getExternalId(), category.getId());
             }
         }
 
-        // Check by names
-        checkForDuplicateParameterNames(requestDto, category);
+        // Проверка по имена
+        checkForDuplicateParameterNames(requestDto, category, null);
     }
 
-    private void checkForDuplicateParameterNames(ParameterRequestDto requestDto, Category category) {
+    private void checkForDuplicateParameterNames(ParameterRequestDto requestDto, Category category, Long excludeParameterId) {
         for (var nameDto : requestDto.getName()) {
             if (!StringUtils.hasText(nameDto.getText())) {
                 continue;
@@ -435,13 +438,26 @@ public class ParameterService {
             String parameterName = nameDto.getText().trim();
 
             if ("bg".equalsIgnoreCase(nameDto.getLanguageCode())) {
-                if (parameterRepository.existsByNameBgIgnoreCaseAndCategory(parameterName, category)) {
+                // ✅ Търсим параметри в тази категория с това име
+                List<Parameter> duplicates = parameterRepository.findByCategoryIdOrderByOrderAsc(category.getId())
+                        .stream()
+                        .filter(p -> parameterName.equalsIgnoreCase(p.getNameBg()))
+                        .filter(p -> excludeParameterId == null || !p.getId().equals(excludeParameterId))
+                        .toList();
+
+                if (!duplicates.isEmpty()) {
                     throw new DuplicateResourceException(
                             String.format("Parameter with Bulgarian name '%s' already exists in this category",
                                     parameterName));
                 }
             } else if ("en".equalsIgnoreCase(nameDto.getLanguageCode())) {
-                if (parameterRepository.existsByNameEnIgnoreCaseAndCategory(parameterName, category)) {
+                List<Parameter> duplicates = parameterRepository.findByCategoryIdOrderByOrderAsc(category.getId())
+                        .stream()
+                        .filter(p -> parameterName.equalsIgnoreCase(p.getNameEn()))
+                        .filter(p -> excludeParameterId == null || !p.getId().equals(excludeParameterId))
+                        .toList();
+
+                if (!duplicates.isEmpty()) {
                     throw new DuplicateResourceException(
                             String.format("Parameter with English name '%s' already exists in this category",
                                     parameterName));
@@ -453,7 +469,11 @@ public class ParameterService {
     private Parameter createParameterFromRequest(ParameterRequestDto requestDto, Category category) {
         Parameter parameter = new Parameter();
         parameter.setExternalId(requestDto.getExternalId());
-        parameter.setCategory(category);
+
+        // ✅ Инициализираме categories Set и добавяме категорията
+        parameter.setCategories(new HashSet<>());
+        parameter.getCategories().add(category);
+
         parameter.setOrder(requestDto.getOrder() != null ? requestDto.getOrder() : 0);
 
         setParameterNamesFromRequest(parameter, requestDto.getName());
@@ -468,6 +488,15 @@ public class ParameterService {
 
         if (requestDto.getName() != null && !requestDto.getName().isEmpty()) {
             setParameterNamesFromRequest(parameter, requestDto.getName());
+        }
+
+        // ✅ Ако се предава категория, добавяме я към Set-а
+        if (requestDto.getCategoryId() != null) {
+            Category category = findCategoryByIdOrThrow(requestDto.getCategoryId());
+            if (!parameter.getCategories().contains(category)) {
+                parameter.getCategories().add(category);
+                log.info("Added category {} to parameter {}", category.getId(), parameter.getId());
+            }
         }
     }
 
@@ -501,10 +530,9 @@ public class ParameterService {
 
     private void updateParameterOptions(Parameter parameter, List<ParameterOptionRequestDto> optionDtos) {
         if (optionDtos == null) {
-            return; // Don't update options if not provided
+            return;
         }
 
-        // Get existing options and map them by external ID, handling duplicates
         Map<Long, ParameterOption> existingOptionsByExternalId = parameterOptionRepository
                 .findByParameterIdOrderByOrderAsc(parameter.getId())
                 .stream()
@@ -522,27 +550,21 @@ public class ParameterService {
         List<ParameterOption> optionsToSave = new ArrayList<>();
         Set<Long> processedExternalIds = new HashSet<>();
 
-        // Separate new options from updates
         for (ParameterOptionRequestDto optionDto : optionDtos) {
             if (optionDto.getExternalId() == null) {
-                // This is a new option, create it
                 optionsToSave.add(createParameterOptionFromRequest(optionDto, parameter));
             } else {
-                // This is an option with an external ID, process as an update or create
                 processedExternalIds.add(optionDto.getExternalId());
                 ParameterOption existingOption = existingOptionsByExternalId.get(optionDto.getExternalId());
                 if (existingOption != null) {
-                    // Update existing option
                     updateParameterOptionFromRequest(existingOption, optionDto);
                     optionsToSave.add(existingOption);
                 } else {
-                    // Create new option with external ID
                     optionsToSave.add(createParameterOptionFromRequest(optionDto, parameter));
                 }
             }
         }
 
-        // Delete options that are no longer in the request (only those with external IDs)
         List<ParameterOption> optionsToDelete = existingOptionsByExternalId.values().stream()
                 .filter(option -> !processedExternalIds.contains(option.getExternalId()))
                 .collect(Collectors.toList());

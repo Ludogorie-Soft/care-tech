@@ -152,6 +152,7 @@ server:
 # LOGGING CONFIGURATION
 logging:
     level:
+#        org.flywaydb: DEBUG
         org.hibernate.SQL: WARN
         org.hibernate.type.descriptor.sql: WARN
         org.hibernate.tool.schema: WARN

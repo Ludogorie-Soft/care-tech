@@ -10,9 +10,24 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface ParameterOptionRepository extends JpaRepository<ParameterOption, Long> {
+
+    List<ParameterOption> findByParameterIdOrderByOrderAsc(Long parameterId);
+
+    @Query("SELECT po FROM ParameterOption po " +
+            "WHERE po.externalId IN :externalIds " +
+            "AND po.parameter.id IN (" +
+            "    SELECT p.id FROM Parameter p JOIN p.categories c WHERE c.id = :categoryId" +
+            ")")
+    List<ParameterOption> findByExternalIdInAndParameterCategoryId(
+            @Param("externalIds") Set<Long> externalIds,
+            @Param("categoryId") Long categoryId
+    );
+
+    Optional<ParameterOption> findByExternalId(Long externalId);
 
     @Query(value = "SELECT DISTINCT ON (name_bg, name_en) * " +
             "FROM parameter_options " +
@@ -24,10 +39,5 @@ public interface ParameterOptionRepository extends JpaRepository<ParameterOption
 
     Optional<ParameterOption> findByExternalIdAndParameterId(Long externalId, Long parameterId);
 
-    List<ParameterOption> findByParameterIdOrderByOrderAsc(Long parameterId);
-
     Optional<ParameterOption> findByParameterAndNameBg(Parameter parameter, String nameBg);
-
-    @Query("SELECT po FROM ParameterOption po JOIN po.parameter p WHERE po.externalId IN :externalIds AND p.category.id = :categoryId")
-    List<ParameterOption> findByExternalIdInAndParameterCategoryId(@Param("externalIds") Collection<Long> externalIds, @Param("categoryId") Long categoryId);
 }

@@ -173,7 +173,7 @@ public class MostSyncService {
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("Starting Most parameters synchronization");
+            log.info("Starting Most parameters synchronization - Many-to-Many VERSION");
 
             Map<String, Set<String>> parametersMap = mostApiService.extractUniqueParameters();
 
@@ -188,6 +188,16 @@ public class MostSyncService {
             // Group parameters by category
             List<Map<String, Object>> allProducts = mostApiService.getAllProducts();
             Map<String, Map<String, Set<String>>> categorizedParameters = groupParametersByCategory(allProducts);
+
+            // ✅ Глобален кеш на параметри по нормализирано име
+            Map<String, Parameter> globalParametersCache = parameterRepository.findAll()
+                    .stream()
+                    .filter(p -> p.getNameBg() != null)
+                    .collect(Collectors.toMap(
+                            p -> normalizeParameterName(p.getNameBg()),
+                            p -> p,
+                            (existing, duplicate) -> existing
+                    ));
 
             for (Map.Entry<String, Map<String, Set<String>>> catEntry : categorizedParameters.entrySet()) {
                 String categoryName = catEntry.getKey();
@@ -204,29 +214,38 @@ public class MostSyncService {
                     Category category = categoryOpt.get();
                     log.info("Processing {} parameters for category: {}", categoryParams.size(), categoryName);
 
-                    // Get existing parameters for this category
-                    Map<String, Parameter> existingParameters = parameterRepository.findByCategoryId(category.getId())
-                            .stream()
-                            .filter(p -> p.getNameBg() != null)
-                            .collect(Collectors.toMap(
-                                    p -> normalizeParameterName(p.getNameBg()),
-                                    p -> p,
-                                    (existing, duplicate) -> existing
-                            ));
-
                     for (Map.Entry<String, Set<String>> paramEntry : categoryParams.entrySet()) {
                         try {
                             String paramName = paramEntry.getKey();
                             Set<String> paramValues = paramEntry.getValue();
 
                             String normalizedName = normalizeParameterName(paramName);
-                            Parameter parameter = existingParameters.get(normalizedName);
+                            Parameter parameter = globalParametersCache.get(normalizedName);
+                            boolean isNewParameter = false;
 
                             if (parameter == null) {
-                                parameter = createMostParameter(paramName, category);
-                                parameter = parameterRepository.save(parameter);
-                                existingParameters.put(normalizedName, parameter);
+                                // Създаваме нов параметър
+                                parameter = new Parameter();
+                                parameter.setNameBg(paramName);
+                                parameter.setNameEn(paramName);
+                                parameter.setPlatform(Platform.MOST);
+                                parameter.setOrder(50);
+                                parameter.setCategories(new HashSet<>());
+                                isNewParameter = true;
+                            }
+
+                            // ✅ Добавяме категорията към параметъра
+                            if (!parameter.getCategories().contains(category)) {
+                                parameter.getCategories().add(category);
+                                log.debug("Added category '{}' to parameter '{}'",
+                                        category.getNameBg(), paramName);
+                            }
+
+                            parameter = parameterRepository.save(parameter);
+
+                            if (isNewParameter) {
                                 totalCreated++;
+                                globalParametersCache.put(normalizedName, parameter);
                             } else {
                                 totalUpdated++;
                             }
@@ -260,6 +279,77 @@ public class MostSyncService {
         }
     }
 
+    // ✅ Актуализиран метод за сетване на параметри
+    private void setMostParametersToProduct(Product product, Map<String, Object> rawProduct) {
+        try {
+            if (product.getCategory() == null) {
+                log.warn("Product {} has no category, cannot set parameters", product.getSku());
+                return;
+            }
+
+            @SuppressWarnings("unchecked")
+            Map<String, String> properties = (Map<String, String>) rawProduct.get("properties");
+            if (properties == null || properties.isEmpty()) {
+                return;
+            }
+
+            Set<ProductParameter> productParameters = new HashSet<>();
+
+            // ✅ Зареждаме параметри, които са асоциирани с категорията на продукта
+            List<Parameter> categoryParameters = parameterRepository
+                    .findByCategoryIdOrderByOrderAsc(product.getCategory().getId());
+
+            Map<String, Parameter> parametersByName = categoryParameters.stream()
+                    .filter(p -> p.getNameBg() != null)
+                    .collect(Collectors.toMap(
+                            p -> normalizeParameterName(p.getNameBg()),
+                            p -> p,
+                            (existing, duplicate) -> existing
+                    ));
+
+            for (Map.Entry<String, String> prop : properties.entrySet()) {
+                try {
+                    String paramName = prop.getKey();
+                    String paramValue = prop.getValue();
+
+                    if (paramValue == null || paramValue.isEmpty() || "-".equals(paramValue)) {
+                        continue;
+                    }
+
+                    String normalizedName = normalizeParameterName(paramName);
+                    Parameter parameter = parametersByName.get(normalizedName);
+
+                    if (parameter == null) {
+                        log.debug("Parameter not found: name={}, categoryId={}, productSku={}",
+                                paramName, product.getCategory().getId(), product.getSku());
+                        continue;
+                    }
+
+                    // Find or create parameter option
+                    ParameterOption option = findOrCreateParameterOption(parameter, paramValue);
+                    if (option == null) {
+                        continue;
+                    }
+
+                    ProductParameter productParam = new ProductParameter();
+                    productParam.setProduct(product);
+                    productParam.setParameter(parameter);
+                    productParam.setParameterOption(option);
+                    productParameters.add(productParam);
+
+                } catch (Exception e) {
+                    log.error("Error mapping parameter {} for product {}: {}",
+                            prop.getKey(), product.getSku(), e.getMessage());
+                }
+            }
+
+            product.setProductParameters(productParameters);
+
+        } catch (Exception e) {
+            log.error("Error setting Most parameters for product {}: {}", product.getSku(), e.getMessage());
+        }
+    }
+
     @Transactional
     public void syncMostProducts() {
         String syncType = "MOST_PRODUCTS";
@@ -276,6 +366,17 @@ public class MostSyncService {
                 logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, 0, 0, 0, 0, "No products found", startTime);
                 return;
             }
+
+            // ✅ ВАЖНО: Предварително кешираме всички категории и техните параметри
+            log.info("Pre-loading categories and their parameters...");
+            Map<Long, List<Parameter>> parametersByCategory = new HashMap<>();
+            List<Category> allCategories = categoryRepository.findAll();
+
+            for (Category cat : allCategories) {
+                List<Parameter> params = parameterRepository.findByCategoryIdOrderByOrderAsc(cat.getId());
+                parametersByCategory.put(cat.getId(), params);
+            }
+            log.info("Loaded parameters for {} categories", parametersByCategory.size());
 
             // Load manufacturers map
             Map<String, Manufacturer> manufacturersMap = manufacturerRepository.findAll()
@@ -326,8 +427,8 @@ public class MostSyncService {
                         totalUpdated++;
                     }
 
-                    // Set parameters
-                    setMostParametersToProduct(product, rawProduct);
+                    // ✅ Set parameters using pre-cached data
+                    setMostParametersToProduct(product, rawProduct, parametersByCategory);
                     productRepository.save(product);
 
                     if ((i + 1) % 50 == 0) {
@@ -353,6 +454,81 @@ public class MostSyncService {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
             log.error("Error during Most products synchronization", e);
             throw new RuntimeException(e);
+        }
+    }
+
+    // ✅ Актуализиран метод - взима кеша като параметър
+    private void setMostParametersToProduct(Product product, Map<String, Object> rawProduct,
+                                            Map<Long, List<Parameter>> parametersByCategory) {
+        try {
+            if (product.getCategory() == null) {
+                log.warn("Product {} has no category, cannot set parameters", product.getSku());
+                return;
+            }
+
+            @SuppressWarnings("unchecked")
+            Map<String, String> properties = (Map<String, String>) rawProduct.get("properties");
+            if (properties == null || properties.isEmpty()) {
+                return;
+            }
+
+            Set<ProductParameter> productParameters = new HashSet<>();
+
+            // ✅ Вземаме от кеша вместо да правим query
+            List<Parameter> categoryParameters = parametersByCategory.get(product.getCategory().getId());
+            if (categoryParameters == null) {
+                log.warn("No parameters found in cache for category {}", product.getCategory().getId());
+                return;
+            }
+
+            Map<String, Parameter> parametersByName = categoryParameters.stream()
+                    .filter(p -> p.getNameBg() != null)
+                    .collect(Collectors.toMap(
+                            p -> normalizeParameterName(p.getNameBg()),
+                            p -> p,
+                            (existing, duplicate) -> existing
+                    ));
+
+            for (Map.Entry<String, String> prop : properties.entrySet()) {
+                try {
+                    String paramName = prop.getKey();
+                    String paramValue = prop.getValue();
+
+                    if (paramValue == null || paramValue.isEmpty() || "-".equals(paramValue)) {
+                        continue;
+                    }
+
+                    String normalizedName = normalizeParameterName(paramName);
+                    Parameter parameter = parametersByName.get(normalizedName);
+
+                    if (parameter == null) {
+                        log.debug("Parameter not found: name={}, categoryId={}, productSku={}",
+                                paramName, product.getCategory().getId(), product.getSku());
+                        continue;
+                    }
+
+                    // Find or create parameter option
+                    ParameterOption option = findOrCreateParameterOption(parameter, paramValue);
+                    if (option == null) {
+                        continue;
+                    }
+
+                    ProductParameter productParam = new ProductParameter();
+                    productParam.setProduct(product);
+                    productParam.setParameter(parameter);
+                    productParam.setParameterOption(option);
+                    productParameters.add(productParam);
+
+                } catch (Exception e) {
+                    log.error("Error mapping parameter {} for product {}: {}",
+                            prop.getKey(), product.getSku(), e.getMessage());
+                }
+            }
+
+            product.setProductParameters(productParameters);
+
+        } catch (Exception e) {
+            log.error("Error setting Most parameters for product {}: {}", product.getSku(), e.getMessage());
         }
     }
 
@@ -382,16 +558,6 @@ public class MostSyncService {
         category.setSlug(uniqueSlug);
 
         return category;
-    }
-
-    private Parameter createMostParameter(String name, Category category) {
-        Parameter parameter = new Parameter();
-        parameter.setNameBg(name);
-        parameter.setNameEn(name);
-        parameter.setCategory(category);
-        parameter.setPlatform(Platform.MOST);
-        parameter.setOrder(50);
-        return parameter;
     }
 
     private int syncParameterOptions(Parameter parameter, Set<String> optionValues) {
@@ -588,63 +754,6 @@ public class MostSyncService {
         }
 
         product.calculateFinalPrice();
-    }
-
-    private void setMostParametersToProduct(Product product, Map<String, Object> rawProduct) {
-        try {
-            if (product.getCategory() == null) {
-                log.warn("Product {} has no category, cannot set parameters", product.getSku());
-                return;
-            }
-
-            @SuppressWarnings("unchecked")
-            Map<String, String> properties = (Map<String, String>) rawProduct.get("properties");
-            if (properties == null || properties.isEmpty()) {
-                return;
-            }
-
-            Set<ProductParameter> productParameters = new HashSet<>();
-
-            for (Map.Entry<String, String> prop : properties.entrySet()) {
-                try {
-                    String paramName = prop.getKey();
-                    String paramValue = prop.getValue();
-
-                    if (paramValue == null || paramValue.isEmpty() || "-".equals(paramValue)) {
-                        continue;
-                    }
-
-                    // Find parameter
-                    Optional<Parameter> parameterOpt = findParameterByName(paramName, product.getCategory());
-                    if (parameterOpt.isEmpty()) {
-                        continue;
-                    }
-
-                    Parameter parameter = parameterOpt.get();
-
-                    // Find or create parameter option
-                    ParameterOption option = findOrCreateParameterOption(parameter, paramValue);
-                    if (option == null) {
-                        continue;
-                    }
-
-                    ProductParameter productParam = new ProductParameter();
-                    productParam.setProduct(product);
-                    productParam.setParameter(parameter);
-                    productParam.setParameterOption(option);
-                    productParameters.add(productParam);
-
-                } catch (Exception e) {
-                    log.error("Error mapping parameter {} for product {}: {}",
-                            prop.getKey(), product.getSku(), e.getMessage());
-                }
-            }
-
-            product.setProductParameters(productParameters);
-
-        } catch (Exception e) {
-            log.error("Error setting Most parameters for product {}: {}", product.getSku(), e.getMessage());
-        }
     }
 
     private Optional<Parameter> findParameterByName(String paramName, Category category) {

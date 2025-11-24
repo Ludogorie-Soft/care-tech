@@ -1,16 +1,10 @@
 package com.techstore.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,26 +13,30 @@ import java.util.Set;
 @Table(name = "parameter_options")
 @Getter
 @Setter
-public class ParameterOption extends BaseEntity {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ParameterOption {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "external_id")
     private Long externalId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parameter_id")
+    @JoinColumn(name = "parameter_id", nullable = false)
     private Parameter parameter;
 
-    @FullTextField
-    @Column(name = "name_bg", columnDefinition = "TEXT")
+    @Column(name = "name_bg")
     private String nameBg;
 
-    @FullTextField
-    @Column(name = "name_en", columnDefinition = "TEXT")
+    @Column(name = "name_en")
     private String nameEn;
 
     @Column(name = "sort_order")
     private Integer order;
 
-    @OneToMany(mappedBy = "parameterOption", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "parameterOption", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductParameter> productParameters = new HashSet<>();
 }

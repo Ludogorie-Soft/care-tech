@@ -2,54 +2,56 @@ package com.techstore.entity;
 
 import com.techstore.enums.Platform;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(
-        name = "parameters",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"category_id", "external_id"})
-)
-@Indexed
-@Data
-public class Parameter extends BaseEntity {
+@Table(name = "parameters")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Parameter {
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "platform")
-    private Platform platform;
-
-    @Column(name = "asbis_key")
-    private String asbisKey;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "external_id")
     private Long externalId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
-
-    @Column(name = "tekra_key")
-    private String tekraKey;
-
-    @FullTextField
     @Column(name = "name_bg")
     private String nameBg;
 
-    @FullTextField
     @Column(name = "name_en")
     private String nameEn;
 
     @Column(name = "sort_order")
     private Integer order;
 
-    @OneToMany(mappedBy = "parameter", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "platform")
+    private Platform platform;
+
+    @Column(name = "tekra_key")
+    private String tekraKey;
+
+    @ManyToMany
+    @JoinTable(
+            name = "category_parameters",
+            joinColumns = @JoinColumn(name = "parameter_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private Set<Category> categories = new HashSet<>();
+
+    @OneToMany(mappedBy = "parameter", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ParameterOption> options = new HashSet<>();
+
+    @OneToMany(mappedBy = "parameter", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProductParameter> productParameters = new HashSet<>();
 }

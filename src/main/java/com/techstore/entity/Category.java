@@ -7,7 +7,9 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "categories")
@@ -66,6 +68,9 @@ public class Category extends BaseEntity {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Product> products = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "categories")
+    private Set<Parameter> parameters = new HashSet<>();
 
     public boolean isParentCategory() {
         return parent == null;

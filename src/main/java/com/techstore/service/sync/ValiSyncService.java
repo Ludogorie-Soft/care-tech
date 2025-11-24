@@ -238,56 +238,6 @@ public class ValiSyncService {
         log.info("Updated parent relationships for {} categories", updateCount);
     }
 
-//    @Transactional
-//    public void syncCategories() {
-//        String syncType = "VALI_CATEGORIES";
-//        SyncLog syncLog = logHelper.createSyncLogSimple(syncType);
-//        long startTime = System.currentTimeMillis();
-//
-//        try {
-//            log.info("Starting categories synchronization");
-//
-//            List<CategoryRequestFromExternalDto> externalCategories = valiApiService.getCategories();
-//            Map<Long, Category> existingCategories = cachedLookupService.getAllCategoriesMap();
-//
-//            long created = 0, updated = 0, skipped = 0;
-//
-//            for (CategoryRequestFromExternalDto extCategory : externalCategories) {
-//                if (excludedCategories.contains(extCategory.getId())) {
-//                    skipped++;
-//                    continue;
-//                }
-//
-//                Category category = existingCategories.get(extCategory.getId());
-//
-//                if (category == null) {
-//                    category = createCategoryFromExternal(extCategory);
-//                    category = categoryRepository.save(category);
-//                    existingCategories.put(category.getExternalId(), category);
-//                    created++;
-//                } else {
-//                    updateCategoryFromExternal(category, extCategory);
-//                    category = categoryRepository.save(category);
-//                    existingCategories.put(category.getExternalId(), category);
-//                    updated++;
-//                }
-//            }
-//
-//            // Update parent relationships after all categories are saved
-//            updateCategoryParents(externalCategories, existingCategories);
-//
-//            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, externalCategories.size(),
-//                    created, updated, 0,
-//                    skipped > 0 ? String.format("Skipped %d excluded categories", skipped) : null,
-//                    startTime);
-//
-//        } catch (Exception e) {
-//            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
-//            log.error("Error during categories synchronization", e); // Log the full exception
-//            throw new RuntimeException(e);
-//        }
-//    }
-
     @Transactional
     public void syncParameters() {
         String syncType = "VALI_PARAMETERS";
@@ -300,11 +250,20 @@ public class ValiSyncService {
             List<Category> categories = categoryRepository.findAll();
             long totalProcessed = 0, created = 0, updated = 0, errors = 0;
 
+            // Кеш на всички параметри по external_id
+            Map<Long, Parameter> globalParametersCache = parameterRepository.findAll()
+                    .stream()
+                    .filter(p -> p.getExternalId() != null)
+                    .collect(Collectors.toMap(
+                            Parameter::getExternalId,
+                            p -> p,
+                            (existing, duplicate) -> existing
+                    ));
+
             for (Category category : categories) {
                 try {
-                    Map<String, Parameter> existingParameters = cachedLookupService.getParametersByCategory(category);
-
-                    List<ParameterRequestDto> externalParameters = valiApiService.getParametersByCategory(category.getExternalId());
+                    List<ParameterRequestDto> externalParameters = valiApiService
+                            .getParametersByCategory(category.getExternalId());
 
                     if (externalParameters == null || externalParameters.isEmpty()) {
                         log.debug("No parameters found for category: {}", category.getNameBg());
@@ -314,14 +273,22 @@ public class ValiSyncService {
                     List<Parameter> parametersToSave = new ArrayList<>();
 
                     for (ParameterRequestDto extParam : externalParameters) {
-                        Parameter parameter = existingParameters.get(extParam.getExternalId().toString());
+                        Parameter parameter = globalParametersCache.get(extParam.getExternalId());
 
                         if (parameter == null) {
-                            parameter = parameterRepository
-                                    .findByExternalIdAndCategoryId(extParam.getExternalId(), category.getId())
-                                    .orElseGet(() -> createParameterFromExternal(extParam, category));
+                            // Нов параметър
+                            parameter = createParameterFromExternal(extParam);
+                            parameter.getCategories().add(category);
+                            globalParametersCache.put(extParam.getExternalId(), parameter);
                             created++;
                         } else {
+                            // Съществуващ параметър - добави категорията ако липсва
+                            if (!parameter.getCategories().contains(category)) {
+                                parameter.getCategories().add(category);
+                                log.debug("Added category {} to parameter {}",
+                                        category.getNameBg(), parameter.getNameBg());
+                            }
+                            // Обнови данните
                             updateParameterFromExternal(parameter, extParam);
                             updated++;
                         }
@@ -332,6 +299,7 @@ public class ValiSyncService {
                     if (!parametersToSave.isEmpty()) {
                         parameterRepository.saveAll(parametersToSave);
 
+                        // Синхронизирай опциите
                         for (int i = 0; i < parametersToSave.size(); i++) {
                             Parameter parameter = parametersToSave.get(i);
                             ParameterRequestDto extParam = externalParameters.get(i);
@@ -342,7 +310,7 @@ public class ValiSyncService {
                                 }
                             } catch (Exception e) {
                                 log.error("Error syncing options for parameter {}: {}",
-                                        parameter.getNameBg(), e.getMessage(), e); // Log the full exception
+                                        parameter.getNameBg(), e.getMessage(), e);
                                 errors++;
                             }
                         }
@@ -351,7 +319,8 @@ public class ValiSyncService {
                     totalProcessed += externalParameters.size();
 
                 } catch (Exception e) {
-                    log.error("Error syncing parameters for category {}: {}", category.getExternalId(), e.getMessage(), e); // Log the full exception
+                    log.error("Error syncing parameters for category {}: {}",
+                            category.getExternalId(), e.getMessage(), e);
                     errors++;
                 }
             }
@@ -362,16 +331,51 @@ public class ValiSyncService {
                 message += String.format(", errors: %d", errors);
             }
 
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, created, updated, errors,
-                    errors > 0 ? message : null, startTime);
+            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, created,
+                    updated, errors, errors > 0 ? message : null, startTime);
 
             log.info("Vali parameters synchronization completed - Processed: {}, Created: {}, Updated: {}, Errors: {}",
                     totalProcessed, created, updated, errors);
 
         } catch (Exception e) {
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
+            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0,
+                    e.getMessage(), startTime);
             log.error("Error during Vali parameters synchronization", e);
             throw new RuntimeException(e);
+        }
+    }
+
+    private Parameter createParameterFromExternal(ParameterRequestDto extParameter) {
+        Parameter parameter = new Parameter();
+        parameter.setExternalId(extParameter.getExternalId());
+        parameter.setOrder(extParameter.getOrder());
+        parameter.setPlatform(Platform.VALI);
+        parameter.setCategories(new HashSet<>());
+
+        if (extParameter.getName() != null) {
+            extParameter.getName().forEach(name -> {
+                if ("bg".equals(name.getLanguageCode())) {
+                    parameter.setNameBg(name.getText());
+                } else if ("en".equals(name.getLanguageCode())) {
+                    parameter.setNameEn(name.getText());
+                }
+            });
+        }
+
+        return parameter;
+    }
+
+    private void updateParameterFromExternal(Parameter parameter, ParameterRequestDto extParameter) {
+        parameter.setOrder(extParameter.getOrder());
+
+        if (extParameter.getName() != null) {
+            extParameter.getName().forEach(name -> {
+                if ("bg".equals(name.getLanguageCode())) {
+                    parameter.setNameBg(name.getText());
+                } else if ("en".equals(name.getLanguageCode())) {
+                    parameter.setNameEn(name.getText());
+                }
+            });
         }
     }
 
@@ -510,10 +514,6 @@ public class ValiSyncService {
         }
     }
 
-    // ===========================================
-    // PRODUCT PARAMETERS MAPPING
-    // ===========================================
-
     private void setParametersToProduct(Product product, ProductRequestDto extProduct) {
         if (extProduct.getParameters() == null || product.getCategory() == null) {
             product.setProductParameters(new HashSet<>());
@@ -590,10 +590,6 @@ public class ValiSyncService {
         }
         product.setProductParameters(newProductParameters);
     }
-
-    // ===========================================
-    // CATEGORY HELPERS
-    // ===========================================
 
     private Category createCategoryFromExternal(CategoryRequestFromExternalDto extCategory) {
         Category category = new Category();
@@ -674,24 +670,6 @@ public class ValiSyncService {
         return numberedSlug;
     }
 
-    private void updateCategoryParents(List<CategoryRequestFromExternalDto> externalCategories, Map<Long, Category> existingCategories) {
-        // Set parent references without saving - Hibernate will handle this on transaction commit
-        for (CategoryRequestFromExternalDto extCategory : externalCategories) {
-            if (extCategory.getParent() != null && extCategory.getParent() != 0) {
-                Category category = existingCategories.get(extCategory.getId());
-                Category parent = existingCategories.get(extCategory.getParent());
-
-                if (category != null && parent != null && !parent.equals(category)) {
-                    category.setParent(parent);
-                }
-            }
-        }
-    }
-
-    // ===========================================
-    // MANUFACTURER HELPERS
-    // ===========================================
-
     private Manufacturer createManufacturerFromExternal(ManufacturerRequestDto extManufacturer) {
         Manufacturer manufacturer = new Manufacturer();
         manufacturer.setExternalId(extManufacturer.getId());
@@ -728,48 +706,6 @@ public class ValiSyncService {
             manufacturer.setEuRepresentativeAddress(extManufacturer.getEuRepresentative().getAddress());
         }
     }
-
-    // ===========================================
-    // PARAMETER HELPERS
-    // ===========================================
-
-    private Parameter createParameterFromExternal(ParameterRequestDto extParameter, Category category) {
-        Parameter parameter = new Parameter();
-        parameter.setExternalId(extParameter.getExternalId());
-        parameter.setCategory(category);
-        parameter.setOrder(extParameter.getOrder());
-        parameter.setPlatform(Platform.VALI);
-
-        if (extParameter.getName() != null) {
-            extParameter.getName().forEach(name -> {
-                if ("bg".equals(name.getLanguageCode())) {
-                    parameter.setNameBg(name.getText());
-                } else if ("en".equals(name.getLanguageCode())) {
-                    parameter.setNameEn(name.getText());
-                }
-            });
-        }
-
-        return parameter;
-    }
-
-    private void updateParameterFromExternal(Parameter parameter, ParameterRequestDto extParameter) {
-        parameter.setOrder(extParameter.getOrder());
-
-        if (extParameter.getName() != null) {
-            extParameter.getName().forEach(name -> {
-                if ("bg".equals(name.getLanguageCode())) {
-                    parameter.setNameBg(name.getText());
-                } else if ("en".equals(name.getLanguageCode())) {
-                    parameter.setNameEn(name.getText());
-                }
-            });
-        }
-    }
-
-    // ===========================================
-    // PRODUCT SYNC BY CATEGORY
-    // ===========================================
 
     private CategorySyncResult syncProductsByCategory(Category category, Map<Long, Manufacturer> manufacturersMap) { // Added manufacturersMap
         long totalProcessed = 0, created = 0, updated = 0, errors = 0;
@@ -870,13 +806,6 @@ public class ValiSyncService {
         return new ChunkResult(processed, created, updated, errors);
     }
 
-    // ===========================================
-    // PRODUCT HELPERS
-    // ===========================================
-
-    // Removed createProductFromExternal and updateProductFromExternal as they are merged into processProductsChunk
-    // and updateProductFieldsFromExternal now handles both creation and update logic.
-
     private void updateProductFieldsFromExternal(Product product, ProductRequestDto extProduct, Manufacturer manufacturer, Category category) {
         product.setExternalId(extProduct.getId());
         product.setWorkflowId(extProduct.getIdWF());
@@ -902,25 +831,6 @@ public class ValiSyncService {
         setDescriptionToProduct(product, extProduct);
         setParametersToProduct(product, extProduct);
         product.calculateFinalPrice();
-    }
-
-    private void setCategoryToProduct(Product product, ProductRequestDto extProduct) {
-        // This method is no longer needed as category is passed directly to updateProductFieldsFromExternal
-        // and set on the product.
-        // Keeping it for now, but it will be removed or refactored if not used elsewhere.
-        if (extProduct.getCategories() == null || extProduct.getCategories().isEmpty()) {
-            return;
-        }
-
-        Long categoryId = extProduct.getCategories().get(0).getId();
-        Optional<Category> categoryOpt = categoryRepository.findByExternalId(categoryId);
-
-        if (categoryOpt.isPresent()) {
-            product.setCategory(categoryOpt.get());
-        } else {
-            log.warn("Category with external ID {} not found for product {}",
-                    categoryId, extProduct.getReferenceNumber());
-        }
     }
 
     private static void setImagesToProduct(Product product, ProductRequestDto extProduct) {
@@ -972,10 +882,6 @@ public class ValiSyncService {
         }
     }
 
-    // ===========================================
-    // UTILITY METHODS
-    // ===========================================
-
     private <T> List<List<T>> partitionList(List<T> list, int partitionSize) {
         List<List<T>> partitions = new ArrayList<>();
         for (int i = 0; i < list.size(); i += partitionSize) {
@@ -983,10 +889,6 @@ public class ValiSyncService {
         }
         return partitions;
     }
-
-    // ===========================================
-    // RESULT CLASSES
-    // ===========================================
 
     private static class CategorySyncResult {
         long processed;
