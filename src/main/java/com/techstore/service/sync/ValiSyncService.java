@@ -32,13 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.techstore.util.LogHelper.LOG_STATUS_FAILED;
@@ -117,48 +111,182 @@ public class ValiSyncService {
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("Starting categories synchronization");
+            log.info("Starting categories synchronization (memory optimized)");
 
             List<CategoryRequestFromExternalDto> externalCategories = valiApiService.getCategories();
-            Map<Long, Category> existingCategories = cachedLookupService.getAllCategoriesMap();
+            log.info("Fetched {} categories from Vali API", externalCategories.size());
 
+            // Clear any existing cache to free memory
+            entityManager.clear();
+
+            // Load existing categories in smaller batches
+            Map<Long, Category> existingCategories = new HashMap<>();
+
+            // Process in chunks to avoid memory issues
+            int chunkSize = 100;
             long created = 0, updated = 0, skipped = 0;
 
-            for (CategoryRequestFromExternalDto extCategory : externalCategories) {
-                if (excludedCategories.contains(extCategory.getId())) {
-                    skipped++;
-                    continue;
+            for (int i = 0; i < externalCategories.size(); i += chunkSize) {
+                int end = Math.min(i + chunkSize, externalCategories.size());
+                List<CategoryRequestFromExternalDto> chunk = externalCategories.subList(i, end);
+
+                log.info("Processing category chunk {}-{} of {}", i, end, externalCategories.size());
+
+                // Reload only needed categories for this chunk
+                Set<Long> chunkExternalIds = chunk.stream()
+                        .map(CategoryRequestFromExternalDto::getId)
+                        .collect(Collectors.toSet());
+
+                // Fetch only categories we need
+                List<Category> existingInChunk = categoryRepository.findByExternalIdIn(chunkExternalIds);
+                for (Category cat : existingInChunk) {
+                    existingCategories.put(cat.getExternalId(), cat);
                 }
 
-                Category category = existingCategories.get(extCategory.getId());
+                // Process chunk
+                List<Category> categoriesToSave = new ArrayList<>();
 
-                if (category == null) {
-                    category = createCategoryFromExternal(extCategory);
-                    category = categoryRepository.save(category);
+                for (CategoryRequestFromExternalDto extCategory : chunk) {
+                    if (excludedCategories.contains(extCategory.getId())) {
+                        skipped++;
+                        continue;
+                    }
+
+                    Category category = existingCategories.get(extCategory.getId());
+
+                    if (category == null) {
+                        category = createCategoryFromExternal(extCategory);
+                        created++;
+                    } else {
+                        updateCategoryFromExternal(category, extCategory);
+                        updated++;
+                    }
+
+                    categoriesToSave.add(category);
                     existingCategories.put(category.getExternalId(), category);
-                    created++;
-                } else {
-                    updateCategoryFromExternal(category, extCategory);
-                    category = categoryRepository.save(category);
-                    existingCategories.put(category.getExternalId(), category);
-                    updated++;
+                }
+
+                // Save chunk
+                if (!categoriesToSave.isEmpty()) {
+                    categoryRepository.saveAll(categoriesToSave);
+                    categoryRepository.flush();
+                }
+
+                // Clear EntityManager to free memory
+                entityManager.clear();
+
+                // Suggest garbage collection (optional)
+                if (i % 200 == 0) {
+                    System.gc();
                 }
             }
 
             // Update parent relationships after all categories are saved
-            updateCategoryParents(externalCategories, existingCategories);
+            log.info("Updating parent relationships...");
+            updateCategoryParentsOptimized(externalCategories, existingCategories);
 
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, externalCategories.size(),
                     created, updated, 0,
                     skipped > 0 ? String.format("Skipped %d excluded categories", skipped) : null,
                     startTime);
 
+            log.info("Categories sync completed - Created: {}, Updated: {}, Skipped: {}",
+                    created, updated, skipped);
+
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
-            log.error("Error during categories synchronization", e); // Log the full exception
+            log.error("Error during categories synchronization", e);
             throw new RuntimeException(e);
         }
     }
+
+    private void updateCategoryParentsOptimized(List<CategoryRequestFromExternalDto> externalCategories,
+                                                Map<Long, Category> existingCategories) {
+        int batchSize = 50;
+        int updateCount = 0;
+
+        List<Category> categoriesToUpdate = new ArrayList<>();
+
+        for (CategoryRequestFromExternalDto extCategory : externalCategories) {
+            if (extCategory.getParent() != null && extCategory.getParent() != 0) {
+                Category category = existingCategories.get(extCategory.getId());
+                Category parent = existingCategories.get(extCategory.getParent());
+
+                if (category != null && parent != null && !parent.equals(category)) {
+                    category.setParent(parent);
+                    categoriesToUpdate.add(category);
+                    updateCount++;
+
+                    // Save in batches
+                    if (categoriesToUpdate.size() >= batchSize) {
+                        categoryRepository.saveAll(categoriesToUpdate);
+                        categoryRepository.flush();
+                        entityManager.clear();
+                        categoriesToUpdate.clear();
+                    }
+                }
+            }
+        }
+
+        // Save remaining
+        if (!categoriesToUpdate.isEmpty()) {
+            categoryRepository.saveAll(categoriesToUpdate);
+            categoryRepository.flush();
+            entityManager.clear();
+        }
+
+        log.info("Updated parent relationships for {} categories", updateCount);
+    }
+
+//    @Transactional
+//    public void syncCategories() {
+//        String syncType = "VALI_CATEGORIES";
+//        SyncLog syncLog = logHelper.createSyncLogSimple(syncType);
+//        long startTime = System.currentTimeMillis();
+//
+//        try {
+//            log.info("Starting categories synchronization");
+//
+//            List<CategoryRequestFromExternalDto> externalCategories = valiApiService.getCategories();
+//            Map<Long, Category> existingCategories = cachedLookupService.getAllCategoriesMap();
+//
+//            long created = 0, updated = 0, skipped = 0;
+//
+//            for (CategoryRequestFromExternalDto extCategory : externalCategories) {
+//                if (excludedCategories.contains(extCategory.getId())) {
+//                    skipped++;
+//                    continue;
+//                }
+//
+//                Category category = existingCategories.get(extCategory.getId());
+//
+//                if (category == null) {
+//                    category = createCategoryFromExternal(extCategory);
+//                    category = categoryRepository.save(category);
+//                    existingCategories.put(category.getExternalId(), category);
+//                    created++;
+//                } else {
+//                    updateCategoryFromExternal(category, extCategory);
+//                    category = categoryRepository.save(category);
+//                    existingCategories.put(category.getExternalId(), category);
+//                    updated++;
+//                }
+//            }
+//
+//            // Update parent relationships after all categories are saved
+//            updateCategoryParents(externalCategories, existingCategories);
+//
+//            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, externalCategories.size(),
+//                    created, updated, 0,
+//                    skipped > 0 ? String.format("Skipped %d excluded categories", skipped) : null,
+//                    startTime);
+//
+//        } catch (Exception e) {
+//            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
+//            log.error("Error during categories synchronization", e); // Log the full exception
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     @Transactional
     public void syncParameters() {
@@ -428,7 +556,7 @@ public class ValiSyncService {
 
                 ParameterOption option = optionsByExternalId.get(paramValue.getOptionId());
                 if (option == null) {
-                    log.warn("Parameter option with external ID {} not found for parameter {} (external ID) for product {}",
+                    log.info("Parameter option with external ID {} not found for parameter {} (external ID) for product {}",
                             paramValue.getOptionId(), paramValue.getParameterId(), extProduct.getReferenceNumber());
                     notFoundCount++;
                     continue;
@@ -457,7 +585,7 @@ public class ValiSyncService {
         }
 
         if (notFoundCount > 0) {
-            log.warn("Finished mapping parameters for product {}. Mapped: {}, Not Found: {}",
+            log.info("Finished mapping parameters for product {}. Mapped: {}, Not Found: {}",
                     extProduct.getReferenceNumber(), mappedCount, notFoundCount);
         }
         product.setProductParameters(newProductParameters);

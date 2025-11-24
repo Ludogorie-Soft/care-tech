@@ -7,7 +7,9 @@ package com.techstore.enums;
 public enum Platform {
     VALI("VALI", "VALI"),
     TEKRA("Tekra", "Tekra"),
-    ASBIS("Asbis", "Asbis");
+    ASBIS("Asbis", "Asbis"),
+    MOST("Most", "Most");
+
 
     private final String displayName;
     private final String code;

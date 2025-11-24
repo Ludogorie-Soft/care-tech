@@ -10,9 +10,12 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
+
+    List<Category> findByExternalIdIn(Set<Long> externalIds);
 
     Optional<Category> findByExternalId(Long externalId);
 

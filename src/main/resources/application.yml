@@ -265,12 +265,20 @@ springdoc:
         tags-sorter: alpha
 
 vali:
-    api:
-        base-url: ${VALI_API_BASE_URL}
-        token: ${VALI_API_TOKEN}
-        timeout: 30000
-        retry-attempts: 3
-        retry-delay: 1000
+  api:
+    base-url: ${VALI_API_BASE_URL}
+    token: ${VALI_API_TOKEN}
+    timeout: 300000
+    retry-attempts: 5
+    retry-delay: 5000
+
+most:
+  api:
+    url: https://most.traveldatabank.biz/ProductXML
+    enabled: true
+  exchange:
+    usd-to-bgn: 1.80
+    eur-to-bgn: 1.95583
 
 asbis:
   api:

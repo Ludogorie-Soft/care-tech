@@ -1,5 +1,6 @@
 package com.techstore.config;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -8,6 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -30,10 +33,23 @@ public class CacheConfig {
         ));
 
         cacheManager.setCaffeine(Caffeine.newBuilder()
-                .maximumSize(10000)
-                .expireAfterWrite(1, TimeUnit.HOURS)
-                .expireAfterAccess(30, TimeUnit.MINUTES)
+                .maximumSize(100)
+                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .expireAfterAccess(5, TimeUnit.MINUTES)
                 .recordStats());
         return cacheManager;
+    }
+
+    /**
+     * Thread-safe cache for Asbis products
+     * Separate from CacheManager for programmatic access
+     */
+    @Bean
+    public Cache<String, List<Map<String, Object>>> asbisProductsCache() {
+        return Caffeine.newBuilder()
+                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .maximumSize(100)
+                .recordStats()
+                .build();
     }
 }

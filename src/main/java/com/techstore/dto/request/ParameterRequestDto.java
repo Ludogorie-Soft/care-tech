@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 public class ParameterRequestDto {
+    @JsonProperty("id")
     private Long externalId;
 
     @JsonProperty("category_id")
