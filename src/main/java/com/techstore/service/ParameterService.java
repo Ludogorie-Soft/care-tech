@@ -406,26 +406,6 @@ public class ParameterService {
     }
 
     private void checkForDuplicateParameter(ParameterRequestDto requestDto, Category category) {
-        // ✅ Проверка по external ID (глобално)
-        if (requestDto.getExternalId() != null) {
-            Optional<Parameter> existing = parameterRepository.findByExternalId(requestDto.getExternalId());
-            if (existing.isPresent()) {
-                // Параметърът съществува глобално
-                Parameter existingParam = existing.get();
-
-                // Проверяваме дали вече е в тази категория
-                if (existingParam.getCategories().contains(category)) {
-                    throw new DuplicateResourceException(
-                            String.format("Parameter already exists with external ID %d in category %d",
-                                    requestDto.getExternalId(), category.getId()));
-                }
-
-                log.info("Parameter with external ID {} exists globally but will be linked to category {}",
-                        requestDto.getExternalId(), category.getId());
-            }
-        }
-
-        // Проверка по имена
         checkForDuplicateParameterNames(requestDto, category, null);
     }
 
@@ -533,40 +513,47 @@ public class ParameterService {
             return;
         }
 
-        Map<Long, ParameterOption> existingOptionsByExternalId = parameterOptionRepository
+        // ✅ Кешираме по нормализирано ИМЕ вместо по external_id
+        Map<String, ParameterOption> existingOptionsByName = parameterOptionRepository
                 .findByParameterIdOrderByOrderAsc(parameter.getId())
                 .stream()
-                .filter(opt -> opt.getExternalId() != null)
+                .filter(opt -> opt.getNameBg() != null)
                 .collect(Collectors.toMap(
-                        ParameterOption::getExternalId,
+                        opt -> normalizeParameterValue(opt.getNameBg()),
                         option -> option,
                         (option1, option2) -> {
-                            log.warn("Duplicate externalId {} found for parameter options with IDs {} and {}. Keeping the one with the higher ID.",
-                                    option1.getExternalId(), option1.getId(), option2.getId());
-                            return option1.getId() > option2.getId() ? option1 : option2;
+                            log.warn("Duplicate name '{}' found for parameter options, keeping first",
+                                    option1.getNameBg());
+                            return option1;
                         }
                 ));
 
         List<ParameterOption> optionsToSave = new ArrayList<>();
-        Set<Long> processedExternalIds = new HashSet<>();
+        Set<String> processedNames = new HashSet<>();
 
         for (ParameterOptionRequestDto optionDto : optionDtos) {
-            if (optionDto.getExternalId() == null) {
-                optionsToSave.add(createParameterOptionFromRequest(optionDto, parameter));
+            String optionNameBg = getOptionNameBg(optionDto);
+            if (optionNameBg == null || optionNameBg.isEmpty()) {
+                continue;
+            }
+
+            String normalizedName = normalizeParameterValue(optionNameBg);
+            processedNames.add(normalizedName);
+
+            ParameterOption existingOption = existingOptionsByName.get(normalizedName);
+            if (existingOption != null) {
+                // ✅ Update existing
+                updateParameterOptionFromRequest(existingOption, optionDto);
+                optionsToSave.add(existingOption);
             } else {
-                processedExternalIds.add(optionDto.getExternalId());
-                ParameterOption existingOption = existingOptionsByExternalId.get(optionDto.getExternalId());
-                if (existingOption != null) {
-                    updateParameterOptionFromRequest(existingOption, optionDto);
-                    optionsToSave.add(existingOption);
-                } else {
-                    optionsToSave.add(createParameterOptionFromRequest(optionDto, parameter));
-                }
+                // ✅ Create new
+                optionsToSave.add(createParameterOptionFromRequest(optionDto, parameter));
             }
         }
 
-        List<ParameterOption> optionsToDelete = existingOptionsByExternalId.values().stream()
-                .filter(option -> !processedExternalIds.contains(option.getExternalId()))
+        // ✅ Delete options that are no longer present
+        List<ParameterOption> optionsToDelete = existingOptionsByName.values().stream()
+                .filter(option -> !processedNames.contains(normalizeParameterValue(option.getNameBg())))
                 .collect(Collectors.toList());
 
         if (!optionsToDelete.isEmpty()) {
@@ -576,6 +563,22 @@ public class ParameterService {
 
         parameterOptionRepository.saveAll(optionsToSave);
         log.debug("Updated {} parameter options for parameter: {}", optionsToSave.size(), parameter.getId());
+    }
+
+    // ✅ Helper methods
+    private String getOptionNameBg(ParameterOptionRequestDto optionDto) {
+        if (optionDto.getName() == null) return null;
+
+        return optionDto.getName().stream()
+                .filter(name -> "bg".equals(name.getLanguageCode()))
+                .map(name -> name.getText())
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String normalizeParameterValue(String value) {
+        if (value == null) return "";
+        return value.toLowerCase().trim().replaceAll("\\s+", " ");
     }
 
     private ParameterOption createParameterOptionFromRequest(ParameterOptionRequestDto optionDto, Parameter parameter) {

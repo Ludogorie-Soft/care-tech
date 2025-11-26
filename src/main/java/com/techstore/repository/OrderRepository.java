@@ -2,12 +2,10 @@ package com.techstore.repository;
 
 import com.techstore.entity.Order;
 import com.techstore.enums.OrderStatus;
-import com.techstore.enums.PaymentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -126,9 +124,4 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findTop10ByOrderByCreatedAtDesc();
     List<Order> findTop20ByOrderByCreatedAtDesc();
     List<Order> findTop50ByOrderByCreatedAtDesc();
-
-    @Query("SELECT COUNT(o) FROM Order o WHERE o.orderNumber LIKE :prefix%")
-    long countByOrderNumberStartingWith(@Param("prefix") String prefix);
-
-    boolean existsByOrderNumber(String orderNumber);
 }

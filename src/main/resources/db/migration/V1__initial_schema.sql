@@ -196,7 +196,7 @@ CREATE INDEX idx_additional_images_product_id ON additional_images(product_id);
 -- ============================================================
 CREATE TABLE parameters (
     id BIGSERIAL PRIMARY KEY,
-    external_id BIGINT UNIQUE,
+    external_id BIGINT,
     tekra_key VARCHAR(500),
     asbis_key VARCHAR(500),
     name_bg VARCHAR(500),

@@ -8,16 +8,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 @Repository
 public interface UserFavoriteRepository extends JpaRepository<UserFavorite, Long> {
 
     @Query("SELECT uf FROM UserFavorite uf JOIN FETCH uf.product p " +
             "WHERE uf.user.id = :userId AND p.show = true")
     Page<UserFavorite> findByUserIdWithProducts(@Param("userId") Long userId, Pageable pageable);
-
-    Optional<UserFavorite> findByUserIdAndProductId(Long userId, Long productId);
 
     boolean existsByUserIdAndProductId(Long userId, Long productId);
 

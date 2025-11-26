@@ -341,7 +341,7 @@ public class TekraSyncService {
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("Starting Tekra parameters synchronization - Many-to-Many VERSION");
+            log.info("Starting Tekra parameters synchronization - Name-based uniqueness");
 
             List<Category> tekraCategories = categoryRepository.findAll().stream()
                     .filter(cat -> cat.getTekraSlug() != null)
@@ -349,119 +349,37 @@ public class TekraSyncService {
 
             if (tekraCategories.isEmpty()) {
                 log.error("No Tekra categories found");
-                logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, "No Tekra categories found", startTime);
+                logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0,
+                        "No Tekra categories found", startTime);
                 return;
             }
 
-            log.info("Found {} Tekra categories", tekraCategories.size());
-
-            Map<String, Category> categoriesByName = new HashMap<>();
-            Map<String, Category> categoriesBySlug = new HashMap<>();
-            Map<String, Category> categoriesByTekraSlug = new HashMap<>();
-
-            for (Category cat : tekraCategories) {
-                if (cat.getNameBg() != null) {
-                    categoriesByName.put(cat.getNameBg().toLowerCase(), cat);
-                }
-                if (cat.getSlug() != null) {
-                    categoriesBySlug.put(cat.getSlug().toLowerCase(), cat);
-                }
-                if (cat.getTekraSlug() != null) {
-                    categoriesByTekraSlug.put(cat.getTekraSlug().toLowerCase(), cat);
-                }
-            }
-
-            // ✅ Стъпка 1: Събираме параметрите и групираме по категории
-            log.info("Step 1: Collecting all products and mapping to correct categories...");
-            Map<Long, Map<String, Set<String>>> categorizedParameters = new HashMap<>();
-            Set<String> processedSkus = new HashSet<>();
-            int totalProducts = 0;
-            int productsWithCategory = 0;
-            int productsWithoutCategory = 0;
-
-            Map<String, Integer> matchTypeStats = new HashMap<>();
-            matchTypeStats.put("perfect_path", 0);
-            matchTypeStats.put("partial_path", 0);
-            matchTypeStats.put("name_match", 0);
-            matchTypeStats.put("no_match", 0);
-
-            for (Category category : tekraCategories) {
-                try {
-                    List<Map<String, Object>> products = tekraApiService.getProductsRaw(category.getTekraSlug());
-
-                    for (Map<String, Object> product : products) {
-                        String sku = getString(product, "sku");
-                        if (sku != null && !processedSkus.contains(sku)) {
-                            processedSkus.add(sku);
-                            totalProducts++;
-
-                            Category productCategory = findMostSpecificCategory(product,
-                                    categoriesByName, categoriesBySlug, categoriesByTekraSlug, matchTypeStats);
-
-                            if (productCategory != null && isValidCategory(productCategory)) {
-                                if (productCategory.getParent() == null) {
-                                    log.debug("Skipping root category '{}' for product {}",
-                                            productCategory.getNameBg(), sku);
-                                    continue;
-                                }
-
-                                productsWithCategory++;
-                                Long catId = productCategory.getId();
-
-                                Map<String, String> productParams = extractTekraParameters(product);
-
-                                if (!productParams.isEmpty()) {
-                                    categorizedParameters.putIfAbsent(catId, new HashMap<>());
-                                    Map<String, Set<String>> categoryParams = categorizedParameters.get(catId);
-
-                                    for (Map.Entry<String, String> param : productParams.entrySet()) {
-                                        categoryParams.putIfAbsent(param.getKey(), new HashSet<>());
-                                        categoryParams.get(param.getKey()).add(param.getValue());
-                                    }
-
-                                    log.debug("Product {} → Category '{}' (path: '{}') with {} params",
-                                            sku, productCategory.getNameBg(), productCategory.getCategoryPath(),
-                                            productParams.size());
-                                }
-                            } else {
-                                productsWithoutCategory++;
-                                log.debug("Product {} has NO category match", sku);
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    log.error("Error processing category {}: {}", category.getNameBg(), e.getMessage());
-                }
-            }
-
-            log.info("Step 1 Complete:");
-            log.info("  Total products: {}", totalProducts);
-            log.info("  Products with category: {}", productsWithCategory);
-            log.info("  Products without category: {}", productsWithoutCategory);
-            log.info("  Categories with parameters: {}", categorizedParameters.size());
+            // ✅ Събираме параметри по категории
+            Map<Long, Map<String, Set<String>>> categorizedParameters =
+                    collectTekraParametersByCategory(tekraCategories);
 
             if (categorizedParameters.isEmpty()) {
-                log.error("No parameters found for any category!");
+                log.error("No parameters found!");
                 logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0,
                         "No parameters found", startTime);
                 return;
             }
 
-            // ✅ Стъпка 2: Синхронизираме параметрите с Many-to-Many логика
-            log.info("Step 2: Syncing parameters to database with Many-to-Many support...");
-
-            // Глобален кеш на параметри по tekraKey
+            // ✅ Глобален кеш по нормализирано ИМЕ
             Map<String, Parameter> globalParametersCache = parameterRepository.findAll()
                     .stream()
-                    .filter(p -> p.getTekraKey() != null)
+                    .filter(p -> p.getNameBg() != null)
                     .collect(Collectors.toMap(
-                            Parameter::getTekraKey,
+                            p -> normalizeParameterName(p.getNameBg()),
                             p -> p,
-                            (existing, duplicate) -> existing
+                            (existing, duplicate) -> {
+                                log.warn("Duplicate parameter name '{}', keeping first",
+                                        existing.getNameBg());
+                                return existing;
+                            }
                     ));
 
-            long totalProcessed = 0, totalCreated = 0, totalUpdated = 0, totalErrors = 0;
-            long totalParameterOptionsCreated = 0, totalParameterOptionsUpdated = 0;
+            long totalCreated = 0, totalUpdated = 0, totalOptionsCreated = 0, totalErrors = 0;
 
             for (Map.Entry<Long, Map<String, Set<String>>> catEntry : categorizedParameters.entrySet()) {
                 try {
@@ -469,145 +387,190 @@ public class TekraSyncService {
                     Optional<Category> categoryOpt = categoryRepository.findById(categoryId);
 
                     if (categoryOpt.isEmpty()) {
-                        log.warn("Category with ID {} not found", categoryId);
                         continue;
                     }
 
                     Category category = categoryOpt.get();
                     Map<String, Set<String>> parametersMap = catEntry.getValue();
 
-                    log.info("Processing category '{}' (path: '{}') with {} parameter types",
-                            category.getNameBg(), category.getCategoryPath(), parametersMap.size());
-
-                    long categoryParamsCreated = 0, categoryParamsUpdated = 0, categoryParamsErrors = 0;
-                    long categoryOptionsCreated = 0, categoryOptionsUpdated = 0;
-
                     for (Map.Entry<String, Set<String>> paramEntry : parametersMap.entrySet()) {
                         try {
-                            String parameterKey = paramEntry.getKey();
-                            Set<String> parameterValues = paramEntry.getValue();
+                            String tekraKey = paramEntry.getKey();
+                            Set<String> paramValues = paramEntry.getValue();
 
-                            String parameterName = convertTekraParameterKeyToName(parameterKey);
+                            // ✅ Генерираме четливо име
+                            String paramName = convertTekraParameterKeyToName(tekraKey);
+                            String normalizedName = normalizeParameterName(paramName);
 
-                            // ✅ Търсим параметъра глобално
-                            Parameter parameter = globalParametersCache.get(parameterKey);
+                            Parameter parameter = globalParametersCache.get(normalizedName);
                             boolean isNewParameter = false;
 
                             if (parameter == null) {
-                                // Създаваме нов параметър
+                                // ✅ Нов параметър
                                 parameter = new Parameter();
-                                parameter.setTekraKey(parameterKey);
-                                parameter.setNameBg(parameterName);
-                                parameter.setNameEn(translateParameterName(parameterName));
-                                parameter.setOrder(getParameterOrder(parameterKey));
+                                parameter.setNameBg(paramName);
+                                parameter.setNameEn(translateParameterName(paramName));
+                                parameter.setTekraKey(tekraKey); // Reference only
                                 parameter.setPlatform(Platform.TEKRA);
+                                parameter.setOrder(getParameterOrder(tekraKey));
                                 parameter.setCategories(new HashSet<>());
                                 isNewParameter = true;
+                                log.debug("Creating new Tekra parameter: {}", paramName);
+                            } else {
+                                // ✅ Съществува - добавяме tekra_key ако липсва
+                                if (parameter.getTekraKey() == null) {
+                                    parameter.setTekraKey(tekraKey);
+                                }
+                                log.debug("Reusing existing parameter: {}", paramName);
                             }
 
-                            // ✅ Добавяме категорията към параметъра
+                            // ✅ Добавяме категорията
                             if (!parameter.getCategories().contains(category)) {
                                 parameter.getCategories().add(category);
                                 log.debug("Added category '{}' to parameter '{}'",
-                                        category.getNameBg(), parameterName);
+                                        category.getNameBg(), paramName);
                             }
 
                             parameter = parameterRepository.save(parameter);
 
                             if (isNewParameter) {
-                                categoryParamsCreated++;
-                                globalParametersCache.put(parameterKey, parameter);
+                                totalCreated++;
+                                globalParametersCache.put(normalizedName, parameter);
                             } else {
-                                categoryParamsUpdated++;
+                                totalUpdated++;
                             }
 
                             // Sync options
-                            Parameter finalParameter = parameter;
-                            Map<String, ParameterOption> existingOptions = parameterOptionRepository
-                                    .findByParameterIdOrderByOrderAsc(parameter.getId())
-                                    .stream()
-                                    .filter(opt -> opt.getNameBg() != null && !opt.getNameBg().isEmpty())
-                                    .collect(Collectors.toMap(
-                                            ParameterOption::getNameBg,
-                                            o -> o,
-                                            (existing, duplicate) -> {
-                                                log.warn("Duplicate parameter option name '{}' for parameter {}, keeping first (IDs: {} and {})",
-                                                        existing.getNameBg(), finalParameter.getNameBg(), existing.getId(), duplicate.getId());
-                                                return existing;
-                                            }
-                                    ));
-
-                            int orderCounter = existingOptions.size();
-                            for (String optionValue : parameterValues) {
-                                try {
-                                    ParameterOption option = existingOptions.get(optionValue);
-
-                                    if (option == null) {
-                                        option = new ParameterOption();
-                                        option.setParameter(parameter);
-                                        option.setNameBg(optionValue);
-                                        option.setNameEn(optionValue);
-                                        option.setOrder(orderCounter++);
-
-                                        parameterOptionRepository.save(option);
-                                        categoryOptionsCreated++;
-                                    } else {
-                                        categoryOptionsUpdated++;
-                                    }
-                                } catch (Exception e) {
-                                    categoryParamsErrors++;
-                                    log.error("Error processing parameter option '{}': {}",
-                                            optionValue, e.getMessage());
-                                }
-                            }
-
-                            totalProcessed++;
+                            int optionsCreated = syncTekraParameterOptions(parameter, paramValues);
+                            totalOptionsCreated += optionsCreated;
 
                         } catch (Exception e) {
-                            categoryParamsErrors++;
-                            log.error("Error processing parameter '{}': {}",
-                                    paramEntry.getKey(), e.getMessage());
+                            log.error("Error processing parameter: {}", e.getMessage());
+                            totalErrors++;
                         }
                     }
 
-                    totalCreated += categoryParamsCreated;
-                    totalUpdated += categoryParamsUpdated;
-                    totalErrors += categoryParamsErrors;
-                    totalParameterOptionsCreated += categoryOptionsCreated;
-                    totalParameterOptionsUpdated += categoryOptionsUpdated;
-
-                    log.info("✓ Category '{}': {} params ({} new, {} updated), {} options ({} new, {} updated)",
-                            category.getNameBg(),
-                            categoryParamsCreated + categoryParamsUpdated,
-                            categoryParamsCreated, categoryParamsUpdated,
-                            categoryOptionsCreated + categoryOptionsUpdated,
-                            categoryOptionsCreated, categoryOptionsUpdated);
-
                 } catch (Exception e) {
+                    log.error("Error syncing parameters for category: {}", e.getMessage());
                     totalErrors++;
-                    log.error("Error syncing parameters for category ID {}: {}",
-                            catEntry.getKey(), e.getMessage(), e);
                 }
             }
 
-            String message = String.format("Parameters: %d created, %d updated. Options: %d created, %d updated",
-                    totalCreated, totalUpdated, totalParameterOptionsCreated, totalParameterOptionsUpdated);
-            if (totalErrors > 0) {
-                message += String.format(". %d errors occurred", totalErrors);
-            }
+            String message = String.format("Parameters: %d created, %d updated. Options: %d created",
+                    totalCreated, totalUpdated, totalOptionsCreated);
 
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, totalCreated, totalUpdated,
-                    totalErrors, message, startTime);
+            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS,
+                    totalCreated + totalUpdated, totalCreated, totalUpdated, totalErrors, message, startTime);
 
-            log.info("=== Tekra parameters sync complete! ===");
-            log.info("Total: {} params, {} options", totalCreated + totalUpdated,
-                    totalParameterOptionsCreated + totalParameterOptionsUpdated);
+            log.info("Tekra parameters sync completed - {}", message);
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
             log.error("Tekra parameters sync failed", e);
             throw e;
         }
+    }
+
+    private int syncTekraParameterOptions(Parameter parameter, Set<String> optionValues) {
+        int created = 0;
+
+        try {
+            // ✅ Кеш на съществуващите опции по нормализирано име
+            Map<String, ParameterOption> existingOptions = parameterOptionRepository
+                    .findByParameterIdOrderByOrderAsc(parameter.getId())
+                    .stream()
+                    .filter(opt -> opt.getNameBg() != null)
+                    .collect(Collectors.toMap(
+                            opt -> normalizeParameterValue(opt.getNameBg()),
+                            opt -> opt,
+                            (existing, duplicate) -> {
+                                log.warn("Duplicate parameter option '{}' for parameter {}, keeping first",
+                                        existing.getNameBg(), parameter.getNameBg());
+                                return existing;
+                            }
+                    ));
+
+            int orderCounter = existingOptions.size();
+
+            for (String optionValue : optionValues) {
+                if (optionValue == null || optionValue.trim().isEmpty() || "-".equals(optionValue.trim())) {
+                    continue;
+                }
+
+                String normalizedValue = normalizeParameterValue(optionValue);
+                ParameterOption option = existingOptions.get(normalizedValue);
+
+                if (option == null) {
+                    // ✅ Създаваме нова опция
+                    option = new ParameterOption();
+                    option.setParameter(parameter);
+                    option.setNameBg(optionValue);
+                    option.setNameEn(optionValue);
+                    option.setOrder(orderCounter++);
+
+                    parameterOptionRepository.save(option);
+                    existingOptions.put(normalizedValue, option);
+                    created++;
+
+                    log.debug("Created parameter option: {} = {}", parameter.getNameBg(), optionValue);
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("Error syncing Tekra parameter options for {}: {}",
+                    parameter.getNameBg(), e.getMessage());
+        }
+
+        return created;
+    }
+
+    // ✅ Нормализация на стойности
+    private String normalizeParameterValue(String value) {
+        if (value == null) return "";
+        return value.toLowerCase().trim().replaceAll("\\s+", " ");
+    }
+
+    // ✅ Helper за събиране на параметри
+    private Map<Long, Map<String, Set<String>>> collectTekraParametersByCategory(
+            List<Category> tekraCategories) {
+
+        Map<Long, Map<String, Set<String>>> categorizedParameters = new HashMap<>();
+        Set<String> processedSkus = new HashSet<>();
+
+        for (Category category : tekraCategories) {
+            try {
+                List<Map<String, Object>> products = tekraApiService.getProductsRaw(category.getTekraSlug());
+
+                for (Map<String, Object> product : products) {
+                    String sku = getString(product, "sku");
+                    if (sku == null || processedSkus.contains(sku)) {
+                        continue;
+                    }
+                    processedSkus.add(sku);
+
+                    Map<String, String> productParams = extractTekraParameters(product);
+
+                    if (!productParams.isEmpty()) {
+                        categorizedParameters.putIfAbsent(category.getId(), new HashMap<>());
+                        Map<String, Set<String>> categoryParams = categorizedParameters.get(category.getId());
+
+                        for (Map.Entry<String, String> param : productParams.entrySet()) {
+                            categoryParams.putIfAbsent(param.getKey(), new HashSet<>());
+                            categoryParams.get(param.getKey()).add(param.getValue());
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error processing category {}: {}", category.getNameBg(), e.getMessage());
+            }
+        }
+
+        return categorizedParameters;
+    }
+
+    private String normalizeParameterName(String name) {
+        if (name == null) return "";
+        return name.toLowerCase().trim().replaceAll("\\s+", " ");
     }
 
     // ✅ Актуализиран метод за сетване на параметри
@@ -702,11 +665,10 @@ public class TekraSyncService {
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("=== STARTING Tekra products synchronization ===");
+            log.info("=== STARTING Tekra products synchronization - MINIMAL UPDATE mode ===");
 
             fixDuplicateProducts();
 
-            // STEP 1: Fetch products from all categories
             log.info("STEP 1: Fetching products from all Tekra categories...");
             List<Map<String, Object>> allProducts = new ArrayList<>();
             Set<String> processedSkus = new HashSet<>();
@@ -738,35 +700,18 @@ public class TekraSyncService {
             log.info("STEP 1 COMPLETE: Collected {} unique products from {} categories",
                     allProducts.size(), allCategories.size());
 
-            // ✅ DEBUG: Покажи sample продукти
-            log.info("Sample products:");
-            allProducts.stream().limit(5).forEach(p ->
-                    log.info("  - SKU: {}, Name: {}, L1={}, L2={}, L3={}",
-                            getString(p, "sku"),
-                            getString(p, "name"),
-                            getString(p, "category_1"),
-                            getString(p, "category_2"),
-                            getString(p, "category_3")
-                    )
-            );
-
             if (allProducts.isEmpty()) {
                 log.warn("No products found in any category");
                 logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, 0, 0, 0, 0, "No products found", startTime);
                 return;
             }
 
-            // STEP 2: Prepare category maps
             log.info("STEP 2: Loading categories for matching...");
-            Map<String, Category> categoriesByPath = new HashMap<>();
             Map<String, Category> categoriesByName = new HashMap<>();
             Map<String, Category> categoriesBySlug = new HashMap<>();
             Map<String, Category> categoriesByTekraSlug = new HashMap<>();
 
             for (Category cat : allCategories) {
-                if (cat.getCategoryPath() != null) {
-                    categoriesByPath.put(cat.getCategoryPath().toLowerCase(), cat);
-                }
                 if (cat.getNameBg() != null) {
                     categoriesByName.put(cat.getNameBg().toLowerCase(), cat);
                 }
@@ -778,15 +723,26 @@ public class TekraSyncService {
                 }
             }
 
-            log.info("Category maps created: byPath={}, byName={}, bySlug={}, byTekraSlug={}",
-                    categoriesByPath.size(), categoriesByName.size(),
-                    categoriesBySlug.size(), categoriesByTekraSlug.size());
+            // ✅ LOAD MANUFACTURERS
+            Map<String, Manufacturer> manufacturersMap = manufacturerRepository.findAll()
+                    .stream()
+                    .filter(m -> m.getName() != null && !m.getName().isEmpty())
+                    .collect(Collectors.toMap(
+                            m -> normalizeManufacturerName(m.getName()),
+                            m -> m,
+                            (existing, duplicate) -> existing
+                    ));
 
-            // STEP 3: Process products with improved matching
+            log.info("Loaded {} manufacturers", manufacturersMap.size());
+
+            if (manufacturersMap.isEmpty()) {
+                log.warn("⚠️ WARNING: No manufacturers found! Products may not have manufacturers assigned.");
+            }
+
             log.info("STEP 3: Processing {} products...", allProducts.size());
 
             long totalProcessed = 0, totalCreated = 0, totalUpdated = 0, totalErrors = 0;
-            long skippedNoCategory = 0;
+            long skippedNoCategory = 0, skippedNoManufacturer = 0;
 
             Map<String, Integer> matchTypeStats = new HashMap<>();
             matchTypeStats.put("perfect_path", 0);
@@ -807,33 +763,36 @@ public class TekraSyncService {
                         continue;
                     }
 
-                    // ✅ Намираме правилната категория
+                    // ✅ Find category
                     Category productCategory = findMostSpecificCategory(rawProduct,
                             categoriesByName, categoriesBySlug, categoriesByTekraSlug, matchTypeStats);
 
                     if (productCategory == null || !isValidCategory(productCategory)) {
-                        log.warn("✗✗✗ Skipping product '{}' ({}): NO VALID CATEGORY", name, sku);
+                        log.warn("✗ Skipping product '{}' ({}): NO VALID CATEGORY", name, sku);
                         skippedNoCategory++;
                         matchTypeStats.put("no_match", matchTypeStats.get("no_match") + 1);
                         continue;
                     }
 
-                    log.info("✓✓✓ Product '{}' → category: '{}' (path: '{}')",
-                            sku, productCategory.getNameBg(), productCategory.getCategoryPath());
+                    log.trace("✓ Product '{}' → category: '{}'", sku, productCategory.getNameBg());
 
-                    // ✅ Намираме/създаваме продукта С категорията
                     Product product = findOrCreateProduct(sku, rawProduct, productCategory);
 
-                    // ✅ ВАЖНА ПРОВЕРКА: Гарантираме че категорията е зададена
                     if (product.getCategory() == null) {
                         log.error("Product {} still has no category after findOrCreateProduct!", sku);
                         product.setCategory(productCategory);
                     }
 
                     boolean isNew = (product.getId() == null);
-                    product.setPlatform(Platform.TEKRA);
 
-                    // ✅ Запазваме продукта ПРЕДИ параметрите
+                    // ✅ Update product fields (CREATE ONLY or MINIMAL UPDATE)
+                    boolean success = updateProductFieldsFromTekraXML(product, rawProduct, isNew, manufacturersMap);
+
+                    if (!success) {
+                        skippedNoManufacturer++;
+                        continue;
+                    }
+
                     product = productRepository.save(product);
 
                     if (isNew) {
@@ -842,23 +801,14 @@ public class TekraSyncService {
                         totalUpdated++;
                     }
 
-                    // ✅ Сега мапваме параметрите (продуктът има категория!)
-                    if (product.getCategory() != null) {
-                        setTekraParametersToProduct(product, rawProduct);
-                        product = productRepository.save(product);
-                    } else {
-                        log.error("Cannot set parameters for product {} - no category!", sku);
-                    }
-
                     totalProcessed++;
 
-                    if (totalProcessed % 20 == 0) {
-                        log.info("Progress: {}/{} (created: {}, updated: {}, errors: {}, skipped: {})",
-                                totalProcessed, allProducts.size(), totalCreated, totalUpdated,
-                                totalErrors, skippedNoCategory);
+                    if (totalProcessed % 50 == 0) {
+                        log.info("Progress: {}/{} (created: {}, updated: {})",
+                                totalProcessed, allProducts.size(), totalCreated, totalUpdated);
                     }
 
-                    if (totalProcessed % 50 == 0) {
+                    if (totalProcessed % 100 == 0) {
                         entityManager.flush();
                         entityManager.clear();
                     }
@@ -866,7 +816,12 @@ public class TekraSyncService {
                 } catch (Exception e) {
                     totalErrors++;
                     log.error("Error processing product {}: {}",
-                            getString(rawProduct, "sku"), e.getMessage(), e);
+                            getString(rawProduct, "sku"), e.getMessage());
+
+                    // Log full stack trace for first few errors
+                    if (totalErrors <= 3) {
+                        log.error("Full exception for debugging:", e);
+                    }
                 }
             }
 
@@ -874,23 +829,109 @@ public class TekraSyncService {
             matchTypeStats.forEach((type, count) ->
                     log.info("{}: {}", type, count)
             );
-            log.info("====================================");
 
             String message = String.format(
-                    "Total: %d, Created: %d, Updated: %d, Skipped (No Category): %d, Errors: %d",
-                    totalProcessed, totalCreated, totalUpdated, skippedNoCategory, totalErrors
+                    "Total: %d, Created: %d, Updated: %d, Skipped (No Category): %d, Skipped (No Manufacturer): %d, Errors: %d",
+                    totalProcessed, totalCreated, totalUpdated, skippedNoCategory, skippedNoManufacturer, totalErrors
             );
 
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, totalCreated,
                     totalUpdated, totalErrors, message, startTime);
 
-            log.info("=== COMPLETE: Products sync finished in {}ms ===",
-                    System.currentTimeMillis() - startTime);
+            log.info("=== COMPLETE: Products sync finished ===");
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
             log.error("=== FAILED: Products synchronization error ===", e);
             throw e;
+        }
+    }
+
+    // ✅ Актуализиран метод с валидация на manufacturer
+    private boolean updateProductFieldsFromTekraXML(Product product, Map<String, Object> rawData,
+                                                    boolean isNew, Map<String, Manufacturer> manufacturersMap) {
+        try {
+            if (isNew) {
+                // ✅ NEW PRODUCT - set all fields
+                product.setReferenceNumber(getString(rawData, "sku"));
+                product.setPlatform(Platform.TEKRA);
+
+                String name = getString(rawData, "name");
+                product.setNameBg(name);
+                product.setNameEn(name);
+
+                product.setModel(getString(rawData, "model"));
+
+                String description = getString(rawData, "description");
+                if (description != null) {
+                    product.setDescriptionBg(description);
+                    product.setDescriptionEn(description);
+                }
+
+                Double weight = getDoubleValue(rawData, "weight");
+                if (weight == null) {
+                    weight = getDoubleValue(rawData, "net_weight");
+                }
+                if (weight != null && weight > 0) {
+                    product.setWeight(BigDecimal.valueOf(weight));
+                }
+
+                setImagesFromTekraXML(product, rawData);
+
+                // ✅ Set manufacturer with validation
+                String manufacturerName = getString(rawData, "manufacturer");
+                if (manufacturerName != null && !manufacturerName.isEmpty()) {
+                    String normalizedName = normalizeManufacturerName(manufacturerName);
+                    Manufacturer manufacturer = manufacturersMap.get(normalizedName);
+
+                    if (manufacturer != null) {
+                        product.setManufacturer(manufacturer);
+                    } else {
+                        log.warn("Manufacturer '{}' not found for product {}, skipping product",
+                                manufacturerName, product.getSku());
+                        return false; // Skip this product
+                    }
+                } else {
+                    log.debug("Product {} has no manufacturer in source data", product.getSku());
+                }
+
+                // ✅ WRAP IN TRY-CATCH to prevent parameter errors from killing the product
+                try {
+                    setTekraParametersToProduct(product, rawData);
+                } catch (Exception e) {
+                    log.error("Error setting parameters for product {}: {}", product.getSku(), e.getMessage());
+                    product.setProductParameters(new HashSet<>());
+                }
+            }
+
+            // ✅ ALWAYS UPDATE (for both new and existing)
+            Double price = getDoubleValue(rawData, "price");
+            if (price != null) {
+                product.setPriceClient(BigDecimal.valueOf(price));
+            }
+
+            Double partnerPrice = getDoubleValue(rawData, "partner_price");
+            if (partnerPrice != null) {
+                product.setPricePartner(BigDecimal.valueOf(partnerPrice));
+            }
+
+            Integer quantity = getIntegerValue(rawData, "quantity");
+            boolean inStock = (quantity != null && quantity > 0);
+            product.setShow(inStock);
+            product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
+
+            product.calculateFinalPrice();
+
+            if (!isNew) {
+                log.trace("Updated product {} - status: {}, priceClient: {}",
+                        product.getSku(), product.getStatus(), product.getPriceClient());
+            }
+
+            return true; // Success
+
+        } catch (Exception e) {
+            log.error("Error updating product fields from Tekra XML: {}", e.getMessage());
+            throw new RuntimeException("Failed to update product fields", e);
         }
     }
 
@@ -1158,14 +1199,6 @@ public class TekraSyncService {
         }
     }
 
-    private String normalizeParameterValue(String value) {
-        if (value == null) return "";
-
-        return value.toLowerCase()
-                .trim()
-                .replaceAll("\\s+", " ");
-    }
-
     private Integer getParameterOrder(String parameterKey) {
         Map<String, Integer> orderMap = Map.ofEntries(
                 Map.entry("model", 1),
@@ -1333,7 +1366,7 @@ public class TekraSyncService {
                 "seriyni_portove",
                 "termalna_rezolyutsiya",
                 "tip_upravlenie"
-                );
+        );
 
         int unknownFieldsCount = 0;
         List<String> unknownFields = new ArrayList<>();

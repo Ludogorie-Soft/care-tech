@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,17 +26,12 @@ public interface ParameterOptionRepository extends JpaRepository<ParameterOption
             @Param("categoryId") Long categoryId
     );
 
-    Optional<ParameterOption> findByExternalId(Long externalId);
-
     @Query(value = "SELECT DISTINCT ON (name_bg, name_en) * " +
             "FROM parameter_options " +
             "WHERE parameter_id = :parameterId " +
             "ORDER BY name_bg, name_en, sort_order ASC",
             nativeQuery = true)
     List<ParameterOption> findUniqueOptionsByParameter(@Param("parameterId") Long parameterId);
-
-
-    Optional<ParameterOption> findByExternalIdAndParameterId(Long externalId, Long parameterId);
 
     Optional<ParameterOption> findByParameterAndNameBg(Parameter parameter, String nameBg);
 }

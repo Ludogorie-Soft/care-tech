@@ -14,8 +14,6 @@ import java.util.Set;
 @Repository
 public interface ParameterRepository extends JpaRepository<Parameter, Long> {
 
-    Optional<Parameter> findByExternalId(Long externalId);
-
     @Query("SELECT DISTINCT p FROM Parameter p " +
             "JOIN p.categories c " +
             "WHERE c.id = :categoryId " +
