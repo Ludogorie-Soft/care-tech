@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -245,6 +247,11 @@ public class ParameterService {
                     optionId, getOptionDisplayName(option));
             return null;
         }, context);
+    }
+
+    public Page<ParameterResponseDto> findAllAdminParameters(Pageable pageable, String lang) {
+        return parameterRepository.findByCreatedByOrderByCreatedAtDesc("ADMIN", pageable)
+                .map(p -> parameterMapper.toResponseDto(p, lang));
     }
 
     // ✅ Helper method
@@ -514,6 +521,7 @@ public class ParameterService {
 
         setParameterNamesFromRequest(parameter, requestDto.getName());
         parameter.setCreatedBy("ADMIN");
+        parameter.setLastModifiedBy("ADMIN");
 
         return parameter;
     }

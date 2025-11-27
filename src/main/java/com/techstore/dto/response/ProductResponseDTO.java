@@ -45,4 +45,5 @@ public class ProductResponseDTO {
     private boolean show;
     private Long workflowId;
     private String slug;
+    private String createdBy;
 }

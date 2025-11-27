@@ -2,6 +2,8 @@ package com.techstore.repository;
 
 import com.techstore.entity.Manufacturer;
 import com.techstore.entity.Product;
+import com.techstore.enums.Platform;
+import com.techstore.enums.ProductStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -56,4 +58,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             "WHERE p.category.id = :categoryId " +
             "AND p.manufacturer IS NOT NULL")
     List<Manufacturer> findManufacturersByCategoryId(@Param("categoryId") Long categoryId);
+
+    Page<Product> findByCreatedByOrderByCreatedAtDesc(String createdBy, Pageable pageable);
 }

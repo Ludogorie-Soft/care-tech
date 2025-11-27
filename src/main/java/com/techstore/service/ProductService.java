@@ -12,6 +12,7 @@ import com.techstore.entity.Parameter;
 import com.techstore.entity.ParameterOption;
 import com.techstore.entity.Product;
 import com.techstore.entity.ProductParameter;
+import com.techstore.enums.Platform;
 import com.techstore.enums.ProductStatus;
 import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.DuplicateResourceException;
@@ -467,6 +468,11 @@ public class ProductService {
         return imageUrl;
     }
 
+    public Page<ProductResponseDTO> findAllAdminProducts(Pageable pageable, String lang) {
+        return productRepository.findByCreatedByOrderByCreatedAtDesc("ADMIN", pageable)
+                .map(p -> convertToResponseDTO(p, lang));
+    }
+
     private void validateProductId(Long id) {
         if (id == null || id <= 0) throw new ValidationException("Product ID must be a positive number");
     }
@@ -690,6 +696,8 @@ public class ProductService {
         p.calculateFinalPrice();
         setParametersFromRest(p, dto.getParameters());
         p.setCreatedBy("ADMIN");
+        p.setLastModifiedBy("ADMIN");
+        p.generateSlug();
     }
     private void updateProductFieldsByUpdate(Product p, ProductCreateRequestDTO dto) {
         p.setReferenceNumber(dto.getReferenceNumber());
@@ -778,6 +786,7 @@ public class ProductService {
         if (p.getManufacturer() != null) dto.setManufacturer(convertToManufacturerSummary(p.getManufacturer()));
         dto.setCreatedAt(p.getCreatedAt());
         dto.setUpdatedAt(p.getUpdatedAt());
+        dto.setCreatedBy(p.getCreatedBy());
         dto.setOnSale(p.isOnSale());
         dto.setStatus(p.getStatus() != null ? p.getStatus().getCode() : 0);
         dto.setWorkflowId(p.getWorkflowId());

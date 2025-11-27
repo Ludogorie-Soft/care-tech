@@ -777,6 +777,7 @@ public class MostSyncService {
                                 parameter.setOrder(50);
                                 parameter.setCategories(new HashSet<>());
                                 parameter.getCategories().add(category);
+                                parameter.setCreatedBy("system");
 
                                 parameter = parameterRepository.save(parameter);
                                 globalParametersCache.put(normalizedName, parameter);
@@ -1093,6 +1094,7 @@ public class MostSyncService {
         boolean isAvailable = "Наличен".equals(productStatus);
         product.setStatus(isAvailable ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
         product.setShow(isAvailable);
+        product.setCreatedBy("system");
 
         // Price
         String priceStr = (String) rawProduct.get("price");

@@ -387,6 +387,7 @@ public class ValiSyncService {
         parameter.setOrder(extParameter.getOrder());
         parameter.setPlatform(Platform.VALI);
         parameter.setCategories(new HashSet<>());
+        parameter.setCreatedBy("system");
 
         if (extParameter.getName() != null) {
             extParameter.getName().forEach(name -> {
@@ -739,6 +740,8 @@ public class ValiSyncService {
             product.setPriceClientPromo(extProduct.getPriceClientPromo());
 
             product.calculateFinalPrice();
+
+            product.setCreatedBy("system");
 
             if (!isNew) {
                 log.trace("Updated product {} - status: {}, priceClient: {}",

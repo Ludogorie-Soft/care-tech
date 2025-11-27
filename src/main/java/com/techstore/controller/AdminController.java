@@ -2,15 +2,15 @@ package com.techstore.controller;
 
 import com.techstore.dto.request.OrderStatusUpdateDTO;
 import com.techstore.dto.request.ProductPromoRequest;
-import com.techstore.dto.response.CategorySummaryDTO;
-import com.techstore.dto.response.ManufacturerSummaryDto;
-import com.techstore.dto.response.OrderResponseDTO;
-import com.techstore.dto.response.OrderStatisticsResponseDTO;
-import com.techstore.dto.response.ProductResponseDTO;
+import com.techstore.dto.response.*;
 import com.techstore.enums.OrderStatus;
 import com.techstore.service.OrderService;
+import com.techstore.service.ParameterService;
+import com.techstore.service.ProductService;
 import com.techstore.service.admin.AdminService;
 import jakarta.validation.Valid;
+import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,6 +34,36 @@ public class AdminController {
 
     private final AdminService adminService;
     private final OrderService orderService;
+    private final ProductService productService;
+    private final ParameterService parameterService;
+
+    @GetMapping("/products/pageable")
+    public ResponseEntity<Page<ProductResponseDTO>> getAllAdminProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(defaultValue = "bg") String lang) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
+        Page<ProductResponseDTO> productsPage = productService.findAllAdminProducts(pageable, lang);
+
+        return ResponseEntity.ok(productsPage);
+    }
+
+    @GetMapping("parameters/pageable")
+    public ResponseEntity<Page<ParameterResponseDto>> getAllAdminParameters(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(defaultValue = "bg") String lang) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
+        Page<ParameterResponseDto> parametersPage = parameterService.findAllAdminParameters(pageable, lang);
+
+        return ResponseEntity.ok(parametersPage);
+    }
 
     @PutMapping("/products/promo")
     public ResponseEntity<ProductResponseDTO> createPromo(@RequestBody ProductPromoRequest request, @RequestParam(defaultValue = "en") String language) {

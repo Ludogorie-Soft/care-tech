@@ -414,6 +414,7 @@ public class TekraSyncService {
                                 parameter.setPlatform(Platform.TEKRA);
                                 parameter.setOrder(getParameterOrder(tekraKey));
                                 parameter.setCategories(new HashSet<>());
+                                parameter.setCreatedBy("system");
                                 isNewParameter = true;
                                 log.debug("Creating new Tekra parameter: {}", paramName);
                             } else {
@@ -861,6 +862,7 @@ public class TekraSyncService {
                 product.setNameEn(name);
 
                 product.setModel(getString(rawData, "model"));
+                product.setCreatedBy("system");
 
                 String description = getString(rawData, "description");
                 if (description != null) {

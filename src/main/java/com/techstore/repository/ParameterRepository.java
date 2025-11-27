@@ -2,6 +2,8 @@ package com.techstore.repository;
 
 import com.techstore.entity.Category;
 import com.techstore.entity.Parameter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,8 @@ import java.util.Set;
 
 @Repository
 public interface ParameterRepository extends JpaRepository<Parameter, Long> {
+
+    Page<Parameter> findByCreatedByOrderByCreatedAtDesc(String createdBy, Pageable pageable);
 
     @Query("SELECT DISTINCT p FROM Parameter p " +
             "JOIN p.categories c " +
