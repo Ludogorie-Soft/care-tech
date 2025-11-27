@@ -16,11 +16,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Parameter {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Parameter extends BaseEntity {
 
     @Column(name = "external_id")
     private Long externalId;

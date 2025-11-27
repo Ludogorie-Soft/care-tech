@@ -513,11 +513,13 @@ public class ParameterService {
         parameter.setOrder(requestDto.getOrder() != null ? requestDto.getOrder() : 0);
 
         setParameterNamesFromRequest(parameter, requestDto.getName());
+        parameter.setCreatedBy("ADMIN");
 
         return parameter;
     }
 
     private void updateParameterFromRequest(Parameter parameter, ParameterRequestDto requestDto) {
+        parameter.setLastModifiedBy("ADMIN");
         if (requestDto.getOrder() != null) {
             parameter.setOrder(requestDto.getOrder());
         }
@@ -667,6 +669,7 @@ public class ParameterService {
         option.setOrder(optionDto.getOrder() != null ? optionDto.getOrder() : 0);
 
         setParameterOptionNamesFromRequest(option, optionDto.getName());
+        option.setCreatedBy("ADMIN");
 
         return option;
     }

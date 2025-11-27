@@ -233,7 +233,7 @@ public class ProductService {
             handleNewImageUploads(product, newPrimaryImage, newAdditionalImages, s3UploadsTracker, s3CleanupList);
             handleImageReordering(product, productData);
             validateProductHasImages(product);
-            updateProductFieldsFromRest(product, productData);
+            updateProductFieldsByUpdate(product, productData);
             product.generateSlug();
             Product savedProduct = productRepository.save(product);
 
@@ -689,6 +689,32 @@ public class ProductService {
         p.setFeatured(dto.getFeatured());
         p.calculateFinalPrice();
         setParametersFromRest(p, dto.getParameters());
+        p.setCreatedBy("ADMIN");
+    }
+    private void updateProductFieldsByUpdate(Product p, ProductCreateRequestDTO dto) {
+        p.setReferenceNumber(dto.getReferenceNumber());
+        p.setNameEn(dto.getNameEn());
+        p.setNameBg(dto.getNameBg());
+        p.setDescriptionEn(dto.getDescriptionEn());
+        p.setDescriptionBg(dto.getDescriptionBg());
+        p.setModel(dto.getModel());
+        p.setBarcode(dto.getBarcode());
+        p.setCategory(findCategoryByIdOrThrow(dto.getCategoryId()));
+        p.setManufacturer(findManufacturerByIdOrThrow(dto.getManufacturerId()));
+        p.setStatus(ProductStatus.fromCode(dto.getStatus()));
+        p.setPriceClient(dto.getPriceClient());
+        p.setPricePartner(dto.getPricePartner());
+        p.setPricePromo(dto.getPricePromo());
+        p.setPriceClientPromo(dto.getPriceClientPromo());
+        p.setMarkupPercentage(dto.getMarkupPercentage());
+        p.setShow(dto.getShow());
+        p.setWarranty(dto.getWarranty());
+        p.setWeight(dto.getWeight());
+        p.setActive(dto.getActive());
+        p.setFeatured(dto.getFeatured());
+        p.calculateFinalPrice();
+        setParametersFromRest(p, dto.getParameters());
+        p.setLastModifiedBy("ADMIN");
     }
     private void setParametersFromRest(Product p, List<ProductParameterCreateDTO> params) {
         if (params == null) {
