@@ -374,10 +374,25 @@ public class ProductService {
         validateProductId(id);
         Product product = findProductByIdOrThrow(id);
         validateProductDeletion(product);
+
+        // ✅ Събери всички снимки за cleanup
         List<String> allImages = collectAllProductImages(product);
+
+        // ✅ ИЗТРИЙ ВСИЧКИ ProductParameter ЗАПИСИ
+        if (product.getProductParameters() != null && !product.getProductParameters().isEmpty()) {
+            log.info("Deleting {} product parameters for product {}",
+                    product.getProductParameters().size(), id);
+            productParameterRepository.deleteAll(product.getProductParameters());
+            product.getProductParameters().clear();
+        }
+
+        // ✅ Soft delete на продукта
         product.setActive(false);
         productRepository.save(product);
+
+        // ✅ Cleanup на снимките
         cleanupImagesOnError(allImages);
+
         log.info("Product soft deleted successfully with id: {}", id);
         clearProductCache();
     }
@@ -388,9 +403,24 @@ public class ProductService {
         validateProductId(id);
         Product product = findProductByIdOrThrow(id);
         validatePermanentProductDeletion(product);
+
+        // ✅ Събери всички снимки
         List<String> allImages = collectAllProductImages(product);
+
+        // ✅ ИЗТРИЙ ProductParameter записи ПРЕДИ permanent delete
+        if (product.getProductParameters() != null && !product.getProductParameters().isEmpty()) {
+            log.info("Deleting {} product parameters before permanent deletion",
+                    product.getProductParameters().size());
+            productParameterRepository.deleteAll(product.getProductParameters());
+            product.getProductParameters().clear();
+        }
+
+        // ✅ Permanent delete
         productRepository.deleteById(id);
+
+        // ✅ Cleanup на снимките
         cleanupImagesOnError(allImages);
+
         log.warn("Product permanently deleted successfully with id: {}", id);
         clearProductCache();
     }
