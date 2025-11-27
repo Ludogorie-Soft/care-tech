@@ -91,4 +91,15 @@ public class ParameterController {
         List<ParameterResponseDto> response = parameterService.getAllParameters(language);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{parameterId}/options/{optionId}")
+    public ResponseEntity<Void> deleteParameterOption(
+            @PathVariable Long parameterId,
+            @PathVariable Long optionId) {
+
+        log.info("DELETE request for parameter option: parameterId={}, optionId={}", parameterId, optionId);
+        parameterService.deleteParameterOption(parameterId, optionId);
+        log.info("Parameter option deleted successfully: parameterId={}, optionId={}", parameterId, optionId);
+        return ResponseEntity.noContent().build();
+    }
 }

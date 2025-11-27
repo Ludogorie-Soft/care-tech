@@ -197,6 +197,67 @@ public class ParameterService {
                 parameterRepository.existsByNameEnIgnoreCaseAndCategories(parameterName.trim(), category);
     }
 
+    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
+    public void deleteParameterOption(Long parameterId, Long optionId) {
+        log.info("Deleting parameter option with ID: {} from parameter: {}", optionId, parameterId);
+
+        String context = ExceptionHelper.createErrorContext(
+                "deleteParameterOption", "ParameterOption", optionId,
+                "parameterId: " + parameterId);
+
+        ExceptionHelper.wrapDatabaseOperation(() -> {
+            validateParameterId(parameterId);
+
+            if (optionId == null || optionId <= 0) {
+                throw new ValidationException("Parameter option ID must be a positive number");
+            }
+
+            // ✅ Провери дали параметърът съществува
+            Parameter parameter = findParameterByIdOrThrow(parameterId);
+
+            // ✅ Намери опцията
+            ParameterOption option = parameterOptionRepository.findById(optionId)
+                    .orElseThrow(() -> new ValidationException(
+                            String.format("Parameter option with ID %d not found", optionId)));
+
+            // ✅ Провери дали опцията принадлежи на този параметър
+            if (!option.getParameter().getId().equals(parameterId)) {
+                throw new ValidationException(
+                        String.format("Parameter option %d does not belong to parameter %d",
+                                optionId, parameterId));
+            }
+
+            // ✅ Провери дали опцията се използва от продукти
+            long productUsages = option.getProductParameters() != null ?
+                    option.getProductParameters().size() : 0;
+
+            if (productUsages > 0) {
+                throw new BusinessLogicException(
+                        String.format("Cannot delete parameter option '%s' because it is used by %d products. " +
+                                        "Please remove it from products first.",
+                                getOptionDisplayName(option), productUsages));
+            }
+
+            // ✅ Изтрий опцията
+            parameterOptionRepository.delete(option);
+
+            log.info("Parameter option deleted successfully: ID {}, name: '{}'",
+                    optionId, getOptionDisplayName(option));
+            return null;
+        }, context);
+    }
+
+    // ✅ Helper method
+    private String getOptionDisplayName(ParameterOption option) {
+        if (StringUtils.hasText(option.getNameBg())) {
+            return option.getNameBg();
+        } else if (StringUtils.hasText(option.getNameEn())) {
+            return option.getNameEn();
+        } else {
+            return "Option ID: " + option.getId();
+        }
+    }
+
     // ========== PRIVATE VALIDATION METHODS ==========
 
     private void validateParameterId(Long id) {
@@ -277,9 +338,9 @@ public class ParameterService {
         }
 
         Set<Long> externalIds = new HashSet<>();
-        Set<Integer> orders = new HashSet<>();
 
         for (ParameterOptionRequestDto option : options) {
+            // ✅ Проверка за external_id дубликати
             if (option.getExternalId() != null) {
                 if (externalIds.contains(option.getExternalId())) {
                     throw new ValidationException("Duplicate parameter option external ID: " + option.getExternalId());
@@ -287,17 +348,12 @@ public class ParameterService {
                 externalIds.add(option.getExternalId());
             }
 
-            if (option.getOrder() != null) {
-                if (option.getOrder() < 0) {
-                    throw new ValidationException("Parameter option order cannot be negative");
-                }
-
-                if (orders.contains(option.getOrder())) {
-                    throw new ValidationException("Duplicate parameter option order: " + option.getOrder());
-                }
-                orders.add(option.getOrder());
+            // ✅ Проверка за отрицателен order
+            if (option.getOrder() != null && option.getOrder() < 0) {
+                throw new ValidationException("Parameter option order cannot be negative");
             }
 
+            // ✅ Проверка за име
             if (option.getName() == null || option.getName().isEmpty()) {
                 throw new ValidationException("Parameter option name is required");
             }
@@ -513,10 +569,19 @@ public class ParameterService {
             return;
         }
 
-        // ✅ Кешираме по нормализирано ИМЕ вместо по external_id
-        Map<String, ParameterOption> existingOptionsByName = parameterOptionRepository
-                .findByParameterIdOrderByOrderAsc(parameter.getId())
-                .stream()
+        // ✅ 1. Зареди съществуващите options
+        List<ParameterOption> existingOptions = parameterOptionRepository
+                .findByParameterIdOrderByOrderAsc(parameter.getId());
+
+        // ✅ 2. Индексирай ги по ID за бърз lookup
+        Map<Long, ParameterOption> existingOptionsById = existingOptions.stream()
+                .collect(Collectors.toMap(
+                        ParameterOption::getId,
+                        option -> option
+                ));
+
+        // ✅ 3. Индексирай ги по нормализирано име (за създаване на нови)
+        Map<String, ParameterOption> existingOptionsByName = existingOptions.stream()
                 .filter(opt -> opt.getNameBg() != null)
                 .collect(Collectors.toMap(
                         opt -> normalizeParameterValue(opt.getNameBg()),
@@ -529,40 +594,54 @@ public class ParameterService {
                 ));
 
         List<ParameterOption> optionsToSave = new ArrayList<>();
-        Set<String> processedNames = new HashSet<>();
+        Set<Long> processedIds = new HashSet<>();
 
+        // ✅ 4. Обработи options от request-а
         for (ParameterOptionRequestDto optionDto : optionDtos) {
             String optionNameBg = getOptionNameBg(optionDto);
             if (optionNameBg == null || optionNameBg.isEmpty()) {
                 continue;
             }
 
-            String normalizedName = normalizeParameterValue(optionNameBg);
-            processedNames.add(normalizedName);
+            ParameterOption existingOption = null;
 
-            ParameterOption existingOption = existingOptionsByName.get(normalizedName);
+            if (existingOption == null) {
+                String normalizedName = normalizeParameterValue(optionNameBg);
+                existingOption = existingOptionsByName.get(normalizedName);
+                if (existingOption != null) {
+                    processedIds.add(existingOption.getId());
+                }
+            }
+
+            // ✅ 4c. Update или Create
             if (existingOption != null) {
-                // ✅ Update existing
+                // ✅ UPDATE existing option
                 updateParameterOptionFromRequest(existingOption, optionDto);
                 optionsToSave.add(existingOption);
+                log.debug("Updated parameter option: '{}' (ID: {})", optionNameBg, existingOption.getId());
             } else {
-                // ✅ Create new
-                optionsToSave.add(createParameterOptionFromRequest(optionDto, parameter));
+                // ✅ CREATE new option
+                ParameterOption newOption = createParameterOptionFromRequest(optionDto, parameter);
+                optionsToSave.add(newOption);
+                log.debug("Creating new parameter option: '{}'", optionNameBg);
             }
         }
 
-        // ✅ Delete options that are no longer present
-        List<ParameterOption> optionsToDelete = existingOptionsByName.values().stream()
-                .filter(option -> !processedNames.contains(normalizeParameterValue(option.getNameBg())))
+        // ✅ 5. DELETE options that are NO LONGER in the request
+        List<ParameterOption> optionsToDelete = existingOptions.stream()
+                .filter(option -> !processedIds.contains(option.getId()))
                 .collect(Collectors.toList());
 
         if (!optionsToDelete.isEmpty()) {
             parameterOptionRepository.deleteAll(optionsToDelete);
-            log.debug("Deleted {} parameter options for parameter: {}", optionsToDelete.size(), parameter.getId());
+            log.info("Deleted {} parameter options for parameter: {}", optionsToDelete.size(), parameter.getId());
         }
 
-        parameterOptionRepository.saveAll(optionsToSave);
-        log.debug("Updated {} parameter options for parameter: {}", optionsToSave.size(), parameter.getId());
+        // ✅ 6. SAVE all options
+        if (!optionsToSave.isEmpty()) {
+            parameterOptionRepository.saveAll(optionsToSave);
+            log.debug("Saved {} parameter options for parameter: {}", optionsToSave.size(), parameter.getId());
+        }
     }
 
     // ✅ Helper methods
