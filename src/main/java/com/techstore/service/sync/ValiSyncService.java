@@ -1,6 +1,7 @@
 package com.techstore.service.sync;
 
 import com.techstore.dto.external.ImageDto;
+import com.techstore.dto.external.NameDto;
 import com.techstore.dto.request.CategoryRequestFromExternalDto;
 import com.techstore.dto.request.ManufacturerRequestDto;
 import com.techstore.dto.request.ParameterOptionRequestDto;
@@ -609,7 +610,6 @@ public class ValiSyncService {
                                              Category category) {
         long processed = 0, created = 0, updated = 0, errors = 0;
 
-        // Fetch existing products in bulk
         Set<Long> externalProductIdsInChunk = products.stream()
                 .map(ProductRequestDto::getId)
                 .collect(Collectors.toSet());
@@ -618,36 +618,26 @@ public class ValiSyncService {
                 .stream()
                 .collect(Collectors.toMap(Product::getExternalId, p -> p));
 
-        log.debug("Found {} existing products out of {} in chunk", existingProductsMap.size(), products.size());
-
         List<Product> productsToSave = new ArrayList<>();
 
         for (ProductRequestDto extProduct : products) {
             try {
-                // ✅ VALIDATION: Check manufacturer exists
                 Manufacturer manufacturer = manufacturersMap.get(extProduct.getManufacturerId());
                 if (manufacturer == null) {
-                    log.warn("Manufacturer with externalId {} not found for product {} ({}), skipping",
-                            extProduct.getManufacturerId(), extProduct.getReferenceNumber(), extProduct.getId());
+                    log.warn("Manufacturer not found for product {}, skipping", extProduct.getReferenceNumber());
                     errors++;
-                    continue; // Skip this product
+                    continue;
                 }
 
                 Product product;
 
                 if (existingProductsMap.containsKey(extProduct.getId())) {
-                    // ✅ EXISTING PRODUCT - MINIMAL UPDATE
                     product = existingProductsMap.get(extProduct.getId());
-                    log.trace("Updating existing product: {} (externalId: {})",
-                            product.getSku(), product.getExternalId());
                     updateProductFieldsFromExternal(product, extProduct, manufacturer, category);
                     updated++;
                 } else {
-                    // ✅ NEW PRODUCT - CREATE ALL FIELDS
                     product = new Product();
                     product.setId(null);
-                    log.trace("Creating new product: {} (externalId: {})",
-                            extProduct.getReferenceNumber(), extProduct.getId());
                     updateProductFieldsFromExternal(product, extProduct, manufacturer, category);
                     created++;
                 }
@@ -657,35 +647,27 @@ public class ValiSyncService {
 
             } catch (Exception e) {
                 errors++;
-                log.error("Error processing product externalId={}, sku={}: {}",
-                        extProduct.getId(),
-                        extProduct.getReferenceNumber(),
-                        e.getMessage());
-
-                // Log full stack trace for first few errors
-                if (errors <= 3) {
-                    log.error("Full exception for debugging:", e);
-                }
+                log.error("Error processing product {}: {}", extProduct.getReferenceNumber(), e.getMessage());
+                // ✅ Clear session след грешка
+                entityManager.clear();
             }
         }
 
-        // Save all products in chunk
         if (!productsToSave.isEmpty()) {
             try {
-                log.debug("Saving {} products from chunk", productsToSave.size());
                 productRepository.saveAll(productsToSave);
-                log.debug("Successfully saved {} products", productsToSave.size());
+                // ✅ Flush успешно
+                entityManager.flush();
             } catch (Exception e) {
                 log.error("Error saving products batch: {}", e.getMessage(), e);
                 errors += productsToSave.size();
+                // ✅ Clear след грешка
+                entityManager.clear();
             }
         }
 
-        entityManager.flush();
+        // ✅ Винаги clear накрая
         entityManager.clear();
-
-        log.debug("Chunk processed - Processed: {}, Created: {}, Updated: {}, Errors: {}",
-                processed, created, updated, errors);
 
         return new ChunkResult(processed, created, updated, errors);
     }
@@ -696,14 +678,12 @@ public class ValiSyncService {
 
         try {
             if (isNew) {
-                // ✅ NEW PRODUCT - set all fields
                 product.setExternalId(extProduct.getId());
                 product.setWorkflowId(extProduct.getIdWF());
                 product.setReferenceNumber(extProduct.getReferenceNumber());
                 product.setModel(extProduct.getModel());
                 product.setBarcode(extProduct.getBarcode());
 
-                // ✅ CRITICAL: Only set manufacturer if not null
                 if (manufacturer != null) {
                     product.setManufacturer(manufacturer);
                 } else {
@@ -721,14 +701,30 @@ public class ValiSyncService {
                 setNamesToProduct(product, extProduct);
                 setDescriptionToProduct(product, extProduct);
 
-                // ✅ WRAP IN TRY-CATCH to prevent parameter errors from killing the product
+                // ✅ NEW PRODUCTS: Always set parameters
                 try {
                     setParametersToProduct(product, extProduct);
                 } catch (Exception e) {
                     log.error("Error setting parameters for product {}: {}",
-                            extProduct.getReferenceNumber(), e.getMessage());
-                    // Continue anyway - product will be created without parameters
+                            extProduct.getReferenceNumber(), e.getMessage(), e);
                     product.setProductParameters(new HashSet<>());
+                }
+            } else {
+                // ✅ EXISTING PRODUCTS: Check if parameters were manually edited
+                boolean hasManualParameters = hasManuallyEditedParameters(product);
+
+                if (hasManualParameters) {
+                    log.info("⚠️ Product {} has MANUALLY edited parameters - SKIPPING parameter sync",
+                            product.getReferenceNumber());
+                } else {
+                    // No manual edits - safe to update from API
+                    try {
+                        setParametersToProduct(product, extProduct);
+                    } catch (Exception e) {
+                        log.error("Error updating parameters for product {}: {}",
+                                extProduct.getReferenceNumber(), e.getMessage(), e);
+                        // Keep existing parameters on error
+                    }
                 }
             }
 
@@ -740,70 +736,117 @@ public class ValiSyncService {
             product.setPriceClientPromo(extProduct.getPriceClientPromo());
 
             product.calculateFinalPrice();
-
             product.setCreatedBy("system");
-
-            if (!isNew) {
-                log.trace("Updated product {} - status: {}, priceClient: {}",
-                        product.getSku(), product.getStatus(), product.getPriceClient());
-            }
 
         } catch (Exception e) {
             log.error("Critical error in updateProductFieldsFromExternal for product {}: {}",
                     extProduct.getReferenceNumber(), e.getMessage(), e);
-            throw e; // Re-throw to be caught in processProductsChunk
+            throw e;
         }
+    }
+
+    /**
+     * Проверява дали продуктът има ръчно редактирани параметри
+     *
+     * Критерии за "ръчно редактиран":
+     * 1. Има параметри без externalId (добавени ръчно)
+     * 2. Има параметри от друга платформа (не VALI)
+     * 3. Има параметри, които не съществуват в API response-а
+     */
+    private boolean hasManuallyEditedParameters(Product product) {
+        if (product.getProductParameters() == null || product.getProductParameters().isEmpty()) {
+            return false;
+        }
+
+        for (ProductParameter pp : product.getProductParameters()) {
+            if (pp.getParameter() == null) {
+                continue;
+            }
+
+            // ✅ Проверка 1: Няма externalId = добавен ръчно
+            if (pp.getParameter().getExternalId() == null) {
+                log.debug("Manual parameter detected: {} (no externalId)", pp.getParameter().getNameBg());
+                return true;
+            }
+
+            // ✅ Проверка 2: Друга платформа = ръчно добавен
+            if (pp.getParameter().getPlatform() != null && pp.getParameter().getPlatform() != Platform.VALI) {
+                log.debug("Manual parameter detected: {} (platform: {})",
+                        pp.getParameter().getNameBg(), pp.getParameter().getPlatform());
+                return true;
+            }
+
+            // ✅ Проверка 3: createdBy != "system" = ръчно добавен
+            if (pp.getCreatedBy() != null && !"system".equals(pp.getCreatedBy())) {
+                log.debug("Manual parameter detected: {} (createdBy: {})",
+                        pp.getParameter().getNameBg(), pp.getCreatedBy());
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void setParametersToProduct(Product product, ProductRequestDto extProduct) {
         if (extProduct.getParameters() == null || product.getCategory() == null) {
-            product.setProductParameters(new HashSet<>());
             return;
         }
 
+        List<Parameter> categoryParameters = parameterRepository
+                .findByCategoryIdOrderByOrderAsc(product.getCategory().getId());
+
+        Map<String, Parameter> parametersByName = categoryParameters.stream()
+                .filter(p -> p.getNameBg() != null)
+                .collect(Collectors.toMap(
+                        p -> normalizeParameterName(p.getNameBg()),
+                        p -> p,
+                        (existing, duplicate) -> existing
+                ));
+
         Set<ProductParameter> newProductParameters = new HashSet<>();
-        int mappedCount = 0;
-        int notFoundCount = 0;
-
-        Set<Long> externalParameterIds = extProduct.getParameters().stream()
-                .map(ParameterValueRequestDto::getParameterId)
-                .collect(Collectors.toSet());
-        Set<Long> externalOptionIds = extProduct.getParameters().stream()
-                .map(ParameterValueRequestDto::getOptionId)
-                .collect(Collectors.toSet());
-
-        Map<Long, Parameter> parametersByExternalId = parameterRepository
-                .findByExternalIdInAndCategoryId(externalParameterIds, product.getCategory().getId())
-                .stream()
-                .collect(Collectors.toMap(Parameter::getExternalId, p -> p));
-
-        Map<Long, ParameterOption> optionsByExternalId = parameterOptionRepository
-                .findByExternalIdInAndParameterCategoryId(externalOptionIds, product.getCategory().getId())
-                .stream()
-                .collect(Collectors.toMap(ParameterOption::getExternalId, o -> o));
 
         for (ParameterValueRequestDto paramValue : extProduct.getParameters()) {
             try {
-                Parameter parameter = parametersByExternalId.get(paramValue.getParameterId());
+                if (paramValue.getParameterName() == null || paramValue.getParameterName().isEmpty()) {
+                    continue;
+                }
+
+                String paramNameBg = paramValue.getParameterName().stream()
+                        .filter(n -> "bg".equals(n.getLanguageCode()))
+                        .map(NameDto::getText)
+                        .findFirst()
+                        .orElse(null);
+
+                if (paramNameBg == null || paramNameBg.trim().isEmpty()) {
+                    continue;
+                }
+
+                String normalizedName = normalizeParameterName(paramNameBg);
+                Parameter parameter = parametersByName.get(normalizedName);
+
                 if (parameter == null) {
-                    log.trace("Parameter with external ID {} not found for category {} for product {}",
-                            paramValue.getParameterId(), product.getCategory().getId(), extProduct.getReferenceNumber());
-                    notFoundCount++;
                     continue;
                 }
 
-                ParameterOption option = optionsByExternalId.get(paramValue.getOptionId());
-                if (option == null) {
-                    log.trace("Parameter option with external ID {} not found for parameter {} for product {}",
-                            paramValue.getOptionId(), paramValue.getParameterId(), extProduct.getReferenceNumber());
-                    notFoundCount++;
+                if (paramValue.getOptionName() == null || paramValue.getOptionName().isEmpty()) {
                     continue;
                 }
 
-                if (!option.getParameter().getId().equals(parameter.getId())) {
-                    log.trace("Parameter option {} does not belong to parameter {} for product {}",
-                            paramValue.getOptionId(), paramValue.getParameterId(), extProduct.getReferenceNumber());
-                    notFoundCount++;
+                String optionNameBg = paramValue.getOptionName().stream()
+                        .filter(n -> "bg".equals(n.getLanguageCode()))
+                        .map(NameDto::getText)
+                        .findFirst()
+                        .orElse(null);
+
+                if (optionNameBg == null || optionNameBg.trim().isEmpty()) {
+                    continue;
+                }
+
+                ParameterOption option = findOrCreateParameterOption(parameter, optionNameBg);
+
+                // ✅ КРИТИЧНО: Skip ако option е null
+                if (option == null || option.getId() == null) {
+                    log.warn("Skipping parameter {} - option creation failed", paramNameBg);
                     continue;
                 }
 
@@ -813,19 +856,63 @@ public class ValiSyncService {
                 pp.setParameterOption(option);
                 newProductParameters.add(pp);
 
-                mappedCount++;
-
             } catch (Exception e) {
-                log.error("Error mapping parameter for product {}: {}", extProduct.getReferenceNumber(), e.getMessage());
-                notFoundCount++;
+                log.error("Error mapping parameter: {}", e.getMessage());
             }
         }
 
-        if (notFoundCount > 0) {
-            log.debug("Product {}: mapped {} parameters, {} not found",
-                    extProduct.getReferenceNumber(), mappedCount, notFoundCount);
+        // ✅ Set parameters
+        if (product.getId() != null) {
+            if (product.getProductParameters() != null) {
+                product.getProductParameters().clear();
+            }
+            if (product.getProductParameters() == null) {
+                product.setProductParameters(new HashSet<>());
+            }
+            product.getProductParameters().addAll(newProductParameters);
+        } else {
+            product.setProductParameters(newProductParameters);
         }
-        product.setProductParameters(newProductParameters);
+
+        log.info("Set {} parameters to product {}",
+                newProductParameters.size(), product.getReferenceNumber());
+    }
+
+    private ParameterOption findOrCreateParameterOption(Parameter parameter, String value) {
+        try {
+            String normalizedValue = normalizeParameterValue(value);
+
+            List<ParameterOption> options = parameterOptionRepository
+                    .findByParameterIdOrderByOrderAsc(parameter.getId());
+
+            for (ParameterOption opt : options) {
+                if (opt.getNameBg() != null &&
+                        normalizedValue.equals(normalizeParameterValue(opt.getNameBg()))) {
+                    return opt;
+                }
+            }
+
+            // Създай нов
+            ParameterOption newOption = new ParameterOption();
+            newOption.setParameter(parameter);
+            newOption.setNameBg(value);
+            newOption.setNameEn(value);
+            newOption.setOrder(options.size());
+
+            // ✅ КРИТИЧНО: Save и flush ВЕДНАГА
+            newOption = parameterOptionRepository.save(newOption);
+            parameterOptionRepository.flush();
+
+            return newOption;
+
+        } catch (Exception e) {
+            log.error("Error creating parameter option for '{}': {}",
+                    value != null && value.length() > 100 ? value.substring(0, 100) + "..." : value,
+                    e.getMessage());
+            // ✅ КРИТИЧНО: Clear session след грешка
+            entityManager.clear();
+            return null;
+        }
     }
 
     private Category createCategoryFromExternal(CategoryRequestFromExternalDto extCategory) {

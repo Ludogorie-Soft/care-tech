@@ -1,7 +1,6 @@
 package com.techstore.service;
 
 import com.techstore.dto.request.ProductCreateRequestDTO;
-import com.techstore.dto.request.ProductImageOperationsDTO;
 import com.techstore.dto.request.ProductImageUpdateDTO;
 import com.techstore.dto.request.ProductParameterCreateDTO;
 import com.techstore.dto.request.ProductUpdateRequestDTO;
@@ -12,7 +11,6 @@ import com.techstore.entity.Parameter;
 import com.techstore.entity.ParameterOption;
 import com.techstore.entity.Product;
 import com.techstore.entity.ProductParameter;
-import com.techstore.enums.Platform;
 import com.techstore.enums.ProductStatus;
 import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.DuplicateResourceException;
@@ -20,7 +18,6 @@ import com.techstore.exception.ValidationException;
 import com.techstore.mapper.ManufacturerMapper;
 import com.techstore.mapper.ParameterMapper;
 import com.techstore.repository.*;
-import com.techstore.util.ExceptionHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -370,57 +367,31 @@ public class ProductService {
     }
 
     @CacheEvict(value = "products", allEntries = true)
-    public void deleteProduct(Long id) {
-        log.info("Deleting product with id: {}", id);
-        validateProductId(id);
-        Product product = findProductByIdOrThrow(id);
-        validateProductDeletion(product);
-
-        // ✅ Събери всички снимки за cleanup
-        List<String> allImages = collectAllProductImages(product);
-
-        // ✅ ИЗТРИЙ ВСИЧКИ ProductParameter ЗАПИСИ
-        if (product.getProductParameters() != null && !product.getProductParameters().isEmpty()) {
-            log.info("Deleting {} product parameters for product {}",
-                    product.getProductParameters().size(), id);
-            productParameterRepository.deleteAll(product.getProductParameters());
-            product.getProductParameters().clear();
-        }
-
-        // ✅ Soft delete на продукта
-        product.setActive(false);
-        productRepository.save(product);
-
-        // ✅ Cleanup на снимките
-        cleanupImagesOnError(allImages);
-
-        log.info("Product soft deleted successfully with id: {}", id);
-        clearProductCache();
-    }
-
-    @CacheEvict(value = "products", allEntries = true)
+    @Transactional
     public void permanentDeleteProduct(Long id) {
         log.warn("Permanently deleting product with id: {}", id);
         validateProductId(id);
         Product product = findProductByIdOrThrow(id);
         validatePermanentProductDeletion(product);
 
-        // ✅ Събери всички снимки
         List<String> allImages = collectAllProductImages(product);
 
-        // ✅ ИЗТРИЙ ProductParameter записи ПРЕДИ permanent delete
-        if (product.getProductParameters() != null && !product.getProductParameters().isEmpty()) {
-            log.info("Deleting {} product parameters before permanent deletion",
-                    product.getProductParameters().size());
-            productParameterRepository.deleteAll(product.getProductParameters());
-            product.getProductParameters().clear();
-        }
-
-        // ✅ Permanent delete
         productRepository.deleteById(id);
+        productRepository.flush(); // ✅ Force DB commit
 
-        // ✅ Cleanup на снимките
-        cleanupImagesOnError(allImages);
+        log.info("Product deleted from database with id: {} (including {} parameters via cascade)",
+                id, product.getProductParameters().size());
+
+        if (!allImages.isEmpty()) {
+            try {
+                s3Service.deleteImages(allImages);
+                log.info("Deleted {} images from S3 for product: {}", allImages.size(), id);
+            } catch (Exception e) {
+                log.error("Failed to delete images from S3 for product {}: {}. " +
+                                "Manual cleanup may be required for URLs: {}",
+                        id, e.getMessage(), allImages, e);
+            }
+        }
 
         log.warn("Product permanently deleted successfully with id: {}", id);
         clearProductCache();

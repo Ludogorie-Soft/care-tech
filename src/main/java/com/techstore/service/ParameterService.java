@@ -376,12 +376,6 @@ public class ParameterService {
             if (StringUtils.hasText(name.getText())) {
                 hasValidName = true;
 
-                if (name.getText().trim().length() > 255) {
-                    throw new ValidationException(
-                            String.format("Parameter option name (%s) cannot exceed 255 characters",
-                                    name.getLanguageCode()));
-                }
-
                 if (name.getText().trim().length() < 1) {
                     throw new ValidationException(
                             String.format("Parameter option name (%s) cannot be empty",
@@ -579,26 +573,26 @@ public class ParameterService {
             return;
         }
 
-        // ✅ 1. Зареди съществуващите options
+        // ✅ 1. Зареди съществуващите options за този параметър
         List<ParameterOption> existingOptions = parameterOptionRepository
                 .findByParameterIdOrderByOrderAsc(parameter.getId());
 
-        // ✅ 2. Индексирай ги по ID за бърз lookup
+        // ✅ 2. Индексирай по ID (за admin panel)
         Map<Long, ParameterOption> existingOptionsById = existingOptions.stream()
                 .collect(Collectors.toMap(
                         ParameterOption::getId,
                         option -> option
                 ));
 
-        // ✅ 3. Индексирай ги по нормализирано име (за създаване на нови)
-        Map<String, ParameterOption> existingOptionsByName = existingOptions.stream()
-                .filter(opt -> opt.getNameBg() != null)
+        // ✅ 3. Индексирай по externalId (за API sync)
+        Map<Long, ParameterOption> existingOptionsByExternalId = existingOptions.stream()
+                .filter(opt -> opt.getExternalId() != null)
                 .collect(Collectors.toMap(
-                        opt -> normalizeParameterValue(opt.getNameBg()),
+                        ParameterOption::getExternalId,
                         option -> option,
                         (option1, option2) -> {
-                            log.warn("Duplicate name '{}' found for parameter options, keeping first",
-                                    option1.getNameBg());
+                            log.warn("Duplicate external_id '{}' found for parameter {}, keeping first",
+                                    option1.getExternalId(), parameter.getId());
                             return option1;
                         }
                 ));
@@ -610,16 +604,40 @@ public class ParameterService {
         for (ParameterOptionRequestDto optionDto : optionDtos) {
             String optionNameBg = getOptionNameBg(optionDto);
             if (optionNameBg == null || optionNameBg.isEmpty()) {
+                log.warn("Skipping option without Bulgarian name for parameter {}", parameter.getId());
                 continue;
             }
 
             ParameterOption existingOption = null;
 
-            if (existingOption == null) {
-                String normalizedName = normalizeParameterValue(optionNameBg);
-                existingOption = existingOptionsByName.get(normalizedName);
+            // ✅ 4a. ПРИОРИТЕТ 1: Ако има database ID (от admin panel)
+            if (optionDto.getId() != null) {
+                existingOption = existingOptionsById.get(optionDto.getId());
+
+                if (existingOption != null) {
+                    // ✅ Валидация: провери дали option принадлежи на този параметър
+                    if (!existingOption.getParameter().getId().equals(parameter.getId())) {
+                        throw new ValidationException(
+                                String.format("Parameter option %d does not belong to parameter %d",
+                                        optionDto.getId(), parameter.getId()));
+                    }
+
+                    processedIds.add(existingOption.getId());
+                    log.debug("Found existing option by database ID: {} for parameter {}",
+                            optionDto.getId(), parameter.getId());
+                } else {
+                    throw new ValidationException(
+                            String.format("Parameter option with ID %d not found", optionDto.getId()));
+                }
+            }
+            // ✅ 4b. ПРИОРИТЕТ 2: Ако има externalId (от API sync)
+            else if (optionDto.getExternalId() != null) {
+                existingOption = existingOptionsByExternalId.get(optionDto.getExternalId());
+
                 if (existingOption != null) {
                     processedIds.add(existingOption.getId());
+                    log.debug("Found existing option by external_id: {} for parameter {}",
+                            optionDto.getExternalId(), parameter.getId());
                 }
             }
 
@@ -628,12 +646,14 @@ public class ParameterService {
                 // ✅ UPDATE existing option
                 updateParameterOptionFromRequest(existingOption, optionDto);
                 optionsToSave.add(existingOption);
-                log.debug("Updated parameter option: '{}' (ID: {})", optionNameBg, existingOption.getId());
+                log.debug("Updated parameter option: '{}' (ID: {}, external_id: {}) for parameter {}",
+                        optionNameBg, existingOption.getId(), existingOption.getExternalId(), parameter.getId());
             } else {
                 // ✅ CREATE new option
                 ParameterOption newOption = createParameterOptionFromRequest(optionDto, parameter);
                 optionsToSave.add(newOption);
-                log.debug("Creating new parameter option: '{}'", optionNameBg);
+                log.debug("Creating new parameter option: '{}' (external_id: {}) for parameter {}",
+                        optionNameBg, optionDto.getExternalId(), parameter.getId());
             }
         }
 
@@ -643,24 +663,41 @@ public class ParameterService {
                 .collect(Collectors.toList());
 
         if (!optionsToDelete.isEmpty()) {
-            parameterOptionRepository.deleteAll(optionsToDelete);
-            log.info("Deleted {} parameter options for parameter: {}", optionsToDelete.size(), parameter.getId());
+            // ✅ Провери дали options не се използват от продукти
+            List<ParameterOption> safeToDelete = new ArrayList<>();
+
+            for (ParameterOption optionToDelete : optionsToDelete) {
+                long productUsages = optionToDelete.getProductParameters() != null ?
+                        optionToDelete.getProductParameters().size() : 0;
+
+                if (productUsages > 0) {
+                    log.warn("Skipping deletion of parameter option '{}' (ID: {}) because it is used by {} products",
+                            getOptionDisplayName(optionToDelete), optionToDelete.getId(), productUsages);
+                } else {
+                    safeToDelete.add(optionToDelete);
+                }
+            }
+
+            if (!safeToDelete.isEmpty()) {
+                parameterOptionRepository.deleteAll(safeToDelete);
+                log.info("Deleted {} parameter options for parameter: {}", safeToDelete.size(), parameter.getId());
+            }
         }
 
-        // ✅ 6. SAVE all options
+        // ✅ 6. SAVE all options (updates + new)
         if (!optionsToSave.isEmpty()) {
             parameterOptionRepository.saveAll(optionsToSave);
-            log.debug("Saved {} parameter options for parameter: {}", optionsToSave.size(), parameter.getId());
+            log.info("Saved {} parameter options for parameter: {}", optionsToSave.size(), parameter.getId());
         }
     }
 
-    // ✅ Helper methods
     private String getOptionNameBg(ParameterOptionRequestDto optionDto) {
         if (optionDto.getName() == null) return null;
 
         return optionDto.getName().stream()
-                .filter(name -> "bg".equals(name.getLanguageCode()))
-                .map(name -> name.getText())
+                .filter(name -> "bg".equalsIgnoreCase(name.getLanguageCode()))
+                .map(com.techstore.dto.external.NameDto::getText)
+                .filter(StringUtils::hasText)
                 .findFirst()
                 .orElse(null);
     }

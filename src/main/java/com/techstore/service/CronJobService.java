@@ -17,16 +17,16 @@ public class CronJobService {
     private final ValiSyncService valiSyncService;
     private final TekraSyncService tekraSyncService;
 
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 2 * * ?")
     public void syncVali() {
         log.info("Starting scheduled Vali synchronization at {}", LocalDateTime.now());
         try {
-//            valiSyncService.syncCategories();
-//            log.info("Scheduled category synchronization completed at {}", LocalDateTime.now());
-//
-//            valiSyncService.syncManufacturers();
-//            log.info("Scheduled manufacturers synchronization completed at {}", LocalDateTime.now());
-//
+            valiSyncService.syncCategories();
+            log.info("Scheduled category synchronization completed at {}", LocalDateTime.now());
+
+            valiSyncService.syncManufacturers();
+            log.info("Scheduled manufacturers synchronization completed at {}", LocalDateTime.now());
+
             valiSyncService.syncParameters();
             log.info("Scheduled parameters synchronization completed at {}", LocalDateTime.now());
 
@@ -38,16 +38,16 @@ public class CronJobService {
         }
     }
 
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 3 * * ?")
     public void syncTekra() {
         log.info("Starting scheduled Tekra synchronization at {}", LocalDateTime.now());
         try {
-//            tekraSyncService.syncTekraCategories();
-//            log.info("Scheduled Tekra category synchronization completed at {}", LocalDateTime.now());
-//
-//            tekraSyncService.syncTekraManufacturers();
-//            log.info("Scheduled Tekra manufacturers synchronization completed at {}", LocalDateTime.now());
-//
+            tekraSyncService.syncTekraCategories();
+            log.info("Scheduled Tekra category synchronization completed at {}", LocalDateTime.now());
+
+            tekraSyncService.syncTekraManufacturers();
+            log.info("Scheduled Tekra manufacturers synchronization completed at {}", LocalDateTime.now());
+
             tekraSyncService.syncTekraParameters();
             log.info("Scheduled Tekra parameters synchronization completed at {}", LocalDateTime.now());
 

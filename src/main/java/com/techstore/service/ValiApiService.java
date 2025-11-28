@@ -596,15 +596,6 @@ public class ValiApiService {
                 dto.setDocuments(documentDtos);
             }
 
-            // ============================================
-            // PARAMETERS - List<ParameterValueRequestDto>
-            // API: [{
-            //   "parameter_id": 1323,
-            //   "parameter_name": [{"language_code": "bg", "text": "Интерфейс"}],
-            //   "option_id": 9078,
-            //   "option_name": [{"language_code": "bg", "text": "PCI-ex"}]
-            // }]
-            // ============================================
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> parameters = (List<Map<String, Object>>) data.get("parameters");
             if (parameters != null) {
@@ -613,12 +604,42 @@ public class ValiApiService {
                 for (Map<String, Object> param : parameters) {
                     ParameterValueRequestDto parameterDto = new ParameterValueRequestDto();
 
+                    // ✅ Extract parameter_id
                     if (param.get("parameter_id") != null) {
                         parameterDto.setParameterId(((Number) param.get("parameter_id")).longValue());
                     }
 
+                    // ✅ Extract option_id
                     if (param.get("option_id") != null) {
                         parameterDto.setOptionId(((Number) param.get("option_id")).longValue());
+                    }
+
+                    // ✅ Extract parameter_name (List<NameDto>)
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> paramNames = (List<Map<String, Object>>) param.get("parameter_name");
+                    if (paramNames != null) {
+                        List<NameDto> paramNameDtos = new ArrayList<>();
+                        for (Map<String, Object> name : paramNames) {
+                            NameDto nameDto = new NameDto();
+                            nameDto.setLanguageCode((String) name.get("language_code"));
+                            nameDto.setText((String) name.get("text"));
+                            paramNameDtos.add(nameDto);
+                        }
+                        parameterDto.setParameterName(paramNameDtos);
+                    }
+
+                    // ✅ Extract option_name (List<NameDto>)
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> optionNames = (List<Map<String, Object>>) param.get("option_name");
+                    if (optionNames != null) {
+                        List<NameDto> optionNameDtos = new ArrayList<>();
+                        for (Map<String, Object> name : optionNames) {
+                            NameDto nameDto = new NameDto();
+                            nameDto.setLanguageCode((String) name.get("language_code"));
+                            nameDto.setText((String) name.get("text"));
+                            optionNameDtos.add(nameDto);
+                        }
+                        parameterDto.setOptionName(optionNameDtos);
                     }
 
                     parameterDtos.add(parameterDto);
@@ -627,10 +648,6 @@ public class ValiApiService {
                 dto.setParameters(parameterDtos);
             }
 
-            // ============================================
-            // FLAGS - List<FlagDto>
-            // API: [{"id": 1, "image": "https://...", "name": [{"language_code": "bg", "text": "..."}]}]
-            // ============================================
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> flags = (List<Map<String, Object>>) data.get("flags");
             if (flags != null) {
@@ -670,85 +687,8 @@ public class ValiApiService {
         } catch (Exception e) {
             log.error("Error mapping product data for id {}: {}",
                     data.get("id"), e.getMessage(), e);
-            // Return partially mapped DTO - better than losing the whole product
         }
 
         return dto;
-    }
-
-    /**
-     * Get documents by product
-     */
-    public List<DocumentRequestDto> getDocumentsByProduct(Long productId) {
-        log.debug("Fetching documents for product: {}", productId);
-        String fullUrl = baseUrl + "/products/" + productId + "/documents";
-
-        try {
-            List<DocumentRequestDto> documents = webClient.get()
-                    .uri(fullUrl)
-                    .headers(h -> h.addAll(createHeaders()))
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<DocumentRequestDto>>() {})
-                    .timeout(Duration.ofMillis(timeout))
-                    .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
-                    .onErrorResume(WebClientResponseException.class, ex -> {
-                        log.warn("Error fetching documents for product {}: {} - {}",
-                                productId, ex.getStatusCode(), ex.getResponseBodyAsString());
-                        return Mono.just(List.of());
-                    })
-                    .block();
-
-            if (documents == null) {
-                log.debug("No documents found for product {}", productId);
-                return List.of();
-            }
-
-            log.debug("Found {} documents for product {}", documents.size(), productId);
-            return documents;
-
-        } catch (Exception e) {
-            log.error("Unexpected error fetching documents for product {}: {}", productId, e.getMessage());
-            return List.of();
-        }
-    }
-
-    /**
-     * Get all documents
-     */
-    public List<DocumentRequestDto> getAllDocuments() {
-        log.debug("Fetching all documents from Vali API");
-        String fullUrl = baseUrl + "/documents";
-
-        try {
-            List<DocumentRequestDto> documents = webClient.get()
-                    .uri(fullUrl)
-                    .headers(h -> h.addAll(createHeaders()))
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<DocumentRequestDto>>() {})
-                    .timeout(Duration.ofMillis(timeout))
-                    .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
-                    .onErrorResume(DataBufferLimitException.class, ex -> {
-                        log.error("Response too large for documents: {}", ex.getMessage());
-                        return Mono.just(List.of());
-                    })
-                    .onErrorResume(WebClientResponseException.class, ex -> {
-                        log.warn("Error fetching all documents: {} - {}",
-                                ex.getStatusCode(), ex.getResponseBodyAsString());
-                        return Mono.just(List.of());
-                    })
-                    .block();
-
-            if (documents == null) {
-                log.debug("No documents found");
-                return List.of();
-            }
-
-            log.debug("Found {} total documents", documents.size());
-            return documents;
-
-        } catch (Exception e) {
-            log.error("Unexpected error fetching all documents: {}", e.getMessage());
-            return List.of();
-        }
     }
 }

@@ -17,10 +17,9 @@ public interface ParameterOptionRepository extends JpaRepository<ParameterOption
     List<ParameterOption> findByParameterIdOrderByOrderAsc(Long parameterId);
 
     @Query("SELECT po FROM ParameterOption po " +
-            "WHERE po.externalId IN :externalIds " +
-            "AND po.parameter.id IN (" +
-            "    SELECT p.id FROM Parameter p JOIN p.categories c WHERE c.id = :categoryId" +
-            ")")
+            "JOIN po.parameter p " +
+            "JOIN p.categories c " +
+            "WHERE po.externalId IN :externalIds AND c.id = :categoryId")
     List<ParameterOption> findByExternalIdInAndParameterCategoryId(
             @Param("externalIds") Set<Long> externalIds,
             @Param("categoryId") Long categoryId

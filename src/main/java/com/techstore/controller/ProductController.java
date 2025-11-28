@@ -134,6 +134,99 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @Hidden
+    @GetMapping(value = "/{id}/related")
+    @Operation(summary = "Get related products", description = "Get products related to the specified product")
+    public ResponseEntity<List<ProductResponseDTO>> getRelatedProducts(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "8") int limit,
+            @RequestParam(defaultValue = "en") String language) {
+
+        List<ProductResponseDTO> relatedProducts = productService.getRelatedProducts(id, limit, language);
+        return ResponseEntity.ok(relatedProducts);
+    }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Create product", description = "Create a new product with required images in single operation")
+    public ResponseEntity<ProductResponseDTO> createProduct(
+            @RequestPart("product") @Valid ProductCreateRequestDTO productData,
+            @RequestPart("primaryImage") MultipartFile primaryImage,
+            @RequestPart(value = "additionalImages", required = false) List<MultipartFile> additionalImages,
+            @RequestParam(defaultValue = "en") String language) {
+
+        log.info("Creating product with reference number: {} and {} images",
+                productData.getReferenceNumber(),
+                1 + (additionalImages != null ? additionalImages.size() : 0));
+
+        ProductResponseDTO createdProduct = productService.createProduct(
+                productData, primaryImage, additionalImages, language);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Update product with image management", description = "Update product and manage images in single operation")
+    public ResponseEntity<ProductResponseDTO> updateProduct(
+            @PathVariable Long id,
+            @RequestPart("product") @Valid ProductUpdateRequestDTO productData,
+            @RequestPart(value = "newPrimaryImage", required = false) MultipartFile newPrimaryImage,
+            @RequestPart(value = "newAdditionalImages", required = false) List<MultipartFile> newAdditionalImages,
+            @RequestParam(defaultValue = "en") String language) { // Removed imageOperations from @RequestPart
+
+        log.info("Updating product with id: {} with image operations", id);
+
+        ProductResponseDTO updatedProduct = productService.updateProductWithImages(
+                id, productData, newPrimaryImage, newAdditionalImages, language); // Removed imageOperations from parameters
+
+        return ResponseEntity.ok(updatedProduct);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete product", description = "Soft delete a product (Admin only)")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        log.info("Deleting product with id: {}", id);
+        productService.permanentDeleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Hidden
+    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Add image to existing product", description = "Add single image to existing product")
+    public ResponseEntity<ProductImageUploadResponseDTO> addImageToProduct(
+            @PathVariable Long id,
+            @RequestPart("file") MultipartFile file,
+            @RequestParam(defaultValue = "false") boolean isPrimary) {
+
+        log.info("Adding image to existing product {} (isPrimary: {})", id, isPrimary);
+        ProductImageUploadResponseDTO response = productService.addImageToProduct(id, file, isPrimary);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Hidden
+    @DeleteMapping("/{id}/images")
+    @Operation(summary = "Delete product image", description = "Delete specific image from product")
+    public ResponseEntity<Void> deleteProductImage(
+            @PathVariable Long id,
+            @RequestParam String imageUrl) {
+
+        log.info("Deleting image {} from product {}", imageUrl, id);
+        productService.deleteProductImage(id, imageUrl);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Hidden
+    @PutMapping(value = "/{id}/images/reorder")
+    @Operation(summary = "Reorder product images", description = "Reorder existing product images")
+    public ResponseEntity<ProductResponseDTO> reorderProductImages(
+            @PathVariable Long id,
+            @RequestBody @Valid List<ProductImageUpdateDTO> images,
+            @RequestParam(defaultValue = "en") String language) {
+
+        log.info("Reordering images for product {}", id);
+        ProductResponseDTO updatedProduct = productService.reorderProductImages(id, images, language);
+        return ResponseEntity.ok(updatedProduct);
+    }
+
     /**
      * Parses sortBy parameter and extracts field name and direction.
      * Supports formats like: "price_asc", "price_desc", or just "price"
@@ -202,105 +295,4 @@ public class ProductController {
      * Record to hold sort field and direction information
      */
     private record SortInfo(String field, String direction) {}
-
-    @Hidden
-    @GetMapping(value = "/{id}/related")
-    @Operation(summary = "Get related products", description = "Get products related to the specified product")
-    public ResponseEntity<List<ProductResponseDTO>> getRelatedProducts(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "8") int limit,
-            @RequestParam(defaultValue = "en") String language) {
-
-        List<ProductResponseDTO> relatedProducts = productService.getRelatedProducts(id, limit, language);
-        return ResponseEntity.ok(relatedProducts);
-    }
-
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Create product", description = "Create a new product with required images in single operation")
-    public ResponseEntity<ProductResponseDTO> createProduct(
-            @RequestPart("product") @Valid ProductCreateRequestDTO productData,
-            @RequestPart("primaryImage") MultipartFile primaryImage,
-            @RequestPart(value = "additionalImages", required = false) List<MultipartFile> additionalImages,
-            @RequestParam(defaultValue = "en") String language) {
-
-        log.info("Creating product with reference number: {} and {} images",
-                productData.getReferenceNumber(),
-                1 + (additionalImages != null ? additionalImages.size() : 0));
-
-        ProductResponseDTO createdProduct = productService.createProduct(
-                productData, primaryImage, additionalImages, language);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
-    }
-
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Update product with image management", description = "Update product and manage images in single operation")
-    public ResponseEntity<ProductResponseDTO> updateProduct(
-            @PathVariable Long id,
-            @RequestPart("product") @Valid ProductUpdateRequestDTO productData,
-            @RequestPart(value = "newPrimaryImage", required = false) MultipartFile newPrimaryImage,
-            @RequestPart(value = "newAdditionalImages", required = false) List<MultipartFile> newAdditionalImages,
-            @RequestParam(defaultValue = "en") String language) { // Removed imageOperations from @RequestPart
-
-        log.info("Updating product with id: {} with image operations", id);
-
-        ProductResponseDTO updatedProduct = productService.updateProductWithImages(
-                id, productData, newPrimaryImage, newAdditionalImages, language); // Removed imageOperations from parameters
-
-        return ResponseEntity.ok(updatedProduct);
-    }
-
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Delete product", description = "Soft delete a product (Admin only)")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        log.info("Deleting product with id: {}", id);
-        productService.deleteProduct(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/{id}/permanent")
-    @Operation(summary = "Permanently delete product", description = "Permanently delete a product (Super Admin only)")
-    public ResponseEntity<Void> permanentDeleteProduct(@PathVariable Long id) {
-        log.info("Permanently deleting product with id: {}", id);
-        productService.permanentDeleteProduct(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Hidden
-    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Add image to existing product", description = "Add single image to existing product")
-    public ResponseEntity<ProductImageUploadResponseDTO> addImageToProduct(
-            @PathVariable Long id,
-            @RequestPart("file") MultipartFile file,
-            @RequestParam(defaultValue = "false") boolean isPrimary) {
-
-        log.info("Adding image to existing product {} (isPrimary: {})", id, isPrimary);
-        ProductImageUploadResponseDTO response = productService.addImageToProduct(id, file, isPrimary);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @Hidden
-    @DeleteMapping("/{id}/images")
-    @Operation(summary = "Delete product image", description = "Delete specific image from product")
-    public ResponseEntity<Void> deleteProductImage(
-            @PathVariable Long id,
-            @RequestParam String imageUrl) {
-
-        log.info("Deleting image {} from product {}", imageUrl, id);
-        productService.deleteProductImage(id, imageUrl);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Hidden
-    @PutMapping(value = "/{id}/images/reorder")
-    @Operation(summary = "Reorder product images", description = "Reorder existing product images")
-    public ResponseEntity<ProductResponseDTO> reorderProductImages(
-            @PathVariable Long id,
-            @RequestBody @Valid List<ProductImageUpdateDTO> images,
-            @RequestParam(defaultValue = "en") String language) {
-
-        log.info("Reordering images for product {}", id);
-        ProductResponseDTO updatedProduct = productService.reorderProductImages(id, images, language);
-        return ResponseEntity.ok(updatedProduct);
-    }
 }
