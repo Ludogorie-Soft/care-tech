@@ -695,6 +695,10 @@ public class MostSyncService {
         }
     }
 
+    // ============================================
+// ФИКС ЗА MostSyncService.syncMostParameters()
+// ============================================
+
     @Transactional
     public void syncMostParameters() {
         String syncType = "MOST_PARAMETERS";
@@ -716,9 +720,17 @@ public class MostSyncService {
             long totalCreated = 0, skipped = 0, totalOptionsCreated = 0;
             int translatedCount = 0, notTranslatedCount = 0;
 
-            // ✅ Global parameter cache by normalized Bulgarian name
-            Map<String, Parameter> globalParametersCache = parameterRepository.findAll()
-                    .stream()
+            // ✅ CRITICAL FIX: Load parameters with EAGER initialization
+            List<Parameter> allParameters = parameterRepository.findAll();
+
+            // Force initialization of categories collection
+            for (Parameter p : allParameters) {
+                if (p.getCategories() != null) {
+                    p.getCategories().size(); // Triggers initialization
+                }
+            }
+
+            Map<String, Parameter> globalParametersCache = allParameters.stream()
                     .filter(p -> p.getNameBg() != null)
                     .collect(Collectors.toMap(
                             p -> normalizeParameterName(p.getNameBg()),
@@ -747,6 +759,12 @@ public class MostSyncService {
                     }
 
                     Category category = categoryOpt.get();
+
+                    // ✅ Force initialization
+                    if (category.getParameters() != null) {
+                        category.getParameters().size();
+                    }
+
                     log.debug("Processing {} parameters for category: {}", categoryParams.size(), bulgarianCategoryName);
 
                     for (Map.Entry<String, Set<String>> paramEntry : categoryParams.entrySet()) {
@@ -754,11 +772,10 @@ public class MostSyncService {
                             String paramNameEnglish = paramEntry.getKey();
                             Set<String> paramValues = paramEntry.getValue();
 
-                            // ✅ TRANSLATE PARAMETER NAME from English to Bulgarian
+                            // ✅ TRANSLATE PARAMETER NAME
                             String paramNameBulgarian = translateParameterName(paramNameEnglish);
 
                             if (paramNameBulgarian.equals(paramNameEnglish)) {
-                                // No translation found - using English name
                                 notTranslatedCount++;
                                 log.debug("No translation for parameter: '{}', using English", paramNameEnglish);
                             } else {
@@ -769,10 +786,10 @@ public class MostSyncService {
                             Parameter parameter = globalParametersCache.get(normalizedName);
 
                             if (parameter == null) {
-                                // ✅ CREATE new parameter with Bulgarian and English names
+                                // ✅ CREATE new parameter
                                 parameter = new Parameter();
-                                parameter.setNameBg(paramNameBulgarian); // ← BULGARIAN NAME
-                                parameter.setNameEn(paramNameEnglish);   // ← ENGLISH NAME (original)
+                                parameter.setNameBg(paramNameBulgarian);
+                                parameter.setNameEn(paramNameEnglish);
                                 parameter.setPlatform(Platform.MOST);
                                 parameter.setOrder(50);
                                 parameter.setCategories(new HashSet<>());
@@ -786,9 +803,19 @@ public class MostSyncService {
                                 log.debug("Created parameter: '{}' (bg) / '{}' (en) for category '{}'",
                                         paramNameBulgarian, paramNameEnglish, bulgarianCategoryName);
                             } else {
-                                // ✅ PARAMETER EXISTS - ONLY ADD CATEGORY IF MISSING
-                                if (!parameter.getCategories().contains(category)) {
-                                    parameter.getCategories().add(category);
+                                // ✅ FIX: SAFE CATEGORY CHECK
+                                Set<Category> parameterCategories = parameter.getCategories();
+                                if (parameterCategories == null) {
+                                    parameterCategories = new HashSet<>();
+                                    parameter.setCategories(parameterCategories);
+                                }
+
+                                // Use category ID instead of contains()
+                                boolean categoryAlreadyLinked = parameterCategories.stream()
+                                        .anyMatch(cat -> cat.getId().equals(category.getId()));
+
+                                if (!categoryAlreadyLinked) {
+                                    parameterCategories.add(category);
                                     parameterRepository.save(parameter);
                                     log.debug("Added category '{}' to existing parameter '{}'",
                                             bulgarianCategoryName, paramNameBulgarian);
@@ -807,8 +834,18 @@ public class MostSyncService {
                         }
                     }
 
+                    // ✅ FLUSH after each category
+                    entityManager.flush();
+
                 } catch (Exception e) {
                     log.error("Error processing parameters for category {}: {}", categoryName, e.getMessage());
+
+                    // ✅ Clear entity manager on error
+                    try {
+                        entityManager.clear();
+                    } catch (Exception clearEx) {
+                        log.error("Error clearing entity manager: {}", clearEx.getMessage());
+                    }
                 }
             }
 

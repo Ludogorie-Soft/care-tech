@@ -247,6 +247,10 @@ public class ValiSyncService {
         log.info("Updated parent relationships for {} categories", updateCount);
     }
 
+    // ============================================
+// ФИКС ЗА ValiSyncService.syncParameters()
+// ============================================
+
     @Transactional
     public void syncParameters() {
         String syncType = "VALI_PARAMETERS";
@@ -261,8 +265,17 @@ public class ValiSyncService {
 
             long totalProcessed = 0, created = 0, skipped = 0, errors = 0;
 
-            Map<String, Parameter> globalParametersCache = parameterRepository.findAll()
-                    .stream()
+            // ✅ CRITICAL FIX: Load parameters with EAGER initialization
+            List<Parameter> allParameters = parameterRepository.findAll();
+
+            // Force initialization of categories collection
+            for (Parameter p : allParameters) {
+                if (p.getCategories() != null) {
+                    p.getCategories().size(); // Triggers initialization
+                }
+            }
+
+            Map<String, Parameter> globalParametersCache = allParameters.stream()
                     .filter(p -> p.getNameBg() != null)
                     .collect(Collectors.toMap(
                             p -> normalizeParameterName(p.getNameBg()),
@@ -317,9 +330,19 @@ public class ValiSyncService {
                                 log.debug("Created parameter: '{}' for category '{}'",
                                         nameBg, category.getNameBg());
                             } else {
-                                // ✅ PARAMETER EXISTS - ONLY ADD CATEGORY IF MISSING
-                                if (!parameter.getCategories().contains(category)) {
-                                    parameter.getCategories().add(category);
+                                // ✅ FIX: SAFE CATEGORY CHECK
+                                Set<Category> parameterCategories = parameter.getCategories();
+                                if (parameterCategories == null) {
+                                    parameterCategories = new HashSet<>();
+                                    parameter.setCategories(parameterCategories);
+                                }
+
+                                // Use category ID instead of contains()
+                                boolean categoryAlreadyLinked = parameterCategories.stream()
+                                        .anyMatch(cat -> cat.getId().equals(category.getId()));
+
+                                if (!categoryAlreadyLinked) {
+                                    parameterCategories.add(category);
                                     parameterRepository.save(parameter);
                                     log.debug("Added category '{}' to existing parameter '{}'",
                                             category.getNameBg(), nameBg);
@@ -341,10 +364,20 @@ public class ValiSyncService {
                         }
                     }
 
+                    // ✅ FLUSH after each category
+                    entityManager.flush();
+
                 } catch (Exception e) {
                     log.error("Error syncing parameters for category {}: {}",
                             category.getExternalId(), e.getMessage());
                     errors++;
+
+                    // ✅ Clear entity manager on error
+                    try {
+                        entityManager.clear();
+                    } catch (Exception clearEx) {
+                        log.error("Error clearing entity manager: {}", clearEx.getMessage());
+                    }
                 }
             }
 

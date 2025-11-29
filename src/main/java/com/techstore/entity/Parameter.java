@@ -2,10 +2,7 @@ package com.techstore.entity;
 
 import com.techstore.enums.Platform;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +13,8 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false, exclude = {"categories", "options", "productParameters"})
+//                                       ^^^^^^^^ КРИТИЧНО: Exclude lazy collections!
 public class Parameter extends BaseEntity {
 
     @Column(name = "external_id")
@@ -37,7 +36,7 @@ public class Parameter extends BaseEntity {
     @Column(name = "tekra_key")
     private String tekraKey;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)  // ✅ Explicit LAZY
     @JoinTable(
             name = "category_parameters",
             joinColumns = @JoinColumn(name = "parameter_id"),
@@ -50,4 +49,18 @@ public class Parameter extends BaseEntity {
 
     @OneToMany(mappedBy = "parameter", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductParameter> productParameters = new HashSet<>();
+
+    // ✅ ДОБАВИ: Custom hashCode/equals based on ID only
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Parameter)) return false;
+        Parameter that = (Parameter) o;
+        return getId() != null && getId().equals(that.getId());
+    }
 }

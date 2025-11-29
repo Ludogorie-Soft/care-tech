@@ -14,7 +14,7 @@ import java.util.Set;
 @Entity
 @Table(name = "categories")
 @Data
-@EqualsAndHashCode(callSuper = false, exclude = {"parent", "children", "products"})
+@EqualsAndHashCode(callSuper = false, exclude = {"parent", "children", "products", "parameters"})
 public class Category extends BaseEntity {
 
     @Column(name = "is_promo_active", nullable = false)

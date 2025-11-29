@@ -333,6 +333,10 @@ public class TekraSyncService {
         }
     }
 
+    // ============================================
+// ФИКС ЗА TekraSyncService.syncTekraParameters()
+// ============================================
+
     @Transactional
     public void syncTekraParameters() {
         SyncLog syncLog = logHelper.createSyncLogSimple("TEKRA_PARAMETERS");
@@ -367,21 +371,19 @@ public class TekraSyncService {
 
             log.info("🔷 DEBUG: collectTekraParametersByCategory returned {} categories with parameters",
                     categorizedParameters.size());
-            log.info("🔷 DEBUG: Category IDs: {}", categorizedParameters.keySet());
 
-            // ✅ Детайлно логиране на разпределението по категории
-            log.info("🔷 DEBUG: Parameters distribution by categories:");
-            for (Map.Entry<Long, Map<String, Set<String>>> entry : categorizedParameters.entrySet()) {
-                Long categoryId = entry.getKey();
-                Optional<Category> catOpt = categoryRepository.findById(categoryId);
-                String categoryName = catOpt.map(Category::getNameBg).orElse("UNKNOWN");
-                int paramCount = entry.getValue().size();
-                log.info("🔷 DEBUG:   Category {} ({}): {} parameters", categoryId, categoryName, paramCount);
+            // ✅ CRITICAL FIX: Load parameters with EAGER initialization of categories
+            List<Parameter> allParameters = parameterRepository.findAll();
+
+            // Force initialization of categories collection to avoid lazy loading issues
+            for (Parameter p : allParameters) {
+                if (p.getCategories() != null) {
+                    p.getCategories().size(); // Triggers initialization
+                }
             }
 
-            // ✅ Глобален кеш по нормализирано ИМЕ
-            Map<String, Parameter> globalParametersCache = parameterRepository.findAll()
-                    .stream()
+            // Create cache
+            Map<String, Parameter> globalParametersCache = allParameters.stream()
                     .filter(p -> p.getNameBg() != null)
                     .collect(Collectors.toMap(
                             p -> normalizeParameterName(p.getNameBg()),
@@ -411,11 +413,16 @@ public class TekraSyncService {
                     }
 
                     Category category = categoryOpt.get();
+
+                    // ✅ CRITICAL: Force initialization of category's parameters
+                    if (category.getParameters() != null) {
+                        category.getParameters().size();
+                    }
+
                     log.info("🔷 DEBUG: ✓ Category found: '{}' (ID: {})", category.getNameBg(), category.getId());
 
                     Map<String, Set<String>> parametersMap = catEntry.getValue();
                     log.info("🔷 DEBUG: Found {} unique parameter keys for this category", parametersMap.size());
-                    log.info("🔷 DEBUG: Parameter keys: {}", parametersMap.keySet());
 
                     int categoryCreated = 0, categoryUpdated = 0;
 
@@ -424,7 +431,6 @@ public class TekraSyncService {
                             String tekraKey = paramEntry.getKey();
                             Set<String> paramValues = paramEntry.getValue();
 
-                            // ✅ Генерираме четливо име
                             String paramName = convertTekraParameterKeyToName(tekraKey);
                             String normalizedName = normalizeParameterName(paramName);
 
@@ -455,9 +461,19 @@ public class TekraSyncService {
                                         paramName, parameter.getId());
                             }
 
-                            // ✅ Добавяме категорията
-                            if (!parameter.getCategories().contains(category)) {
-                                parameter.getCategories().add(category);
+                            // ✅ FIX: Използвай initialized collections, не lazy-loaded
+                            Set<Category> parameterCategories = parameter.getCategories();
+                            if (parameterCategories == null) {
+                                parameterCategories = new HashSet<>();
+                                parameter.setCategories(parameterCategories);
+                            }
+
+                            // ✅ SAFE CHECK: Use category ID instead of contains()
+                            boolean categoryAlreadyLinked = parameterCategories.stream()
+                                    .anyMatch(cat -> cat.getId().equals(category.getId()));
+
+                            if (!categoryAlreadyLinked) {
+                                parameterCategories.add(category);
                                 log.info("🔷 DEBUG:   ✓✓ Added category '{}' (ID: {}) to parameter '{}'",
                                         category.getNameBg(), category.getId(), paramName);
                             } else {
@@ -496,9 +512,20 @@ public class TekraSyncService {
                     log.info("🔷 DEBUG: Category '{}' summary: {} created, {} updated",
                             category.getNameBg(), categoryCreated, categoryUpdated);
 
+                    // ✅ IMPORTANT: Flush after each category to prevent transaction buildup
+                    entityManager.flush();
+
                 } catch (Exception e) {
                     log.error("🔷 DEBUG: ✗✗✗ ERROR syncing parameters for category: {}", e.getMessage(), e);
                     totalErrors++;
+
+                    // ✅ CRITICAL: Mark transaction for rollback and continue
+                    // This prevents "transaction aborted" errors
+                    try {
+                        entityManager.clear();
+                    } catch (Exception clearEx) {
+                        log.error("Error clearing entity manager: {}", clearEx.getMessage());
+                    }
                 }
             }
 
