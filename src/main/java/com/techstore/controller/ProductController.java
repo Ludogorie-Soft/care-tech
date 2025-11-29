@@ -254,14 +254,6 @@ public class ProductController {
     @Operation(summary = "Delete product", description = "Soft delete a product (Admin only)")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         log.info("Deleting product with id: {}", id);
-        productService.deleteProduct(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/{id}/permanent")
-    @Operation(summary = "Permanently delete product", description = "Permanently delete a product (Super Admin only)")
-    public ResponseEntity<Void> permanentDeleteProduct(@PathVariable Long id) {
-        log.info("Permanently deleting product with id: {}", id);
         productService.permanentDeleteProduct(id);
         return ResponseEntity.noContent().build();
     }

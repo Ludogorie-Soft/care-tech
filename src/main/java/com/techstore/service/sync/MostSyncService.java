@@ -1130,78 +1130,159 @@ public class MostSyncService {
             @SuppressWarnings("unchecked")
             Map<String, String> properties = (Map<String, String>) rawProduct.get("properties");
             if (properties == null || properties.isEmpty()) {
+                log.debug("Product {} has no properties in source data", product.getSku());
                 return;
             }
 
-            Set<ProductParameter> productParameters = new HashSet<>();
+            // ✅ FIX 1: Запази съществуващите ProductParameter entities
+            Set<ProductParameter> existingProductParams = product.getProductParameters();
+            if (existingProductParams == null) {
+                existingProductParams = new HashSet<>();
+            }
+
+            // ✅ FIX 2: Раздели на ръчни и автоматични параметри
+            Set<ProductParameter> manualParameters = existingProductParams.stream()
+                    .filter(pp -> pp.getParameter() != null)
+                    .filter(this::isManualParameterForMost)
+                    .collect(Collectors.toSet());
+
+            Set<ProductParameter> autoParameters = new HashSet<>();
+            int mappedCount = 0;
+            int notFoundCount = 0;
 
             // ✅ Load parameters associated with product's category
             List<Parameter> categoryParameters = parameterRepository
                     .findByCategoryIdOrderByOrderAsc(product.getCategory().getId());
 
-            // ✅ CHANGE: Index by ENGLISH name (nameEn) instead of Bulgarian (nameBg)
+            // ✅ FIX 3: Index by ENGLISH name (nameEn) with normalization
             Map<String, Parameter> parametersByEnglishName = categoryParameters.stream()
                     .filter(p -> p.getNameEn() != null)
                     .collect(Collectors.toMap(
-                            p -> normalizeParameterName(p.getNameEn()), // ← ПРОМЯНА: използваме nameEn
+                            p -> normalizeParameterName(p.getNameEn()),
                             p -> p,
-                            (existing, duplicate) -> existing
+                            (existing, duplicate) -> {
+                                log.warn("Duplicate parameter with English name: '{}', IDs: {} and {}, keeping first",
+                                        existing.getNameEn(), existing.getId(), duplicate.getId());
+                                return existing;
+                            }
                     ));
 
-            log.trace("Loaded {} parameters for category {} (indexed by English name)",
+            log.debug("Loaded {} parameters for category '{}' (indexed by English name)",
                     parametersByEnglishName.size(), product.getCategory().getNameBg());
 
+            // ✅ Process all properties from Most API
             for (Map.Entry<String, String> prop : properties.entrySet()) {
                 try {
-                    String paramNameEnglish = prop.getKey(); // ← Most API дава английско име
+                    String paramNameEnglish = prop.getKey(); // ← Most API gives English name
                     String paramValue = prop.getValue();
 
-                    if (paramValue == null || paramValue.isEmpty() || "-".equals(paramValue)) {
+                    // Skip empty/invalid values
+                    if (paramValue == null || paramValue.trim().isEmpty() || "-".equals(paramValue.trim())) {
+                        log.trace("Skipping parameter '{}' with empty/invalid value for product {}",
+                                paramNameEnglish, product.getSku());
                         continue;
                     }
 
-                    // ✅ CHANGE: Search by English name
+                    // ✅ FIX 4: Search by normalized English name
                     String normalizedEnglishName = normalizeParameterName(paramNameEnglish);
                     Parameter parameter = parametersByEnglishName.get(normalizedEnglishName);
 
                     if (parameter == null) {
-                        log.trace("Parameter not found by English name: '{}', categoryId={}, productSku={}",
-                                paramNameEnglish, product.getCategory().getId(), product.getSku());
+                        log.debug("Parameter not found by English name: '{}' (normalized: '{}'), categoryId={}, productSku={}",
+                                paramNameEnglish, normalizedEnglishName,
+                                product.getCategory().getId(), product.getSku());
+                        notFoundCount++;
                         continue;
                     }
 
-                    // Find or create parameter option
+                    // ✅ Find or create parameter option
                     ParameterOption option = findOrCreateParameterOption(parameter, paramValue);
                     if (option == null) {
+                        log.debug("Parameter option not found/created: parameter='{}', value='{}', productSku={}",
+                                parameter.getNameBg(), paramValue, product.getSku());
+                        notFoundCount++;
                         continue;
                     }
 
+                    // ✅ Create ProductParameter
                     ProductParameter productParam = new ProductParameter();
                     productParam.setProduct(product);
                     productParam.setParameter(parameter);
                     productParam.setParameterOption(option);
-                    productParameters.add(productParam);
+                    autoParameters.add(productParam);
 
+                    mappedCount++;
                     log.trace("Mapped parameter '{}' (en) / '{}' (bg) = '{}' for product {}",
                             parameter.getNameEn(), parameter.getNameBg(), paramValue, product.getSku());
 
                 } catch (Exception e) {
-                    log.error("Error mapping parameter {} for product {}: {}",
+                    log.error("Error mapping parameter '{}' for product {}: {}",
                             prop.getKey(), product.getSku(), e.getMessage());
+                    notFoundCount++;
                 }
             }
 
-            product.setProductParameters(productParameters);
+            // ✅ FIX 5: MERGE - combine manual + automatic parameters
+            Set<ProductParameter> mergedParameters = new HashSet<>();
+            mergedParameters.addAll(manualParameters);  // Manually added/modified
+            mergedParameters.addAll(autoParameters);    // From Most API
 
-            if (productParameters.isEmpty()) {
-                log.debug("No parameters mapped for product {}", product.getSku());
+            product.setProductParameters(mergedParameters);
+
+            // ✅ Comprehensive logging
+            if (mappedCount > 0 || notFoundCount > 0 || !manualParameters.isEmpty()) {
+                log.info("Product {} parameter mapping: {} from Most API, {} manual (preserved), {} not found",
+                        product.getSku(), mappedCount, manualParameters.size(), notFoundCount);
             } else {
-                log.debug("Mapped {} parameters for product {}", productParameters.size(), product.getSku());
+                log.debug("Product {} has no parameters mapped", product.getSku());
             }
 
         } catch (Exception e) {
             log.error("Error setting Most parameters for product {}: {}", product.getSku(), e.getMessage());
+            // Don't throw - allow product to be saved without parameters
         }
+    }
+
+    // ✅ Helper method to determine if a parameter is manually added/modified
+    private boolean isManualParameterForMost(ProductParameter productParameter) {
+        Parameter parameter = productParameter.getParameter();
+
+        if (parameter == null) {
+            return false;
+        }
+
+        // CRITERION 1: Check by Platform
+        // If parameter has no platform or different platform than MOST, it's manual
+        boolean isDifferentPlatform = (parameter.getPlatform() == null ||
+                parameter.getPlatform() != Platform.MOST);
+
+        // CRITERION 2: Check if created/modified by ADMIN
+        boolean isCreatedByAdmin = isAdminUser(parameter.getCreatedBy());
+        boolean isModifiedByAdmin = isAdminUser(parameter.getLastModifiedBy());
+
+        // Parameter is manual if:
+        // - Has different platform than MOST (or no platform)
+        // OR
+        // - Created/modified by ADMIN
+        boolean isManual = isDifferentPlatform || isCreatedByAdmin || isModifiedByAdmin;
+
+        if (isManual) {
+            log.trace("Parameter '{}' identified as manual: platform={}, createdBy={}, lastModifiedBy={}",
+                    parameter.getNameBg(), parameter.getPlatform(),
+                    parameter.getCreatedBy(), parameter.getLastModifiedBy());
+        }
+
+        return isManual;
+    }
+
+    // ✅ Helper method for ADMIN user detection (case-insensitive, null-safe)
+    private boolean isAdminUser(String username) {
+        if (username == null || username.isEmpty()) {
+            return false;
+        }
+
+        return "ADMIN".equalsIgnoreCase(username.trim()) ||
+                "admin".equalsIgnoreCase(username.trim());
     }
 
     // ============================================

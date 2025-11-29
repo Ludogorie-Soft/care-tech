@@ -370,35 +370,6 @@ public class ProductService {
     }
 
     @CacheEvict(value = "products", allEntries = true)
-    public void deleteProduct(Long id) {
-        log.info("Deleting product with id: {}", id);
-        validateProductId(id);
-        Product product = findProductByIdOrThrow(id);
-        validateProductDeletion(product);
-
-        // ✅ Събери всички снимки за cleanup
-        List<String> allImages = collectAllProductImages(product);
-
-        // ✅ ИЗТРИЙ ВСИЧКИ ProductParameter ЗАПИСИ
-        if (product.getProductParameters() != null && !product.getProductParameters().isEmpty()) {
-            log.info("Deleting {} product parameters for product {}",
-                    product.getProductParameters().size(), id);
-            productParameterRepository.deleteAll(product.getProductParameters());
-            product.getProductParameters().clear();
-        }
-
-        // ✅ Soft delete на продукта
-        product.setActive(false);
-        productRepository.save(product);
-
-        // ✅ Cleanup на снимките
-        cleanupImagesOnError(allImages);
-
-        log.info("Product soft deleted successfully with id: {}", id);
-        clearProductCache();
-    }
-
-    @CacheEvict(value = "products", allEntries = true)
     public void permanentDeleteProduct(Long id) {
         log.warn("Permanently deleting product with id: {}", id);
         validateProductId(id);

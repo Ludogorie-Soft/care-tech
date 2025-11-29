@@ -14,4 +14,6 @@ public class ParameterOptionRequestDto {
     private Long externalId;
     private List<NameDto> name;
     private Integer order;
+
+    private Long currentId;
 }

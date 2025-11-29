@@ -757,14 +757,30 @@ public class ValiSyncService {
 
     private void setParametersToProduct(Product product, ProductRequestDto extProduct) {
         if (extProduct.getParameters() == null || product.getCategory() == null) {
-            product.setProductParameters(new HashSet<>());
+            // ✅ FIX: Запази съществуващи ръчни параметри дори когато няма нови от API
+            if (product.getProductParameters() == null) {
+                product.setProductParameters(new HashSet<>());
+            }
             return;
         }
 
-        Set<ProductParameter> newProductParameters = new HashSet<>();
+        // ✅ FIX 1: Запази съществуващите ProductParameter entities
+        Set<ProductParameter> existingProductParams = product.getProductParameters();
+        if (existingProductParams == null) {
+            existingProductParams = new HashSet<>();
+        }
+
+        // ✅ FIX 2: Раздели на ръчни и автоматични параметри
+        Set<ProductParameter> manualParameters = existingProductParams.stream()
+                .filter(pp -> pp.getParameter() != null)
+                .filter(this::isManualParameterForVali)
+                .collect(Collectors.toSet());
+
+        Set<ProductParameter> autoParameters = new HashSet<>();
         int mappedCount = 0;
         int notFoundCount = 0;
 
+        // Extract external IDs for bulk loading
         Set<Long> externalParameterIds = extProduct.getParameters().stream()
                 .map(ParameterValueRequestDto::getParameterId)
                 .collect(Collectors.toSet());
@@ -772,6 +788,7 @@ public class ValiSyncService {
                 .map(ParameterValueRequestDto::getOptionId)
                 .collect(Collectors.toSet());
 
+        // Bulk load parameters and options
         Map<Long, Parameter> parametersByExternalId = parameterRepository
                 .findByExternalIdInAndCategoryId(externalParameterIds, product.getCategory().getId())
                 .stream()
@@ -782,6 +799,7 @@ public class ValiSyncService {
                 .stream()
                 .collect(Collectors.toMap(ParameterOption::getExternalId, o -> o));
 
+        // Map parameters from Vali API
         for (ParameterValueRequestDto paramValue : extProduct.getParameters()) {
             try {
                 Parameter parameter = parametersByExternalId.get(paramValue.getParameterId());
@@ -811,7 +829,7 @@ public class ValiSyncService {
                 pp.setProduct(product);
                 pp.setParameter(parameter);
                 pp.setParameterOption(option);
-                newProductParameters.add(pp);
+                autoParameters.add(pp);
 
                 mappedCount++;
 
@@ -821,11 +839,60 @@ public class ValiSyncService {
             }
         }
 
-        if (notFoundCount > 0) {
-            log.debug("Product {}: mapped {} parameters, {} not found",
-                    extProduct.getReferenceNumber(), mappedCount, notFoundCount);
+        // ✅ FIX 3: MERGE - combine manual + automatic parameters
+        Set<ProductParameter> mergedParameters = new HashSet<>();
+        mergedParameters.addAll(manualParameters);  // Manually added/modified
+        mergedParameters.addAll(autoParameters);    // From Vali API
+
+        product.setProductParameters(mergedParameters);
+
+        // ✅ Enhanced logging
+        if (mappedCount > 0 || notFoundCount > 0 || !manualParameters.isEmpty()) {
+            log.info("Product {} parameter mapping: {} from Vali API, {} manual (preserved), {} not found",
+                    extProduct.getReferenceNumber(), mappedCount, manualParameters.size(), notFoundCount);
         }
-        product.setProductParameters(newProductParameters);
+    }
+
+    // ✅ Helper method to determine if a parameter is manually added/modified for Vali
+    private boolean isManualParameterForVali(ProductParameter productParameter) {
+        Parameter parameter = productParameter.getParameter();
+
+        if (parameter == null) {
+            return false;
+        }
+
+        // CRITERION 1: Check by Platform
+        // If parameter has no platform or different platform than VALI, it's manual
+        boolean isDifferentPlatform = (parameter.getPlatform() == null ||
+                parameter.getPlatform() != Platform.VALI);
+
+        // CRITERION 2: Check if created/modified by ADMIN
+        boolean isCreatedByAdmin = isAdminUser(parameter.getCreatedBy());
+        boolean isModifiedByAdmin = isAdminUser(parameter.getLastModifiedBy());
+
+        // Parameter is manual if:
+        // - Has different platform than VALI (or no platform)
+        // OR
+        // - Created/modified by ADMIN
+        boolean isManual = isDifferentPlatform || isCreatedByAdmin || isModifiedByAdmin;
+
+        if (isManual) {
+            log.trace("Parameter '{}' identified as manual: platform={}, createdBy={}, lastModifiedBy={}",
+                    parameter.getNameBg(), parameter.getPlatform(),
+                    parameter.getCreatedBy(), parameter.getLastModifiedBy());
+        }
+
+        return isManual;
+    }
+
+    // ✅ Helper method for ADMIN user detection (case-insensitive, null-safe)
+    private boolean isAdminUser(String username) {
+        if (username == null || username.isEmpty()) {
+            return false;
+        }
+
+        return "ADMIN".equalsIgnoreCase(username.trim()) ||
+                "admin".equalsIgnoreCase(username.trim());
     }
 
     private Category createCategoryFromExternal(CategoryRequestFromExternalDto extCategory) {
