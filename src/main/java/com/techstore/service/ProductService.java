@@ -231,8 +231,9 @@ public class ProductService {
             handleNewImageUploads(product, newPrimaryImage, newAdditionalImages, s3UploadsTracker, s3CleanupList);
             handleImageReordering(product, productData);
             validateProductHasImages(product);
+
             updateProductFieldsByUpdate(product, productData);
-            product.generateSlug();
+
             Product savedProduct = productRepository.save(product);
 
             if (!s3CleanupList.isEmpty()) {
@@ -493,15 +494,40 @@ public class ProductService {
         if (r.getWarranty() != null && r.getWarranty() < 0) throw new ValidationException("Product warranty cannot be negative");
     }
     private void validateProductParameters(List<ProductParameterCreateDTO> params) {
-        if (params == null) return;
-        if (params.stream().mapToInt(p -> p.getParameterOptionId().size()).sum() > MAX_PARAMETERS_PER_PRODUCT) throw new ValidationException("Product cannot have more than " + MAX_PARAMETERS_PER_PRODUCT + " parameter options in total");
+        if (params == null) {
+            return;
+        }
+
+        // Проверка за максимален брой опции
+        int totalOptions = params.stream()
+                .mapToInt(p -> p.getParameterOptionId() != null ? p.getParameterOptionId().size() : 0)
+                .sum();
+
+        if (totalOptions > MAX_PARAMETERS_PER_PRODUCT) {
+            throw new ValidationException("Product cannot have more than " + MAX_PARAMETERS_PER_PRODUCT + " parameter options in total");
+        }
+
         Set<String> uniqueParamOptions = new HashSet<>();
-        for (ProductParameterCreateDTO p : params) {
-            if (p.getParameterId() == null) throw new ValidationException("Parameter ID is required");
-            if (p.getParameterOptionId() == null || p.getParameterOptionId().isEmpty()) throw new ValidationException("Parameter option ID list cannot be empty for parameter: " + p.getParameterId());
-            for (Long optionId : p.getParameterOptionId()) {
-                if (optionId == null) throw new ValidationException("Parameter option ID cannot be null");
-                if (!uniqueParamOptions.add(p.getParameterId() + ":" + optionId)) throw new ValidationException("Duplicate parameter-option combination found");
+
+        for (ProductParameterCreateDTO paramDto : params) {
+            if (paramDto.getParameterId() == null) {
+                throw new ValidationException("Parameter ID is required");
+            }
+
+            if (paramDto.getParameterOptionId() == null || paramDto.getParameterOptionId().isEmpty()) {
+                throw new ValidationException("Parameter option ID list cannot be empty for parameter: " + paramDto.getParameterId());
+            }
+
+            for (Long optionId : paramDto.getParameterOptionId()) {
+                if (optionId == null) {
+                    throw new ValidationException("Parameter option ID cannot be null");
+                }
+
+                String uniqueKey = paramDto.getParameterId() + ":" + optionId;
+                if (!uniqueParamOptions.add(uniqueKey)) {
+                    throw new ValidationException("Duplicate parameter-option combination found: parameterId=" +
+                            paramDto.getParameterId() + ", optionId=" + optionId);
+                }
             }
         }
     }
@@ -652,6 +678,51 @@ public class ProductService {
         p.setLastModifiedBy("ADMIN");
         p.generateSlug();
     }
+
+    private void updateProductParameters(Product product, List<ProductParameterCreateDTO> newParameters) {
+        if (newParameters == null || newParameters.isEmpty()) {
+            // Ако няма нови параметри, изтриваме всички стари
+            productParameterRepository.deleteAllByProductId(product.getId());
+            product.setProductParameters(new HashSet<>());
+            return;
+        }
+
+        // Валидиране на новите параметри
+        validateProductParameters(newParameters);
+
+        // 1. Изтриване на всички стари параметри на продукта (оптимизирано)
+        productParameterRepository.deleteAllByProductId(product.getId());
+
+        // 2. Създаване и добавяне на новите параметри
+        Set<ProductParameter> newProductParameters = new HashSet<>();
+
+        for (ProductParameterCreateDTO paramDto : newParameters) {
+            Parameter parameter = parameterRepository.findById(paramDto.getParameterId())
+                    .orElseThrow(() -> new BusinessLogicException("Parameter not found with id: " + paramDto.getParameterId()));
+
+            for (Long optionId : paramDto.getParameterOptionId()) {
+                ParameterOption option = parameterOptionRepository.findById(optionId)
+                        .orElseThrow(() -> new BusinessLogicException("ParameterOption not found with id: " + optionId));
+
+                // Проверка дали опцията принадлежи към параметъра
+                if (!option.getParameter().getId().equals(parameter.getId())) {
+                    throw new ValidationException(
+                            String.format("Parameter option %d does not belong to parameter %d",
+                                    optionId, paramDto.getParameterId()));
+                }
+
+                ProductParameter productParameter = new ProductParameter();
+                productParameter.setProduct(product);
+                productParameter.setParameter(parameter);
+                productParameter.setParameterOption(option);
+                newProductParameters.add(productParameter);
+            }
+        }
+
+        // 3. Задаване на новата колекция
+        product.setProductParameters(newProductParameters);
+    }
+
     private void updateProductFieldsByUpdate(Product p, ProductCreateRequestDTO dto) {
         p.setReferenceNumber(dto.getReferenceNumber());
         p.setNameEn(dto.getNameEn());
@@ -674,29 +745,51 @@ public class ProductService {
         p.setActive(dto.getActive());
         p.setFeatured(dto.getFeatured());
         p.calculateFinalPrice();
-        setParametersFromRest(p, dto.getParameters());
+
+        // Актуализиране на параметрите - най-ефективният подход
+        updateProductParameters(p, dto.getParameters());
+
         p.setLastModifiedBy("ADMIN");
+        p.generateSlug();
     }
+
     private void setParametersFromRest(Product p, List<ProductParameterCreateDTO> params) {
-        if (params == null) {
+        if (params == null || params.isEmpty()) {
             p.setProductParameters(new HashSet<>());
             return;
         }
+
+        // Валидиране на параметрите
+        validateProductParameters(params);
+
         Set<ProductParameter> newProductParameters = new HashSet<>();
+
         for (ProductParameterCreateDTO paramDto : params) {
-            Parameter parameter = parameterRepository.findById(paramDto.getParameterId()).orElseThrow(() -> new BusinessLogicException("Parameter not found: " + paramDto.getParameterId()));
+            Parameter parameter = parameterRepository.findById(paramDto.getParameterId())
+                    .orElseThrow(() -> new BusinessLogicException("Parameter not found with id: " + paramDto.getParameterId()));
+
             for (Long optionId : paramDto.getParameterOptionId()) {
-                ParameterOption option = parameterOptionRepository.findById(optionId).orElseThrow(() -> new BusinessLogicException("ParameterOption not found: " + optionId));
-                if (!option.getParameter().getId().equals(parameter.getId())) throw new ValidationException(String.format("Parameter option %d does not belong to parameter %d", optionId, paramDto.getParameterId()));
-                ProductParameter pp = new ProductParameter();
-                pp.setProduct(p);
-                pp.setParameter(parameter);
-                pp.setParameterOption(option);
-                newProductParameters.add(pp);
+                ParameterOption option = parameterOptionRepository.findById(optionId)
+                        .orElseThrow(() -> new BusinessLogicException("ParameterOption not found with id: " + optionId));
+
+                // Проверка дали опцията принадлежи към параметъра
+                if (!option.getParameter().getId().equals(parameter.getId())) {
+                    throw new ValidationException(
+                            String.format("Parameter option %d does not belong to parameter %d",
+                                    optionId, paramDto.getParameterId()));
+                }
+
+                ProductParameter productParameter = new ProductParameter();
+                productParameter.setProduct(p);
+                productParameter.setParameter(parameter);
+                productParameter.setParameterOption(option);
+                newProductParameters.add(productParameter);
             }
         }
+
         p.setProductParameters(newProductParameters);
     }
+
     private ProductResponseDTO convertToResponseDTO(Product p, String lang) {
         ProductResponseDTO dto = new ProductResponseDTO();
         dto.setId(p.getId());

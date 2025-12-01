@@ -2022,9 +2022,9 @@ public class TekraSyncService {
                 return null;
             }
 
-            // ✅ ПОДОБРЕНА ПРОВЕРКА: Включва проверка по име за Vali категории
+            // ✅ ПОДОБРЕНА ПРОВЕРКА: БЕЗ parent проверка
             Optional<Category> existingCategoryOpt = findExistingCategoryByTekraData(
-                    tekraId, tekraSlug, name, parentCategory);
+                    tekraId, tekraSlug, name);
 
             Category category;
             boolean isNew = false;
@@ -2039,15 +2039,6 @@ public class TekraSyncService {
                     log.info("✓✓ REUSING existing Vali category: '{}' (ID: {}) for Tekra category '{}'",
                             category.getNameBg(), category.getId(), name);
                 }
-
-                // Проверка дали parent съвпада
-                boolean parentMatches = parentMatches(category, parentCategory);
-
-                if (!parentMatches) {
-                    log.warn("Found category but WRONG parent! Creating NEW category.");
-                    category = new Category();
-                    isNew = true;
-                }
             } else {
                 category = new Category();
                 isNew = true;
@@ -2057,7 +2048,7 @@ public class TekraSyncService {
             category.setTekraId(tekraId);
             category.setTekraSlug(tekraSlug);
 
-            // Запазваме оригиналното име ако вече има (от Vali)
+            // ✅ Запазваме оригиналното име ако вече има (от Vali)
             if (category.getNameBg() == null || isNew) {
                 category.setNameBg(name);
             }
@@ -2065,7 +2056,16 @@ public class TekraSyncService {
                 category.setNameEn(name);
             }
 
-            category.setParent(parentCategory);
+            // ✅ КРИТИЧНА ПРОМЯНА: Обновяваме parent САМО ако е NULL
+            if (category.getParent() == null) {
+                category.setParent(parentCategory);
+                log.info("Setting parent for category '{}' (was null)", category.getNameBg());
+            } else {
+                log.debug("Preserving existing parent for category '{}': current={}, API suggests={}",
+                        category.getNameBg(),
+                        category.getParent().getNameBg(),
+                        parentCategory != null ? parentCategory.getNameBg() : "null");
+            }
 
             String countStr = getString(rawData, "count");
             if (countStr != null && !countStr.isEmpty()) {
@@ -2096,14 +2096,17 @@ public class TekraSyncService {
             categoryRepository.flush();
 
             if (isReused) {
-                log.info("✓✓✓ REUSED Vali category: '{}' | slug='{}' | path='{}' | tekraId={}",
-                        name, uniqueSlug, category.getCategoryPath(), tekraId);
+                log.info("✓✓✓ REUSED Vali category: '{}' | slug='{}' | path='{}' | tekraId={} | parent={}",
+                        name, uniqueSlug, category.getCategoryPath(), tekraId,
+                        category.getParent() != null ? category.getParent().getNameBg() : "null");
             } else if (isNew) {
-                log.info("✓ CREATED: '{}' | slug='{}' | path='{}'",
-                        name, uniqueSlug, category.getCategoryPath());
+                log.info("✓ CREATED: '{}' | slug='{}' | path='{}' | parent={}",
+                        name, uniqueSlug, category.getCategoryPath(),
+                        parentCategory != null ? parentCategory.getNameBg() : "null");
             } else {
-                log.info("✓ UPDATED: '{}' | slug='{}' | path='{}'",
-                        name, uniqueSlug, category.getCategoryPath());
+                log.info("✓ UPDATED: '{}' | slug='{}' | path='{}' | parent={}",
+                        name, uniqueSlug, category.getCategoryPath(),
+                        category.getParent() != null ? category.getParent().getNameBg() : "null");
             }
 
             return category;
@@ -2129,8 +2132,7 @@ public class TekraSyncService {
 
     private Optional<Category> findExistingCategoryByTekraData(String tekraId,
                                                                String tekraSlug,
-                                                               String categoryName,
-                                                               Category parentCategory) {
+                                                               String categoryName) {
         // СТЪПКА 1: Проверка по tekraId (ако вече е синхронизирана от Tekra)
         if (tekraId != null) {
             List<Category> byTekraId = categoryRepository.findAll().stream()
@@ -2138,12 +2140,9 @@ public class TekraSyncService {
                     .toList();
 
             if (!byTekraId.isEmpty()) {
-                for (Category cat : byTekraId) {
-                    if (parentMatches(cat, parentCategory)) {
-                        log.debug("Found existing Tekra category by tekraId: {}", tekraId);
-                        return Optional.of(cat);
-                    }
-                }
+                Category found = byTekraId.get(0);
+                log.debug("Found existing Tekra category by tekraId: {} (ignoring parent mismatch)", tekraId);
+                return Optional.of(found);
             }
         }
 
@@ -2154,16 +2153,14 @@ public class TekraSyncService {
                     .toList();
 
             if (!byTekraSlug.isEmpty()) {
-                for (Category cat : byTekraSlug) {
-                    if (parentMatches(cat, parentCategory)) {
-                        log.debug("Found existing Tekra category by tekraSlug: {}", tekraSlug);
-                        return Optional.of(cat);
-                    }
-                }
+                Category found = byTekraSlug.get(0);
+                log.debug("Found existing Tekra category by tekraSlug: {}", tekraSlug);
+                return Optional.of(found);
             }
         }
 
         // ✅ СТЪПКА 3: Проверка по име (за категории от Vali, които имат същото име)
+        // БЕЗ parent проверка - връщаме първата намерена
         if (categoryName != null && !categoryName.trim().isEmpty()) {
             String normalizedName = normalizeCategoryName(categoryName);
 
@@ -2175,27 +2172,20 @@ public class TekraSyncService {
                 String catNameEn = normalizeCategoryName(cat.getNameEn());
 
                 if (normalizedName.equals(catNameBg) || normalizedName.equals(catNameEn)) {
-                    // Проверка дали parent съвпада
-                    if (parentMatches(cat, parentCategory)) {
-                        log.info("✓ Found existing Vali category by name: '{}' (ID: {}, will REUSE instead of creating new)",
+                    // ✅ ВРЪЩАМЕ ДИРЕКТНО - без parent проверка
+                    if (cat.getTekraId() == null) {
+                        log.info("✓ Found existing Vali category by name: '{}' (ID: {}, will REUSE, parent will be preserved)",
                                 cat.getNameBg(), cat.getId());
-                        return Optional.of(cat);
+                    } else {
+                        log.debug("✓ Found existing Tekra category by name: '{}' (ID: {})",
+                                cat.getNameBg(), cat.getId());
                     }
+                    return Optional.of(cat);
                 }
             }
         }
 
         return Optional.empty();
-    }
-
-    private boolean parentMatches(Category category, Category expectedParent) {
-        if (expectedParent == null && category.getParent() == null) {
-            return true;
-        }
-        if (expectedParent != null && category.getParent() != null) {
-            return expectedParent.getId().equals(category.getParent().getId());
-        }
-        return false;
     }
 
     private String generateUniqueSlug(String tekraSlug, String categoryName,

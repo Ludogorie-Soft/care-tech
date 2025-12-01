@@ -222,7 +222,7 @@ public class ValiSyncService {
                 Category parent = existingCategories.get(extCategory.getParent());
 
                 if (category != null && parent != null && !parent.equals(category)) {
-                    if (category.getParent() == null || !category.getParent().getId().equals(parent.getId())) {
+                    if (category.getParent() == null) {
                         category.setParent(parent);
                         categoriesToUpdate.add(category);
                         updateCount++;

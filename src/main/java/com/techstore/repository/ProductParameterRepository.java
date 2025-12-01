@@ -21,4 +21,8 @@ public interface ProductParameterRepository extends JpaRepository<ProductParamet
             "AND pp.parameter IS NOT NULL " +
             "AND pp.parameterOption IS NOT NULL")
     List<Object[]> findParameterOptionsByCategoryAndActiveProducts(@Param("categoryId") Long categoryId);
+
+    @Modifying
+    @Query("DELETE FROM ProductParameter pp WHERE pp.product.id = :productId")
+    void deleteAllByProductId(@Param("productId") Long productId);
 }
