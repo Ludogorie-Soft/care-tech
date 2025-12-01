@@ -560,12 +560,21 @@ public class ParameterService {
         List<ParameterOption> options = new ArrayList<>();
 
         for (ParameterOptionRequestDto optionDto : optionDtos) {
+            String optionNameBg = getOptionNameBg(optionDto);
+            if (optionNameBg == null || optionNameBg.isEmpty()) {
+                log.warn("Skipping option without Bulgarian name for parameter {}", parameter.getId());
+                continue;
+            }
+
             ParameterOption option = createParameterOptionFromRequest(optionDto, parameter);
             options.add(option);
+            log.debug("Creating new option '{}' for new parameter", optionNameBg);
         }
 
-        parameterOptionRepository.saveAll(options);
-        log.debug("Created {} parameter options for parameter: {}", options.size(), parameter.getId());
+        if (!options.isEmpty()) {
+            parameterOptionRepository.saveAll(options);
+            log.info("Created {} parameter options for new parameter: {}", options.size(), parameter.getId());
+        }
     }
 
     private void updateParameterOptions(Parameter parameter, List<ParameterOptionRequestDto> optionDtos) {
@@ -573,12 +582,13 @@ public class ParameterService {
             return;
         }
 
-        // ✅ 1. Зареди съществуващите options за този параметър
+        // ✅ 1. Зареди съществуващите options
         List<ParameterOption> existingOptions = parameterOptionRepository
                 .findByParameterIdOrderByOrderAsc(parameter.getId());
 
         // ✅ 2. Индексирай по ID (за admin panel)
         Map<Long, ParameterOption> existingOptionsById = existingOptions.stream()
+                .filter(opt -> opt.getId() != null)
                 .collect(Collectors.toMap(
                         ParameterOption::getId,
                         option -> option
@@ -610,29 +620,27 @@ public class ParameterService {
 
             ParameterOption existingOption = null;
 
-//             ✅ 4a. ПРИОРИТЕТ 1: Ако има database ID (от admin panel)
-            if (optionDto.getCurrentId() != null) {
-                existingOption = existingOptionsById.get(optionDto.getCurrentId());
+            // ✅ 4a. ПРИОРИТЕТ 1: Търси по database ID (от admin panel)
+            if (optionDto.getOptionId() != null) {
+                existingOption = existingOptionsById.get(optionDto.getOptionId());
 
                 if (existingOption != null) {
                     // ✅ Валидация: провери дали option принадлежи на този параметър
                     if (!existingOption.getParameter().getId().equals(parameter.getId())) {
                         throw new ValidationException(
                                 String.format("Parameter option %d does not belong to parameter %d",
-                                        optionDto.getCurrentId(), parameter.getId()));
+                                        optionDto.getOptionId(), parameter.getId()));
                     }
 
                     processedIds.add(existingOption.getId());
                     log.debug("Found existing option by database ID: {} for parameter {}",
-                            optionDto.getCurrentId(), parameter.getId());
+                            optionDto.getOptionId(), parameter.getId());
                 } else {
                     throw new ValidationException(
-                            String.format("Parameter option with ID %d not found", optionDto.getCurrentId()));
+                            String.format("Parameter option with ID %d not found", optionDto.getOptionId()));
                 }
             }
-
-//             ✅ 4b. ПРИОРИТЕТ 2: Ако има externalId (от API sync)
-
+            // ✅ 4b. ПРИОРИТЕТ 2: Търси по externalId (от API sync)
             else if (optionDto.getExternalId() != null) {
                 existingOption = existingOptionsByExternalId.get(optionDto.getExternalId());
 
@@ -643,38 +651,53 @@ public class ParameterService {
                 }
             }
 
-        // ✅ 5. DELETE options that are NO LONGER in the request
+            // ✅ 5. UPDATE съществуваща или CREATE нова опция
+            if (existingOption != null) {
+                // UPDATE съществуваща
+                updateParameterOptionFromRequest(existingOption, optionDto);
+                optionsToSave.add(existingOption);
+                log.debug("Updating existing option '{}' for parameter {}",
+                        getOptionDisplayName(existingOption), parameter.getId());
+            } else {
+                // CREATE нова опция
+                ParameterOption newOption = createParameterOptionFromRequest(optionDto, parameter);
+                optionsToSave.add(newOption);
+                log.debug("Adding new option '{}' to parameter {}", optionNameBg, parameter.getId());
+            }
+        }
+
+        // ✅ 6. DELETE options that are NO LONGER in the request
         List<ParameterOption> optionsToDelete = existingOptions.stream()
                 .filter(option -> !processedIds.contains(option.getId()))
-                .collect(Collectors.toList());
+                .toList();
 
-            if (!optionsToDelete.isEmpty()) {
-                // ✅ Провери дали options не се използват от продукти
-                List<ParameterOption> safeToDelete = new ArrayList<>();
+        if (!optionsToDelete.isEmpty()) {
+            List<ParameterOption> safeToDelete = new ArrayList<>();
 
-                for (ParameterOption optionToDelete : optionsToDelete) {
-                    long productUsages = optionToDelete.getProductParameters() != null ?
-                            optionToDelete.getProductParameters().size() : 0;
+            for (ParameterOption optionToDelete : optionsToDelete) {
+                long productUsages = optionToDelete.getProductParameters() != null ?
+                        optionToDelete.getProductParameters().size() : 0;
 
-                    if (productUsages > 0) {
-                        log.warn("Skipping deletion of parameter option '{}' (ID: {}) because it is used by {} products",
-                                getOptionDisplayName(optionToDelete), optionToDelete.getId(), productUsages);
-                    } else {
-                        safeToDelete.add(optionToDelete);
-                    }
-                }
-
-                if (!safeToDelete.isEmpty()) {
-                    parameterOptionRepository.deleteAll(safeToDelete);
-                    log.info("Deleted {} parameter options for parameter: {}", safeToDelete.size(), parameter.getId());
+                if (productUsages > 0) {
+                    log.warn("Skipping deletion of parameter option '{}' (ID: {}) because it is used by {} products",
+                            getOptionDisplayName(optionToDelete), optionToDelete.getId(), productUsages);
+                } else {
+                    safeToDelete.add(optionToDelete);
                 }
             }
 
-            // ✅ 6. SAVE all options (updates + new)
-            if (!optionsToSave.isEmpty()) {
-                parameterOptionRepository.saveAll(optionsToSave);
-                log.info("Saved {} parameter options for parameter: {}", optionsToSave.size(), parameter.getId());
+            if (!safeToDelete.isEmpty()) {
+                parameterOptionRepository.deleteAll(safeToDelete);
+                log.info("Deleted {} unused parameter options for parameter: {}",
+                        safeToDelete.size(), parameter.getId());
             }
+        }
+
+        // ✅ 7. SAVE всички промени (updates + новите)
+        if (!optionsToSave.isEmpty()) {
+            parameterOptionRepository.saveAll(optionsToSave);
+            log.info("Saved {} parameter options for parameter: {} (updates + additions)",
+                    optionsToSave.size(), parameter.getId());
         }
     }
 
@@ -687,11 +710,6 @@ public class ParameterService {
                 .filter(StringUtils::hasText)
                 .findFirst()
                 .orElse(null);
-    }
-
-    private String normalizeParameterValue(String value) {
-        if (value == null) return "";
-        return value.toLowerCase().trim().replaceAll("\\s+", " ");
     }
 
     private ParameterOption createParameterOptionFromRequest(ParameterOptionRequestDto optionDto, Parameter parameter) {

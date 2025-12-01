@@ -41,7 +41,7 @@ public class ManufacturerService {
         log.debug("Fetching all manufacturers for language: {}", language);
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            List<Manufacturer> manufacturers = manufacturerRepository.findAllByOrderByNameAsc();
+            List<Manufacturer> manufacturers = manufacturerRepository.findAll();
             return manufacturers.stream()
                     .map(manufacturerMapper::toResponseDto)
                     .toList();

@@ -30,7 +30,7 @@ public class S3Service {
     private long maxFileSize;
 
     @Value("${app.upload.allowed-extensions:jpg,jpeg,png,gif,webp}")
-    private String[] allowedExtensions;
+    private String allowedExtensionsStr;
 
     public S3Service(S3Client s3Client) {
         this.s3Client = s3Client;
@@ -101,24 +101,42 @@ public class S3Service {
             throw new BusinessLogicException("File size exceeds maximum allowed size of " + maxFileSize + " bytes");
         }
 
-        String extension = getFileExtension(file.getOriginalFilename()).toLowerCase();
-        List<String> allowedExtList = Arrays.asList(allowedExtensions);
+        String originalFilename = file.getOriginalFilename();
+        String extension = getFileExtension(originalFilename);
+
+        if (extension == null || extension.isEmpty()) {
+            throw new BusinessLogicException("File has no extension");
+        }
+
+        extension = extension.toLowerCase();
+
+        // Парсни правилно allowed extensions
+        List<String> allowedExtList = Arrays.asList(allowedExtensionsStr.split(","));
+
+        log.info("Validating file '{}' with extension '{}'. Allowed: {}",
+                originalFilename, extension, allowedExtList);
 
         if (!allowedExtList.contains(extension)) {
-            throw new BusinessLogicException("File extension not allowed. Allowed extensions: " + String.join(", ", allowedExtensions));
+            throw new BusinessLogicException(
+                    String.format("File extension '%s' not allowed. Allowed extensions: %s",
+                            extension, allowedExtensionsStr));
         }
+    }
+
+    private String getFileExtension(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            return "";
+        }
+        int lastDotIndex = filename.lastIndexOf(".");
+        if (lastDotIndex == -1 || lastDotIndex == filename.length() - 1) {
+            return "";
+        }
+        return filename.substring(lastDotIndex + 1).toLowerCase();
     }
 
     private String generateFileName(String originalFilename) {
         String extension = getFileExtension(originalFilename);
         return UUID.randomUUID().toString() + "." + extension;
-    }
-
-    private String getFileExtension(String filename) {
-        if (filename == null || filename.lastIndexOf(".") == -1) {
-            return "";
-        }
-        return filename.substring(filename.lastIndexOf(".") + 1);
     }
 
     private String extractKeyFromUrl(String imageUrl) {

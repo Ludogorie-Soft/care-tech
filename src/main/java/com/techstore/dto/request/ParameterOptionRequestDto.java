@@ -15,5 +15,5 @@ public class ParameterOptionRequestDto {
     private List<NameDto> name;
     private Integer order;
 
-    private Long currentId;
+    private Long optionId;
 }

@@ -8,11 +8,27 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import jakarta.annotation.PostConstruct;
+import org.springframework.data.auditing.DateTimeProvider;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
+import java.util.TimeZone;
 
 @Configuration
-@EnableJpaAuditing(auditorAwareRef = "auditAwareImpl")
+@EnableJpaAuditing(auditorAwareRef = "auditAwareImpl", dateTimeProviderRef = "dateTimeProvider")
 public class AuditConfig {
+
+    @PostConstruct
+    public void init() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Sofia"));
+    }
+
+    @Bean
+    public DateTimeProvider dateTimeProvider() {
+        return () -> Optional.of(LocalDateTime.now(ZoneId.of("Europe/Sofia")));
+    }
 
     @Bean(name = "auditAwareImpl")
     public AuditorAware<String> auditAwareImpl() {

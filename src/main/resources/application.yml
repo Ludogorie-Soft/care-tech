@@ -62,6 +62,7 @@ spring:
         properties:
             hibernate:
                 jdbc:
+                    time_zone: Europe/Sofia
                     batch_size: 30
                 order_inserts: true
                 order_updates: true
@@ -95,6 +96,7 @@ spring:
 
     # Jackson Configuration
     jackson:
+        time-zone: Europe/Sofia
         serialization:
             write-dates-as-timestamps: false
             fail-on-empty-beans: false

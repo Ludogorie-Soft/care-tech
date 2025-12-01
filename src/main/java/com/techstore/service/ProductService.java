@@ -1,7 +1,6 @@
 package com.techstore.service;
 
 import com.techstore.dto.request.ProductCreateRequestDTO;
-import com.techstore.dto.request.ProductImageOperationsDTO;
 import com.techstore.dto.request.ProductImageUpdateDTO;
 import com.techstore.dto.request.ProductParameterCreateDTO;
 import com.techstore.dto.request.ProductUpdateRequestDTO;
@@ -12,7 +11,6 @@ import com.techstore.entity.Parameter;
 import com.techstore.entity.ParameterOption;
 import com.techstore.entity.Product;
 import com.techstore.entity.ProductParameter;
-import com.techstore.enums.Platform;
 import com.techstore.enums.ProductStatus;
 import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.DuplicateResourceException;
@@ -20,7 +18,6 @@ import com.techstore.exception.ValidationException;
 import com.techstore.mapper.ManufacturerMapper;
 import com.techstore.mapper.ParameterMapper;
 import com.techstore.repository.*;
-import com.techstore.util.ExceptionHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -373,24 +370,16 @@ public class ProductService {
     public void permanentDeleteProduct(Long id) {
         log.warn("Permanently deleting product with id: {}", id);
         validateProductId(id);
-        Product product = findProductByIdOrThrow(id);
-        validatePermanentProductDeletion(product);
 
-        // ✅ Събери всички снимки
+        Product product = findProductByIdOrThrow(id);
+
         List<String> allImages = collectAllProductImages(product);
 
-        // ✅ ИЗТРИЙ ProductParameter записи ПРЕДИ permanent delete
-        if (product.getProductParameters() != null && !product.getProductParameters().isEmpty()) {
-            log.info("Deleting {} product parameters before permanent deletion",
-                    product.getProductParameters().size());
-            productParameterRepository.deleteAll(product.getProductParameters());
-            product.getProductParameters().clear();
-        }
+        // ✅ ЕДИН native query за всичко
+        log.info("Deleting product {} and all relations", id);
+        productRepository.permanentlyDeleteProductWithRelations(id);
 
-        // ✅ Permanent delete
-        productRepository.deleteById(id);
-
-        // ✅ Cleanup на снимките
+        // ✅ Cleanup снимки
         cleanupImagesOnError(allImages);
 
         log.warn("Product permanently deleted successfully with id: {}", id);
@@ -536,9 +525,6 @@ public class ProductService {
         int currentImageCount = (p.getPrimaryImageUrl() != null ? 1 : 0) + (p.getAdditionalImages() != null ? p.getAdditionalImages().size() : 0);
         if (currentImageCount >= MAX_IMAGES_PER_PRODUCT) throw new BusinessLogicException("Product already has maximum of " + MAX_IMAGES_PER_PRODUCT + " images");
     }
-    private void validateSearchQuery(String q) {
-        if (!StringUtils.hasText(q) || q.trim().length() > 200 || q.trim().length() < 2) throw new ValidationException("Search query must be between 2 and 200 characters");
-    }
     private void validateRelatedProductsLimit(int limit) {
         if (limit <= 0 || limit > 50) throw new ValidationException("Related products limit must be between 1 and 50");
     }
@@ -549,11 +535,7 @@ public class ProductService {
         if (p.getCategory() == null) throw new BusinessLogicException("Product must have a category to find related products");
         if (p.getManufacturer() == null) throw new BusinessLogicException("Product must have a manufacturer to find related products");
     }
-    private void validateProductDeletion(Product p) { /* No-op for now, can add checks for orders etc. */ }
-    private void validatePermanentProductDeletion(Product p) {
-        validateProductDeletion(p);
-        if (p.getActive()) throw new BusinessLogicException("Product must be deactivated before permanent deletion");
-    }
+
     private void validateImageUpdateList(List<ProductImageUpdateDTO> images) {
         if (images.isEmpty()) return;
         for (ProductImageUpdateDTO img : images) if (!StringUtils.hasText(img.getImageUrl())) throw new ValidationException("Image URL cannot be empty in update list");

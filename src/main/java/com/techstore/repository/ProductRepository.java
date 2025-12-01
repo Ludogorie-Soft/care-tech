@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -60,4 +61,15 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     List<Manufacturer> findManufacturersByCategoryId(@Param("categoryId") Long categoryId);
 
     Page<Product> findByCreatedByOrderByCreatedAtDesc(String createdBy, Pageable pageable);
+
+    @Modifying
+    @Query(value = """
+    DELETE FROM product_parameters WHERE product_id = :productId;
+    DELETE FROM product_flags WHERE product_id = :productId;
+    DELETE FROM user_favorites WHERE product_id = :productId;
+    DELETE FROM cart_items WHERE product_id = :productId;
+    DELETE FROM additional_images WHERE product_id = :productId;
+    DELETE FROM products WHERE id = :productId;
+    """, nativeQuery = true)
+    void permanentlyDeleteProductWithRelations(@Param("productId") Long productId);
 }
