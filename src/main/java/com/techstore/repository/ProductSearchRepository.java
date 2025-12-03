@@ -68,7 +68,7 @@ public class ProductSearchRepository {
                 .append("LEFT JOIN categories c ON p.category_id = c.id ");
 
         StringBuilder whereClause = new StringBuilder(
-                "WHERE p.active = true AND p.show_flag = true AND p.status != 'NOT_AVAILABLE' "
+                "WHERE p.active = true AND p.show_flag = true AND p.status IN ('AVAILABLE', 'ON_ROUTE') "
         );
 
         if (StringUtils.hasText(request.getQuery())) {
@@ -388,10 +388,14 @@ public class ProductSearchRepository {
                     "COUNT(DISTINCT pp.product_id) as product_count " +
                     "FROM parameters param " +
                     "JOIN parameter_options po ON po.parameter_id = param.id " +
-                    "LEFT JOIN product_parameters pp ON pp.parameter_option_id = po.id " +
-                    "LEFT JOIN products p ON pp.product_id = p.id AND p.active = true AND p.show_flag = true " +
+                    "INNER JOIN product_parameters pp ON pp.parameter_option_id = po.id " +
+                    "INNER JOIN products p ON pp.product_id = p.id " +
+                    "   AND p.active = true " +
+                    "   AND p.show_flag = true " +
+                    "   AND p.status IN ('AVAILABLE', 'ON_ROUTE') " +
                     "WHERE param.category_id = :categoryId " +
                     "GROUP BY param.id, param_name, po.id, option_name, param.sort_order, po.sort_order " +
+                    "HAVING COUNT(DISTINCT pp.product_id) > 0 " +
                     "ORDER BY param.sort_order, param_name, po.sort_order, option_name";
 
             Map<String, Object> params = new HashMap<>();
