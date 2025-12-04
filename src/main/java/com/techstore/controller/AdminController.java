@@ -1,6 +1,7 @@
 package com.techstore.controller;
 
 import com.techstore.dto.request.OrderStatusUpdateDTO;
+import com.techstore.dto.request.ProductMarkupUpdateDTO;
 import com.techstore.dto.request.ProductPromoRequest;
 import com.techstore.dto.response.*;
 import com.techstore.enums.OrderStatus;
@@ -9,8 +10,6 @@ import com.techstore.service.ParameterService;
 import com.techstore.service.ProductService;
 import com.techstore.service.admin.AdminService;
 import jakarta.validation.Valid;
-import lombok.Builder;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -63,6 +62,39 @@ public class AdminController {
         Page<ParameterResponseDto> parametersPage = parameterService.findAllAdminParameters(pageable, lang);
 
         return ResponseEntity.ok(parametersPage);
+    }
+
+    @PutMapping("/{id}/markup")
+    public ResponseEntity<ProductResponseDTO> updateProductMarkup(
+            @PathVariable Long id,
+            @RequestBody @Valid ProductMarkupUpdateDTO markupData,
+            @RequestParam(defaultValue = "en") String language) {
+
+        log.info("Updating markup for product {} to {}%", id, markupData.getMarkupPercentage());
+        ProductResponseDTO updatedProduct = productService.updateProductMarkup(id, markupData.getMarkupPercentage(), language);
+        return ResponseEntity.ok(updatedProduct);
+    }
+
+    @PutMapping("/categories/{id}/markup")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    public ResponseEntity<MarkupResponseDTO> applyCategoryMarkup(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductMarkupUpdateDTO markupData) {
+
+        log.info("Applying bulk markup to category {} with {}%", id, markupData.getMarkupPercentage());
+        MarkupResponseDTO response = productService.applyMarkupToCategory(id, markupData);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/manufacturers/{id}/markup")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    public ResponseEntity<MarkupResponseDTO> applyManufacturerMarkup(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductMarkupUpdateDTO markupData) {
+
+        log.info("Applying bulk markup to manufacturer {} with {}%", id, markupData.getMarkupPercentage());
+        MarkupResponseDTO response = productService.applyMarkupToManufacturer(id, markupData);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/products/promo")

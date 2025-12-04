@@ -1,9 +1,6 @@
 package com.techstore.service;
 
-import com.techstore.dto.request.ProductCreateRequestDTO;
-import com.techstore.dto.request.ProductImageUpdateDTO;
-import com.techstore.dto.request.ProductParameterCreateDTO;
-import com.techstore.dto.request.ProductUpdateRequestDTO;
+import com.techstore.dto.request.*;
 import com.techstore.dto.response.*;
 import com.techstore.entity.Category;
 import com.techstore.entity.Manufacturer;
@@ -32,6 +29,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -122,6 +120,148 @@ public class ProductService {
             cleanupImageOnError(imageUrl);
             throw e;
         }
+    }
+
+    @CacheEvict(value = "products", allEntries = true)
+    public ProductResponseDTO updateProductMarkup(Long productId, BigDecimal markupPercentage, String lang) {
+        log.info("Updating markup for product {} to {}%", productId, markupPercentage);
+
+        validateProductId(productId);
+        validateLanguage(lang);
+        validateMarkupPercentage(markupPercentage);
+
+        Product product = findProductByIdOrThrow(productId);
+
+        // Set new markup percentage
+        product.setMarkupPercentage(markupPercentage);
+
+        // Recalculate final price with new markup
+        product.calculateFinalPrice();
+
+        product.setLastModifiedBy("ADMIN");
+
+        Product savedProduct = productRepository.save(product);
+
+        log.info("Markup updated successfully for product {}. New final price: {}",
+                productId, savedProduct.getFinalPrice());
+
+        clearProductCache();
+
+        return convertToResponseDTO(savedProduct, lang);
+    }
+
+    private void validateMarkupPercentage(BigDecimal markup) {
+        if (markup == null) {
+            throw new ValidationException("Markup percentage cannot be null");
+        }
+        if (markup.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ValidationException("Markup percentage cannot be negative");
+        }
+        if (markup.compareTo(new BigDecimal("500.00")) > 0) {
+            throw new ValidationException("Markup percentage cannot exceed 500%");
+        }
+    }
+
+    @Transactional
+    @CacheEvict(value = "products", allEntries = true)
+    public MarkupResponseDTO applyMarkupToCategory(Long categoryId, ProductMarkupUpdateDTO markupData) {
+        log.info("Applying {}% markup to all active products in category {}",
+                markupData.getMarkupPercentage(), categoryId);
+
+        validateCategoryId(categoryId);
+        validateMarkupPercentage(markupData.getMarkupPercentage());
+
+        Category category = findCategoryByIdOrThrow(categoryId);
+
+        List<Product> productsToUpdate = productRepository.findAllByCategoryId(categoryId);
+
+        int updatedCount = 0;
+        int skippedCount = 0;
+
+        for (Product product : productsToUpdate) {
+            try {
+                product.setMarkupPercentage(markupData.getMarkupPercentage());
+                product.calculateFinalPrice();
+                product.setLastModifiedBy("ADMIN");
+                updatedCount++;
+            } catch (Exception e) {
+                log.error("Failed to update markup for product {}: {}", product.getId(), e.getMessage());
+                skippedCount++;
+            }
+        }
+
+        if (updatedCount > 0) {
+            productRepository.saveAll(productsToUpdate);
+        }
+
+        clearProductCache();
+
+        log.info("Bulk markup completed for category {}: {} updated, {} skipped",
+                categoryId, updatedCount, skippedCount);
+
+        return MarkupResponseDTO.builder()
+                .operationType("CATEGORY")
+                .targetId(categoryId)
+                .targetName(category.getNameEn())
+                .markupPercentage(markupData.getMarkupPercentage())
+                .totalProducts(productsToUpdate.size())
+                .updatedProducts(updatedCount)
+                .skippedProducts(skippedCount)
+                .executedAt(LocalDateTime.now())
+                .message(String.format("Successfully updated markup for %d products in category '%s'",
+                        updatedCount, category.getNameEn()))
+                .build();
+    }
+
+    @Transactional
+    @CacheEvict(value = "products", allEntries = true)
+    public MarkupResponseDTO applyMarkupToManufacturer(Long manufacturerId, ProductMarkupUpdateDTO markupData) {
+        log.info("Applying {}% markup to all active products from manufacturer {}",
+                markupData.getMarkupPercentage(), manufacturerId);
+
+        validateManufacturerId(manufacturerId);
+        validateMarkupPercentage(markupData.getMarkupPercentage());
+
+        Manufacturer manufacturer = findManufacturerByIdOrThrow(manufacturerId);
+
+        List<Product> productsToUpdate = productRepository.findByManufacturerId(manufacturerId);
+
+        int updatedCount = 0;
+        int skippedCount = 0;
+
+        for (Product product : productsToUpdate) {
+            try {
+                product.setMarkupPercentage(markupData.getMarkupPercentage());
+                product.calculateFinalPrice();
+                product.setLastModifiedBy("ADMIN");
+                updatedCount++;
+            } catch (Exception e) {
+                log.error("Failed to update markup for product {}: {}", product.getId(), e.getMessage());
+                skippedCount++;
+            }
+        }
+
+        if (updatedCount > 0) {
+            productRepository.saveAll(productsToUpdate);
+        }
+
+        clearProductCache();
+
+        log.info("Bulk markup completed for manufacturer {}: {} updated, {} skipped",
+                manufacturerId, updatedCount, skippedCount);
+
+        return MarkupResponseDTO.builder()
+                .operationType("MANUFACTURER")
+                .targetId(manufacturerId)
+                .targetName(manufacturer.getName())
+                .markupPercentage(markupData.getMarkupPercentage())
+                .totalProducts(productsToUpdate.size())
+                .updatedProducts(updatedCount)
+                .skippedProducts(skippedCount)
+                .executedAt(LocalDateTime.now())
+                .message(String.format("Successfully updated markup for %d products by manufacturer '%s'",
+                        updatedCount, manufacturer.getName()))
+                .build();
     }
 
     @Transactional(readOnly = true)
