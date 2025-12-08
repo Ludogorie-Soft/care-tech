@@ -1,10 +1,13 @@
 package com.techstore.controller;
 
+import com.techstore.dto.CategoryResponseDTO;
+import com.techstore.dto.request.CategoryRequestDto;
 import com.techstore.dto.request.OrderStatusUpdateDTO;
 import com.techstore.dto.request.ProductMarkupUpdateDTO;
 import com.techstore.dto.request.ProductPromoRequest;
 import com.techstore.dto.response.*;
 import com.techstore.enums.OrderStatus;
+import com.techstore.service.CategoryService;
 import com.techstore.service.OrderService;
 import com.techstore.service.ParameterService;
 import com.techstore.service.ProductService;
@@ -16,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +39,7 @@ public class AdminController {
     private final OrderService orderService;
     private final ProductService productService;
     private final ParameterService parameterService;
+    private final CategoryService categoryService;
 
     @GetMapping("/products/pageable")
     public ResponseEntity<Page<ProductResponseDTO>> getAllAdminProducts(
@@ -62,6 +67,29 @@ public class AdminController {
         Page<ParameterResponseDto> parametersPage = parameterService.findAllAdminParameters(pageable, lang);
 
         return ResponseEntity.ok(parametersPage);
+    }
+
+    @PostMapping("/categories")
+    public ResponseEntity<CategoryResponseDTO> createCategory(@Valid @RequestBody CategoryRequestDto requestDTO) {
+        CategoryResponseDTO createdCategory = categoryService.createCategory(requestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
+    }
+
+    @PutMapping(value = "/categories/{id}")
+    public ResponseEntity<CategoryResponseDTO> updateCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody CategoryRequestDto requestDTO) {
+
+        log.info("Updating category with id: {}", id);
+        CategoryResponseDTO updatedCategory = categoryService.updateCategory(id, requestDTO);
+        return ResponseEntity.ok(updatedCategory);
+    }
+
+    @DeleteMapping(value = "/categories/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+        log.info("Deleting category with id: {}", id);
+        categoryService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/markup")
