@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -161,6 +162,13 @@ public class CategoryService {
             log.info("Category soft deleted successfully with id: {}", id);
             return null;
         }, context);
+    }
+
+    public List<CategoryResponseDTO> findCategoriesWithMarkupProducts() {
+        List<Category> categories = categoryRepository.findDistinctByProductsMarkupPercentageGreaterThan(BigDecimal.ZERO);
+        return categories.stream()
+                .map(this::convertToResponseDTO)
+                .toList();
     }
 
     // ========== PRIVATE VALIDATION METHODS ==========

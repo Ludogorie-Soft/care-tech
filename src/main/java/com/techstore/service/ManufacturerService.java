@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -153,6 +154,14 @@ public class ManufacturerService {
         }
 
         return manufacturerRepository.existsByNameIgnoreCase(name.trim());
+    }
+
+    public List<ManufacturerResponseDto> findManufacturersWithMarkupProducts() {
+        List<Manufacturer> manufacturers = manufacturerRepository
+                .findDistinctByProductsMarkupPercentageGreaterThan(BigDecimal.ZERO);
+        return manufacturers.stream()
+                .map(manufacturerMapper::toResponseDto)
+                .toList();
     }
 
     // ========== PRIVATE VALIDATION METHODS ==========

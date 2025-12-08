@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -72,4 +73,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     DELETE FROM products WHERE id = :productId;
     """, nativeQuery = true)
     void permanentlyDeleteProductWithRelations(@Param("productId") Long productId);
+
+    Page<Product> findByMarkupPercentageGreaterThan(BigDecimal markup, Pageable pageable);
 }

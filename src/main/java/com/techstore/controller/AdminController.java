@@ -6,11 +6,9 @@ import com.techstore.dto.request.OrderStatusUpdateDTO;
 import com.techstore.dto.request.ProductMarkupUpdateDTO;
 import com.techstore.dto.request.ProductPromoRequest;
 import com.techstore.dto.response.*;
+import com.techstore.entity.Product;
 import com.techstore.enums.OrderStatus;
-import com.techstore.service.CategoryService;
-import com.techstore.service.OrderService;
-import com.techstore.service.ParameterService;
-import com.techstore.service.ProductService;
+import com.techstore.service.*;
 import com.techstore.service.admin.AdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +38,7 @@ public class AdminController {
     private final ProductService productService;
     private final ParameterService parameterService;
     private final CategoryService categoryService;
+    private final ManufacturerService manufacturerService;
 
     @GetMapping("/products/pageable")
     public ResponseEntity<Page<ProductResponseDTO>> getAllAdminProducts(
@@ -70,7 +69,8 @@ public class AdminController {
     }
 
     @PostMapping("/categories")
-    public ResponseEntity<CategoryResponseDTO> createCategory(@Valid @RequestBody CategoryRequestDto requestDTO) {
+    public ResponseEntity<CategoryResponseDTO> createCategory(
+            @Valid @RequestBody CategoryRequestDto requestDTO) {
         CategoryResponseDTO createdCategory = categoryService.createCategory(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
     }
@@ -92,6 +92,31 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/products/with-markup")
+    public ResponseEntity<Page<ProductResponseDTO>> getProductsWithMarkup(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(defaultValue = "bg") String lang
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
+        Page<ProductResponseDTO>  products = productService.findProductsWithMarkup(pageable, lang);
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/categories/with-markup")
+    public ResponseEntity<List<CategoryResponseDTO>> getCategoriesWithMarkupProducts() {
+        List<CategoryResponseDTO> categories = categoryService.findCategoriesWithMarkupProducts();
+        return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/manufacturers/with-markup")
+    public ResponseEntity<List<ManufacturerResponseDto>> getManufacturersWithMarkupProducts() {
+        List<ManufacturerResponseDto> manufacturers = manufacturerService.findManufacturersWithMarkupProducts();
+        return ResponseEntity.ok(manufacturers);
+    }
+
     @PutMapping("/{id}/markup")
     public ResponseEntity<ProductResponseDTO> updateProductMarkup(
             @PathVariable Long id,
@@ -104,7 +129,6 @@ public class AdminController {
     }
 
     @PutMapping("/categories/{id}/markup")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<MarkupResponseDTO> applyCategoryMarkup(
             @PathVariable Long id,
             @Valid @RequestBody ProductMarkupUpdateDTO markupData) {
@@ -115,7 +139,6 @@ public class AdminController {
     }
 
     @PutMapping("/manufacturers/{id}/markup")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<MarkupResponseDTO> applyManufacturerMarkup(
             @PathVariable Long id,
             @Valid @RequestBody ProductMarkupUpdateDTO markupData) {

@@ -391,6 +391,10 @@ public class ProductService {
         }
     }
 
+    public Page<ProductResponseDTO> findProductsWithMarkup(Pageable pageable, String lang) {
+        return productRepository.findByMarkupPercentageGreaterThan(BigDecimal.ZERO, pageable).map(p -> convertToResponseDTO(p,lang));
+    }
+
     @CacheEvict(value = "products", allEntries = true)
     public ProductResponseDTO reorderProductImages(Long productId, List<ProductImageUpdateDTO> images, String lang) {
         log.info("Reordering images for product {}", productId);
