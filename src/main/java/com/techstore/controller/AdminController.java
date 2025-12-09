@@ -186,6 +186,13 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping(value = "/parameters/filter-activate/{id}")
+    public ResponseEntity<ParameterResponseDto> updateParameterVisibilityAsFilter(
+            @PathVariable("id") Long id) {
+        ParameterResponseDto parameter = parameterService.changeParameterVisibilityAsFilter(id);
+        return ResponseEntity.ok(parameter);
+    }
+
     // ============ ORDER MANAGEMENT ENDPOINTS ============
 
     /**

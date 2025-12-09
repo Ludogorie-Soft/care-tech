@@ -134,14 +134,6 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Parses sortBy parameter and extracts field name and direction.
-     * Supports formats like: "price_asc", "price_desc", or just "price"
-     *
-     * @param sortBy the sort field name (may contain _asc or _desc suffix)
-     * @param defaultDirection the default sort direction if not specified in sortBy
-     * @return SortInfo containing the validated field name and direction
-     */
     private SortInfo parseSortBy(String sortBy, String defaultDirection) {
         if (sortBy == null || sortBy.trim().isEmpty()) {
             return new SortInfo("id", defaultDirection);

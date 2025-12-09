@@ -92,6 +92,29 @@ public class ParameterService {
     }
 
     @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
+    public ParameterResponseDto changeParameterVisibilityAsFilter(Long id) {
+        log.info("Updating parameter with ID: {}", id);
+
+        String context = ExceptionHelper.createErrorContext("updateParameter", "Parameter", id, null);
+
+        return ExceptionHelper.wrapDatabaseOperation(() -> {
+            validateParameterId(id);
+
+            Parameter existingParameter = findParameterByIdOrThrow(id);
+            if (existingParameter.getIsFilter()) {
+                existingParameter.setIsFilter(false);
+            } else {
+                existingParameter.setIsFilter(true);
+            }
+            Parameter updatedParameter = parameterRepository.save(existingParameter);
+
+            log.info("Parameter updated successfully with ID: {}", id);
+            return parameterMapper.toResponseDto(updatedParameter, "en");
+
+        }, context);
+    }
+
+    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
     public void deleteParameter(Long parameterId) {
         log.info("Deleting parameter with ID: {}", parameterId);
 

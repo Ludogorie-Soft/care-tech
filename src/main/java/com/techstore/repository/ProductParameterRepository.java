@@ -19,7 +19,8 @@ public interface ProductParameterRepository extends JpaRepository<ProductParamet
             "AND pp.product.active = true " +
             "AND pp.product.status != com.techstore.enums.ProductStatus.NOT_AVAILABLE " +
             "AND pp.parameter IS NOT NULL " +
-            "AND pp.parameterOption IS NOT NULL")
+            "AND pp.parameterOption IS NOT NULL " +
+            "AND pp.parameter.isFilter = true")
     List<Object[]> findParameterOptionsByCategoryAndActiveProducts(@Param("categoryId") Long categoryId);
 
     @Modifying

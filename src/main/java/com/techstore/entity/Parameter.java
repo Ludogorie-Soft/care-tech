@@ -14,7 +14,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false, exclude = {"categories", "options", "productParameters"})
-//                                       ^^^^^^^^ КРИТИЧНО: Exclude lazy collections!
 public class Parameter extends BaseEntity {
 
     @Column(name = "external_id")
@@ -36,7 +35,9 @@ public class Parameter extends BaseEntity {
     @Column(name = "tekra_key")
     private String tekraKey;
 
-    @ManyToMany(fetch = FetchType.LAZY)  // ✅ Explicit LAZY
+    private Boolean isFilter = true;
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "category_parameters",
             joinColumns = @JoinColumn(name = "parameter_id"),
@@ -50,7 +51,6 @@ public class Parameter extends BaseEntity {
     @OneToMany(mappedBy = "parameter", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductParameter> productParameters = new HashSet<>();
 
-    // ✅ ДОБАВИ: Custom hashCode/equals based on ID only
     @Override
     public int hashCode() {
         return getClass().hashCode();
