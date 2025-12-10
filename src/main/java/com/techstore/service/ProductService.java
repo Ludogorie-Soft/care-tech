@@ -316,15 +316,19 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Set<ProductParameterResponseDto> getProductsParametersByCategory(Long categoryId, String lang) {
         List<Object[]> results = productParameterRepository.findParameterOptionsByCategoryAndActiveProducts(categoryId);
+        log.warn("===PP===" + results + "===");
+
         Map<Long, ProductParameterResponseDto> resultMap = new HashMap<>();
+
         for (Object[] row : results) {
             Long parameterId = (Long) row[0];
             String parameterNameEn = (String) row[1];
             String parameterNameBg = (String) row[2];
-            Long optionId = (Long) row[3];
-            String optionNameEn = (String) row[4];
-            String optionNameBg = (String) row[5];
-            Integer optionOrder = (Integer) row[6];
+            Boolean isFilter = (Boolean) row[3]; // Ново поле
+            Long optionId = (Long) row[4];
+            String optionNameEn = (String) row[5];
+            String optionNameBg = (String) row[6];
+            Integer optionOrder = (Integer) row[7];
 
             ParameterOptionResponseDto optionDto = ParameterOptionResponseDto.builder()
                     .id(optionId)
@@ -336,16 +340,19 @@ public class ProductService {
                             .parameterId(parameterId)
                             .parameterNameEn(parameterNameEn)
                             .parameterNameBg(parameterNameBg)
+                            .isFilter(isFilter)
                             .options(new HashSet<>())
                             .build())
                     .getOptions().add(optionDto);
         }
+
         resultMap.values().forEach(param -> {
             Set<ParameterOptionResponseDto> uniqueOptions = param.getOptions().stream()
                     .sorted(Comparator.comparing(ParameterOptionResponseDto::getOrder))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
             param.setOptions(uniqueOptions);
         });
+
         return new HashSet<>(resultMap.values());
     }
 

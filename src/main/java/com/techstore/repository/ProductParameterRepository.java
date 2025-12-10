@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface ProductParameterRepository extends JpaRepository<ProductParameter, Long> {
     @Query("SELECT DISTINCT pp.parameter.id, pp.parameter.nameEn, pp.parameter.nameBg, " +
+            "pp.parameter.isFilter, " +
             "pp.parameterOption.id, pp.parameterOption.nameEn, pp.parameterOption.nameBg, " +
             "pp.parameterOption.order " +
             "FROM ProductParameter pp " +

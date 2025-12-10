@@ -19,4 +19,6 @@ public class ParameterResponseDto {
     private String platform;
     private String tekraKey;
     private List<ParameterOptionResponseDto> options;
+
+    private Boolean isFilter;
 }
