@@ -1,6 +1,7 @@
 package com.techstore.service;
 
 import com.techstore.dto.request.ParameterOptionRequestDto;
+import com.techstore.dto.request.ParameterOrderDto;
 import com.techstore.dto.request.ParameterRequestDto;
 import com.techstore.dto.response.ParameterResponseDto;
 import com.techstore.entity.Category;
@@ -61,7 +62,7 @@ public class ParameterService {
             log.info("Parameter created successfully with id: {} and external id: {}",
                     parameter.getId(), parameter.getExternalId());
 
-            return parameterMapper.toResponseDto(parameter, language);
+            return toResponseDto(parameter, language);
 
         }, context);
     }
@@ -86,9 +87,62 @@ public class ParameterService {
             updateParameterOptions(updatedParameter, requestDto.getOptions());
 
             log.info("Parameter updated successfully with ID: {}", id);
-            return parameterMapper.toResponseDto(updatedParameter, language);
+            return toResponseDto(updatedParameter, language);
 
         }, context);
+    }
+
+    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
+    @Transactional
+    public List<ParameterResponseDto> reorderParameters(Long categoryId, List<ParameterOrderDto> reorderDtos, String language) {
+        if (reorderDtos == null || reorderDtos.isEmpty()) {
+            throw new ValidationException("Reorder list cannot be empty.");
+        }
+
+        log.info("Reordering {} parameters for category ID: {}", reorderDtos.size(), categoryId);
+        // validateCategoryId(categoryId); // Ако е необходимо да се провери категорията
+
+        // 1. Извличаме всички параметри, които трябва да бъдат пренаредени
+        Set<Long> parameterIds = reorderDtos.stream()
+                .map(ParameterOrderDto::getParameterId)
+                .collect(Collectors.toSet());
+
+        List<Parameter> parameters = parameterRepository.findAllById(parameterIds);
+        if (parameters.size() != parameterIds.size()) {
+            // Проверка за невалидни ID-та
+            String missingIds = parameterIds.stream()
+                    .filter(id -> parameters.stream().noneMatch(p -> p.getId().equals(id)))
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", "));
+            throw new ValidationException("One or more parameter IDs are invalid: " + missingIds);
+        }
+
+        // 2. Индексираме DTO-тата по ID за бърз достъп до новия 'order'
+        Map<Long, Integer> newOrderMap = reorderDtos.stream()
+                .collect(Collectors.toMap(ParameterOrderDto::getParameterId, ParameterOrderDto::getNewOrder));
+
+        // 3. Обновяваме 'order' полето
+        for (Parameter parameter : parameters) {
+            Integer newOrder = newOrderMap.get(parameter.getId());
+
+            // Допълнителна проверка: Уверете се, че параметърът е асоцииран с дадената категория
+            boolean isInCategory = parameter.getCategories().stream()
+                    .anyMatch(c -> c.getId().equals(categoryId));
+
+            if (!isInCategory) {
+                log.warn("Parameter {} is not associated with category {}", parameter.getId(), categoryId);
+                throw new ValidationException(String.format("Parameter %d is not part of category %d", parameter.getId(), categoryId));
+            }
+
+            parameter.setOrder(newOrder);
+        }
+
+        // 4. Записваме промените и изчистваме кеша
+        parameterRepository.saveAll(parameters);
+
+        log.info("Successfully reordered {} parameters for category {}", parameters.size(), categoryId);
+
+        return Collections.emptyList();
     }
 
     @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
@@ -109,7 +163,7 @@ public class ParameterService {
             Parameter updatedParameter = parameterRepository.save(existingParameter);
 
             log.info("Parameter updated successfully with ID: {}", id);
-            return parameterMapper.toResponseDto(updatedParameter, "en");
+            return toResponseDto(updatedParameter, "bg");
 
         }, context);
     }
@@ -135,29 +189,6 @@ public class ParameterService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "parameters", key = "'category_' + #categoryId + '_' + #language")
-    public List<ParameterResponseDto> getParametersByCategory(Long categoryId, String language) {
-        log.debug("Fetching parameters for available products in category: {}", categoryId);
-
-        validateCategoryId(categoryId);
-        findCategoryByIdOrThrow(categoryId);
-
-        return ExceptionHelper.wrapDatabaseOperation(() -> {
-            List<Parameter> parameters = parameterRepository.findParametersForAvailableProductsByCategory(categoryId);
-
-            parameters.forEach(parameter -> {
-                List<ParameterOption> uniqueOptions =
-                        parameterOptionRepository.findUniqueOptionsByParameter(parameter.getId());
-                parameter.setOptions(new HashSet<>(uniqueOptions));
-            });
-
-            return parameters.stream()
-                    .map(parameter -> parameterMapper.toResponseDto(parameter, language))
-                    .toList();
-        }, "fetch parameters for category: " + categoryId);
-    }
-
-    @Transactional(readOnly = true)
     @Cacheable(value = "parameters", key = "'category_all_' + #categoryId + '_' + #language")
     public List<ParameterResponseDto> findByCategory(Long categoryId, String language) {
         log.debug("Fetching all parameters for category: {}", categoryId);
@@ -176,7 +207,7 @@ public class ParameterService {
             });
 
             return parameters.stream()
-                    .map(p -> parameterMapper.toResponseDto(p, language))
+                    .map(p -> toResponseDto(p, language))
                     .toList();
         }, "fetch all parameters for category: " + categoryId);
     }
@@ -189,7 +220,7 @@ public class ParameterService {
         validateParameterId(id);
 
         Parameter parameter = findParameterByIdOrThrow(id);
-        return parameterMapper.toResponseDto(parameter, language);
+        return toResponseDto(parameter, language);
     }
 
     @Transactional(readOnly = true)
@@ -200,26 +231,10 @@ public class ParameterService {
 
         return ExceptionHelper.wrapDatabaseOperation(() ->
                         parameterRepository.findAll().stream()
-                                .map(parameter -> parameterMapper.toResponseDto(parameter, language))
+                                .map(parameter -> toResponseDto(parameter, language))
                                 .toList(),
                 "fetch all parameters"
         );
-    }
-
-    @Transactional(readOnly = true)
-    public boolean parameterExistsInCategory(String parameterName, Long categoryId, String language) {
-        if (!StringUtils.hasText(parameterName) || categoryId == null) {
-            return false;
-        }
-
-        validateCategoryId(categoryId);
-
-        Category category = findCategoryByIdOrThrow(categoryId);
-
-        // ✅ Използваме новия Many-to-Many query
-        return "bg".equalsIgnoreCase(language) ?
-                parameterRepository.existsByNameBgIgnoreCaseAndCategories(parameterName.trim(), category) :
-                parameterRepository.existsByNameEnIgnoreCaseAndCategories(parameterName.trim(), category);
     }
 
     @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
@@ -274,7 +289,7 @@ public class ParameterService {
 
     public Page<ParameterResponseDto> findAllAdminParameters(Pageable pageable, String lang) {
         return parameterRepository.findByCreatedByOrderByCreatedAtDesc("ADMIN", pageable)
-                .map(p -> parameterMapper.toResponseDto(p, lang));
+                .map(p -> toResponseDto(p, lang));
     }
 
     // ✅ Helper method
@@ -777,5 +792,13 @@ public class ParameterService {
         } else {
             return "Parameter ID: " + parameter.getId();
         }
+    }
+
+    @Transactional(readOnly = true)
+    public ParameterResponseDto toResponseDto(Parameter parameter, String language) {
+        if (parameter.getCategories() != null) {
+            parameter.getCategories().size();
+        }
+        return parameterMapper.toResponseDto(parameter, language);
     }
 }

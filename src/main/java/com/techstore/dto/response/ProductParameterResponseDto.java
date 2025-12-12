@@ -18,4 +18,6 @@ public class ProductParameterResponseDto {
     private String parameterNameBg;
     private Set<ParameterOptionResponseDto> options;
     private Boolean isFilter;
+    private Integer order;
+    private Long categoryId;
 }

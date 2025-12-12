@@ -22,7 +22,7 @@ public interface ParameterRepository extends JpaRepository<Parameter, Long> {
     Page<Parameter> findByCreatedByOrderByCreatedAtDesc(String createdBy, Pageable pageable);
 
     @Query("SELECT DISTINCT p FROM Parameter p " +
-            "JOIN p.categories c " +
+            "JOIN FETCH p.categories c " +
             "WHERE c.id = :categoryId " +
             "AND EXISTS (" +
             "  SELECT 1 FROM Product prod " +
@@ -33,10 +33,10 @@ public interface ParameterRepository extends JpaRepository<Parameter, Long> {
             "ORDER BY p.order ASC")
     List<Parameter> findParametersForAvailableProductsByCategory(@Param("categoryId") Long categoryId);
 
-    @Query("SELECT p FROM Parameter p JOIN p.categories c WHERE c.id = :categoryId")
+    @Query("SELECT p FROM Parameter p JOIN FETCH p.categories c WHERE c.id = :categoryId")
     List<Parameter> findByCategoryId(@Param("categoryId") Long categoryId);
 
-    @Query("SELECT p FROM Parameter p JOIN p.categories c WHERE c.id = :categoryId ORDER BY p.order ASC")
+    @Query("SELECT p FROM Parameter p JOIN FETCH p.categories c WHERE c.id = :categoryId ORDER BY p.order ASC")
     List<Parameter> findByCategoryIdOrderByOrderAsc(@Param("categoryId") Long categoryId);
 
     @Query("SELECT p FROM Parameter p JOIN p.categories c WHERE c.id = :categoryId AND p.externalId IN :externalIds")

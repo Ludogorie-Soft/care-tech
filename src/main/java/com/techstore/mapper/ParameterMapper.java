@@ -9,6 +9,7 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,16 +37,13 @@ public interface ParameterMapper {
         return "bg".equals(language) ? option.getNameBg() : option.getNameEn();
     }
 
-    /**
-     * Get primary category ID (first category from the set)
-     * For backward compatibility with existing API responses
-     */
     default Long getPrimaryCategoryId(Parameter parameter) {
         if (parameter.getCategories() == null || parameter.getCategories().isEmpty()) {
             return null;
         }
+        // Избиране на категорията с най-малко ID за консистентност
         return parameter.getCategories().stream()
-                .findFirst()
+                .min(Comparator.comparing(Category::getId))
                 .map(Category::getId)
                 .orElse(null);
     }

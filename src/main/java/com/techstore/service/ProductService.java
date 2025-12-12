@@ -324,11 +324,12 @@ public class ProductService {
             Long parameterId = (Long) row[0];
             String parameterNameEn = (String) row[1];
             String parameterNameBg = (String) row[2];
-            Boolean isFilter = (Boolean) row[3]; // Ново поле
-            Long optionId = (Long) row[4];
-            String optionNameEn = (String) row[5];
-            String optionNameBg = (String) row[6];
-            Integer optionOrder = (Integer) row[7];
+            Boolean isFilter = (Boolean) row[3];
+            Integer parameterOrder = (Integer) row[4];
+            Long optionId = ((Number) row[5]).longValue();
+            String optionNameEn = (String) row[6];
+            String optionNameBg = (String) row[7];
+            Integer optionOrder = (Integer) row[8];
 
             ParameterOptionResponseDto optionDto = ParameterOptionResponseDto.builder()
                     .id(optionId)
@@ -341,7 +342,9 @@ public class ProductService {
                             .parameterNameEn(parameterNameEn)
                             .parameterNameBg(parameterNameBg)
                             .isFilter(isFilter)
+                            .order(parameterOrder)
                             .options(new HashSet<>())
+                            .categoryId(categoryId)
                             .build())
                     .getOptions().add(optionDto);
         }
@@ -353,7 +356,9 @@ public class ProductService {
             param.setOptions(uniqueOptions);
         });
 
-        return new HashSet<>(resultMap.values());
+        return resultMap.values().stream()
+                .sorted(Comparator.comparing(ProductParameterResponseDto::getOrder))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @CacheEvict(value = "products", allEntries = true)

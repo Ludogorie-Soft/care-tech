@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface ProductParameterRepository extends JpaRepository<ProductParameter, Long> {
     @Query("SELECT DISTINCT pp.parameter.id, pp.parameter.nameEn, pp.parameter.nameBg, " +
-            "pp.parameter.isFilter, " +
+            "pp.parameter.isFilter, pp.parameter.order, " + // <-- ДОБАВЯТЕ 'pp.parameter.order'
             "pp.parameterOption.id, pp.parameterOption.nameEn, pp.parameterOption.nameBg, " +
             "pp.parameterOption.order " +
             "FROM ProductParameter pp " +
@@ -21,7 +21,8 @@ public interface ProductParameterRepository extends JpaRepository<ProductParamet
             "AND pp.product.status != com.techstore.enums.ProductStatus.NOT_AVAILABLE " +
             "AND pp.parameter IS NOT NULL " +
             "AND pp.parameterOption IS NOT NULL " +
-            "AND pp.parameter.isFilter = true")
+            "AND pp.parameter.isFilter = true " +
+            "ORDER BY pp.parameter.order ASC")
     List<Object[]> findParameterOptionsByCategoryAndActiveProducts(@Param("categoryId") Long categoryId);
 
     @Modifying

@@ -1,15 +1,13 @@
 package com.techstore.controller;
 
 import com.techstore.dto.CategoryResponseDTO;
-import com.techstore.dto.request.CategoryRequestDto;
-import com.techstore.dto.request.OrderStatusUpdateDTO;
-import com.techstore.dto.request.ProductMarkupUpdateDTO;
-import com.techstore.dto.request.ProductPromoRequest;
+import com.techstore.dto.request.*;
 import com.techstore.dto.response.*;
 import com.techstore.entity.Product;
 import com.techstore.enums.OrderStatus;
 import com.techstore.service.*;
 import com.techstore.service.admin.AdminService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -211,6 +209,18 @@ public class AdminController {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<OrderResponseDTO> orders = orderService.getAllOrders(pageable);
         return ResponseEntity.ok(orders);
+    }
+
+    @PutMapping("/parameters/category/{categoryId}/reorder")
+    @Operation(summary = "Reorder parameters for a category")
+    public ResponseEntity<List<ParameterResponseDto>> reorderParameters(
+            @PathVariable Long categoryId,
+            @RequestBody @Valid List<ParameterOrderDto> reorderDtos,
+            @RequestParam(defaultValue = "en") String language) {
+
+        log.info("Admin request to reorder parameters for category ID: {}", categoryId);
+        List<ParameterResponseDto> updatedList = parameterService.reorderParameters(categoryId, reorderDtos, language);
+        return ResponseEntity.ok(updatedList);
     }
 
     /**
