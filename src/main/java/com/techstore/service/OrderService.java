@@ -161,7 +161,10 @@ public class OrderService {
         }
 
         order.calculateTotals();
-        BigDecimal calculatedShippingCost = shippingConfig.calculateShippingCost(order.getSubtotal());
+        BigDecimal calculatedShippingCost = shippingConfig.calculateShippingCost(
+                order.getSubtotal(),
+                order.getIsToSpeedyOffice()
+        );
         order.setShippingCost(calculatedShippingCost);
 
         order.calculateTotals();

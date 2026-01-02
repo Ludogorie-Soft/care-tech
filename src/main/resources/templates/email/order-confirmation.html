@@ -10,14 +10,14 @@
     <tr>
         <td align="center" style="padding:20px 10px;">
             <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
-                
+
                 <!-- Header -->
                 <tr>
                     <td align="center" style="background-color:#ed1c24; padding:40px 20px;">
                         <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
                     </td>
                 </tr>
-                
+
                 <!-- Success Icon -->
                 <tr>
                     <td align="center" style="padding:40px 20px; background-color:#1a1a1a;">
@@ -31,7 +31,7 @@
                         </p>
                     </td>
                 </tr>
-                
+
                 <!-- Order Number -->
                 <tr>
                     <td style="padding:0 20px 30px;">
@@ -45,14 +45,14 @@
                         </table>
                     </td>
                 </tr>
-                
+
                 <!-- Content -->
                 <tr>
                     <td style="padding:0 20px 30px; background-color:#1a1a1a;">
-                        
+
                         <!-- Order Info -->
                         <h3 style="color:#ffffff; font-size:18px; margin:0 0 15px 0; padding-bottom:8px; border-bottom:2px solid #ed1c24;">Информация за поръчката</h3>
-                        
+
                         <table width="100%" cellpadding="10" cellspacing="0" border="0" style="background-color:#262626; border-radius:6px; margin-bottom:20px;">
                             <tr>
                                 <td style="color:#929497; font-size:14px; padding:10px; border-bottom:1px solid #333333;">Дата на поръчка:</td>
@@ -67,14 +67,26 @@
                                 <td align="right" style="color:#f5f5f5; font-size:14px; padding:10px; border-bottom:1px solid #333333;" th:text="${order.paymentMethod.displayName}">CASH_ON_DELIVERY</td>
                             </tr>
                             <tr>
-                                <td style="color:#929497; font-size:14px; padding:10px;">Метод на доставка:</td>
-                                <td align="right" style="color:#f5f5f5; font-size:14px; padding:10px;" th:text="${order.shippingMethod}">SPEEDY</td>
+                                <td style="color:#929497; font-size:14px; padding:10px; border-bottom:1px solid #333333;">Метод на доставка:</td>
+                                <td align="right" style="color:#f5f5f5; font-size:14px; padding:10px; border-bottom:1px solid #333333;" th:text="${order.shippingMethod}">SPEEDY</td>
+                            </tr>
+                            <!-- Добавен ред за тип доставка -->
+                            <tr>
+                                <td style="color:#929497; font-size:14px; padding:10px;">Тип доставка:</td>
+                                <td align="right" style="font-size:14px; padding:10px;">
+                                    <span th:if="${order.isToSpeedyOffice}" style="color:#10b981; font-weight:600;">
+                                        До офис на Speedy
+                                    </span>
+                                    <span th:unless="${order.isToSpeedyOffice}" style="color:#fb923c; font-weight:600;">
+                                        До адрес
+                                    </span>
+                                </td>
                             </tr>
                         </table>
-                        
+
                         <!-- Products -->
                         <h3 style="color:#ffffff; font-size:18px; margin:20px 0 15px 0; padding-bottom:8px; border-bottom:2px solid #ed1c24;">Продукти</h3>
-                        
+
                         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#262626; border-radius:6px; margin-bottom:20px;">
                             <tr style="background-color:#1f1f1f;">
                                 <th align="left" style="color:#929497; font-size:12px; text-transform:uppercase; padding:12px; font-weight:600;">Продукт</th>
@@ -85,14 +97,13 @@
                             <tr th:each="item, iterStat : ${items}">
                                 <td style="padding:12px; color:#f5f5f5; font-size:13px; border-top:1px solid #333333;">
                                     <div style="font-weight:500; color:#ffffff;" th:text="${item.productName}">Продукт</div>
-<!--                                    <div style="font-size:11px; color:#6c6e70; margin-top:3px;" th:text="'SKU: ' + ${item.productSku}">SKU: null</div>-->
                                 </td>
                                 <td align="center" style="padding:12px; color:#f5f5f5; font-size:13px; border-top:1px solid #333333;" th:text="${item.quantity}">1</td>
                                 <td align="right" style="padding:12px; color:#f5f5f5; font-size:13px; border-top:1px solid #333333;" th:text="${#numbers.formatDecimal(item.unitPrice, 1, 2)} + ' лв.'">129.00 лв.</td>
                                 <td align="right" style="padding:12px; color:#f5f5f5; font-size:13px; border-top:1px solid #333333;" th:text="${#numbers.formatDecimal(item.lineTotal, 1, 2)} + ' лв.'">129.00 лв.</td>
                             </tr>
                         </table>
-                        
+
                         <!-- Totals -->
                         <table width="100%" cellpadding="10" cellspacing="0" border="0" style="background-color:#262626; border-radius:6px; margin-bottom:20px;">
                             <tr>
@@ -103,33 +114,70 @@
                                 <td style="color:#929497; font-size:14px; padding:10px;">ДДС (20%):</td>
                                 <td align="right" style="color:#929497; font-size:14px; padding:10px;" th:text="${#numbers.formatDecimal(order.taxAmount, 1, 2)} + ' лв.'">25.80 лв.</td>
                             </tr>
+                            <!-- Променен ред за доставка -->
                             <tr>
                                 <td style="color:#929497; font-size:14px; padding:10px;">Доставка:</td>
-                                <td align="right" style="color:#929497; font-size:14px; padding:10px;" th:text="${#numbers.formatDecimal(order.shippingCost, 1, 2)} + ' лв.'">5.90 лв.</td>
+                                <td align="right" style="font-size:14px; padding:10px;">
+                                    <!-- До офис на Speedy -->
+                                    <span th:if="${order.isToSpeedyOffice}">
+                                        <span th:if="${order.shippingCost > 0}"
+                                              style="color:#f5f5f5;"
+                                              th:text="${#numbers.formatDecimal(order.shippingCost, 1, 2)} + ' лв.'">5.90 лв.</span>
+                                        <span th:if="${order.shippingCost == 0}"
+                                              style="color:#10b981; font-weight:600; font-size:15px;">БЕЗПЛАТНО</span>
+                                    </span>
+                                    <!-- До адрес -->
+                                    <span th:unless="${order.isToSpeedyOffice}"
+                                          style="color:#fb923c; font-size:13px; font-weight:500;">
+                                        Според тарифите<br/>на куриера
+                                    </span>
+                                </td>
                             </tr>
                             <tr style="border-top:2px solid #ed1c24;">
                                 <td style="color:#ffffff; font-size:18px; font-weight:bold; padding:15px 10px 10px;">ОБЩО:</td>
                                 <td align="right" style="color:#ed1c24; font-size:18px; font-weight:bold; padding:15px 10px 10px;" th:text="${#numbers.formatDecimal(order.total, 1, 2)} + ' лв.'">154.80 лв.</td>
                             </tr>
+                            <!-- Добавена бележка за доставка до адрес -->
+                            <tr th:if="${!order.isToSpeedyOffice}">
+                                <td colspan="2" style="padding:15px 10px 10px;">
+                                    <div style="background-color:#3a2417; border-left:3px solid #fb923c; padding:12px; border-radius:4px;">
+                                        <p style="color:#fb923c; font-size:12px; margin:0; line-height:1.5;">
+                                            <strong>📦 Важно:</strong> При доставка до адрес, цената се определя от куриера според теглото, обема и дестинацията. Доставката се заплаща при получаване на пратката.
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
                         </table>
-                        
+
                         <!-- Shipping Address -->
-                        <h3 style="color:#ffffff; font-size:18px; margin:20px 0 15px 0; padding-bottom:8px; border-bottom:2px solid #ed1c24;">Адрес за доставка</h3>
-                        
+                        <h3 style="color:#ffffff; font-size:18px; margin:20px 0 15px 0; padding-bottom:8px; border-bottom:2px solid #ed1c24;">
+                            <span th:if="${order.isToSpeedyOffice}">Офис за получаване</span>
+                            <span th:unless="${order.isToSpeedyOffice}">Адрес за доставка</span>
+                        </h3>
+
                         <table width="100%" cellpadding="15" cellspacing="0" border="0" style="background-color:#262626; border-radius:6px; margin-bottom:20px;">
                             <tr>
                                 <td>
                                     <p style="font-size:15px; font-weight:600; color:#ffffff; margin:0 0 10px 0;" th:text="${customerName}">Игнат Игнатов</p>
                                     <p style="color:#929497; font-size:14px; line-height:1.6; margin:0;">
-                                        <span th:text="${order.shippingAddress}">ул. МУТКУРОВА No 36</span><br/>
-                                        <span th:text="${order.shippingCity} + ', ' + ${order.shippingPostalCode}">гр. РУСЕ, 7000</span><br/>
+                                        <!-- До офис -->
+                                        <span th:if="${order.isToSpeedyOffice}">
+                                            <strong style="color:#10b981;">Офис Speedy:</strong><br/>
+                                            <span th:text="${order.shippingSpeedyOfficeName}">Офис адрес</span><br/>
+                                            <span th:text="${order.shippingCity} + ', ' + ${order.shippingPostalCode}">гр. РУСЕ, 7000</span><br/>
+                                        </span>
+                                        <!-- До адрес -->
+                                        <span th:unless="${order.isToSpeedyOffice}">
+                                            <span th:text="${order.shippingAddress}">ул. МУТКУРОВА No 36</span><br/>
+                                            <span th:text="${order.shippingCity} + ', ' + ${order.shippingPostalCode}">гр. РУСЕ, 7000</span><br/>
+                                        </span>
                                         <span th:text="${order.shippingCountry}">Bulgaria</span><br/>
                                         <span th:if="${order.customerPhone}">Телефон: <span th:text="${order.customerPhone}">0886474390</span></span>
                                     </p>
                                 </td>
                             </tr>
                         </table>
-                        
+
                         <!-- Info Box -->
                         <table width="100%" cellpadding="15" cellspacing="0" border="0" style="background-color:#262626; border-left:4px solid #ed1c24; border-radius:4px; margin-bottom:20px;">
                             <tr>
@@ -137,11 +185,16 @@
                                     <p style="color:#929497; font-size:13px; line-height:1.6; margin:0;">
                                         <strong style="color:#ffffff;">Какво следва?</strong><br/>
                                         Ще получите допълнително уведомление по имейл, когато поръчката Ви бъде обработена и изпратена.
+                                        <span th:if="${!order.isToSpeedyOffice}">
+                                            <br/><br/>
+                                            <strong style="color:#fb923c;">За доставка до адрес:</strong><br/>
+                                            Куриерът ще се свърже с Вас за уточняване на точното време на доставка. Моля, имайте готова сумата за продуктите и доставката при получаване.
+                                        </span>
                                     </p>
                                 </td>
                             </tr>
                         </table>
-                        
+
                         <!-- CTA Button -->
                         <table width="100%" cellpadding="0" cellspacing="0" border="0">
                             <tr>
@@ -150,10 +203,10 @@
                                 </td>
                             </tr>
                         </table>
-                        
+
                     </td>
                 </tr>
-                
+
                 <!-- Footer -->
                 <tr>
                     <td align="center" style="background-color:#0f0f0f; padding:25px 20px; border-top:2px solid #ed1c24;">
@@ -170,7 +223,7 @@
                         </p>
                     </td>
                 </tr>
-                
+
             </table>
         </td>
     </tr>

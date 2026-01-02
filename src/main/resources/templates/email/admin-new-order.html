@@ -24,7 +24,7 @@
 <!--                        </div>-->
                         <h2 style="color:#ffffff; font-size:24px; margin:0 0 10px 0;">Нова поръчка получена!</h2>
                         <p style="color:#929497; font-size:15px; line-height:1.6; margin:0;">
-                            Клиент: <span th:text="${customerName}" style="color:#ffffff;">Игнат Игнатов</span><br/>
+                            Клиент: <span th:text="${customerName}" style="color:#ffffff;">Иван Иванов</span><br/>
                             Номер на поръчка: <strong th:text="${orderNumber}" style="color:#ed1c24;">ORD-2025-00024</strong><br/>
                             Дата: <span th:text="${orderDate}">30.10.2025 12:04</span>
                         </p>
@@ -43,9 +43,49 @@
                                 <td style="color:#929497; font-size:14px;">Метод на доставка:</td>
                                 <td align="right" style="color:#ffffff; font-size:14px;" th:text="${order.shippingMethod}">Speedy</td>
                             </tr>
+
+                            <!-- Добавете информация за типа доставка -->
+                            <tr>
+                                <td style="color:#929497; font-size:14px;">Тип доставка:</td>
+                                <td align="right" style="color:#ffffff; font-size:14px;">
+                                    <span th:if="${order.isToSpeedyOffice}">До офис на Speedy</span>
+                                    <span th:unless="${order.isToSpeedyOffice}">До адрес</span>
+                                </td>
+                            </tr>
+
+                            <!-- Променете реда за цена на доставка -->
+                            <tr>
+                                <td style="color:#929497; font-size:14px;">Цена доставка:</td>
+                                <td align="right" style="font-size:14px;">
+                    <span th:if="${order.isToSpeedyOffice}">
+                        <span th:if="${order.shippingCost > 0}"
+                              style="color:#ffffff;"
+                              th:text="${#numbers.formatDecimal(order.shippingCost, 1, 2)} + ' лв.'">5.90 лв.</span>
+                        <span th:if="${order.shippingCost == 0}"
+                              style="color:#4ade80; font-weight:600;">БЕЗПЛАТНО</span>
+                    </span>
+                                    <span th:unless="${order.isToSpeedyOffice}"
+                                          style="color:#fb923c; font-size:13px;">
+                        Според тарифите на куриера
+                    </span>
+                                </td>
+                            </tr>
+
                             <tr>
                                 <td style="color:#929497; font-size:14px;">Общо:</td>
-                                <td align="right" style="color:#ed1c24; font-size:16px; font-weight:bold;" th:text="${#numbers.formatDecimal(order.total, 1, 2)} + ' лв.'">154.80 лв.</td>
+                                <td align="right" style="color:#ed1c24; font-size:16px; font-weight:bold;"
+                                    th:text="${#numbers.formatDecimal(order.total, 1, 2)} + ' лв.'">154.80 лв.</td>
+                            </tr>
+
+                            <!-- Добавете бележка ако е до адрес -->
+                            <tr th:if="${!order.isToSpeedyOffice}">
+                                <td colspan="2" style="padding-top:10px;">
+                                    <div style="background-color:#3a2417; border-left:3px solid #fb923c; padding:10px; border-radius:4px;">
+                                        <p style="color:#fb923c; font-size:12px; margin:0; line-height:1.5;">
+                                            ℹ️ <strong>Забележка:</strong> При доставка до адрес, цената се определя от куриера според теглото, обема и дестинацията. Клиентът ще заплати доставката при получаване.
+                                        </p>
+                                    </div>
+                                </td>
                             </tr>
                         </table>
                     </td>
