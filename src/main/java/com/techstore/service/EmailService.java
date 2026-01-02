@@ -277,6 +277,7 @@ public class EmailService {
             helper.setSubject("Ново съобщение от " + dto.getName());
             helper.setText(html, true);
 
+
             mailSender.send(mime);
 
             log.info("Admin message sent from {} <{}>", dto.getName(), dto.getEmail());

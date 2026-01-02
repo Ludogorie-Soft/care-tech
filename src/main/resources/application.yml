@@ -26,7 +26,7 @@ spring:
               trust: mail.caretech.bg
             starttls:
               enable: true
-              required: true
+              required: false
             connectiontimeout: 10000
             timeout: 10000
             writetimeout: 10000
