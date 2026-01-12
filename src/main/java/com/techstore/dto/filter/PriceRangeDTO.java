@@ -23,8 +23,8 @@ public class PriceRangeDTO {
         return PriceRangeDTO.builder()
                 .min(BigDecimal.ZERO)
                 .max(new BigDecimal("999999"))
-                .currency("BGN")
-                .symbol("лв")
+                .currency("EUR")
+                .symbol("€")
                 .decimalPlaces(2)
                 .formatPattern("#,##0.00")
                 .build();

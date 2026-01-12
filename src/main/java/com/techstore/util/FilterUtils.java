@@ -33,8 +33,8 @@ public class FilterUtils {
         return PriceRangeDTO.builder()
                 .min(min)
                 .max(max)
-                .currency("BGN")
-                .symbol("лв")
+                .currency("EUR")
+                .symbol("€")
                 .decimalPlaces(2)
                 .build();
     }

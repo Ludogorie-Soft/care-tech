@@ -118,11 +118,6 @@ public class ValiSyncService {
         }
     }
 
-    private String normalizeManufacturerName(String name) {
-        if (name == null) return "";
-        return name.toLowerCase().trim().replaceAll("\\s+", " ");
-    }
-
     @Transactional
     public void syncCategories() {
         String syncType = "VALI_CATEGORIES";
@@ -208,48 +203,6 @@ public class ValiSyncService {
             throw new RuntimeException(e);
         }
     }
-
-    private void updateCategoryParentsOptimized(List<CategoryRequestFromExternalDto> externalCategories,
-                                                Map<Long, Category> existingCategories) {
-        int batchSize = 50;
-        int updateCount = 0;
-
-        List<Category> categoriesToUpdate = new ArrayList<>();
-
-        for (CategoryRequestFromExternalDto extCategory : externalCategories) {
-            if (extCategory.getParent() != null && extCategory.getParent() != 0) {
-                Category category = existingCategories.get(extCategory.getId());
-                Category parent = existingCategories.get(extCategory.getParent());
-
-                if (category != null && parent != null && !parent.equals(category)) {
-                    if (category.getParent() == null) {
-                        category.setParent(parent);
-                        categoriesToUpdate.add(category);
-                        updateCount++;
-
-                        if (categoriesToUpdate.size() >= batchSize) {
-                            categoryRepository.saveAll(categoriesToUpdate);
-                            categoryRepository.flush();
-                            entityManager.clear();
-                            categoriesToUpdate.clear();
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!categoriesToUpdate.isEmpty()) {
-            categoryRepository.saveAll(categoriesToUpdate);
-            categoryRepository.flush();
-            entityManager.clear();
-        }
-
-        log.info("Updated parent relationships for {} categories", updateCount);
-    }
-
-    // ============================================
-// ФИКС ЗА ValiSyncService.syncParameters()
-// ============================================
 
     @Transactional
     public void syncParameters() {
@@ -394,111 +347,6 @@ public class ValiSyncService {
         }
     }
 
-    private String getParameterNameBg(ParameterRequestDto extParam) {
-        if (extParam.getName() == null) return null;
-
-        return extParam.getName().stream()
-                .filter(name -> "bg".equals(name.getLanguageCode()))
-                .map(name -> name.getText())
-                .findFirst()
-                .orElse(null);
-    }
-
-    private String normalizeParameterName(String name) {
-        if (name == null) return "";
-        return name.toLowerCase().trim().replaceAll("\\s+", " ");
-    }
-
-    private String normalizeParameterValue(String value) {
-        if (value == null) return "";
-        return value.toLowerCase().trim().replaceAll("\\s+", " ");
-    }
-
-    private Parameter createParameterFromExternal(ParameterRequestDto extParameter) {
-        Parameter parameter = new Parameter();
-        parameter.setExternalId(extParameter.getExternalId());
-        parameter.setOrder(extParameter.getOrder());
-        parameter.setPlatform(Platform.VALI);
-        parameter.setCategories(new HashSet<>());
-        parameter.setCreatedBy("system");
-
-        if (extParameter.getName() != null) {
-            extParameter.getName().forEach(name -> {
-                if ("bg".equals(name.getLanguageCode())) {
-                    parameter.setNameBg(name.getText());
-                } else if ("en".equals(name.getLanguageCode())) {
-                    parameter.setNameEn(name.getText());
-                }
-            });
-        }
-
-        return parameter;
-    }
-
-    private void syncValiParameterOptionsCreateOnly(Parameter parameter,
-                                                    List<ParameterOptionRequestDto> externalOptions) {
-        if (externalOptions == null || externalOptions.isEmpty()) {
-            return;
-        }
-
-        Map<String, ParameterOption> existingOptions = parameterOptionRepository
-                .findByParameterIdOrderByOrderAsc(parameter.getId())
-                .stream()
-                .filter(opt -> opt.getNameBg() != null)
-                .collect(Collectors.toMap(
-                        opt -> normalizeParameterValue(opt.getNameBg()),
-                        opt -> opt,
-                        (existing, duplicate) -> existing
-                ));
-
-        int createdCount = 0;
-        int skippedCount = 0;
-
-        for (ParameterOptionRequestDto extOption : externalOptions) {
-            String nameBg = null;
-            String nameEn = null;
-
-            if (extOption.getName() != null) {
-                for (var name : extOption.getName()) {
-                    if ("bg".equals(name.getLanguageCode())) {
-                        nameBg = name.getText();
-                    } else if ("en".equals(name.getLanguageCode())) {
-                        nameEn = name.getText();
-                    }
-                }
-            }
-
-            if (nameBg == null || nameBg.isEmpty()) {
-                continue;
-            }
-
-            String normalizedValue = normalizeParameterValue(nameBg);
-
-            if (!existingOptions.containsKey(normalizedValue)) {
-                ParameterOption option = new ParameterOption();
-                option.setNameBg(nameBg);
-                option.setNameEn(nameEn);
-                option.setParameter(parameter);
-                option.setExternalId(extOption.getExternalId());
-                option.setOrder(extOption.getOrder() != null ? extOption.getOrder() : existingOptions.size() + createdCount);
-
-                parameterOptionRepository.save(option);
-                existingOptions.put(normalizedValue, option);
-                createdCount++;
-
-                log.trace("Created option '{}' for parameter '{}'", nameBg, parameter.getNameBg());
-            } else {
-                skippedCount++;
-                log.trace("Option '{}' already exists, skipping", nameBg);
-            }
-        }
-
-        if (createdCount > 0 || skippedCount > 0) {
-            log.debug("Parameter '{}': created {} options, skipped {} existing",
-                    parameter.getNameBg(), createdCount, skippedCount);
-        }
-    }
-
     @Transactional
     public void syncProducts() {
         String syncType = "VALI_PRODUCTS";
@@ -509,7 +357,6 @@ public class ValiSyncService {
         long totalProcessed = 0, created = 0, updated = 0, errors = 0;
 
         try {
-            // ✅ LOAD MANUFACTURERS
             Map<Long, Manufacturer> manufacturersMap = manufacturerRepository.findAll()
                     .stream()
                     .filter(m -> m.getExternalId() != null)
@@ -521,12 +368,7 @@ public class ValiSyncService {
 
             log.info("Loaded {} manufacturers with externalId", manufacturersMap.size());
 
-            // ✅ DEBUG: Show some manufacturer IDs
-            if (manufacturersMap.size() > 0) {
-                log.info("Sample manufacturer IDs: {}",
-                        manufacturersMap.keySet().stream().limit(10).collect(Collectors.toList()));
-            } else {
-                log.error("⚠️⚠️⚠️ NO MANUFACTURERS FOUND! Products sync will fail! ⚠️⚠️⚠️");
+            if (manufacturersMap.isEmpty()) {
                 logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0,
                         "No manufacturers found", startTime);
                 return;
@@ -541,7 +383,6 @@ public class ValiSyncService {
             for (Category category : categories) {
                 categoryCounter++;
 
-                // ✅ Skip categories without externalId
                 if (category.getExternalId() == null) {
                     log.debug("Skipping category {} - no externalId", category.getNameBg());
                     continue;
@@ -597,7 +438,6 @@ public class ValiSyncService {
 
             log.info("Fetched {} products for category: {}", allProducts.size(), category.getNameBg());
 
-            // Process in chunks
             List<List<ProductRequestDto>> chunks = partitionList(allProducts, batchSize);
             log.info("Split into {} chunks of size {}", chunks.size(), batchSize);
 
@@ -642,7 +482,6 @@ public class ValiSyncService {
                                              Category category) {
         long processed = 0, created = 0, updated = 0, errors = 0;
 
-        // Fetch existing products in bulk
         Set<Long> externalProductIdsInChunk = products.stream()
                 .map(ProductRequestDto::getId)
                 .collect(Collectors.toSet());
@@ -928,6 +767,44 @@ public class ValiSyncService {
                 "admin".equalsIgnoreCase(username.trim());
     }
 
+    private void updateCategoryParentsOptimized(List<CategoryRequestFromExternalDto> externalCategories,
+                                                Map<Long, Category> existingCategories) {
+        int batchSize = 50;
+        int updateCount = 0;
+
+        List<Category> categoriesToUpdate = new ArrayList<>();
+
+        for (CategoryRequestFromExternalDto extCategory : externalCategories) {
+            if (extCategory.getParent() != null && extCategory.getParent() != 0) {
+                Category category = existingCategories.get(extCategory.getId());
+                Category parent = existingCategories.get(extCategory.getParent());
+
+                if (category != null && parent != null && !parent.equals(category)) {
+                    if (category.getParent() == null) {
+                        category.setParent(parent);
+                        categoriesToUpdate.add(category);
+                        updateCount++;
+
+                        if (categoriesToUpdate.size() >= batchSize) {
+                            categoryRepository.saveAll(categoriesToUpdate);
+                            categoryRepository.flush();
+                            entityManager.clear();
+                            categoriesToUpdate.clear();
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!categoriesToUpdate.isEmpty()) {
+            categoryRepository.saveAll(categoriesToUpdate);
+            categoryRepository.flush();
+            entityManager.clear();
+        }
+
+        log.info("Updated parent relationships for {} categories", updateCount);
+    }
+
     private Category createCategoryFromExternal(CategoryRequestFromExternalDto extCategory) {
         Category category = new Category();
         category.setExternalId(extCategory.getId());
@@ -1083,6 +960,116 @@ public class ValiSyncService {
             this.created = created;
             this.updated = updated;
             this.errors = errors;
+        }
+    }
+
+    private String normalizeManufacturerName(String name) {
+        if (name == null) return "";
+        return name.toLowerCase().trim().replaceAll("\\s+", " ");
+    }
+
+    private String getParameterNameBg(ParameterRequestDto extParam) {
+        if (extParam.getName() == null) return null;
+
+        return extParam.getName().stream()
+                .filter(name -> "bg".equals(name.getLanguageCode()))
+                .map(name -> name.getText())
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String normalizeParameterName(String name) {
+        if (name == null) return "";
+        return name.toLowerCase().trim().replaceAll("\\s+", " ");
+    }
+
+    private String normalizeParameterValue(String value) {
+        if (value == null) return "";
+        return value.toLowerCase().trim().replaceAll("\\s+", " ");
+    }
+
+    private Parameter createParameterFromExternal(ParameterRequestDto extParameter) {
+        Parameter parameter = new Parameter();
+        parameter.setExternalId(extParameter.getExternalId());
+        parameter.setOrder(extParameter.getOrder());
+        parameter.setPlatform(Platform.VALI);
+        parameter.setCategories(new HashSet<>());
+        parameter.setCreatedBy("system");
+
+        if (extParameter.getName() != null) {
+            extParameter.getName().forEach(name -> {
+                if ("bg".equals(name.getLanguageCode())) {
+                    parameter.setNameBg(name.getText());
+                } else if ("en".equals(name.getLanguageCode())) {
+                    parameter.setNameEn(name.getText());
+                }
+            });
+        }
+
+        return parameter;
+    }
+
+    private void syncValiParameterOptionsCreateOnly(Parameter parameter,
+                                                    List<ParameterOptionRequestDto> externalOptions) {
+        if (externalOptions == null || externalOptions.isEmpty()) {
+            return;
+        }
+
+        Map<String, ParameterOption> existingOptions = parameterOptionRepository
+                .findByParameterIdOrderByOrderAsc(parameter.getId())
+                .stream()
+                .filter(opt -> opt.getNameBg() != null)
+                .collect(Collectors.toMap(
+                        opt -> normalizeParameterValue(opt.getNameBg()),
+                        opt -> opt,
+                        (existing, duplicate) -> existing
+                ));
+
+        int createdCount = 0;
+        int skippedCount = 0;
+
+        for (ParameterOptionRequestDto extOption : externalOptions) {
+            String nameBg = null;
+            String nameEn = null;
+
+            if (extOption.getName() != null) {
+                for (var name : extOption.getName()) {
+                    if ("bg".equals(name.getLanguageCode())) {
+                        nameBg = name.getText();
+                    } else if ("en".equals(name.getLanguageCode())) {
+                        nameEn = name.getText();
+                    }
+                }
+            }
+
+            if (nameBg == null || nameBg.isEmpty()) {
+                continue;
+            }
+
+            String normalizedValue = normalizeParameterValue(nameBg);
+
+            if (!existingOptions.containsKey(normalizedValue)) {
+                ParameterOption option = new ParameterOption();
+                option.setNameBg(nameBg);
+                option.setNameEn(nameEn);
+                option.setParameter(parameter);
+                option.setExternalId(extOption.getExternalId());
+                option.setOrder(extOption.getOrder() != null ? extOption.getOrder() : existingOptions.size() + createdCount);
+
+                parameterOptionRepository.save(option);
+                existingOptions.put(normalizedValue, option);
+                createdCount++;
+
+                log.trace("Created option '{}' for parameter '{}'", nameBg, parameter.getNameBg());
+            } else {
+                skippedCount++;
+                log.trace("Option '{}' already exists, skipping", nameBg);
+            }
+        }
+
+        if (createdCount > 0 || skippedCount > 0) {
+            log.debug("Parameter '{}': created {} options, skipped {} existing",
+                    parameter.getNameBg(), createdCount, skippedCount);
         }
     }
 }

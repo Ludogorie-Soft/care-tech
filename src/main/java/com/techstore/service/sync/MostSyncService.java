@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,10 +36,8 @@ public class MostSyncService {
     private final SyncHelper syncHelper;
     private final LogHelper logHelper;
 
-    private static final String USD_TO_BGN_RATE = "1.80";
-    private static final String EUR_TO_BGN_RATE = "1.95583";
+    private static final String USD_TO_EUR_RATE = "0.8565";
 
-    // ✅ ОПРОСТЕН МАПИНГ - Използвай HashMap вместо Map.ofEntries()
     private static final Map<String, String> MOST_CATEGORY_MAPPING;
 
     static {
@@ -695,10 +694,6 @@ public class MostSyncService {
         }
     }
 
-    // ============================================
-// ФИКС ЗА MostSyncService.syncMostParameters()
-// ============================================
-
     @Transactional
     public void syncMostParameters() {
         String syncType = "MOST_PARAMETERS";
@@ -864,52 +859,6 @@ public class MostSyncService {
         }
     }
 
-    private int syncParameterOptionsCreateOnly(Parameter parameter, Set<String> optionValues) {
-        int created = 0;
-
-        try {
-            Map<String, ParameterOption> existingOptions = parameterOptionRepository
-                    .findByParameterIdOrderByOrderAsc(parameter.getId())
-                    .stream()
-                    .filter(opt -> opt.getNameBg() != null)
-                    .collect(Collectors.toMap(
-                            opt -> normalizeParameterValue(opt.getNameBg()),
-                            opt -> opt,
-                            (existing, duplicate) -> existing
-                    ));
-
-            for (String optionValue : optionValues) {
-                if (optionValue == null || optionValue.trim().isEmpty() || "-".equals(optionValue.trim())) {
-                    continue;
-                }
-
-                String normalizedValue = normalizeParameterValue(optionValue);
-
-                if (!existingOptions.containsKey(normalizedValue)) {
-                    // ✅ CREATE ONLY
-                    ParameterOption option = new ParameterOption();
-                    option.setParameter(parameter);
-                    option.setNameBg(optionValue);
-                    option.setNameEn(optionValue);
-                    option.setOrder(existingOptions.size() + created);
-
-                    parameterOptionRepository.save(option);
-                    existingOptions.put(normalizedValue, option);
-                    created++;
-
-                    log.trace("Created option '{}' for parameter '{}'", optionValue, parameter.getNameBg());
-                } else {
-                    log.trace("Option '{}' already exists, skipping", optionValue);
-                }
-            }
-
-        } catch (Exception e) {
-            log.error("Error syncing parameter options for {}: {}", parameter.getNameBg(), e.getMessage());
-        }
-
-        return created;
-    }
-
     @Transactional
     public void syncMostProducts() {
         String syncType = "MOST_PRODUCTS";
@@ -1037,7 +986,6 @@ public class MostSyncService {
         }
     }
 
-    // ✅ NEW: Find category using mapping
     private Category findProductCategoryByNameWithMapping(Map<String, Object> product,
                                                           Map<String, Category> categoriesByName) {
         // Try subcategory first (more specific)
@@ -1133,15 +1081,16 @@ public class MostSyncService {
         product.setShow(isAvailable);
         product.setCreatedBy("system");
 
-        // Price
+        // ✅ ПРОМЯНА 2: Промяна на валутната конверсия според новите изисквания
+        // Вече конвертираме само USD към EUR, а EUR оставяме както е
         String priceStr = (String) rawProduct.get("price");
         String currency = (String) rawProduct.get("currency");
 
         if (priceStr != null && !priceStr.isEmpty()) {
             try {
                 BigDecimal price = new BigDecimal(priceStr);
-                BigDecimal priceInBGN = convertPriceToBGN(price, currency);
-                product.setPriceClient(priceInBGN);
+                BigDecimal priceInEuro = convertPriceToEuro(price, currency); // ✅ Новата функция
+                product.setPriceClient(priceInEuro);
             } catch (NumberFormatException e) {
                 log.warn("Invalid price format: {}", priceStr);
             }
@@ -1150,7 +1099,7 @@ public class MostSyncService {
         product.calculateFinalPrice();
 
         if (!isNew) {
-            log.trace("Updated product {} - status: {}, priceClient: {}",
+            log.trace("Updated product {} - status: {}, priceClient: {} EUR",
                     product.getSku(), product.getStatus(), product.getPriceClient());
         }
 
@@ -1432,6 +1381,40 @@ public class MostSyncService {
         }
     }
 
+    // ✅ ПРОМЯНА 3: Нова функция за конвертиране на цена към евро
+    private BigDecimal convertPriceToEuro(BigDecimal price, String currency) {
+        if (price == null) {
+            return BigDecimal.ZERO;
+        }
+
+        if ("EUR".equalsIgnoreCase(currency)) {
+            // Цената вече е в евро, не правим конверсия
+            log.trace("Price already in EUR: {}", price);
+            return price.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        if ("USD".equalsIgnoreCase(currency)) {
+            // Конвертираме USD към EUR
+            BigDecimal convertedPrice = price.multiply(new BigDecimal(USD_TO_EUR_RATE))
+                    .setScale(2, RoundingMode.HALF_UP);
+            log.trace("Converted USD {} to EUR {}", price, convertedPrice);
+            return convertedPrice;
+        }
+
+        if ("BGN".equalsIgnoreCase(currency)) {
+            // Ако все още има BGN в API-то, конвертираме към EUR
+            BigDecimal convertedPrice = price.divide(new BigDecimal("1.95583"), 2, RoundingMode.HALF_UP);
+            log.trace("Converted BGN {} to EUR {}", price, convertedPrice);
+            return convertedPrice;
+        }
+
+        // Default: assume EUR (или друга валута, която не конвертираме)
+        log.warn("Unknown currency: {}, assuming EUR", currency);
+        return price.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    // ✅ ПРОМЯНА 4: Премахваме старата функция convertPriceToBGN
+    /*
     private BigDecimal convertPriceToBGN(BigDecimal price, String currency) {
         if (price == null) {
             return BigDecimal.ZERO;
@@ -1453,6 +1436,7 @@ public class MostSyncService {
         log.warn("Unknown currency: {}, assuming BGN", currency);
         return price;
     }
+    */
 
     private String generateUniqueSlug(String baseSlug, Category category) {
         if (!categoryRepository.existsBySlugAndIdNot(baseSlug, category.getId())) {
@@ -1510,5 +1494,51 @@ public class MostSyncService {
         // No translation found - return original English name
         log.debug("No Bulgarian translation found for parameter: '{}'", englishName);
         return englishName;
+    }
+
+    private int syncParameterOptionsCreateOnly(Parameter parameter, Set<String> optionValues) {
+        int created = 0;
+
+        try {
+            Map<String, ParameterOption> existingOptions = parameterOptionRepository
+                    .findByParameterIdOrderByOrderAsc(parameter.getId())
+                    .stream()
+                    .filter(opt -> opt.getNameBg() != null)
+                    .collect(Collectors.toMap(
+                            opt -> normalizeParameterValue(opt.getNameBg()),
+                            opt -> opt,
+                            (existing, duplicate) -> existing
+                    ));
+
+            for (String optionValue : optionValues) {
+                if (optionValue == null || optionValue.trim().isEmpty() || "-".equals(optionValue.trim())) {
+                    continue;
+                }
+
+                String normalizedValue = normalizeParameterValue(optionValue);
+
+                if (!existingOptions.containsKey(normalizedValue)) {
+                    // ✅ CREATE ONLY
+                    ParameterOption option = new ParameterOption();
+                    option.setParameter(parameter);
+                    option.setNameBg(optionValue);
+                    option.setNameEn(optionValue);
+                    option.setOrder(existingOptions.size() + created);
+
+                    parameterOptionRepository.save(option);
+                    existingOptions.put(normalizedValue, option);
+                    created++;
+
+                    log.trace("Created option '{}' for parameter '{}'", optionValue, parameter.getNameBg());
+                } else {
+                    log.trace("Option '{}' already exists, skipping", optionValue);
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("Error syncing parameter options for {}: {}", parameter.getNameBg(), e.getMessage());
+        }
+
+        return created;
     }
 }

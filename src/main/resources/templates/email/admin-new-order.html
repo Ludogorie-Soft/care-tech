@@ -60,7 +60,7 @@
                     <span th:if="${order.isToSpeedyOffice}">
                         <span th:if="${order.shippingCost > 0}"
                               style="color:#ffffff;"
-                              th:text="${#numbers.formatDecimal(order.shippingCost, 1, 2)} + ' лв.'">5.90 лв.</span>
+                              th:text="${#numbers.formatDecimal(order.shippingCost, 1, 2)} + ' €.'">3.10 €.</span>
                         <span th:if="${order.shippingCost == 0}"
                               style="color:#4ade80; font-weight:600;">БЕЗПЛАТНО</span>
                     </span>
@@ -74,7 +74,7 @@
                             <tr>
                                 <td style="color:#929497; font-size:14px;">Общо:</td>
                                 <td align="right" style="color:#ed1c24; font-size:16px; font-weight:bold;"
-                                    th:text="${#numbers.formatDecimal(order.total, 1, 2)} + ' лв.'">154.80 лв.</td>
+                                    th:text="${#numbers.formatDecimal(order.total, 1, 2)} + ' €.'">154.80 €.</td>
                             </tr>
 
                             <!-- Добавете бележка ако е до адрес -->

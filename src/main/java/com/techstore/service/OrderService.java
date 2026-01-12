@@ -132,7 +132,7 @@ public class OrderService {
 
         // Notes and shipping cost
         order.setCustomerNotes(request.getCustomerNotes());
-//        BigDecimal shippingCost = BigDecimal.valueOf(5.90);
+//        BigDecimal shippingCost = BigDecimal.valueOf(3.10);
 //        if (order.getTotal().compareTo(BigDecimal.valueOf(250)) > 0) {
 //            shippingCost = BigDecimal.ZERO;
 //        }
