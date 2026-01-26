@@ -4,7 +4,6 @@ import com.techstore.service.sync.TekraSyncService;
 import com.techstore.service.sync.ValiSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,16 +16,10 @@ public class CronJobService {
     private final ValiSyncService valiSyncService;
     private final TekraSyncService tekraSyncService;
 
-    @Scheduled(cron = "0 0 1 * * ?")
-    public void syncVali() {
+//    @Scheduled(cron = "0 0 1 * * ?")
+    public void syncApis() {
         log.info("Starting scheduled Vali synchronization at {}", LocalDateTime.now());
         try {
-//            valiSyncService.syncCategories();
-//            log.info("Scheduled category synchronization completed at {}", LocalDateTime.now());
-//
-//            valiSyncService.syncManufacturers();
-//            log.info("Scheduled manufacturers synchronization completed at {}", LocalDateTime.now());
-//
             valiSyncService.syncParameters();
             log.info("Scheduled parameters synchronization completed at {}", LocalDateTime.now());
 
@@ -36,18 +29,8 @@ public class CronJobService {
         } catch (Exception e) {
             log.error("CRITICAL: Scheduled Vali synchronization failed", e);
         }
-    }
 
-    @Scheduled(cron = "0 0 2 * * ?")
-    public void syncTekra() {
-        log.info("Starting scheduled Tekra synchronization at {}", LocalDateTime.now());
         try {
-//            tekraSyncService.syncTekraCategories();
-//            log.info("Scheduled Tekra category synchronization completed at {}", LocalDateTime.now());
-//
-//            tekraSyncService.syncTekraManufacturers();
-//            log.info("Scheduled Tekra manufacturers synchronization completed at {}", LocalDateTime.now());
-//
             tekraSyncService.syncTekraParameters();
             log.info("Scheduled Tekra parameters synchronization completed at {}", LocalDateTime.now());
 
