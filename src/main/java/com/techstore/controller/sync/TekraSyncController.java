@@ -24,7 +24,7 @@ public class TekraSyncController {
     public ResponseEntity<Map<String, Object>> syncCategories() {
         try {
             long startTime = System.currentTimeMillis();
-            tekraSyncService.syncTekraCategories();
+            tekraSyncService.ensureTekraCategories();
             long duration = System.currentTimeMillis() - startTime;
 
             Map<String, Object> response = Map.of(
