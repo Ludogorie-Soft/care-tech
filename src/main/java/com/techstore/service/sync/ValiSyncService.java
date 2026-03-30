@@ -23,21 +23,21 @@ import static com.techstore.util.LogHelper.LOG_STATUS_FAILED;
 import static com.techstore.util.LogHelper.LOG_STATUS_SUCCESS;
 
 /**
- * ValiSyncService - COMPLETELY REWRITTEN VERSION 3.0
+ * ValiSyncService - VERSION 4.0 - FINAL FIX
  *
- * Дата: 23.01.2025
+ * Дата: 27.01.2025
  *
- * КРИСТАЛНА ЛОГИКА:
- * 1. Manufacturers → CREATE ONLY
- * 2. Categories → CREATE ONLY
- * 3. Parameters → ГЛОБАЛНО дедуплициране по ИМЕ
- * 4. Products → Използва готовите параметри
+ * КРИТИЧНА ПОПРАВКА:
+ * - Параметри се дедуплицират по EXTERNAL_ID (НЕ по име!)
+ * - "Капацитет" за "Памети" ≠ "Капацитет" за "Батерии"
+ * - Всеки параметър си има СВОИТЕ опции
+ * - 100% мапинг на параметри към продукти
  *
  * ГАРАНЦИИ:
- * - Един параметър "RAM" за ВСИЧКИ категории
- * - Една опция "16GB" за ВСИЧКИ "RAM"
+ * - Един параметър с external_id=100 → ЕДИН параметър в DB
+ * - Категориите споделят параметър САМО ако external_id съвпада
+ * - Опциите са разделени по параметри
  * - НИЩО не липсва
- * - БЕЗ дублирания
  */
 @Service
 @RequiredArgsConstructor
@@ -298,9 +298,10 @@ public class ValiSyncService {
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("=== Starting GLOBAL Parameters Synchronization ===");
-            log.info("Strategy: Deduplicate by NORMALIZED NAME");
+            log.info("=== Starting Parameters Synchronization V4 ===");
+            log.info("Strategy: Deduplicate by EXTERNAL_ID (not by name!)");
 
+            // ✅ Load existing parameters by EXTERNAL_ID
             List<Parameter> allExistingParams = parameterRepository.findAll();
 
             for (Parameter p : allExistingParams) {
@@ -309,45 +310,42 @@ public class ValiSyncService {
                 }
             }
 
-            Map<String, Parameter> globalParamsCache = allExistingParams.stream()
-                    .filter(p -> p.getNameBg() != null)
+            Map<Long, Parameter> globalParamsCache = allExistingParams.stream()
+                    .filter(p -> p.getExternalId() != null)
                     .collect(Collectors.toMap(
-                            p -> normalizeName(p.getNameBg()),
+                            Parameter::getExternalId,
                             p -> p,
                             (existing, duplicate) -> existing
                     ));
 
             log.info("Loaded {} existing parameters from database", globalParamsCache.size());
 
+            // ✅ Load existing options by EXTERNAL_ID
             List<ParameterOption> allExistingOptions = parameterOptionRepository.findAll();
 
-            Map<String, ParameterOption> globalOptionsCache = new HashMap<>();
-            for (ParameterOption option : allExistingOptions) {
-                if (option.getParameter() != null &&
-                        option.getParameter().getNameBg() != null &&
-                        option.getNameBg() != null) {
-
-                    String cacheKey = buildOptionCacheKey(
-                            option.getParameter().getNameBg(),
-                            option.getNameBg()
-                    );
-                    globalOptionsCache.put(cacheKey, option);
-                }
-            }
+            Map<Long, ParameterOption> globalOptionsCache = allExistingOptions.stream()
+                    .filter(o -> o.getExternalId() != null && o.getExternalId() != 0)
+                    .collect(Collectors.toMap(
+                            ParameterOption::getExternalId,
+                            o -> o,
+                            (existing, duplicate) -> existing
+                    ));
 
             log.info("Loaded {} existing options from database", globalOptionsCache.size());
 
-            List<Category> categories = categoryRepository.findAll();
-            log.info("Processing parameters from {} categories", categories.size());
+            // ✅ Get only Vali categories with externalId
+            List<Category> valiCategories = categoryRepository.findAll().stream()
+                    .filter(cat -> cat.getExternalId() != null)
+                    .filter(cat -> cat.getPlatform() == Platform.VALI)
+                    .toList();
 
-            Map<String, ParameterData> allParametersData = new HashMap<>();
+            log.info("Processing parameters from {} Vali categories", valiCategories.size());
+
+            // ✅ Collect parameters data by EXTERNAL_ID
+            Map<Long, ParameterData> allParametersData = new HashMap<>();
 
             int categoryCounter = 0;
-            for (Category category : categories) {
-                if (category.getExternalId() == null) {
-                    continue;
-                }
-
+            for (Category category : valiCategories) {
                 categoryCounter++;
 
                 try {
@@ -359,18 +357,19 @@ public class ValiSyncService {
                     }
 
                     log.debug("[{}/{}] Category '{}': {} parameters from API",
-                            categoryCounter, categories.size(), category.getNameBg(), apiParams.size());
+                            categoryCounter, valiCategories.size(), category.getNameBg(), apiParams.size());
 
                     for (ParameterRequestDto apiParam : apiParams) {
-                        String nameBg = extractNameBg(apiParam);
-                        if (nameBg == null || nameBg.isEmpty()) {
+                        Long externalId = apiParam.getExternalId();
+
+                        if (externalId == null || externalId == 0) {
+                            log.warn("Parameter without externalId in category {}: {}",
+                                    category.getNameBg(), extractNameBg(apiParam));
                             continue;
                         }
 
-                        String normalizedName = normalizeName(nameBg);
-
                         ParameterData paramData = allParametersData.computeIfAbsent(
-                                normalizedName,
+                                externalId,
                                 k -> new ParameterData(apiParam, new HashSet<>())
                         );
 
@@ -383,27 +382,30 @@ public class ValiSyncService {
                 }
             }
 
-            log.info("Collected {} unique parameters across all categories", allParametersData.size());
+            log.info("Collected {} unique parameters (by externalId) across all categories",
+                    allParametersData.size());
 
             long created = 0, reused = 0, optionsCreated = 0;
 
-            for (Map.Entry<String, ParameterData> entry : allParametersData.entrySet()) {
-                String normalizedName = entry.getKey();
+            for (Map.Entry<Long, ParameterData> entry : allParametersData.entrySet()) {
+                Long externalId = entry.getKey();
                 ParameterData paramData = entry.getValue();
 
                 try {
-                    Parameter parameter = globalParamsCache.get(normalizedName);
+                    Parameter parameter = globalParamsCache.get(externalId);
 
                     if (parameter == null) {
+                        // Create new parameter
                         parameter = createParameterFromExternal(paramData.apiParam);
                         parameter.setCategories(new HashSet<>(paramData.categories));
                         parameter = parameterRepository.save(parameter);
-                        globalParamsCache.put(normalizedName, parameter);
+                        globalParamsCache.put(externalId, parameter);
                         created++;
 
-                        log.debug("✓ Created parameter: '{}' for {} categories",
-                                parameter.getNameBg(), paramData.categories.size());
+                        log.debug("✓ Created parameter: '{}' (externalId={}) for {} categories",
+                                parameter.getNameBg(), externalId, paramData.categories.size());
                     } else {
+                        // Add new categories to existing parameter
                         Set<Category> existingCategories = parameter.getCategories();
                         if (existingCategories == null) {
                             existingCategories = new HashSet<>();
@@ -429,6 +431,7 @@ public class ValiSyncService {
                         reused++;
                     }
 
+                    // Create options for this parameter
                     if (paramData.apiParam.getOptions() != null &&
                             !paramData.apiParam.getOptions().isEmpty()) {
 
@@ -442,7 +445,7 @@ public class ValiSyncService {
                     }
 
                 } catch (Exception e) {
-                    log.error("Error processing parameter '{}': {}", normalizedName, e.getMessage());
+                    log.error("Error processing parameter externalId={}: {}", externalId, e.getMessage());
                 }
             }
 
@@ -451,7 +454,7 @@ public class ValiSyncService {
                     String.format("Created: %d, Reused: %d, Options: %d", created, reused, optionsCreated),
                     startTime);
 
-            log.info("=== Parameters Sync Completed ===");
+            log.info("=== Parameters Sync V4 Completed ===");
             log.info("   Unique parameters: {}", allParametersData.size());
             log.info("   Created: {}, Reused: {}", created, reused);
             log.info("   Options created: {}", optionsCreated);
@@ -465,7 +468,7 @@ public class ValiSyncService {
 
     private int createOptionsForParameter(Parameter parameter,
                                           List<ParameterOptionRequestDto> apiOptions,
-                                          Map<String, ParameterOption> globalOptionsCache) {
+                                          Map<Long, ParameterOption> globalOptionsCache) {
         int created = 0;
 
         for (ParameterOptionRequestDto apiOption : apiOptions) {
@@ -476,14 +479,13 @@ public class ValiSyncService {
                     continue;
                 }
 
-                String nameBg = extractOptionNameBg(apiOption);
-                if (nameBg == null || nameBg.isEmpty()) {
+                // ✅ Check by EXTERNAL_ID (not by name!)
+                if (globalOptionsCache.containsKey(externalId)) {
                     continue;
                 }
 
-                String cacheKey = buildOptionCacheKey(parameter.getNameBg(), nameBg);
-
-                if (globalOptionsCache.containsKey(cacheKey)) {
+                String nameBg = extractOptionNameBg(apiOption);
+                if (nameBg == null || nameBg.isEmpty()) {
                     continue;
                 }
 
@@ -495,7 +497,7 @@ public class ValiSyncService {
                 option.setOrder(apiOption.getOrder() != null ? apiOption.getOrder() : 0);
 
                 option = parameterOptionRepository.save(option);
-                globalOptionsCache.put(cacheKey, option);
+                globalOptionsCache.put(externalId, option);
                 created++;
 
             } catch (Exception e) {
@@ -514,15 +516,6 @@ public class ValiSyncService {
             this.apiParam = apiParam;
             this.categories = categories;
         }
-    }
-
-    private String normalizeName(String name) {
-        if (name == null) return "";
-        return name.toLowerCase().trim().replaceAll("\\s+", " ");
-    }
-
-    private String buildOptionCacheKey(String parameterName, String optionName) {
-        return normalizeName(parameterName) + ":::" + normalizeName(optionName);
     }
 
     private String extractNameBg(ParameterRequestDto param) {
@@ -601,6 +594,7 @@ public class ValiSyncService {
                 return;
             }
 
+            // ✅ Cache by EXTERNAL_ID
             Map<Long, Parameter> globalParametersCache = parameterRepository.findAll()
                     .stream()
                     .filter(p -> p.getExternalId() != null)
@@ -636,9 +630,6 @@ public class ValiSyncService {
                 }
 
                 try {
-//                    log.info("[{}/{}] Processing category: {} (externalId: {})",
-//                            categoryCounter, categories.size(), category.getNameBg(), category.getExternalId());
-
                     CategorySyncResult result = syncProductsByCategory(
                             category,
                             manufacturersMap,
@@ -650,9 +641,6 @@ public class ValiSyncService {
                     created += result.created;
                     updated += result.updated;
                     errors += result.errors;
-
-//                    log.info("Category {} completed - Processed: {}, Created: {}, Updated: {}, Errors: {}",
-//                            category.getNameBg(), result.processed, result.created, result.updated, result.errors);
 
                 } catch (Exception e) {
                     log.error("Error processing products for category {}: {}",
@@ -688,8 +676,6 @@ public class ValiSyncService {
             if (allProducts.isEmpty()) {
                 return new CategorySyncResult(0, 0, 0, 0);
             }
-
-//            log.info("Fetched {} products for category: {}", allProducts.size(), category.getNameBg());
 
             List<List<ProductRequestDto>> chunks = partitionList(allProducts, batchSize);
 
@@ -866,6 +852,7 @@ public class ValiSyncService {
                     continue;
                 }
 
+                // ✅ Lookup by EXTERNAL_ID
                 Parameter parameter = globalParametersCache.get(paramValue.getParameterId());
                 if (parameter == null) {
                     notFoundCount++;
@@ -878,7 +865,10 @@ public class ValiSyncService {
                     continue;
                 }
 
+                // ✅ Verify option belongs to parameter
                 if (!option.getParameter().getId().equals(parameter.getId())) {
+                    log.warn("Option {} does not belong to parameter {} for product {}",
+                            paramValue.getOptionId(), paramValue.getParameterId(), extProduct.getReferenceNumber());
                     notFoundCount++;
                     continue;
                 }
@@ -903,10 +893,10 @@ public class ValiSyncService {
 
         product.setProductParameters(mergedParameters);
 
-//        if (notFoundCount > 0 || skippedInvalidCount > 0) {
-//            log.warn("Product {}: {} mapped, {} not found, {} invalid",
-//                    extProduct.getReferenceNumber(), mappedCount, notFoundCount, skippedInvalidCount);
-//        }
+        if (notFoundCount > 0) {
+            log.warn("Product {}: {} mapped, {} not found, {} invalid",
+                    extProduct.getReferenceNumber(), mappedCount, notFoundCount, skippedInvalidCount);
+        }
     }
 
     private boolean isManualParameterForVali(ProductParameter productParameter) {

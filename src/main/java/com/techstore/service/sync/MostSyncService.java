@@ -287,15 +287,14 @@ public class MostSyncService {
                 }
             }
 
-            Map<String, Parameter> globalParamsCache = allExistingParams.stream()
-                    .filter(p -> p.getNameBg() != null)
-                    .collect(Collectors.toMap(
-                            p -> normalizeName(p.getNameBg()),
-                            p -> p,
-                            (existing, duplicate) -> existing
-                    ));
+            Map<String, Parameter> globalParamsCache = new HashMap<>();
+            for (Parameter p : allExistingParams) {
+                if (p.getMostKey() != null) {
+                    globalParamsCache.put(p.getMostKey(), p);
+                }
+            }
 
-            log.info("Loaded {} existing parameters from database", globalParamsCache.size());
+            log.info("Loaded {} existing parameters with mostKey from database", globalParamsCache.size());
 
             List<ParameterOption> allExistingOptions = parameterOptionRepository.findAll();
 
@@ -345,14 +344,15 @@ public class MostSyncService {
                         String paramName = param.getKey();
                         String paramValue = param.getValue();
 
-                        String normalizedName = normalizeName(paramName);
+                        String mostKey = generateMostKey(paramName);  // ← ДОБАВЕНО!
 
                         ParameterData paramData = allParametersData.computeIfAbsent(
-                                normalizedName,
+                                mostKey,  // ← ПРОМЕНЕНО!
                                 k -> {
                                     ParameterData pd = new ParameterData();
                                     pd.nameBg = paramName;
                                     pd.nameEn = paramName;
+                                    pd.mostKey = mostKey;  // ← ДОБАВЕНО!
                                     pd.categories = new HashSet<>();
                                     pd.values = new HashSet<>();
                                     return pd;
@@ -373,27 +373,29 @@ public class MostSyncService {
             long created = 0, reused = 0, optionsCreated = 0;
 
             for (Map.Entry<String, ParameterData> entry : allParametersData.entrySet()) {
-                String normalizedName = entry.getKey();
+                String mostKey = entry.getKey();  // ← ПРОМЕНЕНО!
                 ParameterData paramData = entry.getValue();
 
                 try {
-                    Parameter parameter = globalParamsCache.get(normalizedName);
+                    Parameter parameter = globalParamsCache.get(mostKey);  // ← ПРОМЕНЕНО!
 
                     if (parameter == null) {
                         parameter = new Parameter();
                         parameter.setNameBg(paramData.nameBg);
                         parameter.setNameEn(paramData.nameEn);
+                        parameter.setMostKey(paramData.mostKey);  // ← ДОБАВЕНО!
                         parameter.setPlatform(Platform.MOST);
                         parameter.setOrder(50);
                         parameter.setCategories(new HashSet<>(paramData.categories));
                         parameter.setCreatedBy("system");
 
                         parameter = parameterRepository.save(parameter);
-                        globalParamsCache.put(normalizedName, parameter);
+                        globalParamsCache.put(paramData.mostKey, parameter);  // ← ПРОМЕНЕНО!
                         created++;
 
-                        log.debug("✓ Created parameter: '{}' for {} categories",
-                                parameter.getNameBg(), paramData.categories.size());
+                        log.debug("✓ Created parameter: '{}' (mostKey={}) for {} categories",
+                                parameter.getNameBg(), paramData.mostKey, paramData.categories.size());
+
                     } else {
                         Set<Category> existingCategories = parameter.getCategories();
                         if (existingCategories == null) {
@@ -429,7 +431,7 @@ public class MostSyncService {
                     optionsCreated += optionsForThisParam;
 
                 } catch (Exception e) {
-                    log.error("Error processing parameter '{}': {}", normalizedName, e.getMessage());
+                    log.error("Error processing parameter: {}", e.getMessage());
                 }
             }
 
@@ -454,6 +456,7 @@ public class MostSyncService {
     private static class ParameterData {
         String nameBg;
         String nameEn;
+        String mostKey;
         Set<Category> categories;
         Set<String> values;
     }
@@ -515,16 +518,15 @@ public class MostSyncService {
                     .filter(p -> p.getPlatform() == Platform.MOST || p.getPlatform() == null)
                     .toList();
 
-            Map<String, Parameter> parametersByNormalizedName = new HashMap<>();
+            Map<String, Parameter> parametersByMostKey = new HashMap<>();
 
             for (Parameter p : allParameters) {
-                if (p.getNameBg() != null) {
-                    String normalizedName = normalizeName(p.getNameBg());
-                    parametersByNormalizedName.put(normalizedName, p);
+                if (p.getMostKey() != null) {
+                    parametersByMostKey.put(p.getMostKey(), p);
                 }
             }
 
-            log.info("Loaded {} parameters globally", allParameters.size());
+            log.info("Loaded {} parameters with mostKey globally", parametersByMostKey.size());
 
             Map<Long, Map<String, ParameterOption>> optionsByParameterId = new HashMap<>();
 
@@ -607,7 +609,7 @@ public class MostSyncService {
                             setMostParametersToProductSimplified(
                                     product,
                                     mostProduct,
-                                    parametersByNormalizedName,
+                                    parametersByMostKey,  // ← ПРОМЕНЕНО ИМЕ!
                                     optionsByParameterId
                             );
                             product = productRepository.save(product);
@@ -664,7 +666,7 @@ public class MostSyncService {
     private void setMostParametersToProductSimplified(
             Product product,
             Map<String, Object> mostProduct,
-            Map<String, Parameter> parametersByNormalizedName,
+            Map<String, Parameter> parametersByMostKey,
             Map<Long, Map<String, ParameterOption>> optionsByParameterId) {
 
         try {
@@ -698,8 +700,8 @@ public class MostSyncService {
                         continue;
                     }
 
-                    String normalizedName = normalizeName(parameterName);
-                    Parameter parameter = parametersByNormalizedName.get(normalizedName);
+                    String mostKey = generateMostKey(parameterName);  // ← ДОБАВЕНО!
+                    Parameter parameter = parametersByMostKey.get(mostKey);  // ← ПРОМЕНЕНО!
 
                     if (parameter == null) {
                         notFoundCount++;
@@ -956,5 +958,16 @@ public class MostSyncService {
             log.warn("Cannot convert to int: {}", value);
             return 0;
         }
+    }
+
+    private String generateMostKey(String parameterName) {
+        if (parameterName == null || parameterName.trim().isEmpty()) {
+            return "unknown_param";
+        }
+
+        return parameterName.toLowerCase()
+                .replaceAll("[^a-z0-9\\s]+", " ")  // Remove special chars
+                .trim()
+                .replaceAll("\\s+", "_");          // Replace spaces with underscore
     }
 }

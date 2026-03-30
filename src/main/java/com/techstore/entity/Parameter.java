@@ -35,6 +35,9 @@ public class Parameter extends BaseEntity {
     @Column(name = "tekra_key")
     private String tekraKey;
 
+    @Column(name = "most_key")
+    private String mostKey;
+
     private Boolean isFilter = true;
 
     @ManyToMany(fetch = FetchType.LAZY)

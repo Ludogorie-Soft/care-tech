@@ -30,22 +30,6 @@ import java.util.stream.Collectors;
 import static com.techstore.util.LogHelper.LOG_STATUS_FAILED;
 import static com.techstore.util.LogHelper.LOG_STATUS_SUCCESS;
 
-/**
- * TekraSyncService - VERSION 3.0 WITH ANALOG/DIGITAL DISCRIMINATION
- *
- * Дата: 23.01.2025
- *
- * НОВИ ФУНКЦИИ:
- * - Разграничава аналогови от цифрови камери/рекордери
- * - Автоматично създава субкатегории (IP Камери, Аналогови камери, NVR, DVR)
- * - Използва множество критерии за определяне на типа
- *
- * КРИСТАЛНА ЛОГИКА:
- * 1. Categories → CREATE/UPDATE with deduplication
- * 2. Manufacturers → CREATE ONLY with name deduplication
- * 3. Parameters → ГЛОБАЛНО дедуплициране по ИМЕ
- * 4. Products → Използва готовите параметри + analog/digital discrimination
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -418,15 +402,14 @@ public class TekraSyncService {
                 }
             }
 
-            Map<String, Parameter> globalParamsCache = allExistingParams.stream()
-                    .filter(p -> p.getNameBg() != null)
-                    .collect(Collectors.toMap(
-                            p -> normalizeName(p.getNameBg()),
-                            p -> p,
-                            (existing, duplicate) -> existing
-                    ));
+            Map<String, Parameter> globalParamsCache = new HashMap<>();
+            for (Parameter p : allExistingParams) {
+                if (p.getTekraKey() != null) {
+                    globalParamsCache.put(p.getTekraKey(), p);
+                }
+            }
 
-            log.info("Loaded {} existing parameters from database", globalParamsCache.size());
+            log.info("Loaded {} existing parameters with tekraKey from database", globalParamsCache.size());
 
             List<ParameterOption> allExistingOptions = parameterOptionRepository.findAll();
 
@@ -474,10 +457,9 @@ public class TekraSyncService {
                             String paramValue = param.getValue();
 
                             String paramName = convertTekraParameterKeyToName(tekraKey);
-                            String normalizedName = normalizeName(paramName);
 
                             ParameterData paramData = allParametersData.computeIfAbsent(
-                                    normalizedName,
+                                    tekraKey,
                                     k -> {
                                         ParameterData pd = new ParameterData();
                                         pd.nameBg = paramName;
@@ -504,11 +486,11 @@ public class TekraSyncService {
             long created = 0, reused = 0, optionsCreated = 0;
 
             for (Map.Entry<String, ParameterData> entry : allParametersData.entrySet()) {
-                String normalizedName = entry.getKey();
+                String tekraKey = entry.getKey();
                 ParameterData paramData = entry.getValue();
 
                 try {
-                    Parameter parameter = globalParamsCache.get(normalizedName);
+                    Parameter parameter = globalParamsCache.get(tekraKey);
 
                     if (parameter == null) {
                         parameter = new Parameter();
@@ -521,8 +503,11 @@ public class TekraSyncService {
                         parameter.setCreatedBy("system");
 
                         parameter = parameterRepository.save(parameter);
-                        globalParamsCache.put(normalizedName, parameter);
+                        globalParamsCache.put(paramData.tekraKey, parameter);
                         created++;
+
+                        log.debug("✓ Created parameter: '{}' (tekraKey={}) for {} categories",
+                                parameter.getNameBg(), paramData.tekraKey, paramData.categories.size());
                     } else {
                         if (parameter.getTekraKey() == null) {
                             parameter.setTekraKey(paramData.tekraKey);
@@ -562,7 +547,7 @@ public class TekraSyncService {
                     optionsCreated += optionsForThisParam;
 
                 } catch (Exception e) {
-                    log.error("Error processing parameter '{}': {}", normalizedName, e.getMessage());
+                    log.error("Error processing parameter: {}", e.getMessage());
                 }
             }
 
@@ -646,19 +631,14 @@ public class TekraSyncService {
                     .toList();
 
             Map<String, Parameter> parametersByTekraKey = new HashMap<>();
-            Map<String, Parameter> parametersByNormalizedName = new HashMap<>();
 
             for (Parameter p : allParameters) {
                 if (p.getTekraKey() != null) {
                     parametersByTekraKey.put(p.getTekraKey(), p);
                 }
-                if (p.getNameBg() != null) {
-                    String normalizedName = normalizeName(p.getNameBg());
-                    parametersByNormalizedName.put(normalizedName, p);
-                }
             }
 
-            log.info("Loaded {} parameters globally", allParameters.size());
+            log.info("Loaded {} parameters with tekraKey globally", parametersByTekraKey.size());
 
             Map<Long, Map<String, ParameterOption>> optionsByParameterId = new HashMap<>();
 
@@ -789,7 +769,6 @@ public class TekraSyncService {
                                     product,
                                     rawProduct,
                                     parametersByTekraKey,
-                                    parametersByNormalizedName,
                                     optionsByParameterId
                             );
                             product = productRepository.save(product);
@@ -1015,7 +994,6 @@ public class TekraSyncService {
             Product product,
             Map<String, Object> rawProduct,
             Map<String, Parameter> parametersByTekraKey,
-            Map<String, Parameter> parametersByNormalizedName,
             Map<Long, Map<String, ParameterOption>> optionsByParameterId) {
 
         try {
@@ -1051,13 +1029,9 @@ public class TekraSyncService {
                     Parameter parameter = parametersByTekraKey.get(parameterKey);
 
                     if (parameter == null) {
-                        String parameterName = convertTekraParameterKeyToName(parameterKey);
-                        String normalizedName = normalizeName(parameterName);
-                        parameter = parametersByNormalizedName.get(normalizedName);
-                    }
-
-                    if (parameter == null) {
                         notFoundCount++;
+                        log.debug("Parameter with tekraKey='{}' not found for product {}",
+                                parameterKey, product.getSku());
                         continue;
                     }
 
