@@ -20,4 +20,5 @@ public class ProductParameterResponseDto {
     private Boolean isFilter;
     private Integer order;
     private Long categoryId;
+    private Integer filterOrder;
 }

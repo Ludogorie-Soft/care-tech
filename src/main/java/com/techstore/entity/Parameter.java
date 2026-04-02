@@ -40,6 +40,9 @@ public class Parameter extends BaseEntity {
 
     private Boolean isFilter = true;
 
+    @Column(name = "filter_order")
+    private Integer filterOrder;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "category_parameters",
