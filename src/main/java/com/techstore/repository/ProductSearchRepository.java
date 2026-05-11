@@ -49,8 +49,10 @@ public class ProductSearchRepository {
         if (StringUtils.hasText(request.getQuery())) {
             sql.append(", ts_rank(")
                     .append("to_tsvector('").append(language).append("', ")
-                    .append("coalesce(p.").append(nameField).append(", '') || ' ' || ")
-                    .append("coalesce(p.").append(descriptionField).append(", '') || ' ' || ")
+                    .append("coalesce(p.name_bg, '') || ' ' || ")
+                    .append("coalesce(p.name_en, '') || ' ' || ")
+                    .append("coalesce(p.description_bg, '') || ' ' || ")
+                    .append("coalesce(p.description_en, '') || ' ' || ")
                     .append("coalesce(p.model, '') || ' ' || ")
                     .append("coalesce(p.reference_number, '')), ")
                     .append("plainto_tsquery('").append(language).append("', :query)) as search_rank ");
@@ -68,22 +70,28 @@ public class ProductSearchRepository {
                 .append("LEFT JOIN categories c ON p.category_id = c.id ");
 
         StringBuilder whereClause = new StringBuilder(
-                "WHERE p.active = true AND p.show_flag = true AND p.status IN ('AVAILABLE', 'ON_ROUTE') "
+                "WHERE p.active = true AND p.show_flag = true AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') "
         );
 
         if (StringUtils.hasText(request.getQuery())) {
             whereClause.append("AND (")
+                    // Full-text search — точни думи, ползва GIN индекс
                     .append("to_tsvector('").append(language).append("', ")
-                    .append("coalesce(p.").append(nameField).append(", '') || ' ' || ")
-                    .append("coalesce(p.").append(descriptionField).append(", '') || ' ' || ")
+                    .append("coalesce(p.name_bg, '') || ' ' || ")
+                    .append("coalesce(p.name_en, '') || ' ' || ")
+                    .append("coalesce(p.description_bg, '') || ' ' || ")
+                    .append("coalesce(p.description_en, '') || ' ' || ")
                     .append("coalesce(p.model, '') || ' ' || ")
                     .append("coalesce(p.reference_number, '')) ")
                     .append("@@ plainto_tsquery('").append(language).append("', :query) OR ")
 
-                    .append("LOWER(p.model) LIKE LOWER(:likeQuery) OR ")
-                    .append("LOWER(p.reference_number) LIKE LOWER(:likeQuery) OR ")
+                    // ILIKE — частични думи, ползва trigram индекс
+                    .append("p.name_bg ILIKE :likeQuery OR ")
+                    .append("p.name_en ILIKE :likeQuery OR ")
+                    .append("p.model ILIKE :likeQuery OR ")
+                    .append("p.reference_number ILIKE :likeQuery OR ")
                     .append("p.barcode = :exactQuery OR ")
-                    .append("LOWER(m.name) LIKE LOWER(:likeQuery)) ");
+                    .append("m.name ILIKE :likeQuery) ");
 
             params.put("likeQuery", "%" + request.getQuery() + "%");
             params.put("exactQuery", request.getQuery());
@@ -350,7 +358,7 @@ public class ProductSearchRepository {
 
     private ProductSearchResult mapRowToProduct(ResultSet rs, int rowNum, String language) throws SQLException {
         String st = rs.getString("status");
-        ProductStatus status = ProductStatus.valueOf(st);
+        ProductStatus status = (st != null) ? ProductStatus.valueOf(st) : ProductStatus.NOT_AVAILABLE;
         return ProductSearchResult.builder()
                 .id(rs.getLong("id"))
                 .name(rs.getString(language.equals("en") ? "name_en" : "name_bg"))
@@ -387,13 +395,14 @@ public class ProductSearchRepository {
                     optionNameField + " as option_name, " +
                     "COUNT(DISTINCT pp.product_id) as product_count " +
                     "FROM parameters param " +
+                    "JOIN category_parameters cp ON cp.parameter_id = param.id " +
                     "JOIN parameter_options po ON po.parameter_id = param.id " +
                     "INNER JOIN product_parameters pp ON pp.parameter_option_id = po.id " +
                     "INNER JOIN products p ON pp.product_id = p.id " +
                     "   AND p.active = true " +
                     "   AND p.show_flag = true " +
-                    "   AND p.status IN ('AVAILABLE', 'ON_ROUTE') " +
-                    "WHERE param.category_id = :categoryId " +
+                    "   AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
+                    "WHERE cp.category_id = :categoryId " +
                     "GROUP BY param.id, param_name, po.id, option_name, param.sort_order, po.sort_order " +
                     "HAVING COUNT(DISTINCT pp.product_id) > 0 " +
                     "ORDER BY param.sort_order, param_name, po.sort_order, option_name";
@@ -426,5 +435,90 @@ public class ProductSearchRepository {
         }
 
         return parameters;
+    }
+
+    // Fuzzy fallback — извиква се само когато основното търсене върне 0 резултата.
+    // Използва word_similarity (бавно при голям dataset, затова е изолиран).
+    public long countFuzzyMatches(ProductSearchRequest request) {
+        if (!StringUtils.hasText(request.getQuery()) || request.getQuery().length() < 4) {
+            return 0;
+        }
+
+        String countSql = "SELECT COUNT(*) FROM products p " +
+                "LEFT JOIN manufacturers m ON p.manufacturer_id = m.id " +
+                "WHERE p.active = true AND p.show_flag = true " +
+                "AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
+                "AND (p.name_bg IS NOT NULL AND word_similarity(:query, p.name_bg) > 0.35 " +
+                "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35)";
+
+        Map<String, Object> params = Map.of("query", request.getQuery());
+        Long count = namedJdbcTemplate.queryForObject(countSql, params, Long.class);
+        return count != null ? count : 0;
+    }
+
+    public ProductSearchResponse searchProductsFuzzy(ProductSearchRequest request) {
+        String language = "simple";
+        String nameField = request.getLanguage().equals("en") ? "name_en" : "name_bg";
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("query", request.getQuery());
+        params.put("limit", request.getSize());
+        params.put("offset", request.getPage() * request.getSize());
+
+        String sql = "SELECT p.id, p.name_bg, p.name_en, p.description_bg, p.description_en, " +
+                "p.model, p.reference_number, p.final_price, p.discount, p.featured, p.status, " +
+                "p.slug, m.name as manufacturer_name, c." + nameField + " as category_name, " +
+                "p.image_url AS primary_image_url, " +
+                "GREATEST(" +
+                "  CASE WHEN p.name_bg IS NOT NULL THEN word_similarity(:query, p.name_bg) ELSE 0 END, " +
+                "  CASE WHEN p.name_en IS NOT NULL THEN word_similarity(:query, p.name_en) ELSE 0 END" +
+                ") as search_rank " +
+                "FROM products p " +
+                "LEFT JOIN manufacturers m ON p.manufacturer_id = m.id " +
+                "LEFT JOIN categories c ON p.category_id = c.id " +
+                "WHERE p.active = true AND p.show_flag = true " +
+                "AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
+                "AND (p.name_bg IS NOT NULL AND word_similarity(:query, p.name_bg) > 0.35 " +
+                "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35) " +
+                "ORDER BY search_rank DESC, p.final_price ASC " +
+                "LIMIT :limit OFFSET :offset";
+
+        String countSql = "SELECT COUNT(*) FROM products p " +
+                "WHERE p.active = true AND p.show_flag = true " +
+                "AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
+                "AND (p.name_bg IS NOT NULL AND word_similarity(:query, p.name_bg) > 0.35 " +
+                "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35)";
+
+        try {
+            List<ProductSearchResult> products = namedJdbcTemplate.query(
+                    sql, params, (rs, rowNum) -> mapRowToProduct(rs, rowNum, request.getLanguage()));
+
+            if (!products.isEmpty()) {
+                List<Long> productIds = products.stream()
+                        .map(ProductSearchResult::getId)
+                        .collect(Collectors.toList());
+                Map<Long, List<ProductParameterResponseDto>> parametersMap =
+                        loadProductParameters(productIds, request.getLanguage());
+                products.forEach(product -> product.setSpecifications(
+                        parametersMap.getOrDefault(product.getId(), Collections.emptyList())));
+            }
+
+            Long totalCount = namedJdbcTemplate.queryForObject(countSql, params, Long.class);
+            long totalElements = totalCount != null ? totalCount : 0;
+            int totalPages = (int) Math.ceil((double) totalElements / request.getSize());
+
+            return ProductSearchResponse.builder()
+                    .products(products)
+                    .totalElements(totalElements)
+                    .totalPages(totalPages)
+                    .currentPage(request.getPage())
+                    .facets(new HashMap<>())
+                    .searchTime(0L)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Fuzzy search failed for query: '{}'. Error: {}", request.getQuery(), e.getMessage(), e);
+            throw new RuntimeException("Fuzzy search failed: " + e.getMessage(), e);
+        }
     }
 }

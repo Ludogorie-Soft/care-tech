@@ -33,8 +33,16 @@ public class ProductSearchService {
             // Validate and sanitize input
             validateSearchRequest(request);
 
-            // Perform search with parameter filtering
+            // Основно търсене — FTS + ILIKE (бързо, ползва индекси)
             ProductSearchResponse response = searchRepository.searchProducts(request);
+
+            // Fuzzy fallback — само ако няма резултати и заявката е >= 4 символа
+            if (response.getTotalElements() == 0
+                    && StringUtils.hasText(request.getQuery())
+                    && request.getQuery().length() >= 4) {
+                log.debug("No results for '{}', attempting fuzzy search", request.getQuery());
+                response = searchRepository.searchProductsFuzzy(request);
+            }
 
             // Set actual search time
             long searchTime = System.currentTimeMillis() - startTime;
@@ -79,7 +87,8 @@ public class ProductSearchService {
         }
 
         // Remove potentially dangerous characters for SQL
-        String sanitized = query.replaceAll("[';\"\\\\]", " ");
+        // Note: apostrophes and quotes are safe to keep since queries are fully parameterized
+        String sanitized = query.replaceAll("[;\\\\]", " ");
 
         // Remove extra whitespace
         sanitized = sanitized.replaceAll("\\s+", " ").trim();
