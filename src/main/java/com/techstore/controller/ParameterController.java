@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -92,6 +93,17 @@ public class ParameterController {
     ) {
         List<ParameterResponseDto> response = parameterService.getAllParameters(language);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Toggle is_filter flag for a parameter within a specific category")
+    @PatchMapping("/category/{categoryId}/{parameterId}/filter")
+    public ResponseEntity<Boolean> toggleCategoryParameterFilter(
+            @PathVariable @NotNull Long categoryId,
+            @PathVariable @NotNull Long parameterId) {
+
+        log.info("Toggling is_filter for category {} / parameter {}", categoryId, parameterId);
+        boolean newValue = parameterService.toggleCategoryParameterFilter(categoryId, parameterId);
+        return ResponseEntity.ok(newValue);
     }
 
     @DeleteMapping("/{parameterId}/options/{optionId}")

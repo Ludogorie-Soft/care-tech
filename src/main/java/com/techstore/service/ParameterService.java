@@ -145,6 +145,30 @@ public class ParameterService {
         return Collections.emptyList();
     }
 
+    @CacheEvict(value = {"parameters", "parametersByCategory", "categoryParametersWithCounts"}, allEntries = true)
+    @Transactional
+    public boolean toggleCategoryParameterFilter(Long categoryId, Long parameterId) {
+        validateCategoryId(categoryId);
+        validateParameterId(parameterId);
+
+        findCategoryByIdOrThrow(categoryId);
+        findParameterByIdOrThrow(parameterId);
+
+        Boolean current = parameterRepository.getCategoryParameterFilter(categoryId, parameterId);
+        if (current == null) {
+            throw new ValidationException(
+                    String.format("No category-parameter link found for category %d and parameter %d",
+                            categoryId, parameterId));
+        }
+
+        boolean newValue = !current;
+        parameterRepository.updateCategoryParameterFilter(categoryId, parameterId, newValue);
+
+        log.info("Toggled category_parameters.is_filter to {} for category {} / parameter {}",
+                newValue, categoryId, parameterId);
+        return newValue;
+    }
+
     @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
     public ParameterResponseDto changeParameterVisibilityAsFilter(Long id) {
         log.info("Updating parameter with ID: {}", id);

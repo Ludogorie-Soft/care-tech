@@ -11,18 +11,23 @@ import java.util.List;
 
 @Repository
 public interface ProductParameterRepository extends JpaRepository<ProductParameter, Long> {
-    @Query("SELECT DISTINCT pp.parameter.id, pp.parameter.nameEn, pp.parameter.nameBg, " +
-            "pp.parameter.isFilter, COALESCE(pp.parameter.filterOrder, pp.parameter.order), " +
-            "pp.parameterOption.id, pp.parameterOption.nameEn, pp.parameterOption.nameBg, " +
-            "pp.parameterOption.order " +
-            "FROM ProductParameter pp " +
-            "WHERE pp.product.category.id = :categoryId " +
-            "AND pp.product.active = true " +
-            "AND pp.product.status != com.techstore.enums.ProductStatus.NOT_AVAILABLE " +
-            "AND pp.parameter IS NOT NULL " +
-            "AND pp.parameterOption IS NOT NULL " +
-            "AND pp.parameter.isFilter = true " +
-            "ORDER BY COALESCE(pp.parameter.filterOrder, pp.parameter.order) ASC")
+    @Query(value =
+            "SELECT DISTINCT param.id, param.name_en, param.name_bg, " +
+            "cp.is_filter, COALESCE(param.filter_order, param.sort_order), " +
+            "po.id, po.name_en, po.name_bg, po.sort_order " +
+            "FROM product_parameters pp " +
+            "JOIN parameters          param ON param.id = pp.parameter_id " +
+            "JOIN parameter_options   po    ON po.id    = pp.parameter_option_id " +
+            "JOIN category_parameters cp    ON cp.parameter_id = param.id " +
+            "                              AND cp.category_id  = :categoryId " +
+            "JOIN products            p     ON p.id = pp.product_id " +
+            "WHERE p.category_id = :categoryId " +
+            "  AND p.active      = true " +
+            "  AND p.show_flag   = true " +
+            "  AND p.status IN ('AVAILABLE','ON_ROUTE','LIMITED_QUANTITY','ON_DEMAND') " +
+            "  AND cp.is_filter  = true " +
+            "ORDER BY COALESCE(param.filter_order, param.sort_order) ASC",
+            nativeQuery = true)
     List<Object[]> findParameterOptionsByCategoryAndActiveProducts(@Param("categoryId") Long categoryId);
 
     @Modifying

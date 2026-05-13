@@ -6,6 +6,7 @@ import com.techstore.enums.Platform;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -65,5 +66,23 @@ public interface ParameterRepository extends JpaRepository<Parameter, Long> {
     boolean existsByNameEnIgnoreCaseAndCategories(
             @Param("nameEn") String nameEn,
             @Param("category") Category category
+    );
+
+    @Query(value = "SELECT is_filter FROM category_parameters " +
+            "WHERE category_id = :categoryId AND parameter_id = :parameterId",
+            nativeQuery = true)
+    Boolean getCategoryParameterFilter(
+            @Param("categoryId") Long categoryId,
+            @Param("parameterId") Long parameterId
+    );
+
+    @Modifying
+    @Query(value = "UPDATE category_parameters SET is_filter = :isFilter " +
+            "WHERE category_id = :categoryId AND parameter_id = :parameterId",
+            nativeQuery = true)
+    int updateCategoryParameterFilter(
+            @Param("categoryId") Long categoryId,
+            @Param("parameterId") Long parameterId,
+            @Param("isFilter") boolean isFilter
     );
 }

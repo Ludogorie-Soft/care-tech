@@ -403,6 +403,7 @@ public class ProductSearchRepository {
                     "   AND p.show_flag = true " +
                     "   AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
                     "WHERE cp.category_id = :categoryId " +
+                    "  AND cp.is_filter = true " +
                     "GROUP BY param.id, param_name, po.id, option_name, param.sort_order, po.sort_order " +
                     "HAVING COUNT(DISTINCT pp.product_id) > 0 " +
                     "ORDER BY param.sort_order, param_name, po.sort_order, option_name";
