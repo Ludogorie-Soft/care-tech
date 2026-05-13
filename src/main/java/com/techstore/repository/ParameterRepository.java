@@ -76,6 +76,10 @@ public interface ParameterRepository extends JpaRepository<Parameter, Long> {
             @Param("parameterId") Long parameterId
     );
 
+    @Query(value = "SELECT parameter_id, is_filter FROM category_parameters WHERE category_id = :categoryId",
+            nativeQuery = true)
+    List<Object[]> getCategoryParameterFilters(@Param("categoryId") Long categoryId);
+
     @Modifying
     @Query(value = "UPDATE category_parameters SET is_filter = :isFilter " +
             "WHERE category_id = :categoryId AND parameter_id = :parameterId",

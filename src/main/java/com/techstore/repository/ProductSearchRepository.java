@@ -403,7 +403,7 @@ public class ProductSearchRepository {
                     "   AND p.show_flag = true " +
                     "   AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
                     "WHERE cp.category_id = :categoryId " +
-                    "  AND cp.is_filter = true " +
+                    "  AND cp.is_filter != false" +
                     "GROUP BY param.id, param_name, po.id, option_name, param.sort_order, po.sort_order " +
                     "HAVING COUNT(DISTINCT pp.product_id) > 0 " +
                     "ORDER BY param.sort_order, param_name, po.sort_order, option_name";
@@ -456,7 +456,7 @@ public class ProductSearchRepository {
                 "WHERE p.active = true AND p.show_flag = true " +
                 "AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
                 "AND p.category_id = :categoryId " +
-                "AND cp.is_filter = true "
+                "AND cp.is_filter != false"
         );
 
         if (request.getManufacturers() != null && !request.getManufacturers().isEmpty()) {

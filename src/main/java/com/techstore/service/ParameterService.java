@@ -145,7 +145,7 @@ public class ParameterService {
         return Collections.emptyList();
     }
 
-    @CacheEvict(value = {"parameters", "parametersByCategory", "categoryParametersWithCounts"}, allEntries = true)
+    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
     @Transactional
     public boolean toggleCategoryParameterFilter(Long categoryId, Long parameterId) {
         validateCategoryId(categoryId);
@@ -221,7 +221,6 @@ public class ParameterService {
         findCategoryByIdOrThrow(categoryId);
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            // ✅ Използваме новия Many-to-Many метод
             List<Parameter> parameters = parameterRepository.findByCategoryIdOrderByOrderAsc(categoryId);
 
             parameters.forEach(parameter -> {
@@ -230,8 +229,21 @@ public class ParameterService {
                 parameter.setOptions(new HashSet<>(uniqueOptions));
             });
 
+            // Build per-category is_filter map from category_parameters table
+            Map<Long, Boolean> filterMap = parameterRepository.getCategoryParameterFilters(categoryId)
+                    .stream()
+                    .collect(Collectors.toMap(
+                            row -> ((Number) row[0]).longValue(),
+                            row -> (Boolean) row[1]
+                    ));
+
             return parameters.stream()
-                    .map(p -> toResponseDto(p, language))
+                    .map(p -> {
+                        ParameterResponseDto dto = toResponseDto(p, language);
+                        // Override with per-category is_filter (not the global Parameter.isFilter)
+                        dto.setIsFilter(filterMap.getOrDefault(p.getId(), false));
+                        return dto;
+                    })
                     .toList();
         }, "fetch all parameters for category: " + categoryId);
     }
