@@ -438,6 +438,164 @@ public class ProductSearchRepository {
         return parameters;
     }
 
+    /**
+     * Returns available filter options with product counts given the currently active filters.
+     * Used for dynamic (real-time) faceted filtering — options that yield 0 results are excluded.
+     */
+    public Map<String, List<FacetValue>> getFilteredFacets(
+            Long categoryId, ProductSearchRequest request, String language) {
+
+        Map<String, List<FacetValue>> facets = new HashMap<>();
+        String paramNameField = language.equals("en") ? "param.name_en" : "param.name_bg";
+        String optionNameField = language.equals("en") ? "po.name_en" : "po.name_bg";
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("categoryId", categoryId);
+
+        StringBuilder where = new StringBuilder(
+                "WHERE p.active = true AND p.show_flag = true " +
+                "AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
+                "AND p.category_id = :categoryId " +
+                "AND cp.is_filter = true "
+        );
+
+        if (request.getManufacturers() != null && !request.getManufacturers().isEmpty()) {
+            where.append("AND p.manufacturer_id IN (:manufacturerIds) ");
+            params.put("manufacturerIds",
+                    request.getManufacturers().stream().map(Long::valueOf).toList());
+        }
+
+        if (request.getMinPrice() != null) {
+            where.append("AND p.final_price >= :minPrice ");
+            params.put("minPrice", request.getMinPrice());
+        }
+        if (request.getMaxPrice() != null) {
+            where.append("AND p.final_price <= :maxPrice ");
+            params.put("maxPrice", request.getMaxPrice());
+        }
+
+        if (request.getFilters() != null && !request.getFilters().isEmpty()) {
+            int idx = 0;
+            for (Map.Entry<Long, List<Long>> entry : request.getFilters().entrySet()) {
+                if (entry.getValue() == null || entry.getValue().isEmpty()) continue;
+                where.append("AND EXISTS (SELECT 1 FROM product_parameters pp2 ")
+                        .append("WHERE pp2.product_id = p.id ")
+                        .append("AND pp2.parameter_id = :fParamId").append(idx).append(" ")
+                        .append("AND pp2.parameter_option_id IN (:fOptIds").append(idx).append(")) ");
+                params.put("fParamId" + idx, entry.getKey());
+                params.put("fOptIds" + idx, entry.getValue());
+                idx++;
+            }
+        }
+
+        String sql = "SELECT " +
+                "param.id as param_id, " +
+                paramNameField + " as param_name, " +
+                "po.id as option_id, " +
+                optionNameField + " as option_name, " +
+                "COUNT(DISTINCT p.id) as cnt " +
+                "FROM products p " +
+                "JOIN product_parameters pp ON pp.product_id = p.id " +
+                "JOIN parameters param ON pp.parameter_id = param.id " +
+                "JOIN parameter_options po ON pp.parameter_option_id = po.id " +
+                "JOIN category_parameters cp ON cp.parameter_id = param.id " +
+                "   AND cp.category_id = :categoryId " +
+                where +
+                "GROUP BY param.id, param_name, po.id, option_name, param.sort_order, po.sort_order " +
+                "HAVING COUNT(DISTINCT p.id) > 0 " +
+                "ORDER BY param.sort_order, param_name, po.sort_order, option_name";
+
+        try {
+            Map<Long, List<Long>> activeFilters = request.getFilters();
+            namedJdbcTemplate.query(sql, params, rs -> {
+                Long paramId = rs.getLong("param_id");
+                String paramName = rs.getString("param_name");
+                Long optionId = rs.getLong("option_id");
+                String optionName = rs.getString("option_name");
+                Long count = rs.getLong("cnt");
+
+                boolean isSelected = activeFilters != null &&
+                        activeFilters.containsKey(paramId) &&
+                        activeFilters.get(paramId) != null &&
+                        activeFilters.get(paramId).contains(optionId);
+
+                FacetValue facetValue = FacetValue.builder()
+                        .id(optionId)
+                        .value(optionName)
+                        .count(count)
+                        .selected(isSelected)
+                        .build();
+
+                facets.computeIfAbsent(paramId + ":" + paramName, k -> new ArrayList<>())
+                        .add(facetValue);
+            });
+        } catch (Exception e) {
+            log.error("Failed to get filtered facets for category {}: {}", categoryId, e.getMessage(), e);
+        }
+
+        // Manufacturer counts — apply parameter filters only (NOT manufacturer filter),
+        // so the user can see which brands have products given the selected parameters.
+        try {
+            StringBuilder mWhere = new StringBuilder(
+                    "WHERE p.active = true AND p.show_flag = true " +
+                    "AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
+                    "AND p.category_id = :categoryId "
+            );
+            Map<String, Object> mParams = new HashMap<>();
+            mParams.put("categoryId", categoryId);
+
+            if (request.getMinPrice() != null) {
+                mWhere.append("AND p.final_price >= :minPrice ");
+                mParams.put("minPrice", request.getMinPrice());
+            }
+            if (request.getMaxPrice() != null) {
+                mWhere.append("AND p.final_price <= :maxPrice ");
+                mParams.put("maxPrice", request.getMaxPrice());
+            }
+
+            if (request.getFilters() != null && !request.getFilters().isEmpty()) {
+                int idx = 0;
+                for (Map.Entry<Long, List<Long>> entry : request.getFilters().entrySet()) {
+                    if (entry.getValue() == null || entry.getValue().isEmpty()) continue;
+                    mWhere.append("AND EXISTS (SELECT 1 FROM product_parameters pp2 ")
+                            .append("WHERE pp2.product_id = p.id ")
+                            .append("AND pp2.parameter_id = :mParamId").append(idx).append(" ")
+                            .append("AND pp2.parameter_option_id IN (:mOptIds").append(idx).append(")) ");
+                    mParams.put("mParamId" + idx, entry.getKey());
+                    mParams.put("mOptIds" + idx, entry.getValue());
+                    idx++;
+                }
+            }
+
+            String mSql = "SELECT m.id as manufacturer_id, m.name as manufacturer_name, " +
+                    "COUNT(DISTINCT p.id) as cnt " +
+                    "FROM products p " +
+                    "JOIN manufacturers m ON p.manufacturer_id = m.id " +
+                    mWhere +
+                    "GROUP BY m.id, m.name " +
+                    "HAVING COUNT(DISTINCT p.id) > 0 " +
+                    "ORDER BY m.name";
+
+            List<FacetValue> manufacturerFacets = new ArrayList<>();
+            namedJdbcTemplate.query(mSql, mParams, rs -> {
+                manufacturerFacets.add(FacetValue.builder()
+                        .id(rs.getLong("manufacturer_id"))
+                        .value(rs.getString("manufacturer_name"))
+                        .count(rs.getLong("cnt"))
+                        .selected(false)
+                        .build());
+            });
+
+            if (!manufacturerFacets.isEmpty()) {
+                facets.put("manufacturers:Марка", manufacturerFacets);
+            }
+        } catch (Exception e) {
+            log.error("Failed to get manufacturer facets for category {}: {}", categoryId, e.getMessage(), e);
+        }
+
+        return facets;
+    }
+
     // Fuzzy fallback — извиква се само когато основното търсене върне 0 резултата.
     // Използва word_similarity (бавно при голям dataset, затова е изолиран).
     public long countFuzzyMatches(ProductSearchRequest request) {

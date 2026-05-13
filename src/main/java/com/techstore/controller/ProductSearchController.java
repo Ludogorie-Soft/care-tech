@@ -79,6 +79,18 @@ public class ProductSearchController {
         return ResponseEntity.ok(parameters);
     }
 
+    @PostMapping("/categories/{categoryId}/filter-facets")
+    public ResponseEntity<Map<String, List<FacetValue>>> getFilteredFacets(
+            @PathVariable Long categoryId,
+            @RequestParam(defaultValue = "bg") String language,
+            @RequestBody ProductSearchRequest request) {
+
+        log.info("Filtered facets request for category {} with {} filters",
+                categoryId, request.getFilters() != null ? request.getFilters().size() : 0);
+        Map<String, List<FacetValue>> facets = searchService.getFilteredFacets(categoryId, request, language);
+        return ResponseEntity.ok(facets);
+    }
+
     @GetMapping("/categories/{categoryId}/products")
     public ResponseEntity<ProductSearchResponse> searchByCategory(
             @PathVariable String categoryId,

@@ -119,6 +119,19 @@ public class ProductSearchService {
         }
     }
 
+    public Map<String, List<FacetValue>> getFilteredFacets(
+            Long categoryId, ProductSearchRequest request, String language) {
+        try {
+            if (request.getLanguage() == null) {
+                request.setLanguage(language);
+            }
+            return searchRepository.getFilteredFacets(categoryId, request, language);
+        } catch (Exception e) {
+            log.error("Failed to get filtered facets for category: {}", categoryId, e);
+            return Collections.emptyMap();
+        }
+    }
+
     public ProductSearchResponse searchByCategory(String categoryId, String language, int page, int size, String sortBy) {
         ProductSearchRequest request = ProductSearchRequest.builder()
                 .categories(List.of(categoryId))
