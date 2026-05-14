@@ -70,7 +70,7 @@ public class ProductSearchRepository {
                 .append("LEFT JOIN categories c ON p.category_id = c.id ");
 
         StringBuilder whereClause = new StringBuilder(
-                "WHERE p.active = true AND p.show_flag = true AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') "
+                "WHERE p.active = true AND p.show_flag = true AND p.status IN ('AVAILABLE', 'LIMITED_QUANTITY') "
         );
 
         if (StringUtils.hasText(request.getQuery())) {
@@ -401,7 +401,7 @@ public class ProductSearchRepository {
                     "INNER JOIN products p ON pp.product_id = p.id " +
                     "   AND p.active = true " +
                     "   AND p.show_flag = true " +
-                    "   AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
+                    "   AND p.status IN ('AVAILABLE', 'LIMITED_QUANTITY') " +
                     "WHERE cp.category_id = :categoryId " +
                     "  AND cp.is_filter != false" +
                     "GROUP BY param.id, param_name, po.id, option_name, param.sort_order, po.sort_order " +
@@ -454,7 +454,7 @@ public class ProductSearchRepository {
 
         StringBuilder where = new StringBuilder(
                 "WHERE p.active = true AND p.show_flag = true " +
-                "AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
+                "AND p.status IN ('AVAILABLE', 'LIMITED_QUANTITY') " +
                 "AND p.category_id = :categoryId " +
                 "AND cp.is_filter != false"
         );
@@ -538,7 +538,7 @@ public class ProductSearchRepository {
         try {
             StringBuilder mWhere = new StringBuilder(
                     "WHERE p.active = true AND p.show_flag = true " +
-                    "AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
+                    "AND p.status IN ('AVAILABLE', 'LIMITED_QUANTITY') " +
                     "AND p.category_id = :categoryId "
             );
             Map<String, Object> mParams = new HashMap<>();
@@ -606,7 +606,7 @@ public class ProductSearchRepository {
         String countSql = "SELECT COUNT(*) FROM products p " +
                 "LEFT JOIN manufacturers m ON p.manufacturer_id = m.id " +
                 "WHERE p.active = true AND p.show_flag = true " +
-                "AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
+                "AND p.status IN ('AVAILABLE', 'LIMITED_QUANTITY') " +
                 "AND (p.name_bg IS NOT NULL AND word_similarity(:query, p.name_bg) > 0.35 " +
                 "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35)";
 
@@ -636,7 +636,7 @@ public class ProductSearchRepository {
                 "LEFT JOIN manufacturers m ON p.manufacturer_id = m.id " +
                 "LEFT JOIN categories c ON p.category_id = c.id " +
                 "WHERE p.active = true AND p.show_flag = true " +
-                "AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
+                "AND p.status IN ('AVAILABLE', 'LIMITED_QUANTITY') " +
                 "AND (p.name_bg IS NOT NULL AND word_similarity(:query, p.name_bg) > 0.35 " +
                 "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35) " +
                 "ORDER BY search_rank DESC, p.final_price ASC " +
@@ -644,7 +644,7 @@ public class ProductSearchRepository {
 
         String countSql = "SELECT COUNT(*) FROM products p " +
                 "WHERE p.active = true AND p.show_flag = true " +
-                "AND p.status IN ('AVAILABLE', 'ON_ROUTE', 'LIMITED_QUANTITY', 'ON_DEMAND') " +
+                "AND p.status IN ('AVAILABLE', 'LIMITED_QUANTITY') " +
                 "AND (p.name_bg IS NOT NULL AND word_similarity(:query, p.name_bg) > 0.35 " +
                 "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35)";
 
