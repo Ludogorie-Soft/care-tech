@@ -138,11 +138,13 @@ public class ParameterService {
         }
 
         // 4. Записваме промените и изчистваме кеша
-        parameterRepository.saveAll(parameters);
+        List<Parameter> saved = parameterRepository.saveAll(parameters);
 
-        log.info("Successfully reordered {} parameters for category {}", parameters.size(), categoryId);
+        log.info("Successfully reordered {} parameters for category {}", saved.size(), categoryId);
 
-        return Collections.emptyList();
+        return saved.stream()
+                .map(p -> toResponseDto(p, language))
+                .collect(Collectors.toList());
     }
 
     @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
@@ -832,9 +834,6 @@ public class ParameterService {
 
     @Transactional(readOnly = true)
     public ParameterResponseDto toResponseDto(Parameter parameter, String language) {
-        if (parameter.getCategories() != null) {
-            parameter.getCategories().size();
-        }
         return parameterMapper.toResponseDto(parameter, language);
     }
 }

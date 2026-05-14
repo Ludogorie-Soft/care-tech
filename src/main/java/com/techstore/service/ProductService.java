@@ -10,6 +10,7 @@ import com.techstore.entity.Product;
 import com.techstore.entity.ProductParameter;
 import com.techstore.enums.ProductStatus;
 import com.techstore.exception.BusinessLogicException;
+import com.techstore.exception.ResourceNotFoundException;
 import com.techstore.exception.DuplicateResourceException;
 import com.techstore.exception.ValidationException;
 import com.techstore.mapper.ManufacturerMapper;
@@ -316,7 +317,6 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Set<ProductParameterResponseDto> getProductsParametersByCategory(Long categoryId, String lang) {
         List<Object[]> results = productParameterRepository.findParameterOptionsByCategoryAndActiveProducts(categoryId);
-        log.warn("===PP===" + results + "===");
 
         Map<Long, ProductParameterResponseDto> resultMap = new HashMap<>();
 
@@ -729,13 +729,22 @@ public class ProductService {
         if (p.getPrimaryImageUrl() == null && (p.getAdditionalImages() == null || p.getAdditionalImages().isEmpty())) throw new BusinessLogicException("Product must have at least one image");
     }
     public Product findProductByIdOrThrow(Long id) {
-        return productRepository.findById(id).orElseThrow(() -> new BusinessLogicException("Product not found with id: " + id));
+        return productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+    }
+
+    @Transactional
+    public int backfillMissingSlugs() {
+        List<Product> products = productRepository.findProductsWithoutSlug();
+        products.forEach(Product::generateSlug);
+        productRepository.saveAll(products);
+        log.info("Backfilled slugs for {} products", products.size());
+        return products.size();
     }
     private Category findCategoryByIdOrThrow(Long id) {
-        return categoryRepository.findById(id).orElseThrow(() -> new BusinessLogicException("Category not found with id: " + id));
+        return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
     }
     private Manufacturer findManufacturerByIdOrThrow(Long id) {
-        return manufacturerRepository.findById(id).orElseThrow(() -> new BusinessLogicException("Manufacturer not found with id: " + id));
+        return manufacturerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Manufacturer not found with id: " + id));
     }
     private void checkForDuplicateProduct(String ref, Long excludeId) {
         if (!StringUtils.hasText(ref)) return;
@@ -953,6 +962,9 @@ public class ProductService {
         dto.setNameBg(p.getNameBg());
         dto.setDescriptionEn(p.getDescriptionEn());
         dto.setDescriptionBg(p.getDescriptionBg());
+        if (p.getSlug() == null || p.getSlug().isEmpty()) {
+            p.generateSlug();
+        }
         dto.setSlug(p.getSlug());
         dto.setReferenceNumber(p.getReferenceNumber());
         dto.setModel(p.getModel());

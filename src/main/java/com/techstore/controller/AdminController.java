@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -344,5 +345,12 @@ public class AdminController {
 
         OrderResponseDTO order = orderService.updateOrderStatus(orderId, request);
         return ResponseEntity.ok(order);
+    }
+
+    @PostMapping("/products/backfill-slugs")
+    public ResponseEntity<Map<String, Integer>> backfillProductSlugs() {
+        int updated = productService.backfillMissingSlugs();
+        log.info("Slug backfill completed: {} products updated", updated);
+        return ResponseEntity.ok(Map.of("updated", updated));
     }
 }

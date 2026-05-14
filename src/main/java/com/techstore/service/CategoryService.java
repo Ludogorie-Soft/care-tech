@@ -203,8 +203,8 @@ public class CategoryService {
             throw new ValidationException("External ID is required for category creation");
         }
 
-        if (requestDto.getNameBg() == null || requestDto.getNameEn().isEmpty()) {
-            throw new ValidationException("Category name is required");
+        if (!StringUtils.hasText(requestDto.getNameBg())) {
+            throw new ValidationException("Category name (BG) is required");
         }
 
         if (requestDto.getOrder() != null && requestDto.getOrder() < 0) {

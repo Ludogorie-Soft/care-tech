@@ -587,7 +587,7 @@ public class ProductSearchRepository {
             });
 
             if (!manufacturerFacets.isEmpty()) {
-                facets.put("manufacturers:Марка", manufacturerFacets);
+                facets.put("manufacturers:Производител", manufacturerFacets);
             }
         } catch (Exception e) {
             log.error("Failed to get manufacturer facets for category {}: {}", categoryId, e.getMessage(), e);
