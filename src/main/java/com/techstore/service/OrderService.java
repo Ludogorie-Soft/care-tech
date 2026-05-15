@@ -30,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -49,6 +50,7 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final UserService userService;
     private final ApplicationEventPublisher eventPublisher;
+    private final FileUploadService fileUploadService;
     private final ShippingConfig shippingConfig;
 
     /**
@@ -446,6 +448,7 @@ public class OrderService {
                 .installmentOffer(order.getInstallmentOffer())
                 .termsAgreed(order.getTermsAgreed())
                 .shippingCost(order.getShippingCost())
+                .warrantyFilePath(order.getWarrantyFilePath())
                 .build();
     }
 
@@ -464,6 +467,37 @@ public class OrderService {
                 .lineTax(item.getLineTax())
                 .discountAmount(item.getDiscountAmount())
                 .build();
+    }
+
+    @Transactional
+    public OrderResponseDTO uploadWarrantyFile(Long orderId, MultipartFile file) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
+
+        // Изтрий стар файл ако съществува
+        if (order.getWarrantyFilePath() != null) {
+            fileUploadService.deleteFile(order.getWarrantyFilePath());
+        }
+
+        String path = fileUploadService.uploadFile(file, "documents");
+        order.setWarrantyFilePath(path);
+        order = orderRepository.save(order);
+        log.info("Warranty uploaded for order {}: {}", orderId, path);
+        return mapToResponseDTO(order);
+    }
+
+    @Transactional
+    public OrderResponseDTO removeWarrantyFile(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
+
+        if (order.getWarrantyFilePath() != null) {
+            fileUploadService.deleteFile(order.getWarrantyFilePath());
+            order.setWarrantyFilePath(null);
+            order = orderRepository.save(order);
+            log.info("Warranty removed for order {}", orderId);
+        }
+        return mapToResponseDTO(order);
     }
 
     private UserRequestDTO getUserRequestDTO(OrderCreateRequestDTO request) {

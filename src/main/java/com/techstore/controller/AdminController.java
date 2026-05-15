@@ -347,6 +347,21 @@ public class AdminController {
         return ResponseEntity.ok(order);
     }
 
+    @PostMapping(value = "/orders/{orderId}/warranty", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<OrderResponseDTO> uploadOrderWarranty(
+            @PathVariable Long orderId,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+
+        OrderResponseDTO order = orderService.uploadWarrantyFile(orderId, file);
+        return ResponseEntity.ok(order);
+    }
+
+    @DeleteMapping("/orders/{orderId}/warranty")
+    public ResponseEntity<OrderResponseDTO> removeOrderWarranty(@PathVariable Long orderId) {
+        OrderResponseDTO order = orderService.removeWarrantyFile(orderId);
+        return ResponseEntity.ok(order);
+    }
+
     @PostMapping("/products/backfill-slugs")
     public ResponseEntity<Map<String, Integer>> backfillProductSlugs() {
         int updated = productService.backfillMissingSlugs();

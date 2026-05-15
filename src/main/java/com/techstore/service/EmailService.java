@@ -8,6 +8,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -42,6 +44,9 @@ public class EmailService {
 
     @Value("${app.email.info:info@caretech.bg}")
     private String infoEmail;
+
+    @Value("${app.upload.directory:./uploads}")
+    private String uploadsDir;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
@@ -148,7 +153,7 @@ public class EmailService {
             variables.put("orderUrl", appUrl + "/orders/" + order.getId());
 
             String subject = appName + " - Вашата поръчка е изпратена #" + order.getOrderNumber();
-            sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-shipped", variables);
+            sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-shipped", variables, order.getWarrantyFilePath());
 
             log.info("Order shipped email sent successfully to: {}", order.getCustomerEmail());
         } catch (Exception e) {
@@ -292,6 +297,15 @@ public class EmailService {
      */
     private void sendHtmlEmail(String from, String to, String subject, String templateName, Map<String, Object> variables)
             throws MessagingException {
+        sendHtmlEmail(from, to, subject, templateName, variables, null);
+    }
+
+    /**
+     * Send HTML email with optional file attachment
+     */
+    private void sendHtmlEmail(String from, String to, String subject, String templateName,
+                                Map<String, Object> variables, String attachmentPath)
+            throws MessagingException {
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -305,6 +319,15 @@ public class EmailService {
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(htmlContent, true);
+
+        if (attachmentPath != null) {
+            File file = new File(uploadsDir, attachmentPath);
+            if (file.exists() && file.isFile()) {
+                helper.addAttachment(file.getName(), new FileSystemResource(file));
+            } else {
+                log.warn("Warranty file not found, skipping attachment: {}", file.getAbsolutePath());
+            }
+        }
 
         mailSender.send(message);
     }

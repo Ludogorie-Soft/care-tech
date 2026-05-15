@@ -86,6 +86,8 @@ public class OrderResponseDTO {
     private Boolean installmentOffer;
     private Boolean termsAgreed;
 
+    private String warrantyFilePath;
+
     // Computed fields
     public String getFullCustomerName() {
         return customerFirstName + " " + customerLastName;

@@ -154,6 +154,9 @@ public class Order extends BaseEntity {
     @Column(name = "terms_agreed", nullable = false)
     private Boolean termsAgreed = false;
 
+    @Column(name = "warranty_file_path", length = 500)
+    private String warrantyFilePath;
+
     public void calculateTotals() {
         this.subtotal = orderItems.stream()
                 .map(OrderItem::getLineTotal)
