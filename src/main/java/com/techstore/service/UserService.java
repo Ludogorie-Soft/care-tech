@@ -1,13 +1,25 @@
 package com.techstore.service;
 
 import com.techstore.dto.UserResponseDTO;
+import com.techstore.dto.request.ChangePasswordDTO;
+import com.techstore.dto.request.UserAddressDTO;
+import com.techstore.dto.request.UserCompanyDTO;
+import com.techstore.dto.request.UserProfileUpdateDTO;
 import com.techstore.dto.request.UserRequestDTO;
+import com.techstore.dto.response.UserAddressResponseDTO;
+import com.techstore.dto.response.UserCompanyResponseDTO;
 import com.techstore.entity.User;
+import com.techstore.entity.UserAddress;
+import com.techstore.entity.UserCompany;
 import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.DuplicateResourceException;
+import com.techstore.exception.ResourceNotFoundException;
 import com.techstore.exception.ValidationException;
+import com.techstore.repository.UserAddressRepository;
+import com.techstore.repository.UserCompanyRepository;
 import com.techstore.repository.UserRepository;
 import com.techstore.util.ExceptionHelper;
+import com.techstore.util.SecurityHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,7 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +40,10 @@ import java.util.regex.Pattern;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserAddressRepository userAddressRepository;
+    private final UserCompanyRepository userCompanyRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SecurityHelper securityHelper;
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$"
@@ -182,6 +199,178 @@ public class UserService {
             log.info("User status changed successfully - ID: {}, New status: {}", id, active);
             return null;
         }, context);
+    }
+
+    // ========== PROFILE METHODS ==========
+
+    @Transactional(readOnly = true)
+    public UserResponseDTO getCurrentUserProfile() {
+        User user = securityHelper.getCurrentUser();
+        return convertToProfileResponseDTO(user);
+    }
+
+    @Transactional
+    public UserResponseDTO updateCurrentUserProfile(UserProfileUpdateDTO dto) {
+        User user = securityHelper.getCurrentUser();
+
+        if (StringUtils.hasText(dto.getFirstName())) {
+            user.setFirstName(dto.getFirstName().trim());
+        } else {
+            user.setFirstName(null);
+        }
+
+        if (StringUtils.hasText(dto.getLastName())) {
+            user.setLastName(dto.getLastName().trim());
+        } else {
+            user.setLastName(null);
+        }
+
+        if (StringUtils.hasText(dto.getPhone())) {
+            user.setPhone(dto.getPhone().trim());
+        } else {
+            user.setPhone(null);
+        }
+
+        userRepository.save(user);
+        log.info("Profile updated for user id: {}", user.getId());
+        return convertToProfileResponseDTO(user);
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordDTO dto) {
+        User user = securityHelper.getCurrentUser();
+
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+            throw new BusinessLogicException("Current password is incorrect");
+        }
+
+        if (passwordEncoder.matches(dto.getNewPassword(), user.getPassword())) {
+            throw new BusinessLogicException("New password must differ from current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+        log.info("Password changed for user id: {}", user.getId());
+    }
+
+    // ========== ADDRESS METHODS ==========
+
+    @Transactional(readOnly = true)
+    public List<UserAddressResponseDTO> getCurrentUserAddresses() {
+        Long userId = securityHelper.getCurrentUserId();
+        return userAddressRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(userId)
+                .stream().map(this::toAddressResponse).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public UserAddressResponseDTO addAddress(UserAddressDTO dto) {
+        User user = securityHelper.getCurrentUser();
+
+        UserAddress address = new UserAddress();
+        address.setUser(user);
+        applyAddressDTO(address, dto);
+
+        if (Boolean.TRUE.equals(dto.getIsDefault())) {
+            userAddressRepository.clearDefaultForUser(user.getId(), 0L);
+        }
+
+        address = userAddressRepository.save(address);
+
+        if (Boolean.TRUE.equals(dto.getIsDefault())) {
+            userAddressRepository.clearDefaultForUser(user.getId(), address.getId());
+        }
+
+        log.info("Address added for user id: {}", user.getId());
+        return toAddressResponse(address);
+    }
+
+    @Transactional
+    public UserAddressResponseDTO updateAddress(Long addressId, UserAddressDTO dto) {
+        Long userId = securityHelper.getCurrentUserId();
+
+        UserAddress address = userAddressRepository.findByIdAndUserId(addressId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found with id: " + addressId));
+
+        applyAddressDTO(address, dto);
+
+        if (Boolean.TRUE.equals(dto.getIsDefault())) {
+            userAddressRepository.clearDefaultForUser(userId, addressId);
+        }
+
+        address = userAddressRepository.save(address);
+        log.info("Address {} updated for user id: {}", addressId, userId);
+        return toAddressResponse(address);
+    }
+
+    @Transactional
+    public void deleteAddress(Long addressId) {
+        Long userId = securityHelper.getCurrentUserId();
+
+        UserAddress address = userAddressRepository.findByIdAndUserId(addressId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found with id: " + addressId));
+
+        userAddressRepository.delete(address);
+        log.info("Address {} deleted for user id: {}", addressId, userId);
+    }
+
+    // ========== COMPANY METHODS ==========
+
+    @Transactional(readOnly = true)
+    public List<UserCompanyResponseDTO> getCurrentUserCompanies() {
+        Long userId = securityHelper.getCurrentUserId();
+        return userCompanyRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(userId)
+                .stream().map(this::toCompanyResponse).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public UserCompanyResponseDTO addCompany(UserCompanyDTO dto) {
+        User user = securityHelper.getCurrentUser();
+
+        UserCompany company = new UserCompany();
+        company.setUser(user);
+        applyCompanyDTO(company, dto);
+
+        if (Boolean.TRUE.equals(dto.getIsDefault())) {
+            userCompanyRepository.clearDefaultForUser(user.getId(), 0L);
+        }
+
+        company = userCompanyRepository.save(company);
+
+        if (Boolean.TRUE.equals(dto.getIsDefault())) {
+            userCompanyRepository.clearDefaultForUser(user.getId(), company.getId());
+        }
+
+        log.info("Company added for user id: {}", user.getId());
+        return toCompanyResponse(company);
+    }
+
+    @Transactional
+    public UserCompanyResponseDTO updateCompany(Long companyId, UserCompanyDTO dto) {
+        Long userId = securityHelper.getCurrentUserId();
+
+        UserCompany company = userCompanyRepository.findByIdAndUserId(companyId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found with id: " + companyId));
+
+        applyCompanyDTO(company, dto);
+
+        if (Boolean.TRUE.equals(dto.getIsDefault())) {
+            userCompanyRepository.clearDefaultForUser(userId, companyId);
+        }
+
+        company = userCompanyRepository.save(company);
+        log.info("Company {} updated for user id: {}", companyId, userId);
+        return toCompanyResponse(company);
+    }
+
+    @Transactional
+    public void deleteCompany(Long companyId) {
+        Long userId = securityHelper.getCurrentUserId();
+
+        UserCompany company = userCompanyRepository.findByIdAndUserId(companyId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found with id: " + companyId));
+
+        userCompanyRepository.delete(company);
+        log.info("Company {} deleted for user id: {}", companyId, userId);
     }
 
     // ========== PRIVATE VALIDATION METHODS ==========
@@ -359,6 +548,85 @@ public class UserService {
                 .updatedAt(user.getUpdatedAt())
                 .lastLoginAt(user.getLastLoginAt())
                 .fullName(user.getFullName())
+                .build();
+    }
+
+    private UserResponseDTO convertToProfileResponseDTO(User user) {
+        List<UserAddressResponseDTO> addresses = userAddressRepository
+                .findByUserIdOrderByIsDefaultDescCreatedAtDesc(user.getId())
+                .stream().map(this::toAddressResponse).collect(Collectors.toList());
+
+        List<UserCompanyResponseDTO> companies = userCompanyRepository
+                .findByUserIdOrderByIsDefaultDescCreatedAtDesc(user.getId())
+                .stream().map(this::toCompanyResponse).collect(Collectors.toList());
+
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .phone(user.getPhone())
+                .role(user.getRole().name())
+                .active(user.getActive())
+                .emailVerified(user.getEmailVerified())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .lastLoginAt(user.getLastLoginAt())
+                .fullName(user.getFullName())
+                .addresses(addresses)
+                .companies(companies)
+                .build();
+    }
+
+    private void applyAddressDTO(UserAddress address, UserAddressDTO dto) {
+        address.setLabel(StringUtils.hasText(dto.getLabel()) ? dto.getLabel().trim() : null);
+        address.setType(dto.getType());
+        address.setAddressLine(StringUtils.hasText(dto.getAddressLine()) ? dto.getAddressLine().trim() : null);
+        address.setCity(StringUtils.hasText(dto.getCity()) ? dto.getCity().trim() : null);
+        address.setPostalCode(StringUtils.hasText(dto.getPostalCode()) ? dto.getPostalCode().trim() : null);
+        address.setIsDefault(Boolean.TRUE.equals(dto.getIsDefault()));
+        address.setCityId(StringUtils.hasText(dto.getCityId()) ? dto.getCityId().trim() : null);
+        address.setOfficeId(StringUtils.hasText(dto.getOfficeId()) ? dto.getOfficeId().trim() : null);
+    }
+
+    private void applyCompanyDTO(UserCompany company, UserCompanyDTO dto) {
+        company.setCompanyName(dto.getCompanyName().trim());
+        company.setEik(StringUtils.hasText(dto.getEik()) ? dto.getEik().trim() : null);
+        company.setVatNumber(StringUtils.hasText(dto.getVatNumber()) ? dto.getVatNumber().trim() : null);
+        company.setMol(StringUtils.hasText(dto.getMol()) ? dto.getMol().trim() : null);
+        company.setSeat(StringUtils.hasText(dto.getSeat()) ? dto.getSeat().trim() : null);
+        company.setManagementAddress(StringUtils.hasText(dto.getManagementAddress()) ? dto.getManagementAddress().trim() : null);
+        company.setCity(StringUtils.hasText(dto.getCity()) ? dto.getCity().trim() : null);
+        company.setIsDefault(Boolean.TRUE.equals(dto.getIsDefault()));
+    }
+
+    private UserAddressResponseDTO toAddressResponse(UserAddress a) {
+        return UserAddressResponseDTO.builder()
+                .id(a.getId())
+                .label(a.getLabel())
+                .type(a.getType())
+                .addressLine(a.getAddressLine())
+                .city(a.getCity())
+                .postalCode(a.getPostalCode())
+                .isDefault(a.getIsDefault())
+                .cityId(a.getCityId())
+                .officeId(a.getOfficeId())
+                .createdAt(a.getCreatedAt())
+                .build();
+    }
+
+    private UserCompanyResponseDTO toCompanyResponse(UserCompany c) {
+        return UserCompanyResponseDTO.builder()
+                .id(c.getId())
+                .companyName(c.getCompanyName())
+                .eik(c.getEik())
+                .vatNumber(c.getVatNumber())
+                .mol(c.getMol())
+                .seat(c.getSeat())
+                .managementAddress(c.getManagementAddress())
+                .city(c.getCity())
+                .isDefault(c.getIsDefault())
+                .createdAt(c.getCreatedAt())
                 .build();
     }
 }

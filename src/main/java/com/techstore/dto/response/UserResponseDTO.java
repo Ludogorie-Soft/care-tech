@@ -1,6 +1,8 @@
 package com.techstore.dto;
 
 import com.techstore.dto.response.CartItemResponseDto;
+import com.techstore.dto.response.UserAddressResponseDTO;
+import com.techstore.dto.response.UserCompanyResponseDTO;
 import com.techstore.dto.response.UserFavoriteResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,4 +33,6 @@ public class UserResponseDTO {
     private List<UserFavoriteResponseDto> userFavorites;
     private Boolean subscribed;
     private String phone;
+    private List<UserAddressResponseDTO> addresses;
+    private List<UserCompanyResponseDTO> companies;
 }
