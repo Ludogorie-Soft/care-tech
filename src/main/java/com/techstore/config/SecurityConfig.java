@@ -71,6 +71,20 @@ public class SecurityConfig {
     }
 
     @Bean
+    @org.springframework.core.annotation.Order(1)
+    public SecurityFilterChain ogPreviewFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/api/og/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers
+                        .cacheControl(cache -> cache.disable())
+                        .frameOptions(frame -> frame.disable())
+                )
+                .authorizeHttpRequests(authz -> authz.anyRequest().permitAll());
+        return http.build();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -94,6 +108,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/sync/**").permitAll()
                         .requestMatchers("/api/contact/**").permitAll()
                         .requestMatchers("/api/internal/**").permitAll()
+                        .requestMatchers("/api/og/**").permitAll()
 
                         // Swagger/OpenAPI endpoints
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
