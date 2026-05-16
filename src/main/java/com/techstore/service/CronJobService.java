@@ -4,6 +4,7 @@ import com.techstore.service.sync.TekraSyncService;
 import com.techstore.service.sync.ValiSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,7 +17,7 @@ public class CronJobService {
     private final ValiSyncService valiSyncService;
     private final TekraSyncService tekraSyncService;
 
-//    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     public void syncApis() {
         log.info("Starting scheduled Vali synchronization at {}", LocalDateTime.now());
         try {

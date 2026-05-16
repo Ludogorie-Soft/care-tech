@@ -33,4 +33,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @Query("SELECT c FROM Category c LEFT JOIN FETCH c.parent")
     List<Category> findAllWithParents();
+
+    @Query("SELECT c.id AS id, c.slug AS slug, c.updatedAt AS updatedAt FROM Category c WHERE c.show = true AND c.slug IS NOT NULL AND c.slug <> ''")
+    List<SitemapEntry> findSitemapEntries();
 }

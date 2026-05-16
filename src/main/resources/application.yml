@@ -179,7 +179,7 @@ logging:
 # Application Specific Configuration
 app:
     name: CareTech
-    url: ${REACT_APP_API_URL:https://www.caretech.bg}
+    url: ${APP_URL:https://www.caretech.bg}
     email:
       info: ${CARETECH_INFO_EMAIL:info@caretech.bg}
       from: ${CARETECH_ORDERS_EMAIL:orders@caretech.bg}
@@ -256,6 +256,9 @@ management:
     endpoint:
         health:
             show-details: when-authorized
+    health:
+        mail:
+            enabled: false
 
 # OpenAPI/Swagger Configuration
 springdoc:

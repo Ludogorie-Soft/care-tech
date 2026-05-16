@@ -72,8 +72,9 @@ public class OGPreviewController {
     private String buildOgHtml(String title, String description, String imageUrl, String url) {
         String safeTitle = escape(title + " | Care Tech");
         String safeDesc = escape(description);
-        String safeImage = escape(imageUrl);
+        String safeImage = escape(ensureAbsoluteHttps(imageUrl));
         String safeUrl = escape(url);
+        String imageType = imageUrl.toLowerCase().contains(".png") ? "image/png" : "image/jpeg";
 
         return "<!DOCTYPE html>" +
                 "<html lang=\"bg\">" +
@@ -88,8 +89,8 @@ public class OGPreviewController {
                 "<meta property=\"og:title\" content=\"" + safeTitle + "\">" +
                 "<meta property=\"og:description\" content=\"" + safeDesc + "\">" +
                 "<meta property=\"og:image\" content=\"" + safeImage + "\">" +
-                "<meta property=\"og:image:width\" content=\"1200\">" +
-                "<meta property=\"og:image:height\" content=\"630\">" +
+                "<meta property=\"og:image:secure_url\" content=\"" + safeImage + "\">" +
+                "<meta property=\"og:image:type\" content=\"" + imageType + "\">" +
                 "<meta property=\"og:url\" content=\"" + safeUrl + "\">" +
                 "<meta name=\"twitter:card\" content=\"summary_large_image\">" +
                 "<meta name=\"twitter:title\" content=\"" + safeTitle + "\">" +
@@ -101,6 +102,15 @@ public class OGPreviewController {
                 "<p><a href=\"" + safeUrl + "\">Care Tech</a></p>" +
                 "</body>" +
                 "</html>";
+    }
+
+    private String ensureAbsoluteHttps(String imageUrl) {
+        if (imageUrl == null) return appUrl + "/logo.png";
+        if (imageUrl.startsWith("https://")) return imageUrl;
+        if (imageUrl.startsWith("http://")) return imageUrl.replaceFirst("http://", "https://");
+        if (imageUrl.startsWith("//")) return "https:" + imageUrl;
+        if (imageUrl.startsWith("/")) return appUrl + imageUrl;
+        return imageUrl;
     }
 
     private String escape(String input) {

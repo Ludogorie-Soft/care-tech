@@ -78,4 +78,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     void permanentlyDeleteProductWithRelations(@Param("productId") Long productId);
 
     Page<Product> findByMarkupPercentageGreaterThan(BigDecimal markup, Pageable pageable);
+
+    @Query("SELECT p.id AS id, p.slug AS slug, p.updatedAt AS updatedAt FROM Product p WHERE p.active = true AND p.slug IS NOT NULL AND p.slug <> ''")
+    List<SitemapEntry> findSitemapEntries();
 }
