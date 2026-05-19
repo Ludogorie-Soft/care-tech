@@ -1,4 +1,17 @@
 {
   "version": 1,
-  "bugs": []
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-05-16T00:00:00Z",
+      "error_message": "All 16 MOST parameters in DB are metadata junk — no real product parameters stored from Most XML",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Two bugs: (1) extractMostParameters() iterated top-level product Map fields (code, partnum, main_picture_url etc.) instead of the nested 'properties' Map which contains actual XML product specs. (2) generateMostKey() regex [^a-z0-9\\s]+ stripped all Cyrillic characters, turning Bulgarian parameter names like 'Размери (мм)' into empty strings, falling back to 'unknown_param'.",
+      "fix": "Fixed extractMostParameters() to read from mostProduct.get('properties') (Map<String,String> from XML <properties> element). Fixed generateMostKey() regex to [^a-z0-9а-яё\\s]+ to preserve Cyrillic. SQL: DELETE FROM parameters WHERE platform = 'MOST' to clean up all 16 junk entries.",
+      "tags": ["most", "parameters", "cyrillic", "regex", "sync"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-16"
+    }
+  ]
 }

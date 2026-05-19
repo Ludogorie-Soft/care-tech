@@ -1365,7 +1365,13 @@ public class TekraSyncService {
                 "partner_product", "in_stock", "availability",
                 "created_at", "updated_at", "status",
                 "barcode", "ean", "isbn", "warranty",
-                "reference_number", "merna", "outlet", "promo"
+                "reference_number", "merna", "outlet", "promo",
+                // Metadata fields - NOT product parameters
+                "code", "main_picture_url", "partnum", "vendor_url",
+                "searchstring", "picture", "picture_url",
+                "product_code", "article", "article_number", "articul",
+                "country_of_origin", "country", "brand_url",
+                "type_prefix", "param_count"
         );
 
         Set<String> knownTekraParameters = Set.of(

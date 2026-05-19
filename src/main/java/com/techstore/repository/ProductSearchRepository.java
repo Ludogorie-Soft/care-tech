@@ -368,8 +368,7 @@ public class ProductSearchRepository {
                 .finalPrice(rs.getBigDecimal("final_price"))
                 .discount(rs.getBigDecimal("discount"))
                 .status(status.getCode())
-//                .primaryImageUrl("/api/images/product/" + rs.getLong("id") + "/primary")
-                .primaryImageUrl(rs.getString("primary_image_url"))
+                .primaryImageUrl(rs.getString("primary_image_url") != null ? "/api/images/product/" + rs.getLong("id") + "/primary" : null)
                 .manufacturerName(rs.getString("manufacturer_name"))
                 .categoryName(rs.getString("category_name"))
                 .featured(rs.getBoolean("featured"))
@@ -456,7 +455,7 @@ public class ProductSearchRepository {
                 "WHERE p.active = true AND p.show_flag = true " +
                 "AND p.status IN ('AVAILABLE', 'LIMITED_QUANTITY') " +
                 "AND p.category_id = :categoryId " +
-                "AND cp.is_filter != false"
+                "AND cp.is_filter IS NOT FALSE "
         );
 
         if (request.getManufacturers() != null && !request.getManufacturers().isEmpty()) {

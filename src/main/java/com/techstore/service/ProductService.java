@@ -979,14 +979,12 @@ public class ProductService {
         dto.setActive(p.getActive());
         dto.setFeatured(p.getFeatured());
         dto.setShow(p.getShow());
-        if (p.getPrimaryImageUrl() != null) dto.setPrimaryImageUrl(p.getPrimaryImageUrl());
-        if (p.getAdditionalImages() != null) dto.setAdditionalImages(p.getAdditionalImages());
-//        if (p.getPrimaryImageUrl() != null) dto.setPrimaryImageUrl("/api/images/product/" + p.getId() + "/primary");
-//        if (p.getAdditionalImages() != null && !p.getAdditionalImages().isEmpty()) {
-//            List<String> proxyUrls = new ArrayList<>();
-//            for (int i = 0; i < p.getAdditionalImages().size(); i++) proxyUrls.add("/api/images/product/" + p.getId() + "/additional/" + i);
-//            dto.setAdditionalImages(proxyUrls);
-//        }
+        if (p.getPrimaryImageUrl() != null) dto.setPrimaryImageUrl("/api/images/product/" + p.getId() + "/primary");
+        if (p.getAdditionalImages() != null && !p.getAdditionalImages().isEmpty()) {
+            List<String> proxyUrls = new ArrayList<>();
+            for (int i = 0; i < p.getAdditionalImages().size(); i++) proxyUrls.add("/api/images/product/" + p.getId() + "/additional/" + i);
+            dto.setAdditionalImages(proxyUrls);
+        }
         dto.setWarranty(p.getWarranty());
         dto.setWeight(p.getWeight());
         Map<Long, ProductParameterResponseDto> uniqueSpecs = new HashMap<>();

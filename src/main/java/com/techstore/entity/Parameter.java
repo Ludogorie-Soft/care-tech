@@ -19,7 +19,7 @@ public class Parameter extends BaseEntity {
     @Column(name = "external_id")
     private Long externalId;
 
-    @Column(name = "name_bg")
+    @Column(name = "name_bg", unique = true)
     private String nameBg;
 
     @Column(name = "name_en")

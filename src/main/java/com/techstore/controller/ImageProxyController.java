@@ -27,11 +27,14 @@ public class ImageProxyController {
 
     @GetMapping("/product/{productId}/primary")
     public void getPrimaryImage(@PathVariable Long productId, HttpServletResponse response) {
+        log.info("Image proxy request: primary for product {}", productId);
         try {
             String originalImageUrl = productService.getOriginalImageUrl(productId, true, 0);
             if (originalImageUrl != null) {
+                log.info("Proxying primary image for product {} from: {}", productId, originalImageUrl);
                 proxyImage(originalImageUrl, response);
             } else {
+                log.warn("No primary image URL for product {}", productId);
                 response.setStatus(HttpStatus.NOT_FOUND.value());
             }
         } catch (Exception e) {
@@ -57,13 +60,6 @@ public class ImageProxyController {
     }
 
     private void proxyImage(String imageUrl, HttpServletResponse response) {
-        // Convert vali.bg HTTPS URLs to HTTP to avoid SSL timeout issues
-        if (imageUrl.contains("vali.bg") && imageUrl.startsWith("https://")) {
-            String originalUrl = imageUrl;
-            imageUrl = imageUrl.replace("https://", "http://");
-            log.debug("Converted Vali HTTPS URL to HTTP: {} -> {}", originalUrl, imageUrl);
-        }
-
         int maxRetries = 2;
         int retryCount = 0;
 
@@ -73,18 +69,27 @@ public class ImageProxyController {
                 URL url = new URL(imageUrl);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
+                connection.setInstanceFollowRedirects(true);
 
-                // Increased timeouts for external APIs
-                connection.setConnectTimeout(15000); // 15 seconds
-                connection.setReadTimeout(30000);    // 30 seconds
+                connection.setConnectTimeout(15000);
+                connection.setReadTimeout(30000);
 
                 // Add headers to avoid being blocked
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
                 connection.setRequestProperty("Accept", "image/webp,image/apng,image/*,*/*;q=0.8");
                 connection.setRequestProperty("Accept-Language", "bg-BG,bg;q=0.9,en;q=0.8");
 
-                // Set appropriate content type
+                int statusCode = connection.getResponseCode();
                 String contentType = connection.getContentType();
+                log.info("vali.bg response: status={}, contentType={}, url={}", statusCode, contentType, imageUrl);
+
+                if (statusCode != 200) {
+                    log.warn("Non-200 response {} from: {}", statusCode, imageUrl);
+                    response.setStatus(statusCode);
+                    return;
+                }
+
+                // Set appropriate content type
                 if (contentType != null && contentType.startsWith("image/")) {
                     response.setContentType(contentType);
                 } else {

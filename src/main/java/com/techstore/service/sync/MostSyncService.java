@@ -875,38 +875,34 @@ public class MostSyncService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, String> extractMostParameters(Map<String, Object> mostProduct) {
         Map<String, String> parameters = new HashMap<>();
 
-        Set<String> systemFields = Set.of(
-                "part_number", "name", "model", "manufacturer",
-                "price", "currency", "quantity", "category",
-                "description", "image_url", "url"
-        );
+        // Read from the nested "properties" map — these are the actual product specs
+        // from the Most XML <properties><property name="...">value</property></properties> section.
+        // Top-level product fields (code, partnum, main_picture_url, etc.) are metadata, NOT parameters.
+        Object propertiesObj = mostProduct.get("properties");
+        if (!(propertiesObj instanceof Map)) {
+            return parameters;
+        }
 
-        for (Map.Entry<String, Object> entry : mostProduct.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
+        Map<String, String> properties = (Map<String, String>) propertiesObj;
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            String name = entry.getKey();
+            String value = entry.getValue();
 
-            if (value == null || key == null || key.trim().isEmpty()) {
+            if (name == null || name.isBlank() || value == null || value.isBlank()
+                    || "null".equalsIgnoreCase(value.trim())) {
                 continue;
             }
 
-            if (systemFields.contains(key)) {
+            String trimmedValue = value.trim();
+            if (trimmedValue.length() > 200) {
                 continue;
             }
 
-            String stringValue = value.toString().trim();
-
-            if (stringValue.isEmpty() || "null".equalsIgnoreCase(stringValue)) {
-                continue;
-            }
-
-            if (stringValue.length() > 200) {
-                continue;
-            }
-
-            parameters.put(key, stringValue);
+            parameters.put(name, trimmedValue);
         }
 
         return parameters;
@@ -965,9 +961,10 @@ public class MostSyncService {
             return "unknown_param";
         }
 
+        // Keep Cyrillic (а-яА-Я) and Latin (a-zA-Z), digits, strip everything else
         return parameterName.toLowerCase()
-                .replaceAll("[^a-z0-9\\s]+", " ")  // Remove special chars
+                .replaceAll("[^a-z0-9а-яё\\s]+", " ")
                 .trim()
-                .replaceAll("\\s+", "_");          // Replace spaces with underscore
+                .replaceAll("\\s+", "_");
     }
 }
