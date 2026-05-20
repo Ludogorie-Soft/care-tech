@@ -101,5 +101,54 @@
       "occurrences": 1,
       "last_seen": "2026-05-20"
     }
+  ,
+    {
+      "id": "bug-012",
+      "timestamp": "2026-05-20T00:00:00Z",
+      "error_message": "Дублиращи категории в менюто: 'Видео карта' и 'Видео карти', 'Памет' и 'Памети' и др.",
+      "file": "scripts/7b_fix_asbis_duplicate_subcategories.sql",
+      "root_cause": "Скрипт 7 мести ДЕЦАТА на Asbis roots под Vali roots. Тези деца са именувани в единствено число (Видео карта, Памет, Дънна платка...) докато съответните Vali категории са в множествено число. Резултат: двойници под един родител.",
+      "fix": "Скрипт 7b: CREATE FUNCTION merge_asbis_duplicate() — за всяка двойка (Asbis ед.ч., Vali мн.ч.) премества продуктите и скрива Asbis категорията. Покрива всички познати случаи + финална диагностика.",
+      "tags": ["categories", "asbis", "duplicates", "singular-plural", "merge"],
+      "related_bugs": ["bug-009", "bug-005"],
+      "occurrences": 1,
+      "last_seen": "2026-05-20"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-05-20T00:00:00Z",
+      "error_message": "Празни категории се показват в навигационното меню (напр. pamet-asbis/417 — без продукти)",
+      "file": "scripts/9_hide_empty_categories.sql",
+      "root_cause": "След скрипт 7 (reorganize_asbis) Asbis подкатегориите се преместиха под Vali roots с show_flag=true, но много нямат видими (show=true) продукти. getAllCategories() връща всички show_flag=true категории без проверка за съдържание.",
+      "fix": "Скрипт 9: итеративен UPDATE show_flag=false за leaf категории без видими продукти и без видими деца. Повтаря се докато нищо не се промени (хваща и родителите).",
+      "tags": ["categories", "show_flag", "empty", "asbis", "navigation"],
+      "related_bugs": ["bug-005"],
+      "occurrences": 1,
+      "last_seen": "2026-05-20"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-05-20T00:00:00Z",
+      "error_message": "Разбъркан sort_order в категориите след скрипт 7 — Asbis подкатегории с sort_order=0 излизат ПРЕДИ Vali подкатегориите",
+      "file": "scripts/10_fix_sort_order_after_reorganization.sql",
+      "root_cause": "Скрипт 7 мести Asbis подкатегории под Vali roots без да задава sort_order. Default sort_order=0 ги поставя пред всички Vali категории (sort_order 1-21).",
+      "fix": "Скрипт 10: Asbis-derived подкатегории → sort_order=100+; Vali подкатегории → sort_order 1-21 (re-run от скрипт 4); top-level re-run от скрипт 3.",
+      "tags": ["categories", "sort_order", "asbis", "reorganization"],
+      "related_bugs": ["bug-009"],
+      "occurrences": 1,
+      "last_seen": "2026-05-20"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-05-20T00:00:00Z",
+      "error_message": "Продуктови URL-и показват числов ID вместо slug (напр. /product/12345/12345)",
+      "file": "scripts/11_fix_product_slugs.sql",
+      "root_cause": "ProductCard използва `p?.slug || p?.id`. Продукти с empty slug (nameEn/nameBg бяха empty при първото @PrePersist, или transliterate върна '') показват ID. SlugRegenerationRunner регенерира при startup само ако slug е null/empty.",
+      "fix": "Скрипт 11: SQL UPDATE генерира slug от name_en (Latin) чрез regexp_replace. За Cyrillic имена — optional fallback 'product-id' или рестарт на приложението (SlugRegenerationRunner).",
+      "tags": ["product", "slug", "url", "asbis", "tekra"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-20"
+    }
   ]
 }

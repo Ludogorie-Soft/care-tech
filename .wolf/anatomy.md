@@ -125,7 +125,11 @@
 - `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
+- `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
 - `8_asbis_filters.sql` — Auto-select Asbis is_filter=true по option_count 2-50, с blacklist на packaging/global параметри (~600 tok)
+- `9_hide_empty_categories.sql` — Итеративно скрива категории без видими продукти (show=false); работи рекурсивно нагоре (leaf → parent) (~500 tok)
+- `10_fix_sort_order_after_reorganization.sql` — Поправя sort_order след скрипт 7: Asbis subcategories → 100+, Vali subcategories → 1-21, top-level re-run (~600 tok)
+- `11_fix_product_slugs.sql` — Генерира slug за продукти с empty/null slug от name_en/name_bg; Cyrillic product-id fallback опционален (~400 tok)
 
 ## src/
 
