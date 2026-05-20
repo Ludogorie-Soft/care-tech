@@ -310,9 +310,8 @@ public class ValiSyncService {
                             (existing, duplicate) -> existing
                     ));
 
-            // Fallback map: VALI params without externalId, keyed by normalised name_bg
-            Map<String, Parameter> valiParamsByNameBg = allExistingParams.stream()
-                    .filter(p -> p.getPlatform() == Platform.VALI)
+            // Fallback map: ALL params without externalId, keyed by normalised name_bg (cross-platform adoption)
+            Map<String, Parameter> allParamsByNameBg = allExistingParams.stream()
                     .filter(p -> p.getExternalId() == null)
                     .filter(p -> p.getNameBg() != null)
                     .collect(Collectors.toMap(
@@ -320,6 +319,19 @@ public class ValiSyncService {
                             p -> p,
                             (existing, duplicate) -> existing
                     ));
+
+            // Guard: categoryId → (normalizedNameBg → parameterId) — prevents duplicate param names per category
+            Map<Long, Map<String, Long>> paramNamesByCategory = new HashMap<>();
+            for (Parameter p : allExistingParams) {
+                if (p.getNameBg() == null || p.getCategories() == null) continue;
+                String norm = p.getNameBg().toLowerCase().trim();
+                for (Category cat : p.getCategories()) {
+                    if (cat.getId() != null) {
+                        paramNamesByCategory.computeIfAbsent(cat.getId(), k -> new HashMap<>())
+                                .put(norm, p.getId());
+                    }
+                }
+            }
 
             log.info("Loaded {} existing parameters from database", globalParamsCache.size());
 
@@ -402,10 +414,21 @@ public class ValiSyncService {
                         String nameBgLower = extractNameBg(paramData.apiParam) != null
                                 ? extractNameBg(paramData.apiParam).toLowerCase().trim() : null;
                         Parameter orphanByName = nameBgLower != null
-                                ? valiParamsByNameBg.remove(nameBgLower) : null;
+                                ? allParamsByNameBg.remove(nameBgLower) : null;
 
                         if (orphanByName != null) {
                             orphanByName.setExternalId(externalId);
+                            // Assign new categories through uniqueness guard
+                            Set<Category> existCats = orphanByName.getCategories();
+                            if (existCats == null) { existCats = new HashSet<>(); orphanByName.setCategories(existCats); }
+                            Set<Long> existCatIds = existCats.stream().map(Category::getId).collect(Collectors.toSet());
+                            for (Category c : paramData.categories) {
+                                if (!existCatIds.contains(c.getId()) &&
+                                        canAddCategoryToParam(orphanByName.getId(), orphanByName.getNameBg(), c, paramNamesByCategory)) {
+                                    existCats.add(c);
+                                    registerParamInCategory(orphanByName.getId(), orphanByName.getNameBg(), c, paramNamesByCategory);
+                                }
+                            }
                             parameter = parameterRepository.save(orphanByName);
                             globalParamsCache.put(externalId, parameter);
                             reused++;
@@ -413,8 +436,19 @@ public class ValiSyncService {
                                     parameter.getNameBg(), externalId);
                         } else {
                             parameter = createParameterFromExternal(paramData.apiParam);
-                            parameter.setCategories(new HashSet<>(paramData.categories));
+                            // Filter categories through uniqueness guard before saving
+                            Set<Category> validCats = new HashSet<>();
+                            String newParamNameBg = extractNameBg(paramData.apiParam);
+                            for (Category c : paramData.categories) {
+                                if (canAddCategoryToParam(null, newParamNameBg, c, paramNamesByCategory)) {
+                                    validCats.add(c);
+                                }
+                            }
+                            parameter.setCategories(validCats);
                             parameter = parameterRepository.save(parameter);
+                            for (Category c : parameter.getCategories()) {
+                                registerParamInCategory(parameter.getId(), parameter.getNameBg(), c, paramNamesByCategory);
+                            }
                             globalParamsCache.put(externalId, parameter);
                             created++;
                             log.debug("✓ Created parameter: '{}' (externalId={}) for {} categories",
@@ -447,8 +481,10 @@ public class ValiSyncService {
                                 .collect(Collectors.toSet());
 
                         for (Category newCat : paramData.categories) {
-                            if (!existingCategoryIds.contains(newCat.getId())) {
+                            if (!existingCategoryIds.contains(newCat.getId()) &&
+                                    canAddCategoryToParam(parameter.getId(), parameter.getNameBg(), newCat, paramNamesByCategory)) {
                                 existingCategories.add(newCat);
+                                registerParamInCategory(parameter.getId(), parameter.getNameBg(), newCat, paramNamesByCategory);
                                 updated = true;
                             }
                         }
@@ -976,6 +1012,26 @@ public class ValiSyncService {
             log.warn("Product {}: {} params processed, {} not found",
                     extProduct.getReferenceNumber(), currentParams.size(), notFoundCount);
         }
+    }
+
+    private boolean canAddCategoryToParam(Long paramId, String nameBg, Category cat,
+                                          Map<Long, Map<String, Long>> paramNamesByCategory) {
+        if (cat.getId() == null || nameBg == null) return true;
+        Map<String, Long> namesInCat = paramNamesByCategory.get(cat.getId());
+        if (namesInCat == null) return true;
+        Long existingId = namesInCat.get(nameBg.toLowerCase().trim());
+        if (existingId == null) return true;
+        if (existingId.equals(paramId)) return true;
+        log.warn("Blocked duplicate param '{}' in category '{}' — already owned by param id={}",
+                nameBg, cat.getNameBg(), existingId);
+        return false;
+    }
+
+    private void registerParamInCategory(Long paramId, String nameBg, Category cat,
+                                         Map<Long, Map<String, Long>> paramNamesByCategory) {
+        if (paramId == null || cat.getId() == null || nameBg == null) return;
+        paramNamesByCategory.computeIfAbsent(cat.getId(), k -> new HashMap<>())
+                .put(nameBg.toLowerCase().trim(), paramId);
     }
 
     private boolean isManualParameterForVali(ProductParameter productParameter) {

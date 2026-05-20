@@ -59,6 +59,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT p FROM Product p WHERE p.sku = :sku")
     List<Product> findProductsBySkuCode(@Param("sku") String sku);
 
+    @Query("SELECT p FROM Product p WHERE p.sku = :sku AND p.platform = :platform")
+    List<Product> findBySkuAndPlatform(@Param("sku") String sku, @Param("platform") com.techstore.enums.Platform platform);
+
     @Query("SELECT DISTINCT p.manufacturer FROM Product p " +
             "WHERE p.category.id = :categoryId " +
             "AND p.manufacturer IS NOT NULL")
@@ -78,6 +81,15 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     void permanentlyDeleteProductWithRelations(@Param("productId") Long productId);
 
     Page<Product> findByMarkupPercentageGreaterThan(BigDecimal markup, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.asbisCode IN :asbisCodes")
+    List<Product> findByAsbisCodeIn(@Param("asbisCodes") Collection<String> asbisCodes);
+
+    @Modifying
+    @Query("UPDATE Product p SET p.show = false, p.status = com.techstore.enums.ProductStatus.NOT_AVAILABLE " +
+           "WHERE p.platform = com.techstore.enums.Platform.ASBIS " +
+           "AND p.asbisCode NOT IN :knownCodes")
+    int hideAsbisProductsNotIn(@Param("knownCodes") Collection<String> knownCodes);
 
     @Query("SELECT p.id AS id, p.slug AS slug, p.updatedAt AS updatedAt FROM Product p WHERE p.active = true AND p.slug IS NOT NULL AND p.slug <> ''")
     List<SitemapEntry> findSitemapEntries();

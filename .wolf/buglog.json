@@ -13,5 +13,93 @@
       "occurrences": 1,
       "last_seen": "2026-05-16"
     }
+  ,
+    {
+      "id": "bug-005",
+      "timestamp": "2026-05-19T16:02:00Z",
+      "error_message": "Скрити категории (show_flag=false) се появяват в навигационното меню на фронтенда",
+      "file": "src/main/java/com/techstore/service/CategoryService.java",
+      "root_cause": "getAllCategories() (non-paginated, използван от GET /api/categories) викаше findAll() вместо findByShowTrue() — връщаше всички категории включително скритите Asbis roots.",
+      "fix": "Сменен findAll() с findByShowTrue() в non-paginated getAllCategories(). Добавен List<Category> findByShowTrue() в CategoryRepository.",
+      "tags": ["categories", "show_flag", "frontend", "navigation"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-05-19T12:17:28Z",
+      "error_message": "InvalidDataAccessApiUsageException: Modifying queries can only use void or int/Integer as return type",
+      "file": "src/main/java/com/techstore/repository/ProductRepository.java",
+      "root_cause": "hideAsbisProductsNotIn() declared return type long — Spring Data @Modifying queries only support void/int/Integer.",
+      "fix": "Changed return type from long to int in both repository interface and service call site.",
+      "tags": ["spring-data", "modifying", "return-type", "repository"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-05-19T11:53:53Z",
+      "error_message": "HibernateException: A collection with orphan deletion was no longer referenced by the owning entity instance: Product.productParameters",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "setAsbisParametersToProduct() built a new HashSet 'merged' and called product.setProductParameters(merged), replacing the Hibernate-managed collection. With orphanRemoval=true Hibernate tracks the exact collection instance — replacing it at flush causes this exception.",
+      "fix": "Replaced product.setProductParameters(merged) with existingParams.clear() + existingParams.addAll(manualParams) + existingParams.addAll(autoParams). Mutates the existing managed collection in-place instead of swapping it.",
+      "tags": ["hibernate", "orphanRemoval", "productParameters", "asbis", "sync"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-05-19T11:30:00Z",
+      "error_message": "Found 0 Product nodes in PriceAvail XML — syncAsbisPriceAvail() updates nothing",
+      "file": "src/main/java/com/techstore/service/AsbisApiService.java",
+      "root_cause": "parsePriceAvailFromXML() searched for getElementsByTagName('Product') but the real Asbis PriceAvail.xml uses <PRICE> tags inside <PRICES>. Field names also wrong: WIC (not ProductCode), MY_PRICE (not Price), AVAIL text 'да'/'По заявка' (not Stock integer), CURRENCY_CODE (not Currency).",
+      "fix": "Changed getElementsByTagName('Product') → 'PRICE'. Rewrote extractPriceAvailFromElement() to read WIC, MY_PRICE, RETAIL_PRICE, AVAIL, CURRENCY_CODE, WARRANTYTERM. AVAIL 'да' maps to stock=1, anything else maps to stock=0.",
+      "tags": ["asbis", "price-avail", "xml", "parsing", "sync"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19"
+    }
+  ,
+    {
+      "id": "bug-006",
+      "timestamp": "2026-05-19T00:00:00Z",
+      "error_message": "SQL Error [42703]: column cp.option_count does not exist",
+      "file": "scripts/8_asbis_filters.sql",
+      "root_cause": "category_parameters table has only (category_id, parameter_id, is_filter). There is no option_count column — the count must be computed with a subquery against parameter_options.",
+      "fix": "Replaced cp.option_count with (SELECT COUNT(*) FROM parameter_options po WHERE po.parameter_id = p.id) in both the UPDATE WHERE clause and the verification SELECT.",
+      "tags": ["sql", "category_parameters", "option_count", "asbis", "filters"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-19"
+    }
+  ,
+    {
+      "id": "bug-007",
+      "timestamp": "2026-05-20T00:00:00Z",
+      "error_message": "Tekra camera subcategories (IP Камери, Аналогови камери, NVR/DVR Рекордери) show no filters — only brands",
+      "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "syncTekraParameters() only processes categories with tekraSlug set. The discriminated subcategories (IP Камери, Аналогови камери, etc.) are created manually via ensureAnalogDigitalSubcategories() without a tekraSlug, so they are never included in the parameter→category join. Products get remapped to these subcategories in syncTekraProducts() via findCategoryWithTypeDiscrimination(), but category_parameters is never populated for them.",
+      "fix": "Added a native bulk INSERT at the end of syncTekraProducts() that populates missing category_parameters from product_parameters for all TEKRA products. Uses ON CONFLICT DO NOTHING so it is idempotent.",
+      "tags": ["tekra", "category_parameters", "filters", "subcategories", "discrimination"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-20"
+    }
+  ,
+    {
+      "id": "bug-008",
+      "timestamp": "2026-05-20T00:00:00Z",
+      "error_message": "Asbis products with zero price appear in the storefront",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "Two bugs: (1) setAsbisProductFields() set show=true/status=AVAILABLE for new products before PriceAvail sync ran — they were visible with no price. (2) syncAsbisPriceAvail() set show based only on inStock (stock>0), ignoring price — products with AVAIL='да' but MY_PRICE=0 became visible.",
+      "fix": "(1) New products now start with show=false/status=NOT_AVAILABLE. (2) visible = inStock && hasPrice (price > 0). Both conditions must be true for a product to be shown.",
+      "tags": ["asbis", "price", "show", "zero-price", "sync"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-20"
+    }
   ]
 }

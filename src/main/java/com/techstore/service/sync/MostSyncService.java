@@ -294,21 +294,39 @@ public class MostSyncService {
                 }
             }
 
+            // Fallback map: ALL existing parameters keyed by normalized nameBg (for cross-platform reuse)
+            Map<String, Parameter> existingByNormalizedNameBg = new HashMap<>();
+            for (Parameter p : allExistingParams) {
+                if (p.getNameBg() != null && p.getMostKey() == null) {
+                    existingByNormalizedNameBg.put(p.getNameBg().toLowerCase().trim(), p);
+                }
+            }
+
             log.info("Loaded {} existing parameters with mostKey from database", globalParamsCache.size());
+
+            // Guard: categoryId → (normalizedNameBg → parameterId)
+            Map<Long, Map<String, Long>> paramNamesByCategory = new HashMap<>();
+            for (Parameter p : allExistingParams) {
+                if (p.getNameBg() == null || p.getCategories() == null) continue;
+                String norm = p.getNameBg().toLowerCase().trim();
+                for (Category cat : p.getCategories()) {
+                    if (cat.getId() != null) {
+                        paramNamesByCategory.computeIfAbsent(cat.getId(), k -> new HashMap<>())
+                                .put(norm, p.getId());
+                    }
+                }
+            }
 
             List<ParameterOption> allExistingOptions = parameterOptionRepository.findAll();
 
             Map<String, ParameterOption> globalOptionsCache = new HashMap<>();
             for (ParameterOption option : allExistingOptions) {
                 if (option.getParameter() != null &&
-                        option.getParameter().getNameBg() != null &&
+                        option.getParameter().getId() != null &&
                         option.getNameBg() != null) {
-
-                    String cacheKey = buildOptionCacheKey(
-                            option.getParameter().getNameBg(),
-                            option.getNameBg()
-                    );
-                    globalOptionsCache.put(cacheKey, option);
+                    globalOptionsCache.put(
+                            buildOptionCacheKey(option.getParameter().getId(), option.getNameBg()),
+                            option);
                 }
             }
 
@@ -380,21 +398,54 @@ public class MostSyncService {
                     Parameter parameter = globalParamsCache.get(mostKey);  // ← ПРОМЕНЕНО!
 
                     if (parameter == null) {
-                        parameter = new Parameter();
-                        parameter.setNameBg(paramData.nameBg);
-                        parameter.setNameEn(paramData.nameEn);
-                        parameter.setMostKey(paramData.mostKey);  // ← ДОБАВЕНО!
-                        parameter.setPlatform(Platform.MOST);
-                        parameter.setOrder(50);
-                        parameter.setCategories(new HashSet<>(paramData.categories));
-                        parameter.setCreatedBy("system");
+                        // Cross-platform fallback: check if a parameter with the same nameBg exists
+                        String normalizedName = paramData.nameBg != null
+                                ? paramData.nameBg.toLowerCase().trim() : null;
+                        Parameter byNameBg = normalizedName != null
+                                ? existingByNormalizedNameBg.remove(normalizedName) : null;
 
-                        parameter = parameterRepository.save(parameter);
-                        globalParamsCache.put(paramData.mostKey, parameter);  // ← ПРОМЕНЕНО!
-                        created++;
-
-                        log.debug("✓ Created parameter: '{}' (mostKey={}) for {} categories",
-                                parameter.getNameBg(), paramData.mostKey, paramData.categories.size());
+                        if (byNameBg != null) {
+                            // Adopt existing parameter: assign mostKey and merge categories
+                            byNameBg.setMostKey(paramData.mostKey);
+                            Set<Category> existCats = byNameBg.getCategories();
+                            if (existCats == null) { existCats = new HashSet<>(); byNameBg.setCategories(existCats); }
+                            Set<Long> existCatIds = existCats.stream().map(Category::getId).collect(Collectors.toSet());
+                            for (Category c : paramData.categories) {
+                                if (!existCatIds.contains(c.getId()) &&
+                                        canAddCategoryToParam(byNameBg.getId(), byNameBg.getNameBg(), c, paramNamesByCategory)) {
+                                    existCats.add(c);
+                                    registerParamInCategory(byNameBg.getId(), byNameBg.getNameBg(), c, paramNamesByCategory);
+                                }
+                            }
+                            parameter = parameterRepository.save(byNameBg);
+                            globalParamsCache.put(paramData.mostKey, parameter);
+                            reused++;
+                            log.debug("↑ Adopted parameter '{}' by nameBg (assigned mostKey={})",
+                                    parameter.getNameBg(), paramData.mostKey);
+                        } else {
+                            parameter = new Parameter();
+                            parameter.setNameBg(paramData.nameBg);
+                            parameter.setNameEn(paramData.nameEn);
+                            parameter.setMostKey(paramData.mostKey);
+                            parameter.setPlatform(Platform.MOST);
+                            parameter.setOrder(50);
+                            parameter.setCreatedBy("system");
+                            Set<Category> validCats = new HashSet<>();
+                            for (Category c : paramData.categories) {
+                                if (canAddCategoryToParam(null, paramData.nameBg, c, paramNamesByCategory)) {
+                                    validCats.add(c);
+                                }
+                            }
+                            parameter.setCategories(validCats);
+                            parameter = parameterRepository.save(parameter);
+                            for (Category c : parameter.getCategories()) {
+                                registerParamInCategory(parameter.getId(), parameter.getNameBg(), c, paramNamesByCategory);
+                            }
+                            globalParamsCache.put(paramData.mostKey, parameter);
+                            created++;
+                            log.debug("✓ Created parameter: '{}' (mostKey={}) for {} categories",
+                                    parameter.getNameBg(), paramData.mostKey, validCats.size());
+                        }
 
                     } else {
                         Set<Category> existingCategories = parameter.getCategories();
@@ -409,8 +460,10 @@ public class MostSyncService {
 
                         boolean updated = false;
                         for (Category newCat : paramData.categories) {
-                            if (!existingCategoryIds.contains(newCat.getId())) {
+                            if (!existingCategoryIds.contains(newCat.getId()) &&
+                                    canAddCategoryToParam(parameter.getId(), parameter.getNameBg(), newCat, paramNamesByCategory)) {
                                 existingCategories.add(newCat);
+                                registerParamInCategory(parameter.getId(), parameter.getNameBg(), newCat, paramNamesByCategory);
                                 updated = true;
                             }
                         }
@@ -471,7 +524,7 @@ public class MostSyncService {
                 continue;
             }
 
-            String cacheKey = buildOptionCacheKey(parameter.getNameBg(), value);
+            String cacheKey = buildOptionCacheKey(parameter.getId(), value);
 
             if (globalOptionsCache.containsKey(cacheKey)) {
                 continue;
@@ -515,7 +568,7 @@ public class MostSyncService {
             log.info("Loaded {} manufacturers", manufacturersMap.size());
 
             List<Parameter> allParameters = parameterRepository.findAll().stream()
-                    .filter(p -> p.getPlatform() == Platform.MOST || p.getPlatform() == null)
+                    .filter(p -> p.getMostKey() != null)
                     .toList();
 
             Map<String, Parameter> parametersByMostKey = new HashMap<>();
@@ -562,6 +615,7 @@ public class MostSyncService {
 
             long totalProcessed = 0, totalCreated = 0, totalUpdated = 0, totalErrors = 0;
             long skippedNoCategory = 0, skippedNoManufacturer = 0;
+            Set<String> unmappedCategories = new LinkedHashSet<>();
 
             for (int i = 0; i < allProducts.size(); i++) {
                 Map<String, Object> mostProduct = allProducts.get(i);
@@ -579,7 +633,7 @@ public class MostSyncService {
                     String targetCategoryName = MOST_CATEGORY_MAPPING.get(categoryName);
 
                     if (targetCategoryName == null) {
-                        log.debug("Unknown category '{}' for product {}", categoryName, sku);
+                        if (categoryName != null) unmappedCategories.add(categoryName);
                         skippedNoCategory++;
                         continue;
                     }
@@ -646,9 +700,15 @@ public class MostSyncService {
                 }
             }
 
+            if (!unmappedCategories.isEmpty()) {
+                log.warn("=== MOST UNMAPPED CATEGORIES ({}) — add to MOST_CATEGORY_MAPPING: {} ===",
+                        unmappedCategories.size(), unmappedCategories);
+            }
+
             String message = String.format(
-                    "Total: %d, Created: %d, Updated: %d, Skipped (No Category): %d, Skipped (No Manufacturer): %d, Errors: %d",
-                    totalProcessed, totalCreated, totalUpdated, skippedNoCategory, skippedNoManufacturer, totalErrors
+                    "Total: %d, Created: %d, Updated: %d, Skipped (No Category): %d, Skipped (No Manufacturer): %d, Errors: %d, Unmapped categories: %d",
+                    totalProcessed, totalCreated, totalUpdated, skippedNoCategory, skippedNoManufacturer, totalErrors,
+                    unmappedCategories.size()
             );
 
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, totalCreated,
@@ -757,14 +817,9 @@ public class MostSyncService {
     private boolean isManualParameter(ProductParameter productParameter) {
         Parameter parameter = productParameter.getParameter();
         if (parameter == null) return false;
-
-        boolean isDifferentPlatform = (parameter.getPlatform() == null ||
-                parameter.getPlatform() != Platform.MOST);
-
-        boolean isCreatedByAdmin = isAdminUser(parameter.getCreatedBy());
-        boolean isModifiedByAdmin = isAdminUser(parameter.getLastModifiedBy());
-
-        return isDifferentPlatform || isCreatedByAdmin || isModifiedByAdmin;
+        // Only admin-touched parameters are considered manual — platform is irrelevant.
+        // Cross-platform parameters (e.g. created by Vali, reused by Most) must NOT be treated as manual.
+        return isAdminUser(parameter.getCreatedBy()) || isAdminUser(parameter.getLastModifiedBy());
     }
 
     private boolean isAdminUser(String username) {
@@ -774,13 +829,13 @@ public class MostSyncService {
 
     private Product findOrCreateProduct(String sku, Map<String, Object> mostProduct, Category category) {
         try {
-            List<Product> existing = productRepository.findProductsBySkuCode(sku);
+            List<Product> existing = productRepository.findBySkuAndPlatform(sku, Platform.MOST);
             Product product;
 
             if (!existing.isEmpty()) {
                 product = existing.get(0);
                 if (existing.size() > 1) {
-                    log.warn("Found {} duplicates for SKU: {}, keeping first", existing.size(), sku);
+                    log.warn("Found {} duplicates for SKU: {} (MOST), keeping first", existing.size(), sku);
                     for (int i = 1; i < existing.size(); i++) {
                         productRepository.delete(existing.get(i));
                     }
@@ -788,6 +843,7 @@ public class MostSyncService {
             } else {
                 product = new Product();
                 product.setSku(sku);
+                product.setPlatform(Platform.MOST);
             }
 
             product.setCategory(category);
@@ -804,8 +860,6 @@ public class MostSyncService {
                                                 boolean isNew, Map<String, Manufacturer> manufacturersMap) {
         try {
             if (isNew) {
-                String sku = (String) mostProduct.get("part_number");
-                product.setReferenceNumber(sku);
                 product.setPlatform(Platform.MOST);
 
                 String name = (String) mostProduct.get("name");
@@ -908,6 +962,26 @@ public class MostSyncService {
         return parameters;
     }
 
+    private boolean canAddCategoryToParam(Long paramId, String nameBg, Category cat,
+                                          Map<Long, Map<String, Long>> paramNamesByCategory) {
+        if (cat.getId() == null || nameBg == null) return true;
+        Map<String, Long> namesInCat = paramNamesByCategory.get(cat.getId());
+        if (namesInCat == null) return true;
+        Long existingId = namesInCat.get(nameBg.toLowerCase().trim());
+        if (existingId == null) return true;
+        if (existingId.equals(paramId)) return true;
+        log.warn("Blocked duplicate param '{}' in category '{}' — already owned by param id={}",
+                nameBg, cat.getNameBg(), existingId);
+        return false;
+    }
+
+    private void registerParamInCategory(Long paramId, String nameBg, Category cat,
+                                         Map<Long, Map<String, Long>> paramNamesByCategory) {
+        if (paramId == null || cat.getId() == null || nameBg == null) return;
+        paramNamesByCategory.computeIfAbsent(cat.getId(), k -> new HashMap<>())
+                .put(nameBg.toLowerCase().trim(), paramId);
+    }
+
     private String normalizeManufacturerName(String name) {
         if (name == null) return "";
         return name.toLowerCase().trim().replaceAll("\\s+", " ").replaceAll("[^a-zа-я0-9\\s]+", "");
@@ -918,8 +992,8 @@ public class MostSyncService {
         return name.toLowerCase().trim().replaceAll("\\s+", " ");
     }
 
-    private String buildOptionCacheKey(String parameterName, String optionName) {
-        return normalizeName(parameterName) + ":::" + normalizeName(optionName);
+    private String buildOptionCacheKey(Long parameterId, String optionName) {
+        return parameterId + ":::" + normalizeName(optionName);
     }
 
     private BigDecimal convertToPrice(Object value) {

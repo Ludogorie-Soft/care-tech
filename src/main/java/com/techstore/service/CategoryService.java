@@ -36,7 +36,7 @@ public class CategoryService {
         log.debug("Fetching all active categories");
 
         return ExceptionHelper.wrapDatabaseOperation(() ->
-                        categoryRepository.findAll()
+                        categoryRepository.findByShowTrue()
                                 .stream()
                                 .map(this::convertToResponseDTO)
                                 .toList(),

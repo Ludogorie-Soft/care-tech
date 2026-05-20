@@ -117,10 +117,15 @@
 
 ## scripts/
 
-- `rebrand_vali_to_caretech.sql` — Ребрандиране: VALI COMPUTERS → CARETECH (~536 tok)
-- `rename_categories.sql` — Скрипт за преименуване и реорганизация на категории (~2744 tok)
-- `reorder_subcategories.sql` — Скрипт за пренареждане на подкатегории (sort_order) (~4734 tok)
-- `reorder_top_categories.sql` — Скрипт за пренареждане на главните категории (sort_order) (~1086 tok)
+Изпълнявай в ред след всички sync API endpoints:
+- `1_rename_categories.sql` — Преименуване на Vali/Tekra категории по external_id (~2744 tok)
+- `2_rebrand_vali_to_caretech.sql` — Ребрандиране: VALI COMPUTERS → CARETECH (~536 tok)
+- `3_reorder_top_categories.sql` — Пренарежда главните категории (sort_order) вкл. 3-те нови Asbis roots (~1086 tok)
+- `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
+- `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)
+- `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
+- `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
+- `8_asbis_filters.sql` — Auto-select Asbis is_filter=true по option_count 2-50, с blacklist на packaging/global параметри (~600 tok)
 
 ## src/
 

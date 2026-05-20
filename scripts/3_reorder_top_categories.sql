@@ -48,10 +48,16 @@ UPDATE categories SET sort_order = 22, updated_at = NOW()
   WHERE name_bg ILIKE 'VR%' AND parent_id IS NULL;
 UPDATE categories SET sort_order = 23, updated_at = NOW()
   WHERE name_bg ILIKE 'Офис продукти%' AND parent_id IS NULL;
-UPDATE categories SET sort_order = 24, updated_at = NOW() WHERE external_id = 491;           -- Инструменти и аксесоари (Продукти и аксесоари)
+UPDATE categories SET sort_order = 24, updated_at = NOW() WHERE external_id = 491;           -- Инструменти и аксесоари
 UPDATE categories SET sort_order = 25, updated_at = NOW()
+  WHERE name_bg = 'Дребни домакински уреди' AND parent_id IS NULL;                           -- Asbis root
+UPDATE categories SET sort_order = 26, updated_at = NOW()
+  WHERE name_bg = 'Дигитална сигнализация IDS' AND parent_id IS NULL;                        -- Asbis root
+UPDATE categories SET sort_order = 27, updated_at = NOW()
+  WHERE name_bg = 'Роботизирани решения' AND parent_id IS NULL;                              -- Asbis root
+UPDATE categories SET sort_order = 28, updated_at = NOW()
   WHERE name_bg = 'STEM' AND parent_id IS NULL;
-UPDATE categories SET sort_order = 26, updated_at = NOW() WHERE external_id = 708;           -- СЕРВИЗНИ УСЛУГИ
+UPDATE categories SET sort_order = 29, updated_at = NOW() WHERE external_id = 708;           -- СЕРВИЗНИ УСЛУГИ
 
 -- =============================================================================
 -- Проверка на резултата

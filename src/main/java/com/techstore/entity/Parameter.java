@@ -19,7 +19,7 @@ public class Parameter extends BaseEntity {
     @Column(name = "external_id")
     private Long externalId;
 
-    @Column(name = "name_bg", unique = true)
+    @Column(name = "name_bg")
     private String nameBg;
 
     @Column(name = "name_en")
@@ -37,6 +37,9 @@ public class Parameter extends BaseEntity {
 
     @Column(name = "most_key")
     private String mostKey;
+
+    @Column(name = "asbis_key")
+    private String asbisKey;
 
     private Boolean isFilter = true;
 

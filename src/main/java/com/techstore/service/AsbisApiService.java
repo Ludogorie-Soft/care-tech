@@ -414,7 +414,7 @@ public class AsbisApiService {
             Document document = builder.parse(new ByteArrayInputStream(xmlResponse.getBytes("UTF-8")));
             document.getDocumentElement().normalize();
 
-            NodeList productNodes = document.getElementsByTagName("Product");
+            NodeList productNodes = document.getElementsByTagName("PRICE");
             log.info("✓ Found {} Product nodes in PriceAvail XML", productNodes.getLength());
 
             for (int i = 0; i < productNodes.getLength(); i++) {
@@ -460,51 +460,44 @@ public class AsbisApiService {
         Map<String, Object> data = new HashMap<>();
 
         try {
-            // Extract product code (mandatory)
-            String productCode = getElementText(element, "ProductCode");
+            // WIC = product code/SKU in Asbis PriceAvail.xml
+            String productCode = getElementText(element, "WIC");
             if (productCode == null || productCode.trim().isEmpty()) {
-                log.warn("Skipping price record with missing ProductCode");
+                log.warn("Skipping price record with missing WIC");
                 return null;
             }
-            data.put("productcode", productCode);
+            data.put("productcode", productCode.trim());
 
-            // Extract price
-            String priceStr = getElementText(element, "Price");
+            // MY_PRICE = dealer/client price
+            String priceStr = getElementText(element, "MY_PRICE");
             if (priceStr != null && !priceStr.trim().isEmpty()) {
                 try {
                     BigDecimal price = new BigDecimal(priceStr.trim().replaceAll("[^0-9.]", ""));
                     data.put("price", price);
                 } catch (Exception e) {
-                    log.debug("Could not parse price for product {}: {}", productCode, priceStr);
+                    log.debug("Could not parse MY_PRICE for product {}: {}", productCode, priceStr);
                     data.put("price", null);
                 }
             }
 
-            // Extract stock quantity
-            String stockStr = getElementText(element, "Stock");
-            if (stockStr != null && !stockStr.trim().isEmpty()) {
+            // RETAIL_PRICE = suggested retail price
+            String retailStr = getElementText(element, "RETAIL_PRICE");
+            if (retailStr != null && !retailStr.trim().isEmpty()) {
                 try {
-                    Integer stock = Integer.parseInt(stockStr.trim());
-                    data.put("stock", stock);
+                    data.put("retailprice", new BigDecimal(retailStr.trim().replaceAll("[^0-9.]", "")));
                 } catch (Exception e) {
-                    log.debug("Could not parse stock for product {}: {}", productCode, stockStr);
-                    data.put("stock", 0);
+                    data.put("retailprice", null);
                 }
-            } else {
-                data.put("stock", 0);
             }
 
-            // Extract availability status
-            String availability = getElementText(element, "Availability");
-            data.put("availability", availability);
+            // AVAIL = "да" (in stock) or "По заявка" (on order) — map to stock 1/0
+            String avail = getElementText(element, "AVAIL");
+            boolean inStock = avail != null && avail.trim().equalsIgnoreCase("да");
+            data.put("stock", inStock ? 1 : 0);
+            data.put("availability", avail);
 
-            // Extract availability date
-            String availDate = getElementText(element, "AvailabilityDate");
-            data.put("availabilitydate", availDate);
-
-            // Additional fields that might exist
-            data.put("currency", getElementText(element, "Currency"));
-            data.put("warehouse", getElementText(element, "Warehouse"));
+            data.put("currency", getElementText(element, "CURRENCY_CODE"));
+            data.put("warrantyterm", getElementText(element, "WARRANTYTERM"));
 
         } catch (Exception e) {
             log.error("Error extracting price/availability from XML element", e);
