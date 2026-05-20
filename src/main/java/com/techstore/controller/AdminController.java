@@ -1,6 +1,6 @@
 package com.techstore.controller;
 
-import com.techstore.dto.CategoryResponseDTO;
+import com.techstore.dto.response.CategoryResponseDTO;
 import com.techstore.dto.request.*;
 import com.techstore.dto.response.*;
 import com.techstore.entity.Product;

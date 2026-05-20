@@ -93,4 +93,16 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("SELECT p.id AS id, p.slug AS slug, p.updatedAt AS updatedAt FROM Product p WHERE p.show = true AND p.slug IS NOT NULL AND p.slug <> ''")
     List<SitemapEntry> findSitemapEntries();
+
+    /**
+     * Returns all distinct SKUs that are visible (show=true) on the given platforms.
+     * Used for cross-platform duplicate detection: if a SKU is already visible on Vali/Tekra,
+     * Asbis/lower-priority products with the same SKU should stay hidden.
+     */
+    @Query("SELECT DISTINCT p.sku FROM Product p WHERE p.sku IS NOT NULL AND p.show = true AND p.platform IN :platforms")
+    List<String> findVisibleSkusByPlatforms(@Param("platforms") Collection<Platform> platforms);
+
+    @Modifying
+    @Query("UPDATE Product p SET p.show = false WHERE p.sku IN :skus AND p.platform = :platform")
+    int hideBySkuInAndPlatform(@Param("skus") Collection<String> skus, @Param("platform") Platform platform);
 }

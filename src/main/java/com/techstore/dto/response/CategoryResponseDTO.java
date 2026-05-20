@@ -1,4 +1,4 @@
-package com.techstore.dto;
+package com.techstore.dto.response;
 
 import com.techstore.dto.response.CategorySummaryDTO;
 import lombok.AllArgsConstructor;

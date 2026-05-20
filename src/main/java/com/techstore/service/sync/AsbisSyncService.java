@@ -784,6 +784,14 @@ public class AsbisSyncService {
 
             log.info("Matched {} products in database", productsByAsbisCode.size());
 
+            // Pre-load SKUs that are already visible on higher-priority platforms (Vali, Tekra).
+            // If an Asbis product's SKU already exists on one of these platforms, keep it hidden
+            // to avoid showing duplicate products to customers.
+            Set<String> higherPrioritySkus = new HashSet<>(
+                    productRepository.findVisibleSkusByPlatforms(List.of(Platform.VALI, Platform.TEKRA))
+            );
+            log.info("Found {} SKUs already covered by Vali/Tekra — Asbis duplicates will stay hidden", higherPrioritySkus.size());
+
             long updated = 0, notFound = 0, errors = 0;
 
             for (Map<String, Object> priceRecord : priceData) {
@@ -806,7 +814,8 @@ public class AsbisSyncService {
                     int stock = (stockObj instanceof Integer) ? (Integer) stockObj : 0;
                     boolean inStock = stock > 0;
                     boolean hasPrice = price != null && price.compareTo(BigDecimal.ZERO) > 0;
-                    boolean visible = inStock && hasPrice;
+                    boolean isDuplicate = product.getSku() != null && higherPrioritySkus.contains(product.getSku());
+                    boolean visible = inStock && hasPrice && !isDuplicate;
                     product.setShow(visible);
                     product.setStatus(visible ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
 
@@ -827,9 +836,15 @@ public class AsbisSyncService {
             }
 
             // Hide products not present in PriceAvail.xml — they have no confirmed price/availability.
-            // They will be shown again automatically when they appear in a future sync with AVAIL="да".
-            int hidden = productRepository.hideAsbisProductsNotIn(productsByAsbisCode.keySet());
-            log.info("Hidden {} Asbis products absent from PriceAvail feed", hidden);
+            // Guard: skip if set is empty — passing empty collection to NOT IN hides everything.
+            int hidden = 0;
+            if (!productsByAsbisCode.isEmpty()) {
+                hidden = productRepository.hideAsbisProductsNotIn(productsByAsbisCode.keySet());
+                log.info("Hidden {} Asbis products absent from PriceAvail feed", hidden);
+            } else {
+                log.warn("productsByAsbisCode is empty — skipping hideAsbisProductsNotIn to prevent mass-hiding. " +
+                         "Possible cause: WIC codes in PriceAvail.xml do not match ProductCode in catalog XML.");
+            }
 
             String message = String.format("Updated: %d, Hidden: %d, NotFound: %d, Errors: %d", updated, hidden, notFound, errors);
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, updated, 0, updated, errors, message, startTime);

@@ -919,6 +919,7 @@ public class ValiSyncService {
             product.setWorkflowId(extProduct.getIdWF());
             product.setReferenceNumber(extProduct.getReferenceNumber());
             product.setModel(extProduct.getModel());
+            product.setSku(extProduct.getModel()); // manufacturer part number (e.g. SA400S37/240G)
             product.setBarcode(extProduct.getBarcode());
             product.setManufacturer(manufacturer);
             product.setCategory(category);
@@ -926,6 +927,9 @@ public class ValiSyncService {
             product.setWeight(extProduct.getWeight());
             product.setPlatform(Platform.VALI);
             product.setCreatedBy("system");
+        } else if (product.getSku() == null && extProduct.getModel() != null && !extProduct.getModel().isBlank()) {
+            // Backfill SKU for existing products that were created before this field was populated
+            product.setSku(extProduct.getModel());
         }
 
         product.setShow(extProduct.getShow());

@@ -1,6 +1,6 @@
 package com.techstore.service;
 
-import com.techstore.dto.CategoryResponseDTO;
+import com.techstore.dto.response.CategoryResponseDTO;
 import com.techstore.dto.request.CategoryRequestDto;
 import com.techstore.dto.response.CategorySummaryDTO;
 import com.techstore.entity.Category;
