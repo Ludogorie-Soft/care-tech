@@ -64,8 +64,13 @@ public class ValiSyncService {
             List<ManufacturerRequestDto> externalManufacturers = valiApiService.getManufacturers();
             log.info("Fetched {} manufacturers from Vali API", externalManufacturers.size());
 
-            Map<String, Manufacturer> existingManufacturers = manufacturerRepository.findAll()
-                    .stream()
+            List<Manufacturer> allExistingManufacturers = manufacturerRepository.findAll();
+
+            Map<Long, Manufacturer> existingByExternalId = allExistingManufacturers.stream()
+                    .filter(m -> m.getExternalId() != null)
+                    .collect(Collectors.toMap(Manufacturer::getExternalId, m -> m, (e, d) -> e));
+
+            Map<String, Manufacturer> existingManufacturers = allExistingManufacturers.stream()
                     .filter(m -> m.getName() != null && !m.getName().isEmpty())
                     .collect(Collectors.toMap(
                             m -> normalizeManufacturerName(m.getName()),
@@ -73,11 +78,17 @@ public class ValiSyncService {
                             (existing, duplicate) -> existing
                     ));
 
-            log.info("Found {} existing manufacturers in database", existingManufacturers.size());
+            log.info("Found {} existing manufacturers in database", allExistingManufacturers.size());
 
             long created = 0, skipped = 0;
 
             for (ManufacturerRequestDto extManufacturer : externalManufacturers) {
+                // Primary check by externalId — prevents duplicate key violation
+                if (extManufacturer.getId() != null && existingByExternalId.containsKey(extManufacturer.getId())) {
+                    skipped++;
+                    continue;
+                }
+
                 String normalizedName = normalizeManufacturerName(extManufacturer.getName());
                 Manufacturer manufacturer = existingManufacturers.get(normalizedName);
 
@@ -85,6 +96,7 @@ public class ValiSyncService {
                     manufacturer = createManufacturerFromExternal(extManufacturer);
                     manufacturer = manufacturerRepository.save(manufacturer);
                     existingManufacturers.put(normalizedName, manufacturer);
+                    existingByExternalId.put(manufacturer.getExternalId(), manufacturer);
                     created++;
                 } else {
                     skipped++;

@@ -703,14 +703,9 @@ public class AsbisSyncService {
             product.setProductParameters(existingParams);
         }
 
-        // Preserve admin-manually-set parameters
-        Set<ProductParameter> manualParams = existingParams.stream()
-                .filter(pp -> pp.getParameter() != null)
-                .filter(pp -> isAdminUser(pp.getParameter().getCreatedBy())
-                        || isAdminUser(pp.getParameter().getLastModifiedBy()))
-                .collect(Collectors.toSet());
-
-        Set<ProductParameter> autoParams = new HashSet<>();
+        // Build target set from Asbis attrlist: key = "parameterId-optionId"
+        Map<String, Parameter> targetParams = new LinkedHashMap<>();
+        Map<String, ParameterOption> targetOptions = new LinkedHashMap<>();
 
         Map<String, String> attrList = (Map<String, String>) asbisProduct.getOrDefault("attrlist", Collections.emptyMap());
 
@@ -730,18 +725,38 @@ public class AsbisSyncService {
             ParameterOption option = paramOptions.get(normalizedValue);
             if (option == null) continue;
 
-            ProductParameter pp = new ProductParameter();
-            pp.setProduct(product);
-            pp.setParameter(parameter);
-            pp.setParameterOption(option);
-            autoParams.add(pp);
+            String key = parameter.getId() + "-" + option.getId();
+            targetParams.put(key, parameter);
+            targetOptions.put(key, option);
         }
 
-        // Clear and repopulate the existing Hibernate-managed collection.
-        // Never replace it with a new Set — orphanRemoval=true requires the same collection instance.
-        existingParams.clear();
-        existingParams.addAll(manualParams);
-        existingParams.addAll(autoParams);
+        // Remove only entries no longer in target (preserve admin-set parameters).
+        // Do NOT use clear()+addAll() — Hibernate flushes INSERTs before DELETEs,
+        // which causes unique constraint violations when re-adding the same combinations.
+        existingParams.removeIf(pp -> {
+            if (pp.getParameter() == null || pp.getParameterOption() == null) return true;
+            if (isAdminUser(pp.getParameter().getCreatedBy()) || isAdminUser(pp.getParameter().getLastModifiedBy())) {
+                return false;
+            }
+            String key = pp.getParameter().getId() + "-" + pp.getParameterOption().getId();
+            return !targetParams.containsKey(key);
+        });
+
+        // Collect keys already present to avoid duplicate inserts
+        Set<String> existingKeys = existingParams.stream()
+                .filter(pp -> pp.getParameter() != null && pp.getParameterOption() != null)
+                .map(pp -> pp.getParameter().getId() + "-" + pp.getParameterOption().getId())
+                .collect(Collectors.toSet());
+
+        // Add only entries not already present
+        for (String key : targetParams.keySet()) {
+            if (existingKeys.contains(key)) continue;
+            ProductParameter pp = new ProductParameter();
+            pp.setProduct(product);
+            pp.setParameter(targetParams.get(key));
+            pp.setParameterOption(targetOptions.get(key));
+            existingParams.add(pp);
+        }
     }
 
     // =========================================================

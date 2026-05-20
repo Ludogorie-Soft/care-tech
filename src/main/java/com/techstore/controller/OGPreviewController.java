@@ -97,6 +97,7 @@ public class OGPreviewController {
                 "<meta name=\"twitter:description\" content=\"" + safeDesc + "\">" +
                 "<meta name=\"twitter:image\" content=\"" + safeImage + "\">" +
                 "<link rel=\"canonical\" href=\"" + safeUrl + "\">" +
+                "<meta http-equiv=\"refresh\" content=\"0; url=" + safeUrl + "?og_bypass=1\">" +
                 "</head>" +
                 "<body>" +
                 "<p><a href=\"" + safeUrl + "\">Care Tech</a></p>" +
