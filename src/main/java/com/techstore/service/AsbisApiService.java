@@ -17,6 +17,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -83,11 +84,11 @@ public class AsbisApiService {
                 String url = buildApiUrl("ProductList.xml");
                 log.info("Fetching ProductList.xml (attempt {}/{})", attempt + 1, retryAttempts);
 
-                String response = restTemplate.getForObject(url, String.class);
+                byte[] responseBytes = restTemplate.getForObject(url, byte[].class);
 
-                if (response != null && !response.isEmpty()) {
+                if (responseBytes != null && responseBytes.length > 0) {
                     log.info("✓ Successfully fetched ProductList.xml on attempt {}", attempt + 1);
-                    return response;
+                    return new String(responseBytes, StandardCharsets.UTF_8);
                 }
 
             } catch (Exception e) {
@@ -296,11 +297,11 @@ public class AsbisApiService {
                 String url = buildApiUrl("PriceAvail.xml");
                 log.info("Fetching PriceAvail.xml (attempt {}/{})", attempt + 1, retryAttempts);
 
-                String response = restTemplate.getForObject(url, String.class);
+                byte[] responseBytes = restTemplate.getForObject(url, byte[].class);
 
-                if (response != null && !response.isEmpty()) {
+                if (responseBytes != null && responseBytes.length > 0) {
                     log.info("✓ Successfully fetched PriceAvail.xml on attempt {}", attempt + 1);
-                    return response;
+                    return new String(responseBytes, StandardCharsets.UTF_8);
                 }
 
             } catch (Exception e) {

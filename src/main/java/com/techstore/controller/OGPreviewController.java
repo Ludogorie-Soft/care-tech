@@ -1,6 +1,8 @@
 package com.techstore.controller;
 
+import com.techstore.dto.response.CategoryResponseDTO;
 import com.techstore.dto.response.ProductResponseDTO;
+import com.techstore.service.CategoryService;
 import com.techstore.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class OGPreviewController {
 
     private final ProductService productService;
+    private final CategoryService categoryService;
 
     @Value("${app.url:https://www.caretech.bg}")
     private String appUrl;
@@ -46,6 +49,31 @@ public class OGPreviewController {
             log.warn("OG preview failed for product {}: {}", id, e.getMessage());
             HttpHeaders headers = new HttpHeaders();
             headers.set("Location", appUrl + "/product/" + id);
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        }
+    }
+
+    @GetMapping("/category/{id}")
+    public ResponseEntity<String> categoryOgPreview(@PathVariable Long id) {
+        try {
+            CategoryResponseDTO category = categoryService.getCategoryById(id);
+
+            String title = category.getNameBg() != null ? category.getNameBg() : category.getNameEn();
+            String categoryUrl = (category.getSlug() != null && !category.getSlug().isBlank())
+                    ? appUrl + "/category/" + category.getSlug() + "/" + id
+                    : appUrl + "/category/" + id;
+            String imageUrl = appUrl + "/logo.png";
+            String description = title + " - Care Tech";
+
+            String html = buildOgHtml(title, description, imageUrl, categoryUrl);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(new MediaType("text", "html", StandardCharsets.UTF_8));
+            return new ResponseEntity<>(html, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            log.warn("OG preview failed for category {}: {}", id, e.getMessage());
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Location", appUrl + "/category/" + id);
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
         }
     }

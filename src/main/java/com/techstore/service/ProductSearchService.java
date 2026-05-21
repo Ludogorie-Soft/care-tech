@@ -62,6 +62,13 @@ public class ProductSearchService {
     }
 
     private void validateSearchRequest(ProductSearchRequest request) {
+        // @Builder.Default values are NOT applied when Jackson deserializes via @NoArgsConstructor.
+        // Guard against null/zero defaults that would cause NPE or LIMIT 0 in the SQL.
+        if (request.getLanguage() == null) request.setLanguage("bg");
+        if (request.getSortBy() == null) request.setSortBy("price_asc");
+        if (request.getSize() <= 0) request.setSize(20);
+        if (request.getPage() < 0) request.setPage(0);
+
         if (request.getSize() > 100) {
             throw new IllegalArgumentException("Page size cannot exceed 100");
         }

@@ -149,6 +149,30 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-20"
+    },
+    {
+      "id": "bug-012",
+      "timestamp": "2026-05-20T00:00:00Z",
+      "error_message": "Търсачката връща 0 резултата или хвърля NullPointerException при POST /api/products/search",
+      "file": "src/main/java/com/techstore/service/ProductSearchService.java",
+      "root_cause": "ProductSearchRequest използва Lombok @Builder.Default за language, sortBy, size. @Builder.Default стойностите НЕ се прилагат когато Jackson десериализира чрез @NoArgsConstructor. Резултат: language=null (NPE), sortBy=null (NPE), size=0 (LIMIT 0 → 0 резултата).",
+      "fix": "Добавени null/zero guards в validateSearchRequest(): if language==null → 'bg', if sortBy==null → 'price_asc', if size<=0 → 20, if page<0 → 0.",
+      "tags": ["search", "lombok", "jackson", "builder-default", "null-pointer"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-20"
+    },
+    {
+      "id": "bug-013",
+      "timestamp": "2026-05-20T00:00:00Z",
+      "error_message": "Всички Asbis продукти остават show_flag=false след syncAsbisPriceAvail() — AVAIL='да' никога не се разпознава",
+      "file": "src/main/java/com/techstore/service/AsbisApiService.java",
+      "root_cause": "restTemplate.getForObject(url, String.class) декодира HTTP response като ISO-8859-1 (HTTP default за text без explicit charset). UTF-8 Кирилица в <AVAIL>да</AVAIL> се превръща в garbled string ('Ð´Ð°'). Последващото getBytes('UTF-8') re-кодира вече развалените символи. avail.equalsIgnoreCase('да') = false → inStock = false → visible = false → всичко скрито.",
+      "fix": "Смяна на getForObject(url, String.class) → getForObject(url, byte[].class) и new String(bytes, StandardCharsets.UTF_8) в getRawProductListXML() и getRawPriceAvailXML(). Добавен import java.nio.charset.StandardCharsets.",
+      "tags": ["asbis", "encoding", "utf8", "iso-8859-1", "rest-template", "show-flag", "price-avail"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-20"
     }
   ]
 }
