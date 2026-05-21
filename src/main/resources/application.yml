@@ -154,6 +154,8 @@ server:
 # LOGGING CONFIGURATION
 logging:
     level:
+        root: WARN
+        com.techstore: WARN
 #        org.flywaydb: DEBUG
         org.hibernate.SQL: WARN
         org.hibernate.type.descriptor.sql: WARN
@@ -162,9 +164,9 @@ logging:
         org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
         org.springframework.security.web.FilterChainProxy: WARN
         org.hibernate.type.descriptor.sql.BasicBinder: ERROR
-        com.techstore.service.SyncService: warn
-        com.techstore.repository.ProductSearchRepository: warn
-        com.techstore.service.ProductSearchService: warn
+        com.techstore.service.SyncService: WARN
+        com.techstore.repository.ProductSearchRepository: WARN
+        com.techstore.service.ProductSearchService: WARN
     pattern:
         console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
         file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

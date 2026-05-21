@@ -914,8 +914,14 @@ public class ValiSyncService {
             }
         }
 
-        entityManager.flush();
-        entityManager.clear();
+        try {
+            entityManager.flush();
+        } catch (Exception e) {
+            log.error("Flush failed for chunk — session will be cleared: {}", e.getMessage());
+            errors += productsToSave.size();
+        } finally {
+            entityManager.clear();
+        }
 
         return new ChunkResult(processed, created, updated, errors);
     }

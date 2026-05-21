@@ -135,8 +135,15 @@ public class ImageProxyController {
                 }
 
             } catch (Exception e) {
-                log.error("Error proxying image from {}: {} - {}", imageUrl, e.getClass().getSimpleName(), e.getMessage());
-                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                if (e instanceof java.io.IOException && e.getMessage() != null &&
+                        (e.getMessage().contains("Broken pipe") || e.getMessage().contains("Connection reset"))) {
+                    log.warn("Client disconnected while proxying image from {}", imageUrl);
+                } else if (e.getClass().getSimpleName().contains("AsyncRequestNotUsable")) {
+                    log.warn("Client disconnected (async) while proxying image from {}", imageUrl);
+                } else {
+                    log.error("Error proxying image from {}: {} - {}", imageUrl, e.getClass().getSimpleName(), e.getMessage());
+                    response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                }
                 break;
             } finally {
                 if (connection != null) {
