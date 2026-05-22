@@ -8,12 +8,17 @@
       "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
       "root_cause": "Two bugs: (1) extractMostParameters() iterated top-level product Map fields (code, partnum, main_picture_url etc.) instead of the nested 'properties' Map which contains actual XML product specs. (2) generateMostKey() regex [^a-z0-9\\s]+ stripped all Cyrillic characters, turning Bulgarian parameter names like 'Размери (мм)' into empty strings, falling back to 'unknown_param'.",
       "fix": "Fixed extractMostParameters() to read from mostProduct.get('properties') (Map<String,String> from XML <properties> element). Fixed generateMostKey() regex to [^a-z0-9а-яё\\s]+ to preserve Cyrillic. SQL: DELETE FROM parameters WHERE platform = 'MOST' to clean up all 16 junk entries.",
-      "tags": ["most", "parameters", "cyrillic", "regex", "sync"],
+      "tags": [
+        "most",
+        "parameters",
+        "cyrillic",
+        "regex",
+        "sync"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-16"
-    }
-  ,
+    },
     {
       "id": "bug-005",
       "timestamp": "2026-05-19T16:02:00Z",
@@ -21,7 +26,12 @@
       "file": "src/main/java/com/techstore/service/CategoryService.java",
       "root_cause": "getAllCategories() (non-paginated, използван от GET /api/categories) викаше findAll() вместо findByShowTrue() — връщаше всички категории включително скритите Asbis roots.",
       "fix": "Сменен findAll() с findByShowTrue() в non-paginated getAllCategories(). Добавен List<Category> findByShowTrue() в CategoryRepository.",
-      "tags": ["categories", "show_flag", "frontend", "navigation"],
+      "tags": [
+        "categories",
+        "show_flag",
+        "frontend",
+        "navigation"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-19"
@@ -33,7 +43,12 @@
       "file": "src/main/java/com/techstore/repository/ProductRepository.java",
       "root_cause": "hideAsbisProductsNotIn() declared return type long — Spring Data @Modifying queries only support void/int/Integer.",
       "fix": "Changed return type from long to int in both repository interface and service call site.",
-      "tags": ["spring-data", "modifying", "return-type", "repository"],
+      "tags": [
+        "spring-data",
+        "modifying",
+        "return-type",
+        "repository"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-19"
@@ -45,7 +60,13 @@
       "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
       "root_cause": "setAsbisParametersToProduct() built a new HashSet 'merged' and called product.setProductParameters(merged), replacing the Hibernate-managed collection. With orphanRemoval=true Hibernate tracks the exact collection instance — replacing it at flush causes this exception.",
       "fix": "Replaced product.setProductParameters(merged) with existingParams.clear() + existingParams.addAll(manualParams) + existingParams.addAll(autoParams). Mutates the existing managed collection in-place instead of swapping it.",
-      "tags": ["hibernate", "orphanRemoval", "productParameters", "asbis", "sync"],
+      "tags": [
+        "hibernate",
+        "orphanRemoval",
+        "productParameters",
+        "asbis",
+        "sync"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-19"
@@ -57,12 +78,17 @@
       "file": "src/main/java/com/techstore/service/AsbisApiService.java",
       "root_cause": "parsePriceAvailFromXML() searched for getElementsByTagName('Product') but the real Asbis PriceAvail.xml uses <PRICE> tags inside <PRICES>. Field names also wrong: WIC (not ProductCode), MY_PRICE (not Price), AVAIL text 'да'/'По заявка' (not Stock integer), CURRENCY_CODE (not Currency).",
       "fix": "Changed getElementsByTagName('Product') → 'PRICE'. Rewrote extractPriceAvailFromElement() to read WIC, MY_PRICE, RETAIL_PRICE, AVAIL, CURRENCY_CODE, WARRANTYTERM. AVAIL 'да' maps to stock=1, anything else maps to stock=0.",
-      "tags": ["asbis", "price-avail", "xml", "parsing", "sync"],
+      "tags": [
+        "asbis",
+        "price-avail",
+        "xml",
+        "parsing",
+        "sync"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-19"
-    }
-  ,
+    },
     {
       "id": "bug-006",
       "timestamp": "2026-05-19T00:00:00Z",
@@ -70,12 +96,17 @@
       "file": "scripts/8_asbis_filters.sql",
       "root_cause": "category_parameters table has only (category_id, parameter_id, is_filter). There is no option_count column — the count must be computed with a subquery against parameter_options.",
       "fix": "Replaced cp.option_count with (SELECT COUNT(*) FROM parameter_options po WHERE po.parameter_id = p.id) in both the UPDATE WHERE clause and the verification SELECT.",
-      "tags": ["sql", "category_parameters", "option_count", "asbis", "filters"],
+      "tags": [
+        "sql",
+        "category_parameters",
+        "option_count",
+        "asbis",
+        "filters"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-19"
-    }
-  ,
+    },
     {
       "id": "bug-007",
       "timestamp": "2026-05-20T00:00:00Z",
@@ -83,12 +114,17 @@
       "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
       "root_cause": "syncTekraParameters() only processes categories with tekraSlug set. The discriminated subcategories (IP Камери, Аналогови камери, etc.) are created manually via ensureAnalogDigitalSubcategories() without a tekraSlug, so they are never included in the parameter→category join. Products get remapped to these subcategories in syncTekraProducts() via findCategoryWithTypeDiscrimination(), but category_parameters is never populated for them.",
       "fix": "Added a native bulk INSERT at the end of syncTekraProducts() that populates missing category_parameters from product_parameters for all TEKRA products. Uses ON CONFLICT DO NOTHING so it is idempotent.",
-      "tags": ["tekra", "category_parameters", "filters", "subcategories", "discrimination"],
+      "tags": [
+        "tekra",
+        "category_parameters",
+        "filters",
+        "subcategories",
+        "discrimination"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-20"
-    }
-  ,
+    },
     {
       "id": "bug-008",
       "timestamp": "2026-05-20T00:00:00Z",
@@ -96,12 +132,17 @@
       "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
       "root_cause": "Two bugs: (1) setAsbisProductFields() set show=true/status=AVAILABLE for new products before PriceAvail sync ran — they were visible with no price. (2) syncAsbisPriceAvail() set show based only on inStock (stock>0), ignoring price — products with AVAIL='да' but MY_PRICE=0 became visible.",
       "fix": "(1) New products now start with show=false/status=NOT_AVAILABLE. (2) visible = inStock && hasPrice (price > 0). Both conditions must be true for a product to be shown.",
-      "tags": ["asbis", "price", "show", "zero-price", "sync"],
+      "tags": [
+        "asbis",
+        "price",
+        "show",
+        "zero-price",
+        "sync"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-20"
-    }
-  ,
+    },
     {
       "id": "bug-012",
       "timestamp": "2026-05-20T00:00:00Z",
@@ -109,8 +150,17 @@
       "file": "scripts/7b_fix_asbis_duplicate_subcategories.sql",
       "root_cause": "Скрипт 7 мести ДЕЦАТА на Asbis roots под Vali roots. Тези деца са именувани в единствено число (Видео карта, Памет, Дънна платка...) докато съответните Vali категории са в множествено число. Резултат: двойници под един родител.",
       "fix": "Скрипт 7b: CREATE FUNCTION merge_asbis_duplicate() — за всяка двойка (Asbis ед.ч., Vali мн.ч.) премества продуктите и скрива Asbis категорията. Покрива всички познати случаи + финална диагностика.",
-      "tags": ["categories", "asbis", "duplicates", "singular-plural", "merge"],
-      "related_bugs": ["bug-009", "bug-005"],
+      "tags": [
+        "categories",
+        "asbis",
+        "duplicates",
+        "singular-plural",
+        "merge"
+      ],
+      "related_bugs": [
+        "bug-009",
+        "bug-005"
+      ],
       "occurrences": 1,
       "last_seen": "2026-05-20"
     },
@@ -121,8 +171,16 @@
       "file": "scripts/9_hide_empty_categories.sql",
       "root_cause": "След скрипт 7 (reorganize_asbis) Asbis подкатегориите се преместиха под Vali roots с show_flag=true, но много нямат видими (show=true) продукти. getAllCategories() връща всички show_flag=true категории без проверка за съдържание.",
       "fix": "Скрипт 9: итеративен UPDATE show_flag=false за leaf категории без видими продукти и без видими деца. Повтаря се докато нищо не се промени (хваща и родителите).",
-      "tags": ["categories", "show_flag", "empty", "asbis", "navigation"],
-      "related_bugs": ["bug-005"],
+      "tags": [
+        "categories",
+        "show_flag",
+        "empty",
+        "asbis",
+        "navigation"
+      ],
+      "related_bugs": [
+        "bug-005"
+      ],
       "occurrences": 1,
       "last_seen": "2026-05-20"
     },
@@ -133,8 +191,15 @@
       "file": "scripts/10_fix_sort_order_after_reorganization.sql",
       "root_cause": "Скрипт 7 мести Asbis подкатегории под Vali roots без да задава sort_order. Default sort_order=0 ги поставя пред всички Vali категории (sort_order 1-21).",
       "fix": "Скрипт 10: Asbis-derived подкатегории → sort_order=100+; Vali подкатегории → sort_order 1-21 (re-run от скрипт 4); top-level re-run от скрипт 3.",
-      "tags": ["categories", "sort_order", "asbis", "reorganization"],
-      "related_bugs": ["bug-009"],
+      "tags": [
+        "categories",
+        "sort_order",
+        "asbis",
+        "reorganization"
+      ],
+      "related_bugs": [
+        "bug-009"
+      ],
       "occurrences": 1,
       "last_seen": "2026-05-20"
     },
@@ -145,7 +210,13 @@
       "file": "scripts/11_fix_product_slugs.sql",
       "root_cause": "ProductCard използва `p?.slug || p?.id`. Продукти с empty slug (nameEn/nameBg бяха empty при първото @PrePersist, или transliterate върна '') показват ID. SlugRegenerationRunner регенерира при startup само ако slug е null/empty.",
       "fix": "Скрипт 11: SQL UPDATE генерира slug от name_en (Latin) чрез regexp_replace. За Cyrillic имена — optional fallback 'product-id' или рестарт на приложението (SlugRegenerationRunner).",
-      "tags": ["product", "slug", "url", "asbis", "tekra"],
+      "tags": [
+        "product",
+        "slug",
+        "url",
+        "asbis",
+        "tekra"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-20"
@@ -157,7 +228,13 @@
       "file": "src/main/java/com/techstore/service/ProductSearchService.java",
       "root_cause": "ProductSearchRequest използва Lombok @Builder.Default за language, sortBy, size. @Builder.Default стойностите НЕ се прилагат когато Jackson десериализира чрез @NoArgsConstructor. Резултат: language=null (NPE), sortBy=null (NPE), size=0 (LIMIT 0 → 0 резултата).",
       "fix": "Добавени null/zero guards в validateSearchRequest(): if language==null → 'bg', if sortBy==null → 'price_asc', if size<=0 → 20, if page<0 → 0.",
-      "tags": ["search", "lombok", "jackson", "builder-default", "null-pointer"],
+      "tags": [
+        "search",
+        "lombok",
+        "jackson",
+        "builder-default",
+        "null-pointer"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-20"
@@ -169,10 +246,47 @@
       "file": "src/main/java/com/techstore/service/AsbisApiService.java",
       "root_cause": "restTemplate.getForObject(url, String.class) декодира HTTP response като ISO-8859-1 (HTTP default за text без explicit charset). UTF-8 Кирилица в <AVAIL>да</AVAIL> се превръща в garbled string ('Ð´Ð°'). Последващото getBytes('UTF-8') re-кодира вече развалените символи. avail.equalsIgnoreCase('да') = false → inStock = false → visible = false → всичко скрито.",
       "fix": "Смяна на getForObject(url, String.class) → getForObject(url, byte[].class) и new String(bytes, StandardCharsets.UTF_8) в getRawProductListXML() и getRawPriceAvailXML(). Добавен import java.nio.charset.StandardCharsets.",
-      "tags": ["asbis", "encoding", "utf8", "iso-8859-1", "rest-template", "show-flag", "price-avail"],
+      "tags": [
+        "asbis",
+        "encoding",
+        "utf8",
+        "iso-8859-1",
+        "rest-template",
+        "show-flag",
+        "price-avail"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-20"
+    },
+    {
+      "id": "bug-015",
+      "timestamp": "2026-05-22T05:40:03.458Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 5→3 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-22T05:40:03.458Z"
+    }
+  ,
+    {
+      "id": "bug-014",
+      "timestamp": "2026-05-22T00:00:00Z",
+      "error_message": "UnexpectedRollbackException: Transaction silently rolled back because it has been marked as rollback-only — Tekra scheduled sync failed",
+      "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "setTekraParametersToProductSimplified() called product.setProductParameters(mergedParameters) — replacing the Hibernate-managed collection. With orphanRemoval=true on Product.productParameters, Hibernate marks the transaction as rollback-only during the next flush. The exception is caught by the try-catch in syncTekraProducts() (line 836), but the transaction is already doomed. When syncTekraProducts() tries to return normally, Spring detects rollback-only and throws UnexpectedRollbackException.",
+      "fix": "Changed to mutate the existing collection in-place: existingProductParams.clear() + existingProductParams.addAll(manualParameters) + existingProductParams.addAll(autoParameters). Also added product.setProductParameters(existingProductParams) when the collection is null. Same pattern as bug-003 in Asbis.",
+      "tags": ["tekra", "hibernate", "orphanRemoval", "productParameters", "rollback-only", "sync", "transaction"],
+      "related_bugs": ["bug-003"],
+      "occurrences": 1,
+      "last_seen": "2026-05-22"
     }
   ]
 }

@@ -1097,6 +1097,7 @@ public class TekraSyncService {
             Set<ProductParameter> existingProductParams = product.getProductParameters();
             if (existingProductParams == null) {
                 existingProductParams = new HashSet<>();
+                product.setProductParameters(existingProductParams);
             }
 
             Set<ProductParameter> manualParameters = existingProductParams.stream()
@@ -1155,11 +1156,9 @@ public class TekraSyncService {
                 }
             }
 
-            Set<ProductParameter> mergedParameters = new HashSet<>();
-            mergedParameters.addAll(manualParameters);
-            mergedParameters.addAll(autoParameters);
-
-            product.setProductParameters(mergedParameters);
+            existingProductParams.clear();
+            existingProductParams.addAll(manualParameters);
+            existingProductParams.addAll(autoParameters);
 
         } catch (Exception e) {
             log.error("ERROR setting Tekra parameters for product {}: {}",

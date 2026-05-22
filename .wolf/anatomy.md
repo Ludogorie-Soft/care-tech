@@ -1,7 +1,12 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-15T09:51:21.757Z
-> Files: 368 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T05:51:10.054Z
+> Files: 378 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
+
+- `MEMORY.md` — Memory Index (~100 tok)
+- `project_most_api.md` (~136 tok)
 
 ## ./
 
@@ -117,8 +122,9 @@
 
 ## scripts/
 
-Изпълнявай в ред след всички sync API endpoints:
 - `1_rename_categories.sql` — Преименуване на Vali/Tekra категории по external_id (~2744 tok)
+- `10_fix_sort_order_after_reorganization.sql` — Поправя sort_order след скрипт 7: Asbis subcategories → 100+, Vali subcategories → 1-21, top-level re-run (~600 tok)
+- `11_fix_product_slugs.sql` — Генерира slug за продукти с empty/null slug от name_en/name_bg; Cyrillic product-id fallback опционален (~400 tok)
 - `2_rebrand_vali_to_caretech.sql` — Ребрандиране: VALI COMPUTERS → CARETECH (~536 tok)
 - `3_reorder_top_categories.sql` — Пренарежда главните категории (sort_order) вкл. 3-те нови Asbis roots (~1086 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
@@ -128,8 +134,6 @@
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
 - `8_asbis_filters.sql` — Auto-select Asbis is_filter=true по option_count 2-50, с blacklist на packaging/global параметри (~600 tok)
 - `9_hide_empty_categories.sql` — Итеративно скрива категории без видими продукти (show=false); работи рекурсивно нагоре (leaf → parent) (~500 tok)
-- `10_fix_sort_order_after_reorganization.sql` — Поправя sort_order след скрипт 7: Asbis subcategories → 100+, Vali subcategories → 1-21, top-level re-run (~600 tok)
-- `11_fix_product_slugs.sql` — Генерира slug за продукти с empty/null slug от name_en/name_bg; Cyrillic product-id fallback опционален (~400 tok)
 
 ## src/
 
@@ -440,7 +444,7 @@
 ## src/main/java/com/techstore/service/sync/
 
 - `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~11314 tok)
-- `TekraSyncService.java` — Service: TekraSyncService (~20531 tok)
+- `TekraSyncService.java` — Service: TekraSyncService (~21282 tok)
 - `ValiSyncService.java` — ValiSyncService - VERSION 4.0 - FINAL FIX (~11832 tok)
 
 ## src/main/java/com/techstore/util/
