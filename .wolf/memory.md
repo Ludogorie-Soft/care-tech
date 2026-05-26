@@ -174,3 +174,6 @@
 | 12:01 | Session end: 19 writes across 8 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 8 reads | ~18709 tok |
 | 12:47 | Session end: 19 writes across 8 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 8 reads | ~18709 tok |
 | 12:48 | Session end: 19 writes across 8 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 8 reads | ~18709 tok |
+| 12:59 | Created scripts/14_delete_unwanted_categories.sql | — | ~2082 |
+| 12:59 | Session end: 20 writes across 9 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 9 reads | ~27029 tok |
+| 13:05 | Session end: 20 writes across 9 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 9 reads | ~27029 tok |

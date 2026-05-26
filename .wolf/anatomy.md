@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-26T08:52:01.875Z
-> Files: 383 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-26T09:59:13.335Z
+> Files: 384 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -136,6 +136,7 @@
 - `10_fix_sort_order_after_reorganization.sql` — Поправя sort_order след скрипт 7: Asbis subcategories → 100+, Vali subcategories → 1-21, top-level re-run (~600 tok)
 - `11_fix_product_slugs.sql` — Генерира slug за продукти с empty/null slug от name_en/name_bg; Cyrillic product-id fallback опционален (~400 tok)
 - `12_deduplicate_products_by_sku.sql` — ============================================================================= (~777 tok)
+- `14_delete_unwanted_categories.sql` — ============================================================ (~2082 tok)
 - `2_rebrand_vali_to_caretech.sql` — Ребрандиране: VALI COMPUTERS → CARETECH (~536 tok)
 - `3_reorder_top_categories.sql` — Пренарежда главните категории (sort_order) вкл. 3-те нови Asbis roots (~1086 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
