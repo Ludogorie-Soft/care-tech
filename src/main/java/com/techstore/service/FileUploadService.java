@@ -6,6 +6,8 @@ import com.techstore.util.ExceptionHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -83,6 +85,22 @@ public class FileUploadService {
                 throw new BusinessLogicException("File upload failed due to security restrictions: " + e.getMessage());
             }
         }, context);
+    }
+
+    public Resource loadFileAsResource(String filePath) {
+        try {
+            String normalized = filePath.startsWith("/") ? filePath.substring(1) : filePath;
+            Path path = Paths.get(uploadDirectory, normalized).normalize();
+            Resource resource = new UrlResource(path.toUri());
+            return resource.exists() && resource.isReadable() ? resource : null;
+        } catch (Exception e) {
+            log.error("Could not load file as resource: {}", filePath, e);
+            return null;
+        }
+    }
+
+    public String getContentType(String filePath) {
+        return getContentTypeFromExtension(filePath);
     }
 
     public void deleteFile(String filePath) {
@@ -309,14 +327,30 @@ public class FileUploadService {
             return;
         }
 
-        // Basic content type validation for images
-        if (contentType.startsWith("image/")) {
-            List<String> allowedImageTypes = Arrays.asList(
-                    "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"
-            );
-            if (!allowedImageTypes.contains(contentType.toLowerCase())) {
-                throw new ValidationException("Image content type not allowed: " + contentType);
-            }
+        String ct = contentType.toLowerCase();
+
+        List<String> allowedContentTypes = Arrays.asList(
+                // Images
+                "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp",
+                // PDF
+                "application/pdf",
+                // Word
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                // Excel
+                "application/vnd.ms-excel",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                // OpenDocument
+                "application/vnd.oasis.opendocument.text",
+                "application/vnd.oasis.opendocument.spreadsheet",
+                // Text / CSV
+                "text/plain", "text/csv", "application/csv",
+                // RTF
+                "application/rtf", "text/rtf"
+        );
+
+        if (!allowedContentTypes.contains(ct)) {
+            throw new ValidationException("File content type not allowed: " + contentType);
         }
     }
 

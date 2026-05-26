@@ -236,7 +236,7 @@ app:
     upload:
         directory: ${UPLOAD_DIR}
         max-file-size: 10485760
-        allowed-extensions: jpg,jpeg,png,gif,webp
+        allowed-extensions: jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,odt,ods,rtf,txt,csv
 
     # Admin Configuration
     admin:
@@ -282,7 +282,7 @@ vali:
 
 most:
   api:
-    url: https://most.traveldatabank.biz/ProductXML
+    url: https://portal.mostbg.com/api/product/xml/all?currency=EUR
     enabled: true
   exchange:
     usd-to-bgn: 1.80

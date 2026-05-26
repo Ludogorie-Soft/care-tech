@@ -1,12 +1,22 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-22T05:51:10.054Z
-> Files: 378 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-26T08:52:01.875Z
+> Files: 383 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
 - `MEMORY.md` — Memory Index (~100 tok)
 - `project_most_api.md` (~136 tok)
+
+## ../../care-tech-ui/src/
+
+- `App.js` — Declares ScrollToTop (~2406 tok)
+
+## ../../care-tech-ui/src/pages/profile/
+
+- `OrderDetails.jsx` — OrderDetails (~3165 tok)
+- `ProfileLayout.jsx` — links (~1723 tok)
+- `WarrantyCards.jsx` — WarrantyCards (~886 tok)
 
 ## ./
 
@@ -125,6 +135,7 @@
 - `1_rename_categories.sql` — Преименуване на Vali/Tekra категории по external_id (~2744 tok)
 - `10_fix_sort_order_after_reorganization.sql` — Поправя sort_order след скрипт 7: Asbis subcategories → 100+, Vali subcategories → 1-21, top-level re-run (~600 tok)
 - `11_fix_product_slugs.sql` — Генерира slug за продукти с empty/null slug от name_en/name_bg; Cyrillic product-id fallback опционален (~400 tok)
+- `12_deduplicate_products_by_sku.sql` — ============================================================================= (~777 tok)
 - `2_rebrand_vali_to_caretech.sql` — Ребрандиране: VALI COMPUTERS → CARETECH (~536 tok)
 - `3_reorder_top_categories.sql` — Пренарежда главните категории (sort_order) вкл. 3-те нови Asbis roots (~1086 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
@@ -183,7 +194,7 @@
 - `FileUploadController.java` — RestController: FileUploadController (5 endpoints) (~647 tok)
 - `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1905 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
-- `OrderController.java` — Създаване на нова поръчка (~1184 tok)
+- `OrderController.java` — Създаване на нова поръчка (~1568 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
 - `ProductController.java` — Record to hold sort field and direction information (~3884 tok)
 - `ProductSearchController.java` — RestController: ProductSearchController (8 endpoints) (~1491 tok)
@@ -420,16 +431,16 @@
 - `CartService.java` — Service: CartService (~1669 tok)
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~13424 tok)
 - `CategoryService.java` — Service: CategoryService (~4425 tok)
-- `CronJobService.java` — Service: CronJobService (~428 tok)
-- `EmailService.java` — Service for sending email notifications (~3743 tok)
-- `FileUploadService.java` — Service: FileUploadService (~7386 tok)
+- `CronJobService.java` — Service: CronJobService (~788 tok)
+- `EmailService.java` — Service for sending email notifications (~3751 tok)
+- `FileUploadService.java` — Service: FileUploadService (~7252 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
-- `MostApiService.java` — Test API connectivity (~4112 tok)
-- `OrderService.java` — Creates a new order (~5784 tok)
+- `MostApiService.java` — Test API connectivity (~3823 tok)
+- `OrderService.java` — Creates a new order (~5783 tok)
 - `ParameterService.java` — Service: ParameterService (~10236 tok)
 - `ProductSearchService.java` — Service: ProductSearchService (~1890 tok)
 - `ProductService.java` — Service: ProductService (~14076 tok)
-- `S3Service.java` — Service: S3Service (~1466 tok)
+- `S3Service.java` — Service: S3Service (~2077 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
 - `TekraApiService.java` — Get categories using JSON parsing (categories return JSON) (~4698 tok)
@@ -443,8 +454,8 @@
 
 ## src/main/java/com/techstore/service/sync/
 
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~11314 tok)
-- `TekraSyncService.java` — Service: TekraSyncService (~21282 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~10717 tok)
+- `TekraSyncService.java` — Service: TekraSyncService (~22725 tok)
 - `ValiSyncService.java` — ValiSyncService - VERSION 4.0 - FINAL FIX (~11832 tok)
 
 ## src/main/java/com/techstore/util/
@@ -459,7 +470,7 @@
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` (~2402 tok)
+- `application.yml` (~2444 tok)
 
 ## src/main/resources/db/
 

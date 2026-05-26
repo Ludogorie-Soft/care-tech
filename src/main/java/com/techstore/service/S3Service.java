@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
@@ -89,6 +90,67 @@ public class S3Service {
 
         for (String imageUrl : imageUrls) {
             deleteImage(imageUrl);
+        }
+    }
+
+    // ============ WARRANTY FILE OPERATIONS ============
+
+    public String uploadWarrantyFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BusinessLogicException("Warranty file cannot be empty");
+        }
+        if (file.getSize() > maxFileSize) {
+            throw new BusinessLogicException("File size exceeds maximum allowed size");
+        }
+
+        String extension = getFileExtension(file.getOriginalFilename());
+        List<String> allowed = Arrays.asList("pdf", "doc", "docx", "xls", "xlsx", "odt", "ods", "rtf", "txt");
+        if (!allowed.contains(extension)) {
+            throw new BusinessLogicException("File type not allowed for warranty documents. Allowed: " + allowed);
+        }
+
+        String key = "warranties/" + UUID.randomUUID() + "." + extension;
+        try {
+            PutObjectRequest put = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .contentType(file.getContentType())
+                    .contentLength(file.getSize())
+                    .build();
+            s3Client.putObject(put, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            log.info("Warranty file uploaded to S3: {}", key);
+            return key;
+        } catch (IOException e) {
+            log.error("Error uploading warranty file to S3: {}", e.getMessage());
+            throw new BusinessLogicException("Failed to upload warranty file: " + e.getMessage());
+        }
+    }
+
+    public byte[] downloadFileBytes(String key) {
+        try {
+            GetObjectRequest get = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+            try (ResponseInputStream<GetObjectResponse> response = s3Client.getObject(get)) {
+                return response.readAllBytes();
+            }
+        } catch (IOException e) {
+            log.error("Error downloading file from S3: {}", key, e);
+            throw new BusinessLogicException("Failed to download file from S3: " + e.getMessage());
+        }
+    }
+
+    public void deleteWarrantyFile(String key) {
+        if (key == null || key.isBlank()) return;
+        try {
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build());
+            log.info("Warranty file deleted from S3: {}", key);
+        } catch (Exception e) {
+            log.error("Error deleting warranty file from S3: {}", key, e);
         }
     }
 

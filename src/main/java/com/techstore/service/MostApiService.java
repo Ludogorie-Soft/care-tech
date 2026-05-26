@@ -14,6 +14,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -71,13 +72,14 @@ public class MostApiService {
         try {
             log.info("Fetching products from Most API: {}", apiUrl);
 
-            String xmlResponse = restTemplate.getForObject(apiUrl, String.class);
+            byte[] xmlBytes = restTemplate.getForObject(apiUrl, byte[].class);
 
-            if (xmlResponse == null || xmlResponse.isEmpty()) {
+            if (xmlBytes == null || xmlBytes.length == 0) {
                 log.error("Received null or empty XML response from Most API");
                 return new ArrayList<>();
             }
 
+            String xmlResponse = new String(xmlBytes, StandardCharsets.UTF_8);
             List<Map<String, Object>> products = parseProductsFromXML(xmlResponse);
 
             // Update cache
@@ -134,53 +136,52 @@ public class MostApiService {
         Map<String, Object> product = new HashMap<>();
 
         try {
-            // Basic fields
-            product.put("id", getElementText(productElement, "id"));
-            product.put("uid", getElementText(productElement, "uid"));
-            product.put("code", getElementText(productElement, "code"));
-            product.put("name", getElementText(productElement, "name"));
-            product.put("searchstring", getElementText(productElement, "searchstring"));
-            product.put("product_status", getElementText(productElement, "product_status"));
-            product.put("haspromo", getElementText(productElement, "haspromo"));
-            product.put("general_description", getElementText(productElement, "general_description"));
+            // Product ID (attribute)
+            product.put("id", productElement.getAttribute("id"));
 
-            // Category information
-            product.put("classname", getElementText(productElement, "classname"));
-            product.put("classname_full", getElementText(productElement, "classname_full"));
-            product.put("class_id", getElementText(productElement, "class_id"));
+            // Basic fields
+            product.put("name", getElementText(productElement, "name"));
+            product.put("general_description", getElementText(productElement, "general_description"));
+            product.put("searchstring", getElementText(productElement, "searchstring"));
+
+            // SKU — new API uses <PartNumber>
+            String partNumber = getElementText(productElement, "PartNumber");
+            product.put("partNumber", partNumber);
+
+            // EAN / warranty
+            product.put("ean", getElementText(productElement, "EAN"));
+            product.put("warrantyMonths", getElementText(productElement, "warrantyInMonths"));
+
+            // Availability — new API uses <product_status> text instead of quantity
+            String productStatus = getElementText(productElement, "product_status");
+            product.put("product_status", productStatus);
+            boolean inStock = productStatus != null && !productStatus.trim().isEmpty()
+                    && !productStatus.toLowerCase().contains("изчерп")
+                    && !productStatus.toLowerCase().contains("недост");
+            product.put("inStock", inStock);
 
             // Pricing
             product.put("price", getElementText(productElement, "price"));
             product.put("currency", getElementText(productElement, "currency"));
 
-            // Images
-            product.put("main_picture_url", getElementText(productElement, "main_picture_url"));
+            // Gallery — new API uses <gallery><pictureUrl>
             product.put("gallery", extractGallery(productElement));
 
-            // Manufacturer and category
+            // Manufacturer — <manufacturer id="N">NAME</manufacturer>
             Element manufacturerElement = (Element) productElement.getElementsByTagName("manufacturer").item(0);
             if (manufacturerElement != null) {
                 product.put("manufacturer_id", manufacturerElement.getAttribute("id"));
-                product.put("manufacturer", manufacturerElement.getTextContent());
+                product.put("manufacturer", manufacturerElement.getTextContent().trim());
             }
 
+            // Category — <category id="N">NAME</category>
             Element categoryElement = (Element) productElement.getElementsByTagName("category").item(0);
             if (categoryElement != null) {
                 product.put("category_id", categoryElement.getAttribute("id"));
-                product.put("category", categoryElement.getTextContent());
+                product.put("category", categoryElement.getTextContent().trim());
             }
 
-            Element subcategoryElement = (Element) productElement.getElementsByTagName("subcategory").item(0);
-            if (subcategoryElement != null) {
-                product.put("subcategory_id", subcategoryElement.getAttribute("id"));
-                product.put("subcategory", subcategoryElement.getTextContent());
-            }
-
-            // Part number
-            product.put("partnum", getElementText(productElement, "partnum"));
-            product.put("vendor_url", getElementText(productElement, "vendor_url"));
-
-            // Properties (parameters)
+            // Properties (parameters) — <property name="..." s="sort_order">value</property>
             product.put("properties", extractProperties(productElement));
 
         } catch (Exception e) {
@@ -201,13 +202,12 @@ public class MostApiService {
             NodeList galleryNodes = productElement.getElementsByTagName("gallery");
             if (galleryNodes.getLength() > 0) {
                 Element galleryElement = (Element) galleryNodes.item(0);
-                NodeList pictureNodes = galleryElement.getElementsByTagName("picture");
-
-                for (int i = 0; i < pictureNodes.getLength(); i++) {
-                    Element pictureElement = (Element) pictureNodes.item(i);
-                    String pictureUrl = getElementText(pictureElement, "picture_url");
-                    if (pictureUrl != null && !pictureUrl.isEmpty()) {
-                        gallery.add(pictureUrl);
+                // New API uses <pictureUrl> directly inside <gallery>
+                NodeList pictureUrlNodes = galleryElement.getElementsByTagName("pictureUrl");
+                for (int i = 0; i < pictureUrlNodes.getLength(); i++) {
+                    String url = pictureUrlNodes.item(i).getTextContent().trim();
+                    if (!url.isEmpty()) {
+                        gallery.add(url);
                     }
                 }
             }

@@ -20,7 +20,11 @@ import com.techstore.util.SyncHelper;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -44,6 +48,10 @@ public class TekraSyncService {
     private final TekraApiService tekraApiService;
     private final LogHelper logHelper;
     private final SyncHelper syncHelper;
+
+    @Autowired
+    @Lazy
+    private TekraSyncService self;
 
     @Transactional
     public void syncTekraCategories() {
@@ -668,43 +676,30 @@ public class TekraSyncService {
 
             fixDuplicateProducts();
 
-            Map<String, Manufacturer> manufacturersMap = manufacturerRepository.findAll()
-                    .stream()
+            // ID maps — safe to share across REQUIRES_NEW transactions (no managed entities)
+            Map<String, Long> manufacturerIdsByName = manufacturerRepository.findAll().stream()
                     .filter(m -> m.getName() != null && !m.getName().isEmpty())
                     .collect(Collectors.toMap(
                             m -> normalizeManufacturerName(m.getName()),
-                            m -> m,
+                            Manufacturer::getId,
                             (existing, duplicate) -> existing
                     ));
+            log.info("Loaded {} manufacturers", manufacturerIdsByName.size());
 
-            log.info("Loaded {} manufacturers", manufacturersMap.size());
-
-            List<Parameter> allParameters = parameterRepository.findAll().stream()
+            Map<String, Long> parameterIdsByTekraKey = parameterRepository.findAll().stream()
                     .filter(p -> p.getTekraKey() != null)
-                    .toList();
+                    .collect(Collectors.toMap(Parameter::getTekraKey, Parameter::getId, (e, d) -> e));
+            log.info("Loaded {} parameters with tekraKey", parameterIdsByTekraKey.size());
 
-            Map<String, Parameter> parametersByTekraKey = new HashMap<>();
-
-            for (Parameter p : allParameters) {
-                if (p.getTekraKey() != null) {
-                    parametersByTekraKey.put(p.getTekraKey(), p);
+            Map<Long, Map<String, Long>> optionIdsByParamAndValue = new HashMap<>();
+            for (ParameterOption opt : parameterOptionRepository.findAll()) {
+                if (opt.getParameter() != null && opt.getNameBg() != null) {
+                    optionIdsByParamAndValue
+                            .computeIfAbsent(opt.getParameter().getId(), k -> new HashMap<>())
+                            .put(normalizeName(opt.getNameBg()), opt.getId());
                 }
             }
-
-            log.info("Loaded {} parameters with tekraKey globally", parametersByTekraKey.size());
-
-            Map<Long, Map<String, ParameterOption>> optionsByParameterId = new HashMap<>();
-
-            List<ParameterOption> allOptions = parameterOptionRepository.findAll();
-            for (ParameterOption option : allOptions) {
-                if (option.getParameter() != null && option.getNameBg() != null) {
-                    optionsByParameterId
-                            .computeIfAbsent(option.getParameter().getId(), k -> new HashMap<>())
-                            .put(normalizeName(option.getNameBg()), option);
-                }
-            }
-
-            log.info("Loaded {} options globally", allOptions.size());
+            log.info("Loaded {} option entries", optionIdsByParamAndValue.size());
 
             // Load ALL categories once — used for path-based matching across all platforms
             List<Category> allCategoriesForMatch = categoryRepository.findAll();
@@ -750,8 +745,17 @@ public class TekraSyncService {
                         }
                     }
 
+                    Thread.sleep(30_000); // 30 sec delay between categories to avoid rate limiting
+                } catch (HttpClientErrorException.TooManyRequests e) {
+                    log.warn("Tekra rate limit exhausted for category '{}'. Cooling down 3 minutes before next category.",
+                            category.getTekraSlug());
+                    try { Thread.sleep(180_000); } catch (InterruptedException ie2) { Thread.currentThread().interrupt(); break; }
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    log.warn("Tekra sync interrupted during category fetch delay");
+                    break;
                 } catch (Exception e) {
-                    log.error("Error fetching products for category: {}", e.getMessage());
+                    log.error("Error fetching products for category '{}': {}", category.getTekraSlug(), e.getMessage());
                 }
             }
 
@@ -773,9 +777,7 @@ public class TekraSyncService {
             matchTypeStats.put("name_match", 0);
             matchTypeStats.put("no_match", 0);
 
-            for (int i = 0; i < allProducts.size(); i++) {
-                Map<String, Object> rawProduct = allProducts.get(i);
-
+            for (Map<String, Object> rawProduct : allProducts) {
                 try {
                     String sku = getString(rawProduct, "sku");
                     String name = getString(rawProduct, "name");
@@ -796,74 +798,36 @@ public class TekraSyncService {
                         continue;
                     }
 
-                    // ✅ НОВА ЛОГИКА: Приложи разграничаване аналогов/цифров
                     String productType = determineProductType(rawProduct);
-                    if ("IP".equals(productType)) {
-                        digitalCount++;
-                    } else if ("Analog".equals(productType)) {
-                        analogCount++;
-                    } else {
-                        undeterminedCount++;
-                    }
+                    if ("IP".equals(productType)) digitalCount++;
+                    else if ("Analog".equals(productType)) analogCount++;
+                    else undeterminedCount++;
 
-                    productCategory = findCategoryWithTypeDiscrimination(
-                            rawProduct,
-                            productCategory,
-                            categoriesByName
-                    );
+                    productCategory = findCategoryWithTypeDiscrimination(rawProduct, productCategory, categoriesByName);
+                    Long categoryId = productCategory.getId();
 
-                    Product product = findOrCreateProduct(sku, rawProduct, productCategory);
-                    boolean isNew = (product.getId() == null);
+                    // Each product in its own REQUIRES_NEW transaction —
+                    // one duplicate key rolls back only that product, not the entire sync
+                    int result = self.processOneTekraProduct(
+                            rawProduct, categoryId, manufacturerIdsByName,
+                            parameterIdsByTekraKey, optionIdsByParamAndValue);
 
-                    boolean success = updateProductFieldsFromTekraXML(product, rawProduct, isNew, manufacturersMap);
-
-                    if (!success) {
-                        skippedNoManufacturer++;
-                        continue;
-                    }
-
-                    product = productRepository.save(product);
-
-                    if (product.getCategory() != null && product.getId() != null) {
-                        try {
-                            setTekraParametersToProductSimplified(
-                                    product,
-                                    rawProduct,
-                                    parametersByTekraKey,
-                                    optionsByParameterId
-                            );
-                            product = productRepository.save(product);
-                        } catch (Exception e) {
-                            log.error("ERROR setting parameters for product {}: {}", product.getSku(), e.getMessage());
-                        }
-                    }
-
-                    if (isNew) {
-                        totalCreated++;
-                    } else {
-                        totalUpdated++;
-                    }
-
-                    totalProcessed++;
-
-                    if (totalProcessed % 50 == 0) {
-                        log.info("Progress: {}/{} (created: {}, updated: {}, analog: {}, digital: {})",
-                                totalProcessed, allProducts.size(), totalCreated, totalUpdated, analogCount, digitalCount);
-                    }
-
-                    if (totalProcessed % 100 == 0) {
-                        entityManager.flush();
-                        entityManager.clear();
+                    switch (result) {
+                        case 1  -> { totalCreated++;  totalProcessed++; }
+                        case 2  -> { totalUpdated++;  totalProcessed++; }
+                        case -2 -> skippedNoManufacturer++;
+                        default -> totalErrors++;
                     }
 
                 } catch (Exception e) {
                     totalErrors++;
-                    log.error("Error processing product {}: {}",
-                            getString(rawProduct, "sku"), e.getMessage());
+                    log.error("Error processing product {}: {}", getString(rawProduct, "sku"), e.getMessage());
+                    if (totalErrors <= 3) log.error("Full exception for debugging:", e);
+                }
 
-                    if (totalErrors <= 3) {
-                        log.error("Full exception for debugging:", e);
-                    }
+                if (totalProcessed > 0 && totalProcessed % 50 == 0) {
+                    log.info("Progress: {}/{} (created: {}, updated: {}, analog: {}, digital: {})",
+                            totalProcessed, allProducts.size(), totalCreated, totalUpdated, analogCount, digitalCount);
                 }
             }
 
@@ -1080,6 +1044,139 @@ public class TekraSyncService {
         } catch (Exception e) {
             log.error("Error in findCategoryWithTypeDiscrimination: {}", e.getMessage());
             return baseCategory;
+        }
+    }
+
+    /**
+     * Processes a single Tekra product in its own transaction (REQUIRES_NEW).
+     * Returns: 1=created, 2=updated, -1=invalid, -2=no manufacturer
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public int processOneTekraProduct(
+            Map<String, Object> rawProduct,
+            Long categoryId,
+            Map<String, Long> manufacturerIdsByName,
+            Map<String, Long> parameterIdsByTekraKey,
+            Map<Long, Map<String, Long>> optionIdsByParamAndValue) {
+
+        String sku = getString(rawProduct, "sku");
+        String name = getString(rawProduct, "name");
+        if (sku == null || name == null) return -1;
+
+        List<Product> existing = productRepository.findBySkuAndPlatform(sku, Platform.TEKRA);
+        Product product;
+        boolean isNew;
+
+        if (!existing.isEmpty()) {
+            product = existing.get(0);
+            isNew = false;
+            if (existing.size() > 1) {
+                for (int i = 1; i < existing.size(); i++) productRepository.delete(existing.get(i));
+            }
+        } else {
+            product = new Product();
+            product.setSku(sku);
+            product.setPlatform(Platform.TEKRA);
+            isNew = true;
+        }
+
+        product.setCategory(entityManager.getReference(Category.class, categoryId));
+
+        if (isNew) {
+            product.setNameBg(name);
+            product.setNameEn(name);
+            product.setModel(getString(rawProduct, "model"));
+            product.setCreatedBy("system");
+            product.setPlatform(Platform.TEKRA);
+
+            String description = getString(rawProduct, "description");
+            if (description != null) {
+                product.setDescriptionBg(description);
+                product.setDescriptionEn(description);
+            }
+
+            Double weight = getDoubleValue(rawProduct, "weight");
+            if (weight == null) weight = getDoubleValue(rawProduct, "net_weight");
+            if (weight != null && weight > 0) product.setWeight(BigDecimal.valueOf(weight));
+
+            setImagesFromTekraXML(product, rawProduct);
+
+            String manufacturerName = getString(rawProduct, "manufacturer");
+            if (manufacturerName != null && !manufacturerName.isEmpty()) {
+                Long mfId = manufacturerIdsByName.get(normalizeManufacturerName(manufacturerName));
+                if (mfId == null) {
+                    log.warn("Manufacturer '{}' not found for SKU {}, skipping", manufacturerName, sku);
+                    return -2;
+                }
+                product.setManufacturer(entityManager.getReference(Manufacturer.class, mfId));
+            }
+        }
+
+        Double price = getDoubleValue(rawProduct, "price");
+        if (price != null) product.setPriceClient(BigDecimal.valueOf(price));
+
+        Double partnerPrice = getDoubleValue(rawProduct, "partner_price");
+        if (partnerPrice != null) product.setPricePartner(BigDecimal.valueOf(partnerPrice));
+
+        Integer quantity = getIntegerValue(rawProduct, "quantity");
+        boolean inStock = (quantity != null && quantity > 0);
+        product.setShow(inStock);
+        product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
+        product.calculateFinalPrice();
+
+        product = productRepository.save(product);
+
+        setTekraParametersToProduct(product, rawProduct, parameterIdsByTekraKey, optionIdsByParamAndValue);
+
+        return isNew ? 1 : 2;
+    }
+
+    private void setTekraParametersToProduct(
+            Product product,
+            Map<String, Object> rawProduct,
+            Map<String, Long> parameterIdsByTekraKey,
+            Map<Long, Map<String, Long>> optionIdsByParamAndValue) {
+
+        try {
+            // Direct DELETE — runs within REQUIRES_NEW, no shared session state conflict
+            entityManager.createQuery("DELETE FROM ProductParameter pp WHERE pp.product.id = :productId")
+                    .setParameter("productId", product.getId())
+                    .executeUpdate();
+
+            Map<String, String> parameterMappings = extractTekraParameters(rawProduct);
+            Set<String> seenKeys = new HashSet<>();
+            int mappedCount = 0, notFoundCount = 0;
+
+            for (Map.Entry<String, String> paramEntry : parameterMappings.entrySet()) {
+                String parameterValue = paramEntry.getValue();
+                if (parameterValue == null || parameterValue.isBlank() || "-".equals(parameterValue.trim())) continue;
+
+                Long parameterId = parameterIdsByTekraKey.get(paramEntry.getKey());
+                if (parameterId == null) { notFoundCount++; continue; }
+
+                Map<String, Long> optionMap = optionIdsByParamAndValue.get(parameterId);
+                if (optionMap == null) { notFoundCount++; continue; }
+
+                Long optionId = optionMap.get(normalizeName(parameterValue));
+                if (optionId == null) { notFoundCount++; continue; }
+
+                if (!seenKeys.add(parameterId + ":" + optionId)) continue; // dedup
+
+                ProductParameter pp = new ProductParameter();
+                pp.setProduct(product);
+                pp.setParameter(entityManager.getReference(Parameter.class, parameterId));
+                pp.setParameterOption(entityManager.getReference(ParameterOption.class, optionId));
+                entityManager.persist(pp);
+                mappedCount++;
+            }
+
+            if (notFoundCount > 0) {
+                log.warn("Product {}: {} mapped, {} not found", product.getSku(), mappedCount, notFoundCount);
+            }
+
+        } catch (Exception e) {
+            log.error("ERROR setting Tekra parameters for product {}: {}", product.getSku(), e.getMessage());
+            throw e;
         }
     }
 

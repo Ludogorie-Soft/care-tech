@@ -5,6 +5,7 @@ import com.techstore.dto.request.OrderStatusUpdateDTO;
 import com.techstore.dto.response.OrderResponseDTO;
 import com.techstore.entity.User;
 import com.techstore.service.OrderService;
+import com.techstore.service.S3Service;
 import com.techstore.util.SecurityHelper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,13 +14,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,6 +34,7 @@ public class OrderController {
 
     private final OrderService orderService;
     private final SecurityHelper securityHelper;
+    private final S3Service s3Service;
 
     /**
      * Създаване на нова поръчка
@@ -90,6 +92,41 @@ public class OrderController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<OrderResponseDTO> orders = orderService.getUserOrders(currentUser.getId(), pageable);
         return ResponseEntity.ok(orders);
+    }
+
+    /**
+     * Сваля гаранционния файл на поръчката (само собствени поръчки)
+     */
+    @GetMapping("/{orderId}/warranty/download")
+    public ResponseEntity<byte[]> downloadWarrantyFile(@PathVariable Long orderId) {
+        User currentUser = securityHelper.getCurrentUser();
+        OrderResponseDTO order = orderService.getOrderById(orderId);
+
+        if (!currentUser.isAdmin() && !order.getCustomerEmail().equals(currentUser.getEmail())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (order.getWarrantyFilePath() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String key = order.getWarrantyFilePath();
+        byte[] fileBytes = s3Service.downloadFileBytes(key);
+        String filename = key.substring(key.lastIndexOf('/') + 1);
+        String extension = filename.contains(".") ? filename.substring(filename.lastIndexOf('.') + 1).toLowerCase() : "";
+        String contentType = switch (extension) {
+            case "pdf" -> "application/pdf";
+            case "doc" -> "application/msword";
+            case "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            case "xls" -> "application/vnd.ms-excel";
+            case "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            default -> "application/octet-stream";
+        };
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"garantsia-" + order.getOrderNumber() + "." + extension + "\"")
+                .body(fileBytes);
     }
 
     /**

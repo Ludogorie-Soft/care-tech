@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
@@ -406,41 +407,56 @@ public class TekraApiService {
             return productsCache.get(categorySlug);
         }
 
-        try {
-            log.info("Fetching products for category: {} (XML parsing)", categorySlug);
+        int maxRetries = 3;
+        long retryDelayMs = 10_000; // 10 seconds initial backoff
 
-            String url = UriComponentsBuilder.fromHttpUrl(baseUrl)
-                    .queryParam("action", "browse")
-                    .queryParam("catSlug", categorySlug)
-                    .queryParam("page", 1)
-                    .queryParam("perPage", 100)
-                    .queryParam("allProducts", 0)
-                    .queryParam("in_stock", 1)
-                    .queryParam("out_of_stock", 1)
-                    .queryParam("order", "bestsellers")
-                    .queryParam("feed", 1)
-                    .queryParam("access_token_feed", accessToken)
-                    .toUriString();
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                log.info("Fetching products for category: {} (attempt {}/{})", categorySlug, attempt, maxRetries);
 
-            String xmlResponse = restTemplate.getForObject(url, String.class);
+                String url = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                        .queryParam("action", "browse")
+                        .queryParam("catSlug", categorySlug)
+                        .queryParam("page", 1)
+                        .queryParam("perPage", 100)
+                        .queryParam("allProducts", 0)
+                        .queryParam("in_stock", 1)
+                        .queryParam("out_of_stock", 1)
+                        .queryParam("order", "bestsellers")
+                        .queryParam("feed", 1)
+                        .queryParam("access_token_feed", accessToken)
+                        .toUriString();
 
-            if (xmlResponse == null) {
-                log.error("Received null XML response from Tekra API for products");
+                String xmlResponse = restTemplate.getForObject(url, String.class);
+
+                if (xmlResponse == null) {
+                    log.error("Received null XML response from Tekra API for products");
+                    return new ArrayList<>();
+                }
+
+                List<Map<String, Object>> products = parseProductsFromXML(xmlResponse);
+
+                productsCache.put(categorySlug, products);
+                cacheTimestamp = System.currentTimeMillis();
+
+                log.info("Extracted {} products from Tekra XML response (cached)", products.size());
+                return products;
+
+            } catch (HttpClientErrorException.TooManyRequests e) {
+                if (attempt < maxRetries) {
+                    log.warn("Tekra API rate limited (429) for category '{}', attempt {}/{}. Waiting {} ms before retry.",
+                            categorySlug, attempt, maxRetries, retryDelayMs);
+                    try { Thread.sleep(retryDelayMs); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); return new ArrayList<>(); }
+                    retryDelayMs *= 2;
+                } else {
+                    log.error("Tekra API still returning 429 after {} attempts for category '{}'", maxRetries, categorySlug);
+                    throw e; // propagate so caller can apply cooldown before next category
+                }
+            } catch (Exception e) {
+                log.error("Error fetching products from Tekra API for category '{}'", categorySlug, e);
                 return new ArrayList<>();
             }
-
-            List<Map<String, Object>> products = parseProductsFromXML(xmlResponse);
-
-            // Update cache
-            productsCache.put(categorySlug, products);
-            cacheTimestamp = System.currentTimeMillis();
-
-            log.info("Extracted {} products from Tekra XML response (cached)", products.size());
-            return products;
-
-        } catch (Exception e) {
-            log.error("Error fetching products from Tekra API", e);
-            return new ArrayList<>();
         }
+        return new ArrayList<>();
     }
 }

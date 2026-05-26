@@ -49,7 +49,8 @@ WITH ranked AS (
                     WHEN 'VALI'   THEN 1
                     WHEN 'TEKRA'  THEN 2
                     WHEN 'ASBIS'  THEN 3
-                    ELSE 4
+                    WHEN 'MOST'   THEN 4
+                    ELSE 5
                 END,
                 -- Накрая по id за детерминизъм
                 p.id ASC

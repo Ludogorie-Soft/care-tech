@@ -51,6 +51,9 @@ public class CronJobService {
 
         // --- Most ---
         try {
+            mostSyncService.syncMostManufacturers();
+            log.info("Most manufacturers sync completed at {}", LocalDateTime.now());
+
             mostSyncService.syncMostParameters();
             log.info("Most parameters sync completed at {}", LocalDateTime.now());
 

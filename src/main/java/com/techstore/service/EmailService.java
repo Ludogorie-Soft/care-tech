@@ -8,7 +8,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -32,6 +31,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
+    private final S3Service s3Service;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -44,9 +44,6 @@ public class EmailService {
 
     @Value("${app.email.info:info@caretech.bg}")
     private String infoEmail;
-
-    @Value("${app.upload.directory:./uploads}")
-    private String uploadsDir;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
@@ -321,11 +318,12 @@ public class EmailService {
         helper.setText(htmlContent, true);
 
         if (attachmentPath != null) {
-            File file = new File(uploadsDir, attachmentPath);
-            if (file.exists() && file.isFile()) {
-                helper.addAttachment(file.getName(), new FileSystemResource(file));
-            } else {
-                log.warn("Warranty file not found, skipping attachment: {}", file.getAbsolutePath());
+            try {
+                byte[] fileBytes = s3Service.downloadFileBytes(attachmentPath);
+                String filename = attachmentPath.substring(attachmentPath.lastIndexOf('/') + 1);
+                helper.addAttachment(filename, new ByteArrayResource(fileBytes));
+            } catch (Exception e) {
+                log.warn("Could not attach warranty file from S3, skipping: {}", attachmentPath, e);
             }
         }
 

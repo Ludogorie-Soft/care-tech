@@ -274,8 +274,7 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-22T05:40:03.458Z"
-    }
-  ,
+    },
     {
       "id": "bug-014",
       "timestamp": "2026-05-22T00:00:00Z",
@@ -283,10 +282,296 @@
       "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
       "root_cause": "setTekraParametersToProductSimplified() called product.setProductParameters(mergedParameters) — replacing the Hibernate-managed collection. With orphanRemoval=true on Product.productParameters, Hibernate marks the transaction as rollback-only during the next flush. The exception is caught by the try-catch in syncTekraProducts() (line 836), but the transaction is already doomed. When syncTekraProducts() tries to return normally, Spring detects rollback-only and throws UnexpectedRollbackException.",
       "fix": "Changed to mutate the existing collection in-place: existingProductParams.clear() + existingProductParams.addAll(manualParameters) + existingProductParams.addAll(autoParameters). Also added product.setProductParameters(existingProductParams) when the collection is null. Same pattern as bug-003 in Asbis.",
-      "tags": ["tekra", "hibernate", "orphanRemoval", "productParameters", "rollback-only", "sync", "transaction"],
-      "related_bugs": ["bug-003"],
+      "tags": [
+        "tekra",
+        "hibernate",
+        "orphanRemoval",
+        "productParameters",
+        "rollback-only",
+        "sync",
+        "transaction"
+      ],
+      "related_bugs": [
+        "bug-003"
+      ],
       "occurrences": 1,
       "last_seen": "2026-05-22"
+    },
+    {
+      "id": "bug-017",
+      "timestamp": "2026-05-25T11:28:06.274Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "91 lines replaced/restructured",
+      "fix": "Rewrote 107→40 lines (91 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-25T11:28:06.274Z"
+    },
+    {
+      "id": "bug-018",
+      "timestamp": "2026-05-25T11:28:22.801Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Had \"part_number\"",
+      "fix": "Changed to \"partNumber\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-25T11:28:22.801Z"
+    },
+    {
+      "id": "bug-019",
+      "timestamp": "2026-05-25T11:58:46.182Z",
+      "error_message": "Wrong reference: WARN should be INFO",
+      "file": "src/main/resources/application.yml",
+      "root_cause": "Used \"WARN\" instead of \"INFO\"",
+      "fix": "Changed WARN → INFO",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "yml"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-25T11:58:46.182Z"
+    },
+    {
+      "id": "bug-020",
+      "timestamp": "2026-05-25T12:12:11.355Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 89→120 lines (7 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-25T12:12:11.355Z"
+    },
+    {
+      "id": "bug-021",
+      "timestamp": "2026-05-25T00:00:00.000Z",
+      "error_message": "duplicate key value violates unique constraint 'uq_product_parameters_unique' — Key (product_id, parameter_id, parameter_option_id)=(20019, 5886, 116287) already exists",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "orphanRemoval=true + clear() + addAll() still causes Hibernate INSERT-before-DELETE on flush. Additionally, two API properties mapping to the same (parameter_id, option_id) were not deduplicated since ProductParameter has no equals/hashCode override.",
+      "fix": "Replaced orphanRemoval-based clear+addAll with direct JPQL DELETE (entityManager.createQuery DELETE FROM ProductParameter WHERE product.id = :productId). Added seenParamOptionKeys dedup set to prevent duplicate (parameter_id, option_id) pairs. Manual params re-created as new transient entities after the delete.",
+      "tags": [
+        "duplicate-key",
+        "hibernate",
+        "orphan-removal",
+        "most-sync",
+        "product-parameters"
+      ],
+      "related_bugs": [
+        "bug-014"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-05-25T00:00:00.000Z"
+    },
+    {
+      "id": "bug-022",
+      "timestamp": "2026-05-25T13:26:15.796Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "42 lines replaced/restructured",
+      "fix": "Rewrote 93→53 lines (42 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-25T13:26:15.796Z"
+    },
+    {
+      "id": "bug-023",
+      "timestamp": "2026-05-25T13:27:02.657Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-25T13:27:02.657Z"
+    },
+    {
+      "id": "bug-024",
+      "timestamp": "2026-05-25T13:54:54.157Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/TekraApiService.java",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 36→51 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-25T13:54:54.157Z"
+    },
+    {
+      "id": "bug-025",
+      "timestamp": "2026-05-25T14:08:48.602Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 22→26 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-25T14:08:48.602Z"
+    },
+    {
+      "id": "bug-026",
+      "timestamp": "2026-05-26T08:07:24.567Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/FileUploadService.java",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 17→33 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-26T08:07:24.567Z"
+    },
+    {
+      "id": "bug-027",
+      "timestamp": "2026-05-26T08:08:49.116Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/EmailService.java",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 8→10 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-26T08:08:49.116Z"
+    },
+    {
+      "id": "bug-028",
+      "timestamp": "2026-05-26T08:30:17.131Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/FileUploadService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-26T08:30:17.131Z"
+    },
+    {
+      "id": "bug-029",
+      "timestamp": "2026-05-26T08:39:07.763Z",
+      "error_message": "CSS fix: label, icon, to",
+      "file": "../../care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+      "root_cause": "label: \"Смяна на парола\", → \"Гаранционни карти\",; icon: <FiLock className=\"w-5 h-5\" />, → <FiShield className=\"w-5 h-5\" />,; to: \"change-password\", → \"warranty-cards\",",
+      "fix": "Changed label: \"Смяна на парола\", → \"Гаранционни карти\",; icon: <FiLock className=\"w-5 h-5\" />, → <FiShield className=\"w-5 h-5\" />,; to: \"change-password\", → \"warranty-cards\",",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-26T08:39:07.763Z"
+    },
+    {
+      "id": "bug-030",
+      "timestamp": "2026-05-26T08:39:29.762Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../care-tech-ui/src/pages/profile/OrderDetails.jsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-26T08:39:29.762Z"
+    },
+    {
+      "id": "bug-031",
+      "timestamp": "2026-05-26T08:46:31.572Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/S3Service.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-26T08:46:31.572Z"
+    },
+    {
+      "id": "bug-032",
+      "timestamp": "2026-05-26T08:49:26.028Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/EmailService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-26T08:49:26.028Z"
+    },
+    {
+      "id": "bug-033",
+      "timestamp": "2026-05-26T08:52:01.894Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/controller/OrderController.java",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 26→31 lines (7 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-26T08:52:01.894Z"
     }
   ]
 }

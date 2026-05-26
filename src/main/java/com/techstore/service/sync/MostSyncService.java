@@ -10,7 +10,10 @@ import com.techstore.util.SyncHelper;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -53,6 +56,10 @@ public class MostSyncService {
     private final SyncHelper syncHelper;
     private final LogHelper logHelper;
 
+    @Autowired
+    @Lazy
+    private MostSyncService self;
+
     private static final String USD_TO_BGN_RATE = "1.80";
     private static final String EUR_TO_BGN_RATE = "1.95583";
 
@@ -61,107 +68,52 @@ public class MostSyncService {
     static {
         Map<String, String> map = new HashMap<>();
 
-        map.put("CPU", "Процесори");
-        map.put("AMD Ryzen /AM4", "Процесори");
-        map.put("AMD Ryzen /AM5", "Процесори");
-        map.put("AMD Ryzen /Internal VGA", "Процесори");
-        map.put("AMD Athlon /AM4", "Процесори");
-        map.put("AMD A-series /AM4", "Процесори");
-        map.put("Intel Core Ultra 200", "Процесори");
-        map.put("Core Gen 10th /LGA1200", "Процесори");
-        map.put("Core Gen 11th /LGA1200", "Процесори");
-        map.put("Core Gen 12th /LGA1700", "Процесори");
-        map.put("Core Gen 13th /LGA1700", "Процесори");
-        map.put("Core Gen 14th /LGA1700", "Процесори");
-        map.put("Celeron Gen10th /LGA1200", "Процесори");
-        map.put("Pentium Gen10th /LGA1200", "Процесори");
-        map.put("Intel Pentium /Internal VGA", "Процесори");
-        map.put("LGA1851 /Intel Core Ultra 200", "Процесори");
+        // ── Нови категории от portal.mostbg.com ──────────────────────────
+        map.put("MAIN BOARD",   "Дънни платки");
+        map.put("MONITOR",      "Монитори");
+        map.put("PRINTER",      "Принтери, скенери и консумативи");
+        map.put("LAN",          "Мрежов хардуер");
+        map.put("NOTEBOOK",     "Лаптопи");
+        map.put("M - MEDIA",    "Мултимедиен хардуер");
+        map.put("CARTRIDGE",    "Консумативи(тонери) за лазерни устройства");
+        map.put("CD MEDIA",     "Носители CD, DVD, Blu-Ray");
+        map.put("GAMES",        "Игри и мултимедия");
+        map.put("GSM",          "Мобилни телефони");
+        map.put("COMPUTER",     "Настолни компютри");
+        map.put("ALL-IN-ONE",   "Компютър всичко в едно");
 
-        map.put("VIDEO CARD", "Видео карти");
-        map.put("GeForce RTX5090", "Видео карти");
-        map.put("GeForce RTX5080", "Видео карти");
-        map.put("GeForce RTX5070TI", "Видео карти");
-        map.put("GeForce RTX5070", "Видео карти");
-        map.put("GeForce RTX5060TI", "Видео карти");
-        map.put("GeForce RTX5060", "Видео карти");
-        map.put("GeForce RTX5050", "Видео карти");
-        map.put("GeForce RTX4090", "Видео карти");
-        map.put("GeForce RTX4080 Super", "Видео карти");
-        map.put("GeForce RTX4070TI Super", "Видео карти");
-        map.put("GeForce RTX4070TI", "Видео карти");
-        map.put("GeForce RTX4070 Super", "Видео карти");
-        map.put("GeForce RTX4070", "Видео карти");
-        map.put("GeForce RTX4060Ti", "Видео карти");
-        map.put("GeForce RTX4060", "Видео карти");
-        map.put("GeForce RTX3060", "Видео карти");
-        map.put("GeForce RTX3050", "Видео карти");
-        map.put("GeForce RTX2070", "Видео карти");
-        map.put("GeForce GTX1650", "Видео карти");
-        map.put("GeForce GTX1070TI", "Видео карти");
-        map.put("GeForce GT1030", "Видео карти");
-        map.put("GeForce GT730", "Видео карти");
-        map.put("GeForce GT710", "Видео карти");
-        map.put("Radeon RX9070XT", "Видео карти");
-        map.put("Radeon RX9070", "Видео карти");
-        map.put("Radeon RX9060XT", "Видео карти");
-        map.put("Radeon RX7900XTX", "Видео карти");
-        map.put("Radeon RX7900XT", "Видео карти");
-        map.put("Radeon RX7900GRE", "Видео карти");
-        map.put("Radeon RX7800XT", "Видео карти");
-        map.put("Radeon RX7700XT", "Видео карти");
-        map.put("Radeon RX7600XT", "Видео карти");
-        map.put("Radeon RX7600", "Видео карти");
-        map.put("Radeon RX6700", "Видео карти");
-        map.put("Radeon RX6650XT", "Видео карти");
-        map.put("Radeon RX6600XT", "Видео карти");
-        map.put("Radeon RX6600", "Видео карти");
-        map.put("Radeon RX6500XT", "Видео карти");
-        map.put("Radeon RX580", "Видео карти");
-        map.put("Radeon RX570", "Видео карти");
-        map.put("Radeon RX550", "Видео карти");
-
-        map.put("MEMORY", "Памети");
-        map.put("DDR5", "Памети");
-        map.put("DDR4", "Памети");
-        map.put("DDR3", "Памети");
-        map.put("DDR2", "Памети");
-
-        map.put("MOTHERBOARD", "Дънни платки");
-        map.put("AMD /Socket AM5", "Дънни платки");
-        map.put("AMD /Socket AM4", "Дънни платки");
-        map.put("Intel /LGA1851", "Дънни платки");
-        map.put("Intel /LGA1700", "Дънни платки");
-        map.put("Intel /LGA1200", "Дънни платки");
-
-        map.put("SSD", "SSD дискове");
-        map.put("M.2 NVMe", "SSD дискове");
-        map.put("2.5\" SATA", "SSD дискове");
-        map.put("mSATA", "SSD дискове");
-        map.put("M.2 SATA", "SSD дискове");
-        map.put("PCIe", "SSD дискове");
-
-        map.put("HDD", "Твърди дискове");
-        map.put("3.5\"", "Твърди дискове");
-        map.put("2.5\"", "Твърди дискове");
-
+        // ── Категории, открити при разширено сканиране ───────────────────
+        // (добавят се при всеки нов unmapped тип от логовете)
+        map.put("CPU",          "Процесори");
+        map.put("VIDEO CARD",   "Видео карти");
+        map.put("MEMORY",       "Памети");
+        map.put("MOTHERBOARD",  "Дънни платки");
+        map.put("SSD",          "SSD");
+        map.put("HDD",          "Твърди дискове");
         map.put("POWER SUPPLY", "Захранвания");
-        map.put("ATX", "Захранвания");
-        map.put("SFX", "Захранвания");
+        map.put("CASE",         "Кутии за компютри");
+        map.put("COOLING",      "Охладители");
+        map.put("UPS",          "Непрекъсваеми токозахранващи устройства");
+        map.put("HEADSET",      "Слушалки");
+        map.put("KEYBOARD",     "Клавиатури");
+        map.put("MOUSE",        "Мишки");
+        map.put("WEBCAM",       "Уеб камери");
+        map.put("WEB CAMERA",   "Уеб камери");
+        map.put("SPEAKER",      "Звукови системи и тонколони");
+        map.put("TABLET",       "Таблети");
+        map.put("NAS",          "Настолен NAS");
+        map.put("ACCESSORY",    "Аксесоари");
 
-        map.put("CASE", "Кутии за компютри");
-        map.put("Mid Tower", "Кутии за компютри");
-        map.put("Full Tower", "Кутии за компютри");
-        map.put("Mini Tower", "Кутии за компютри");
-
-        map.put("COOLING", "Охлаждане");
-        map.put("CPU Cooler", "Охлаждане");
-        map.put("Case Fan", "Охлаждане");
-        map.put("Liquid Cooling", "Охлаждане");
-
-        map.put("MONITOR", "Монитори");
-        map.put("Gaming Monitor", "Монитори");
-        map.put("Office Monitor", "Монитори");
+        // ── Категории от unmapped лог (добавени след първи sync) ────────────
+        map.put("RAM",          "Памети");
+        map.put("FAN",          "Охладители");
+        map.put("SCANER",       "Принтери, скенери и консумативи");
+        map.put("CD",           "Носители CD, DVD, Blu-Ray");
+        map.put("HP",           "Консумативи(тонери) за лазерни устройства");
+        map.put("HP_",          "Консумативи(тонери) за лазерни устройства");
+        map.put("FLASH",        "Флаш памети");
+        map.put("CONTR I/O",    "Входно-изходни контролери");
+        map.put("CAMERA",       "Аксесоари");
 
         MOST_CATEGORY_MAPPING = Collections.unmodifiableMap(map);
     }
@@ -294,11 +246,21 @@ public class MostSyncService {
                 }
             }
 
-            // Fallback map: ALL existing parameters keyed by normalized nameBg (for cross-platform reuse)
+            // Fallback map by nameBg (cross-platform reuse)
             Map<String, Parameter> existingByNormalizedNameBg = new HashMap<>();
             for (Parameter p : allExistingParams) {
                 if (p.getNameBg() != null && p.getMostKey() == null) {
                     existingByNormalizedNameBg.put(p.getNameBg().toLowerCase().trim(), p);
+                }
+            }
+
+            // Fallback map by nameEn — Most API property names are in English,
+            // so match against existing parameters' English name to avoid duplicates
+            Map<String, Parameter> existingByNormalizedNameEn = new HashMap<>();
+            for (Parameter p : allExistingParams) {
+                if (p.getNameEn() != null && p.getMostKey() == null
+                        && !existingByNormalizedNameBg.containsValue(p)) {
+                    existingByNormalizedNameEn.put(p.getNameEn().toLowerCase().trim(), p);
                 }
             }
 
@@ -398,11 +360,23 @@ public class MostSyncService {
                     Parameter parameter = globalParamsCache.get(mostKey);  // ← ПРОМЕНЕНО!
 
                     if (parameter == null) {
-                        // Cross-platform fallback: check if a parameter with the same nameBg exists
+                        // Cross-platform fallback 1: match by nameBg
                         String normalizedName = paramData.nameBg != null
                                 ? paramData.nameBg.toLowerCase().trim() : null;
                         Parameter byNameBg = normalizedName != null
                                 ? existingByNormalizedNameBg.remove(normalizedName) : null;
+
+                        // Cross-platform fallback 2: match by nameEn (Most properties are in English)
+                        if (byNameBg == null) {
+                            String normalizedNameEn = paramData.nameEn != null
+                                    ? paramData.nameEn.toLowerCase().trim() : null;
+                            byNameBg = normalizedNameEn != null
+                                    ? existingByNormalizedNameEn.remove(normalizedNameEn) : null;
+                            if (byNameBg != null) {
+                                log.debug("↑ Matched parameter '{}' by nameEn='{}' (assigned mostKey={})",
+                                        byNameBg.getNameBg(), paramData.nameEn, paramData.mostKey);
+                            }
+                        }
 
                         if (byNameBg != null) {
                             // Adopt existing parameter: assign mostKey and merge categories
@@ -554,149 +528,84 @@ public class MostSyncService {
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("=== STARTING Most products synchronization - SIMPLIFIED mode ===");
+            log.info("=== STARTING Most products synchronization ===");
 
-            Map<String, Manufacturer> manufacturersMap = manufacturerRepository.findAll()
-                    .stream()
+            // Load lookup maps as primitive ID maps — safe to share across REQUIRES_NEW transactions
+            // (no managed entity objects crossing transaction boundaries)
+            Map<String, Long> manufacturerIdsByName = manufacturerRepository.findAll().stream()
                     .filter(m -> m.getName() != null && !m.getName().isEmpty())
                     .collect(Collectors.toMap(
                             m -> normalizeManufacturerName(m.getName()),
-                            m -> m,
+                            Manufacturer::getId,
                             (existing, duplicate) -> existing
                     ));
+            log.info("Loaded {} manufacturers", manufacturerIdsByName.size());
 
-            log.info("Loaded {} manufacturers", manufacturersMap.size());
-
-            List<Parameter> allParameters = parameterRepository.findAll().stream()
-                    .filter(p -> p.getMostKey() != null)
-                    .toList();
-
-            Map<String, Parameter> parametersByMostKey = new HashMap<>();
-
-            for (Parameter p : allParameters) {
-                if (p.getMostKey() != null) {
-                    parametersByMostKey.put(p.getMostKey(), p);
-                }
-            }
-
-            log.info("Loaded {} parameters with mostKey globally", parametersByMostKey.size());
-
-            Map<Long, Map<String, ParameterOption>> optionsByParameterId = new HashMap<>();
-
-            List<ParameterOption> allOptions = parameterOptionRepository.findAll();
-            for (ParameterOption option : allOptions) {
-                if (option.getParameter() != null && option.getNameBg() != null) {
-                    optionsByParameterId
-                            .computeIfAbsent(option.getParameter().getId(), k -> new HashMap<>())
-                            .put(normalizeName(option.getNameBg()), option);
-                }
-            }
-
-            log.info("Loaded {} options globally", allOptions.size());
-
-            Map<String, Category> categoriesByName = categoryRepository.findAll().stream()
-                    .filter(cat -> cat.getNameBg() != null)
+            Map<String, Long> categoryIdsByName = categoryRepository.findAll().stream()
+                    .filter(c -> c.getNameBg() != null)
                     .collect(Collectors.toMap(
-                            cat -> cat.getNameBg(),
-                            cat -> cat,
+                            c -> c.getNameBg().toLowerCase().trim(),
+                            Category::getId,
                             (existing, duplicate) -> existing
                     ));
+            log.info("Loaded {} categories", categoryIdsByName.size());
 
-            log.info("Loaded {} categories", categoriesByName.size());
+            Map<String, Long> parameterIdsByMostKey = parameterRepository.findAll().stream()
+                    .filter(p -> p.getMostKey() != null)
+                    .collect(Collectors.toMap(
+                            Parameter::getMostKey,
+                            Parameter::getId,
+                            (existing, duplicate) -> existing
+                    ));
+            log.info("Loaded {} parameters with mostKey", parameterIdsByMostKey.size());
+
+            Map<Long, Map<String, Long>> optionIdsByParamAndValue = new HashMap<>();
+            for (ParameterOption opt : parameterOptionRepository.findAll()) {
+                if (opt.getParameter() != null && opt.getNameBg() != null) {
+                    optionIdsByParamAndValue
+                            .computeIfAbsent(opt.getParameter().getId(), k -> new HashMap<>())
+                            .put(normalizeName(opt.getNameBg()), opt.getId());
+                }
+            }
+            log.info("Loaded {} option entries", optionIdsByParamAndValue.size());
 
             List<Map<String, Object>> allProducts = mostApiService.getAllProducts();
             log.info("Fetched {} products from Most API", allProducts.size());
 
             if (allProducts.isEmpty()) {
-                log.warn("No products found");
                 logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, 0, 0, 0, 0, "No products found", startTime);
                 return;
             }
 
             long totalProcessed = 0, totalCreated = 0, totalUpdated = 0, totalErrors = 0;
-            long skippedNoCategory = 0, skippedNoManufacturer = 0;
+            long skippedNoCategory = 0, skippedNoManufacturer = 0, skippedNoSku = 0;
             Set<String> unmappedCategories = new LinkedHashSet<>();
 
-            for (int i = 0; i < allProducts.size(); i++) {
-                Map<String, Object> mostProduct = allProducts.get(i);
-
+            for (Map<String, Object> mostProduct : allProducts) {
                 try {
-                    String sku = (String) mostProduct.get("part_number");
-                    String name = (String) mostProduct.get("name");
+                    // Each product runs in its own REQUIRES_NEW transaction.
+                    // One failure rolls back only that product — not the entire sync.
+                    int result = self.processOneMostProduct(
+                            mostProduct, manufacturerIdsByName, categoryIdsByName,
+                            parameterIdsByMostKey, optionIdsByParamAndValue, unmappedCategories);
 
-                    if (sku == null || name == null) {
-                        totalErrors++;
-                        continue;
-                    }
-
-                    String categoryName = (String) mostProduct.get("category");
-                    String targetCategoryName = MOST_CATEGORY_MAPPING.get(categoryName);
-
-                    if (targetCategoryName == null) {
-                        if (categoryName != null) unmappedCategories.add(categoryName);
-                        skippedNoCategory++;
-                        continue;
-                    }
-
-                    Category productCategory = categoriesByName.get(targetCategoryName);
-
-                    if (productCategory == null) {
-                        log.warn("Category '{}' not found for product {}", targetCategoryName, sku);
-                        skippedNoCategory++;
-                        continue;
-                    }
-
-                    Product product = findOrCreateProduct(sku, mostProduct, productCategory);
-                    boolean isNew = (product.getId() == null);
-
-                    boolean success = updateProductFieldsFromMost(product, mostProduct, isNew, manufacturersMap);
-
-                    if (!success) {
-                        skippedNoManufacturer++;
-                        continue;
-                    }
-
-                    product = productRepository.save(product);
-
-                    if (product.getCategory() != null && product.getId() != null) {
-                        try {
-                            setMostParametersToProductSimplified(
-                                    product,
-                                    mostProduct,
-                                    parametersByMostKey,  // ← ПРОМЕНЕНО ИМЕ!
-                                    optionsByParameterId
-                            );
-                            product = productRepository.save(product);
-                        } catch (Exception e) {
-                            log.error("ERROR setting parameters for product {}: {}", product.getSku(), e.getMessage());
-                        }
-                    }
-
-                    if (isNew) {
-                        totalCreated++;
-                    } else {
-                        totalUpdated++;
-                    }
-
-                    totalProcessed++;
-
-                    if (totalProcessed % 50 == 0) {
-                        log.info("Progress: {}/{} (created: {}, updated: {})",
-                                totalProcessed, allProducts.size(), totalCreated, totalUpdated);
-                    }
-
-                    if (totalProcessed % 100 == 0) {
-                        entityManager.flush();
-                        entityManager.clear();
+                    switch (result) {
+                        case 1  -> { totalCreated++;  totalProcessed++; }
+                        case 2  -> { totalUpdated++;  totalProcessed++; }
+                        case 0  -> skippedNoCategory++;
+                        case -1 -> skippedNoSku++;
+                        case -2 -> skippedNoManufacturer++;
+                        default -> totalErrors++;
                     }
 
                 } catch (Exception e) {
                     totalErrors++;
                     log.error("Error processing product: {}", e.getMessage());
+                }
 
-                    if (totalErrors <= 3) {
-                        log.error("Full exception for debugging:", e);
-                    }
+                if (totalProcessed > 0 && totalProcessed % 50 == 0) {
+                    log.info("Progress: processed={}, created={}, updated={}, errors={}",
+                            totalProcessed, totalCreated, totalUpdated, totalErrors);
                 }
             }
 
@@ -706,10 +615,9 @@ public class MostSyncService {
             }
 
             String message = String.format(
-                    "Total: %d, Created: %d, Updated: %d, Skipped (No Category): %d, Skipped (No Manufacturer): %d, Errors: %d, Unmapped categories: %d",
-                    totalProcessed, totalCreated, totalUpdated, skippedNoCategory, skippedNoManufacturer, totalErrors,
-                    unmappedCategories.size()
-            );
+                    "Total: %d, Created: %d, Updated: %d, Skipped (No SKU): %d, Skipped (No Category): %d, Skipped (No Manufacturer): %d, Errors: %d, Unmapped: %d",
+                    totalProcessed, totalCreated, totalUpdated, skippedNoSku, skippedNoCategory,
+                    skippedNoManufacturer, totalErrors, unmappedCategories.size());
 
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, totalCreated,
                     totalUpdated, totalErrors, message, startTime);
@@ -723,209 +631,157 @@ public class MostSyncService {
         }
     }
 
-    private void setMostParametersToProductSimplified(
+    /**
+     * Processes a single Most product in its own transaction (REQUIRES_NEW).
+     * Returns: 1=created, 2=updated, 0=skip(no category), -2=skip(no manufacturer), -1=error
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public int processOneMostProduct(
+            Map<String, Object> mostProduct,
+            Map<String, Long> manufacturerIdsByName,
+            Map<String, Long> categoryIdsByName,
+            Map<String, Long> parameterIdsByMostKey,
+            Map<Long, Map<String, Long>> optionIdsByParamAndValue,
+            Set<String> unmappedCategories) {
+
+        String sku = (String) mostProduct.get("partNumber");
+        String name = (String) mostProduct.get("name");
+
+        if (sku == null || sku.isBlank() || name == null) {
+            return -1;
+        }
+
+        String categoryName = (String) mostProduct.get("category");
+        String targetCategoryName = MOST_CATEGORY_MAPPING.get(categoryName);
+        if (targetCategoryName == null) {
+            if (categoryName != null) unmappedCategories.add(categoryName);
+            return 0;
+        }
+
+        Long categoryId = categoryIdsByName.get(targetCategoryName.toLowerCase().trim());
+        if (categoryId == null) {
+            log.warn("Category '{}' not found in DB for product {}", targetCategoryName, sku);
+            return 0;
+        }
+
+        List<Product> existing = productRepository.findBySkuAndPlatform(sku, Platform.MOST);
+        Product product;
+        boolean isNew;
+
+        if (!existing.isEmpty()) {
+            product = existing.get(0);
+            isNew = false;
+            if (existing.size() > 1) {
+                log.warn("Found {} duplicates for SKU {} (MOST), keeping first", existing.size(), sku);
+                for (int i = 1; i < existing.size(); i++) productRepository.delete(existing.get(i));
+            }
+        } else {
+            product = new Product();
+            product.setSku(sku);
+            product.setPlatform(Platform.MOST);
+            isNew = true;
+        }
+
+        product.setCategory(entityManager.getReference(Category.class, categoryId));
+
+        if (isNew) {
+            product.setNameBg(name);
+            product.setNameEn(name);
+            product.setCreatedBy("system");
+
+            String description = (String) mostProduct.get("general_description");
+            if (description != null && !description.isBlank()) {
+                product.setDescriptionBg(description);
+                product.setDescriptionEn(description);
+            }
+
+            @SuppressWarnings("unchecked")
+            List<String> gallery = (List<String>) mostProduct.get("gallery");
+            if (gallery != null && !gallery.isEmpty()) {
+                product.setPrimaryImageUrl(gallery.get(0));
+            }
+
+            String manufacturerName = (String) mostProduct.get("manufacturer");
+            if (manufacturerName != null && !manufacturerName.isBlank()) {
+                Long mfId = manufacturerIdsByName.get(normalizeManufacturerName(manufacturerName));
+                if (mfId == null) {
+                    log.warn("Manufacturer '{}' not found for SKU {}, skipping", manufacturerName, sku);
+                    return -2;
+                }
+                product.setManufacturer(entityManager.getReference(Manufacturer.class, mfId));
+            }
+        }
+
+        Object priceObj = mostProduct.get("price");
+        if (priceObj != null) {
+            BigDecimal price = convertToPrice(priceObj);
+            String currency = (String) mostProduct.get("currency");
+            if ("USD".equals(currency)) price = price.multiply(new BigDecimal(USD_TO_BGN_RATE));
+            else if ("EUR".equals(currency)) price = price.multiply(new BigDecimal(EUR_TO_BGN_RATE));
+            product.setPriceClient(price);
+        }
+
+        boolean inStock = Boolean.TRUE.equals(mostProduct.get("inStock"));
+        product.setShow(inStock);
+        product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
+        product.calculateFinalPrice();
+
+        product = productRepository.save(product);
+
+        setMostParametersToProduct(product, mostProduct, parameterIdsByMostKey, optionIdsByParamAndValue);
+
+        return isNew ? 1 : 2;
+    }
+
+    private void setMostParametersToProduct(
             Product product,
             Map<String, Object> mostProduct,
-            Map<String, Parameter> parametersByMostKey,
-            Map<Long, Map<String, ParameterOption>> optionsByParameterId) {
+            Map<String, Long> parameterIdsByMostKey,
+            Map<Long, Map<String, Long>> optionIdsByParamAndValue) {
 
         try {
-            if (product.getCategory() == null) {
-                log.warn("Product {} has no category, cannot set parameters", product.getSku());
-                return;
-            }
-
-            Set<ProductParameter> existingProductParams = product.getProductParameters();
-            if (existingProductParams == null) {
-                existingProductParams = new HashSet<>();
-            }
-
-            Set<ProductParameter> manualParameters = existingProductParams.stream()
-                    .filter(pp -> pp.getParameter() != null)
-                    .filter(pp -> isManualParameter(pp))
-                    .collect(Collectors.toSet());
-
-            Set<ProductParameter> autoParameters = new HashSet<>();
-            int mappedCount = 0;
-            int notFoundCount = 0;
+            // DELETE existing params for this product via JPQL.
+            // Since this runs inside its own REQUIRES_NEW transaction (no shared session state),
+            // there is no L1 cache conflict — the DELETE executes cleanly before any INSERTs.
+            entityManager.createQuery("DELETE FROM ProductParameter pp WHERE pp.product.id = :productId")
+                    .setParameter("productId", product.getId())
+                    .executeUpdate();
 
             Map<String, String> parameterMappings = extractMostParameters(mostProduct);
+            Set<String> seenKeys = new HashSet<>();
+            int mappedCount = 0, notFoundCount = 0;
 
             for (Map.Entry<String, String> paramEntry : parameterMappings.entrySet()) {
-                try {
-                    String parameterName = paramEntry.getKey();
-                    String parameterValue = paramEntry.getValue();
+                String parameterValue = paramEntry.getValue();
+                if (parameterValue == null || parameterValue.isBlank()) continue;
 
-                    if (parameterValue == null || parameterValue.trim().isEmpty()) {
-                        continue;
-                    }
+                String mostKey = generateMostKey(paramEntry.getKey());
+                Long parameterId = parameterIdsByMostKey.get(mostKey);
+                if (parameterId == null) { notFoundCount++; continue; }
 
-                    String mostKey = generateMostKey(parameterName);  // ← ДОБАВЕНО!
-                    Parameter parameter = parametersByMostKey.get(mostKey);  // ← ПРОМЕНЕНО!
+                Map<String, Long> optionMap = optionIdsByParamAndValue.get(parameterId);
+                if (optionMap == null) { notFoundCount++; continue; }
 
-                    if (parameter == null) {
-                        notFoundCount++;
-                        continue;
-                    }
+                Long optionId = optionMap.get(normalizeName(parameterValue));
+                if (optionId == null) { notFoundCount++; continue; }
 
-                    Map<String, ParameterOption> parameterOptions = optionsByParameterId.get(parameter.getId());
-                    if (parameterOptions == null) {
-                        notFoundCount++;
-                        continue;
-                    }
+                if (!seenKeys.add(parameterId + ":" + optionId)) continue; // dedup
 
-                    String normalizedValue = normalizeName(parameterValue);
-                    ParameterOption option = parameterOptions.get(normalizedValue);
-
-                    if (option == null) {
-                        notFoundCount++;
-                        continue;
-                    }
-
-                    ProductParameter productParam = new ProductParameter();
-                    productParam.setProduct(product);
-                    productParam.setParameter(parameter);
-                    productParam.setParameterOption(option);
-                    autoParameters.add(productParam);
-
-                    mappedCount++;
-
-                } catch (Exception e) {
-                    log.error("Error mapping parameter {} for product {}: {}",
-                            paramEntry.getKey(), product.getSku(), e.getMessage());
-                    notFoundCount++;
-                }
+                ProductParameter pp = new ProductParameter();
+                pp.setProduct(product);
+                pp.setParameter(entityManager.getReference(Parameter.class, parameterId));
+                pp.setParameterOption(entityManager.getReference(ParameterOption.class, optionId));
+                entityManager.persist(pp);
+                mappedCount++;
             }
-
-            Set<ProductParameter> mergedParameters = new HashSet<>();
-            mergedParameters.addAll(manualParameters);
-            mergedParameters.addAll(autoParameters);
-
-            product.setProductParameters(mergedParameters);
 
             if (notFoundCount > 0) {
-                log.warn("Product {}: {} mapped, {} manual, {} not found",
-                        product.getSku(), mappedCount, manualParameters.size(), notFoundCount);
+                log.warn("Product {}: {} mapped, {} not found", product.getSku(), mappedCount, notFoundCount);
             }
 
         } catch (Exception e) {
-            log.error("ERROR setting Most parameters for product {}: {}",
-                    product.getSku(), e.getMessage());
-        }
-    }
-
-    private boolean isManualParameter(ProductParameter productParameter) {
-        Parameter parameter = productParameter.getParameter();
-        if (parameter == null) return false;
-        // Only admin-touched parameters are considered manual — platform is irrelevant.
-        // Cross-platform parameters (e.g. created by Vali, reused by Most) must NOT be treated as manual.
-        return isAdminUser(parameter.getCreatedBy()) || isAdminUser(parameter.getLastModifiedBy());
-    }
-
-    private boolean isAdminUser(String username) {
-        if (username == null || username.isEmpty()) return false;
-        return "ADMIN".equalsIgnoreCase(username.trim()) || "admin".equalsIgnoreCase(username.trim());
-    }
-
-    private Product findOrCreateProduct(String sku, Map<String, Object> mostProduct, Category category) {
-        try {
-            List<Product> existing = productRepository.findBySkuAndPlatform(sku, Platform.MOST);
-            Product product;
-
-            if (!existing.isEmpty()) {
-                product = existing.get(0);
-                if (existing.size() > 1) {
-                    log.warn("Found {} duplicates for SKU: {} (MOST), keeping first", existing.size(), sku);
-                    for (int i = 1; i < existing.size(); i++) {
-                        productRepository.delete(existing.get(i));
-                    }
-                }
-            } else {
-                product = new Product();
-                product.setSku(sku);
-                product.setPlatform(Platform.MOST);
-            }
-
-            product.setCategory(category);
-
-            return product;
-
-        } catch (Exception e) {
-            log.error("Error in findOrCreateProduct for SKU {}: {}", sku, e.getMessage());
+            log.error("ERROR setting Most parameters for product {}: {}", product.getSku(), e.getMessage());
             throw e;
-        }
-    }
-
-    private boolean updateProductFieldsFromMost(Product product, Map<String, Object> mostProduct,
-                                                boolean isNew, Map<String, Manufacturer> manufacturersMap) {
-        try {
-            if (isNew) {
-                product.setPlatform(Platform.MOST);
-
-                String name = (String) mostProduct.get("name");
-                product.setNameBg(name);
-                product.setNameEn(name);
-
-                product.setModel((String) mostProduct.get("model"));
-                product.setCreatedBy("system");
-
-                String description = (String) mostProduct.get("description");
-                if (description != null && !description.trim().isEmpty()) {
-                    product.setDescriptionBg(description);
-                    product.setDescriptionEn(description);
-                }
-
-                String imageUrl = (String) mostProduct.get("image_url");
-                if (imageUrl != null && !imageUrl.trim().isEmpty()) {
-                    product.setPrimaryImageUrl(imageUrl);
-                }
-
-                String manufacturerName = (String) mostProduct.get("manufacturer");
-                if (manufacturerName != null && !manufacturerName.isEmpty()) {
-                    String normalizedName = normalizeManufacturerName(manufacturerName);
-                    Manufacturer manufacturer = manufacturersMap.get(normalizedName);
-
-                    if (manufacturer != null) {
-                        product.setManufacturer(manufacturer);
-                    } else {
-                        log.warn("Manufacturer '{}' not found for product {}, skipping product",
-                                manufacturerName, product.getSku());
-                        return false;
-                    }
-                }
-            }
-
-            Object priceObj = mostProduct.get("price");
-            if (priceObj != null) {
-                BigDecimal price = convertToPrice(priceObj);
-
-                String currency = (String) mostProduct.get("currency");
-                if ("USD".equals(currency)) {
-                    price = price.multiply(new BigDecimal(USD_TO_BGN_RATE));
-                } else if ("EUR".equals(currency)) {
-                    price = price.multiply(new BigDecimal(EUR_TO_BGN_RATE));
-                }
-
-                product.setPriceClient(price);
-            }
-
-            Object quantityObj = mostProduct.get("quantity");
-            boolean inStock = false;
-            if (quantityObj != null) {
-                int quantity = convertToInt(quantityObj);
-                inStock = (quantity > 0);
-            }
-
-            product.setShow(inStock);
-            product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
-
-            product.calculateFinalPrice();
-
-            return true;
-
-        } catch (Exception e) {
-            log.error("Error updating product fields from Most: {}", e.getMessage());
-            throw new RuntimeException("Failed to update product fields", e);
         }
     }
 
@@ -1015,20 +871,6 @@ public class MostSyncService {
         }
     }
 
-    private int convertToInt(Object value) {
-        if (value == null) return 0;
-
-        if (value instanceof Number) {
-            return ((Number) value).intValue();
-        }
-
-        try {
-            return Integer.parseInt(value.toString());
-        } catch (NumberFormatException e) {
-            log.warn("Cannot convert to int: {}", value);
-            return 0;
-        }
-    }
 
     private String generateMostKey(String parameterName) {
         if (parameterName == null || parameterName.trim().isEmpty()) {
