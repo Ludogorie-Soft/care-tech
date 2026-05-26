@@ -177,3 +177,49 @@
 | 12:59 | Created scripts/14_delete_unwanted_categories.sql | — | ~2082 |
 | 12:59 | Session end: 20 writes across 9 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 9 reads | ~27029 tok |
 | 13:05 | Session end: 20 writes across 9 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 9 reads | ~27029 tok |
+| 14:29 | Edited ../../care-tech-ui/src/pages/OurClients.jsx | added 1 import(s) | ~118 |
+| 14:29 | Session end: 21 writes across 10 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 10 reads | ~27147 tok |
+| 14:31 | Session end: 21 writes across 10 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 10 reads | ~27147 tok |
+| 14:33 | Session end: 21 writes across 10 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 12 reads | ~27147 tok |
+| 14:37 | Edited ../../care-tech-ui/src/pages/OurClients.jsx | 13→13 lines | ~147 |
+| 14:37 | Edited ../../care-tech-ui/src/components/home/ReviewsSlider.jsx | "w-auto h-10 sm:h-12" → "w-auto h-14 sm:h-16" | ~12 |
+| 14:38 | Session end: 23 writes across 11 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 12 reads | ~27306 tok |
+| 14:38 | Session end: 23 writes across 11 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 12 reads | ~27306 tok |
+| 14:55 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | modified catch() | ~295 |
+| 14:55 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | 7→8 lines | ~130 |
+| 14:55 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | 6→6 lines | ~122 |
+| 14:55 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 4→5 lines | ~102 |
+| 14:55 | Edited src/main/java/com/techstore/repository/ProductRepository.java | 5→5 lines | ~167 |
+| 14:55 | Created scripts/15_hide_zero_price_products.sql | — | ~315 |
+| 14:56 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | added 1 import(s) | ~23 |
+| 14:56 | Session end: 30 writes across 16 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 25 reads | ~114390 tok |
+| 15:03 | Session end: 30 writes across 16 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 25 reads | ~114390 tok |
+| 15:10 | Created scripts/16_fix_products_in_hidden_categories.sql | — | ~780 |
+| 15:10 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | 2→3 lines | ~61 |
+| 15:11 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | 20→25 lines | ~248 |
+| 15:11 | Edited ../../care-tech-ui/src/components/Breadcrumbs.jsx | 10→10 lines | ~104 |
+| 15:12 | Session end: 34 writes across 19 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 27 reads | ~115638 tok |
+| 15:13 | Session end: 34 writes across 19 files (ProfileLayout.jsx, OrderDetails.jsx, WarrantyCards.jsx, App.js, S3Service.java) | 29 reads | ~122138 tok |
+
+## Session: 2026-05-26 15:16
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:46 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | modified for() | ~233 |
+| 15:46 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | added 2 condition(s) | ~386 |
+| 15:48 | Fixed AsbisSyncService: only resolve to visible categories; preserve existing category for hidden-cat products | AsbisSyncService.java | success | ~400 |
+| 15:48 | Session end: 2 writes across 1 files (AsbisSyncService.java) | 4 reads | ~10899 tok |
+| 15:50 | Session end: 2 writes across 1 files (AsbisSyncService.java) | 4 reads | ~10899 tok |
+| 15:50 | Session end: 2 writes across 1 files (AsbisSyncService.java) | 4 reads | ~10899 tok |
+| 15:51 | Session end: 2 writes across 1 files (AsbisSyncService.java) | 4 reads | ~10899 tok |
+| 15:51 | Session end: 2 writes across 1 files (AsbisSyncService.java) | 4 reads | ~10899 tok |
+| 15:53 | Session end: 2 writes across 1 files (AsbisSyncService.java) | 4 reads | ~10899 tok |
+| 15:54 | Session end: 2 writes across 1 files (AsbisSyncService.java) | 5 reads | ~11679 tok |
+| 15:54 | Session end: 2 writes across 1 files (AsbisSyncService.java) | 5 reads | ~11679 tok |
+| 15:55 | Session end: 2 writes across 1 files (AsbisSyncService.java) | 5 reads | ~11679 tok |
+| 15:56 | Session end: 2 writes across 1 files (AsbisSyncService.java) | 5 reads | ~11679 tok |
+| 15:59 | Session end: 2 writes across 1 files (AsbisSyncService.java) | 5 reads | ~11679 tok |
+| 16:10 | Created scripts/17_fix_all_hidden_category_products.sql | — | ~2213 |
+| 16:10 | Created script 17: full audit fix for ~60 hidden categories, 1500+ products across Groups 1/2/3 | scripts/17_fix_all_hidden_category_products.sql | success | ~300 |
+| 16:10 | Session end: 3 writes across 2 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql) | 5 reads | ~14050 tok |
+| 16:11 | Session end: 3 writes across 2 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql) | 5 reads | ~14050 tok |

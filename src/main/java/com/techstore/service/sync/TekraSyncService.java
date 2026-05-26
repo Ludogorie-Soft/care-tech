@@ -1120,9 +1120,10 @@ public class TekraSyncService {
 
         Integer quantity = getIntegerValue(rawProduct, "quantity");
         boolean inStock = (quantity != null && quantity > 0);
-        product.setShow(inStock);
         product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
         product.calculateFinalPrice();
+        boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
+        product.setShow(inStock && hasValidPrice);
 
         product = productRepository.save(product);
 
@@ -1376,10 +1377,10 @@ public class TekraSyncService {
 
             Integer quantity = getIntegerValue(rawData, "quantity");
             boolean inStock = (quantity != null && quantity > 0);
-            product.setShow(inStock);
             product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
-
             product.calculateFinalPrice();
+            boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
+            product.setShow(inStock && hasValidPrice);
 
             return true;
 

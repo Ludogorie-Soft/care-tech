@@ -722,9 +722,10 @@ public class MostSyncService {
         }
 
         boolean inStock = Boolean.TRUE.equals(mostProduct.get("inStock"));
-        product.setShow(inStock);
         product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
         product.calculateFinalPrice();
+        boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
+        product.setShow(inStock && hasValidPrice);
 
         product = productRepository.save(product);
 

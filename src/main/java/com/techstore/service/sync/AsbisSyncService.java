@@ -498,8 +498,9 @@ public class AsbisSyncService {
                 }
             });
 
-            // Load categories — parent-aware to correctly resolve same-name subcategories under different parents
-            List<Category> allCategoriesForProducts = categoryRepository.findAll();
+            // Load categories — only VISIBLE ones (show=true).
+            // Hidden categories are excluded so products are never assigned to them during sync.
+            List<Category> allCategoriesForProducts = categoryRepository.findByShowTrue();
             Map<String, Category> rootCategoriesByName = new HashMap<>();
             Map<String, Category> childCategoriesByParentAndName = new HashMap<>();
             for (Category c : allCategoriesForProducts) {
@@ -563,11 +564,6 @@ public class AsbisSyncService {
                         // Fallback: use L1 root category
                         category = rootCategoriesByName.get(cat1.toLowerCase().trim());
                     }
-                    if (category == null) {
-                        skippedNoCategory++;
-                        continue;
-                    }
-
                     // Resolve manufacturer
                     String vendorName = getString(asbisProduct, "vendor");
                     Manufacturer manufacturer = null;
@@ -581,6 +577,22 @@ public class AsbisSyncService {
 
                     Product product = existingByAsbisCode.get(productCode);
                     boolean isNew = (product == null);
+
+                    if (category == null) {
+                        if (isNew) {
+                            // New product with no visible category — skip
+                            skippedNoCategory++;
+                            continue;
+                        }
+                        // Existing product: preserve its current category instead of losing it
+                        category = product.getCategory();
+                        if (category == null) {
+                            skippedNoCategory++;
+                            continue;
+                        }
+                        log.debug("Preserved existing category '{}' for product {} (ASBIS category not in visible tree)",
+                                category.getNameBg(), productCode);
+                    }
 
                     if (isNew) {
                         product = new Product();

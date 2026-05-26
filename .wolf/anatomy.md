@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-26T09:59:13.335Z
-> Files: 384 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-26T13:10:09.616Z
+> Files: 392 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -11,6 +11,19 @@
 ## ../../care-tech-ui/src/
 
 - `App.js` — Declares ScrollToTop (~2406 tok)
+
+## ../../care-tech-ui/src/components/
+
+- `Breadcrumbs.jsx` — Breadcrumbs (~504 tok)
+
+## ../../care-tech-ui/src/components/home/
+
+- `ReviewsSlider.jsx` — PrevArrow (~1554 tok)
+
+## ../../care-tech-ui/src/pages/
+
+- `OurClients.jsx` — clients (~2686 tok)
+- `ProductPage.jsx` — EURO_RATE (~7323 tok)
 
 ## ../../care-tech-ui/src/pages/profile/
 
@@ -137,6 +150,9 @@
 - `11_fix_product_slugs.sql` — Генерира slug за продукти с empty/null slug от name_en/name_bg; Cyrillic product-id fallback опционален (~400 tok)
 - `12_deduplicate_products_by_sku.sql` — ============================================================================= (~777 tok)
 - `14_delete_unwanted_categories.sql` — ============================================================ (~2082 tok)
+- `15_hide_zero_price_products.sql` — ============================================================ (~315 tok)
+- `16_fix_products_in_hidden_categories.sql` — ============================================================ (~780 tok)
+- `17_fix_all_hidden_category_products.sql` — ============================================================ (~2213 tok)
 - `2_rebrand_vali_to_caretech.sql` — Ребрандиране: VALI COMPUTERS → CARETECH (~536 tok)
 - `3_reorder_top_categories.sql` — Пренарежда главните категории (sort_order) вкл. 3-те нови Asbis roots (~1086 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
@@ -416,7 +432,7 @@
 - `ParameterOptionRepository.java` — Repository: ParameterOptionRepository (~420 tok)
 - `ParameterRepository.java` — Repository: ParameterRepository (~1143 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~512 tok)
-- `ProductRepository.java` — Repository: ProductRepository (~1126 tok)
+- `ProductRepository.java` — Returns all distinct SKUs that are visible (show=true) on the given platforms. (~1501 tok)
 - `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9519 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
 - `SyncLogRepository.java` — Repository: SyncLogRepository (~78 tok)
@@ -455,9 +471,10 @@
 
 ## src/main/java/com/techstore/service/sync/
 
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~10717 tok)
-- `TekraSyncService.java` — Service: TekraSyncService (~22725 tok)
-- `ValiSyncService.java` — ValiSyncService - VERSION 4.0 - FINAL FIX (~11832 tok)
+- `AsbisSyncService.java` — Syncs ASBIS manufacturers/categories/parameters/products/price+avail. Only resolves to visible (show=true) categories; preserves existing category for products whose ASBIS category is hidden (~12459 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~10755 tok)
+- `TekraSyncService.java` — Service: TekraSyncService (~22801 tok)
+- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~13886 tok)
 
 ## src/main/java/com/techstore/util/
 

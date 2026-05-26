@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -950,7 +951,6 @@ public class ValiSyncService {
             product.setSku(extProduct.getModel());
         }
 
-        product.setShow(extProduct.getShow());
         setNamesToProduct(product, extProduct);
         setDescriptionToProduct(product, extProduct);
         setImagesToProduct(product, extProduct);
@@ -970,6 +970,9 @@ public class ValiSyncService {
         product.setPricePromo(extProduct.getPricePromo());
         product.setPriceClientPromo(extProduct.getPriceClientPromo());
         product.calculateFinalPrice();
+
+        boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
+        product.setShow(Boolean.TRUE.equals(extProduct.getShow()) && hasValidPrice);
     }
 
     private void setParametersToProduct(Product product, ProductRequestDto extProduct,
