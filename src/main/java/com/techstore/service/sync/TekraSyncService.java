@@ -851,17 +851,7 @@ public class TekraSyncService {
                 log.error("Failed to sync Tekra category_parameters: {}", e.getMessage());
             }
 
-            // Hide Tekra products whose SKU is already covered by a visible Vali product.
-            // Runs after the full sync so all Tekra show-flags are already set correctly.
-            try {
-                List<String> valiSkus = productRepository.findVisibleSkusByPlatforms(List.of(Platform.VALI));
-                if (!valiSkus.isEmpty()) {
-                    int hiddenDupes = productRepository.hideBySkuInAndPlatform(valiSkus, Platform.TEKRA);
-                    log.info("Dedup: hidden {} Tekra products already covered by Vali", hiddenDupes);
-                }
-            } catch (Exception e) {
-                log.error("Tekra dedup step failed: {}", e.getMessage());
-            }
+            // Cross-platform deduplication runs later at end of sync (cheapest price wins).
 
             log.info("=== CATEGORY MATCHING STATISTICS ===");
             matchTypeStats.forEach((type, count) ->
@@ -878,6 +868,9 @@ public class TekraSyncService {
                     totalProcessed, totalCreated, totalUpdated, digitalCount, analogCount,
                     skippedNoCategory + skippedNoManufacturer, totalErrors
             );
+
+            int deduplicated = productRepository.deduplicateCrossPlatformBySku();
+            log.info("Cross-platform deduplication: hidden {} higher-priced duplicates", deduplicated);
 
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, totalCreated,
                     totalUpdated, totalErrors, message, startTime);

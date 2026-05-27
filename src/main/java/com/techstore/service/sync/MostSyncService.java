@@ -619,6 +619,9 @@ public class MostSyncService {
                     totalProcessed, totalCreated, totalUpdated, skippedNoSku, skippedNoCategory,
                     skippedNoManufacturer, totalErrors, unmappedCategories.size());
 
+            int deduplicated = productRepository.deduplicateCrossPlatformBySku();
+            log.info("Cross-platform deduplication: hidden {} higher-priced duplicates", deduplicated);
+
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, totalCreated,
                     totalUpdated, totalErrors, message, startTime);
 

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-26T13:10:09.616Z
-> Files: 392 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-27T07:45:06.178Z
+> Files: 395 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -10,7 +10,7 @@
 
 ## ../../care-tech-ui/src/
 
-- `App.js` — Declares ScrollToTop (~2406 tok)
+- `App.js` — Declares ScrollToTop (~2444 tok)
 
 ## ../../care-tech-ui/src/components/
 
@@ -24,6 +24,14 @@
 
 - `OurClients.jsx` — clients (~2686 tok)
 - `ProductPage.jsx` — EURO_RATE (~7323 tok)
+
+## ../../care-tech-ui/src/pages/admin/Dashboard/
+
+- `Sidebar.jsx` — Sidebar (~916 tok)
+
+## ../../care-tech-ui/src/pages/admin/Sync/
+
+- `SyncLogsLayout.jsx` — STATUS_LABELS — renders table (~2882 tok)
 
 ## ../../care-tech-ui/src/pages/profile/
 
@@ -201,7 +209,7 @@
 
 ## src/main/java/com/techstore/controller/
 
-- `AdminController.java` — Get all orders with pagination and sorting (~4356 tok)
+- `AdminController.java` — Get all orders with pagination and sorting (~4459 tok)
 - `AuthController.java` — RestController: AuthController (9 endpoints) (~1192 tok)
 - `CacheClearController.java` — RestController: CacheClearController (2 endpoints) (~248 tok)
 - `CartController.java` — RestController: CartController (6 endpoints) (~2192 tok)
@@ -326,6 +334,7 @@
 - `ProductSummaryDto.java` — Class: ProductSummaryDto (~95 tok)
 - `ShippingPreviewResponseDTO.java` — Class: ShippingPreviewResponseDTO (~209 tok)
 - `SubscriptionDto.java` — Class: SubscriptionDto (~81 tok)
+- `SyncLogResponseDTO.java` — Class: SyncLogResponseDTO (~273 tok)
 - `UserAddressResponseDTO.java` — Class: UserAddressResponseDTO (~130 tok)
 - `UserCompanyResponseDTO.java` — Class: UserCompanyResponseDTO (~131 tok)
 - `UserFavoriteResponseDto.java` — Class: UserFavoriteResponseDto (~68 tok)
@@ -432,10 +441,10 @@
 - `ParameterOptionRepository.java` — Repository: ParameterOptionRepository (~420 tok)
 - `ParameterRepository.java` — Repository: ParameterRepository (~1143 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~512 tok)
-- `ProductRepository.java` — Returns all distinct SKUs that are visible (show=true) on the given platforms. (~1501 tok)
+- `ProductRepository.java` — Cross-platform deduplication by SKU. (~1771 tok)
 - `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9519 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
-- `SyncLogRepository.java` — Repository: SyncLogRepository (~78 tok)
+- `SyncLogRepository.java` — Repository: SyncLogRepository (~214 tok)
 - `UserAddressRepository.java` — Repository: UserAddressRepository (~261 tok)
 - `UserCompanyRepository.java` — Repository: UserCompanyRepository (~261 tok)
 - `UserFavoriteRepository.java` — Repository: UserFavoriteRepository (~284 tok)
@@ -471,10 +480,10 @@
 
 ## src/main/java/com/techstore/service/sync/
 
-- `AsbisSyncService.java` — Syncs ASBIS manufacturers/categories/parameters/products/price+avail. Only resolves to visible (show=true) categories; preserves existing category for products whose ASBIS category is hidden (~12459 tok)
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~10755 tok)
-- `TekraSyncService.java` — Service: TekraSyncService (~22801 tok)
-- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~13886 tok)
+- `AsbisSyncService.java` — AsbisSyncService (~12414 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~10804 tok)
+- `TekraSyncService.java` — Service: TekraSyncService (~22688 tok)
+- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~13944 tok)
 
 ## src/main/java/com/techstore/util/
 

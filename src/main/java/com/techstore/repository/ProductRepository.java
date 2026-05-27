@@ -94,15 +94,48 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT p.id AS id, p.slug AS slug, p.updatedAt AS updatedAt FROM Product p WHERE p.show = true AND p.slug IS NOT NULL AND p.slug <> ''")
     List<SitemapEntry> findSitemapEntries();
 
-    /**
-     * Returns all distinct SKUs that are visible (show=true) on the given platforms.
-     * Used for cross-platform duplicate detection: if a SKU is already visible on Vali/Tekra,
-     * Asbis/lower-priority products with the same SKU should stay hidden.
-     */
-    @Query("SELECT DISTINCT p.sku FROM Product p WHERE p.sku IS NOT NULL AND p.show = true AND p.platform IN :platforms")
-    List<String> findVisibleSkusByPlatforms(@Param("platforms") Collection<Platform> platforms);
-
     @Modifying
     @Query("UPDATE Product p SET p.show = false WHERE p.sku IN :skus AND p.platform = :platform")
     int hideBySkuInAndPlatform(@Param("skus") Collection<String> skus, @Param("platform") Platform platform);
+
+    /**
+     * Cross-platform deduplication by SKU.
+     * For each SKU visible on 2+ platforms simultaneously, hides all but the winner.
+     * Winner = lowest final_price, tiebreaker = platform priority (VALI > TEKRA > ASBIS > MOST), then lowest id.
+     * Called at the end of every sync to ensure price changes are reflected correctly.
+     */
+    @Modifying
+    @Query(value = """
+        WITH dup_skus AS (
+            SELECT sku
+            FROM products
+            WHERE sku IS NOT NULL AND show_flag = true
+            GROUP BY sku
+            HAVING COUNT(DISTINCT platform) > 1
+        ),
+        ranked AS (
+            SELECT
+                p.id,
+                ROW_NUMBER() OVER (
+                    PARTITION BY p.sku
+                    ORDER BY
+                        p.final_price ASC NULLS LAST,
+                        CASE p.platform
+                            WHEN 'VALI'  THEN 1
+                            WHEN 'TEKRA' THEN 2
+                            WHEN 'ASBIS' THEN 3
+                            WHEN 'MOST'  THEN 4
+                            ELSE 5
+                        END,
+                        p.id ASC
+                ) AS rn
+            FROM products p
+            INNER JOIN dup_skus d ON p.sku = d.sku
+            WHERE p.show_flag = true
+        )
+        UPDATE products
+        SET show_flag = false, updated_at = NOW()
+        WHERE id IN (SELECT id FROM ranked WHERE rn > 1)
+        """, nativeQuery = true)
+    int deduplicateCrossPlatformBySku();
 }

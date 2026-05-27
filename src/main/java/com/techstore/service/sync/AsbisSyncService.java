@@ -811,14 +811,6 @@ public class AsbisSyncService {
 
             log.info("Matched {} products in database", productsByAsbisCode.size());
 
-            // Pre-load SKUs that are already visible on higher-priority platforms (Vali, Tekra).
-            // If an Asbis product's SKU already exists on one of these platforms, keep it hidden
-            // to avoid showing duplicate products to customers.
-            Set<String> higherPrioritySkus = new HashSet<>(
-                    productRepository.findVisibleSkusByPlatforms(List.of(Platform.VALI, Platform.TEKRA))
-            );
-            log.info("Found {} SKUs already covered by Vali/Tekra — Asbis duplicates will stay hidden", higherPrioritySkus.size());
-
             long updated = 0, notFound = 0, errors = 0;
 
             for (Map<String, Object> priceRecord : priceData) {
@@ -836,13 +828,13 @@ public class AsbisSyncService {
                         product.setPriceClient(price);
                     }
 
-                    // Stock / availability
+                    // Stock / availability — show based only on stock + price.
+                    // Cross-platform deduplication (cheapest wins) runs after all products are updated.
                     Object stockObj = priceRecord.get("stock");
                     int stock = (stockObj instanceof Integer) ? (Integer) stockObj : 0;
                     boolean inStock = stock > 0;
                     boolean hasPrice = price != null && price.compareTo(BigDecimal.ZERO) > 0;
-                    boolean isDuplicate = product.getSku() != null && higherPrioritySkus.contains(product.getSku());
-                    boolean visible = inStock && hasPrice && !isDuplicate;
+                    boolean visible = inStock && hasPrice;
                     product.setShow(visible);
                     product.setStatus(visible ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
 
@@ -873,7 +865,13 @@ public class AsbisSyncService {
                          "Possible cause: WIC codes in PriceAvail.xml do not match ProductCode in catalog XML.");
             }
 
-            String message = String.format("Updated: %d, Hidden: %d, NotFound: %d, Errors: %d", updated, hidden, notFound, errors);
+            // Cross-platform deduplication: for SKUs visible on 2+ platforms, keep only the cheapest.
+            // Tiebreaker: VALI > TEKRA > ASBIS > MOST.
+            int deduplicated = productRepository.deduplicateCrossPlatformBySku();
+            log.info("Cross-platform deduplication: hidden {} higher-priced duplicates", deduplicated);
+
+            String message = String.format("Updated: %d, Hidden: %d, Deduplicated: %d, NotFound: %d, Errors: %d",
+                    updated, hidden, deduplicated, notFound, errors);
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, updated, 0, updated, errors, message, startTime);
             log.info("=== Asbis Price/Avail Sync Completed: {} ===", message);
 

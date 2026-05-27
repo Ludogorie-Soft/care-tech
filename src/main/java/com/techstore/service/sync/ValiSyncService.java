@@ -788,12 +788,15 @@ public class ValiSyncService {
                 }
             }
 
+            int deduplicated = productRepository.deduplicateCrossPlatformBySku();
+            log.info("Cross-platform deduplication: hidden {} higher-priced duplicates", deduplicated);
+
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, created, updated, errors,
                     errors > 0 ? String.format("Completed with %d errors", errors) : null, startTime);
 
             log.info("=== Products Sync Completed ===");
-            log.info("   Total: {}, Created: {}, Updated: {}, Errors: {}",
-                    totalProcessed, created, updated, errors);
+            log.info("   Total: {}, Created: {}, Updated: {}, Deduplicated: {}, Errors: {}",
+                    totalProcessed, created, updated, deduplicated, errors);
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, totalProcessed, created, updated, errors,

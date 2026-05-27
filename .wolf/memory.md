@@ -223,3 +223,38 @@
 | 16:10 | Created script 17: full audit fix for ~60 hidden categories, 1500+ products across Groups 1/2/3 | scripts/17_fix_all_hidden_category_products.sql | success | ~300 |
 | 16:10 | Session end: 3 writes across 2 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql) | 5 reads | ~14050 tok |
 | 16:11 | Session end: 3 writes across 2 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql) | 5 reads | ~14050 tok |
+| 09:55 | Session end: 3 writes across 2 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql) | 7 reads | ~16328 tok |
+| 10:00 | Session end: 3 writes across 2 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql) | 7 reads | ~16328 tok |
+| 10:05 | Edited src/main/java/com/techstore/repository/ProductRepository.java | expanded (+33 lines) | ~461 |
+| 10:06 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | modified for() | ~956 |
+| 10:07 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | 4→7 lines | ~113 |
+| 10:08 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | modified updateSyncLogSimple() | ~168 |
+| 10:08 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 4→7 lines | ~113 |
+| 10:09 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | removed 11 lines | ~25 |
+| 10:10 | Fixed cross-platform dedup bug: cheapest price wins across all syncs. Added deduplicateCrossPlatformBySku() to ProductRepository, removed isDuplicate/higherPrioritySkus from ASBIS, removed old Vali-priority dedup from Tekra | ProductRepository.java, AsbisSyncService.java, TekraSyncService.java, ValiSyncService.java, MostSyncService.java | success | ~500 |
+| 10:10 | Session end: 9 writes across 6 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql, ProductRepository.java, TekraSyncService.java, ValiSyncService.java) | 10 reads | ~78246 tok |
+| 10:12 | Session end: 9 writes across 6 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql, ProductRepository.java, TekraSyncService.java, ValiSyncService.java) | 10 reads | ~78246 tok |
+| 10:14 | Session end: 9 writes across 6 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql, ProductRepository.java, TekraSyncService.java, ValiSyncService.java) | 10 reads | ~78246 tok |
+| 10:15 | Session end: 9 writes across 6 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql, ProductRepository.java, TekraSyncService.java, ValiSyncService.java) | 10 reads | ~78246 tok |
+| 10:15 | Session end: 9 writes across 6 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql, ProductRepository.java, TekraSyncService.java, ValiSyncService.java) | 10 reads | ~78246 tok |
+| 10:16 | Session end: 9 writes across 6 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql, ProductRepository.java, TekraSyncService.java, ValiSyncService.java) | 14 reads | ~79772 tok |
+| 10:22 | Session end: 9 writes across 6 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql, ProductRepository.java, TekraSyncService.java, ValiSyncService.java) | 19 reads | ~84128 tok |
+| 10:37 | Edited src/main/java/com/techstore/repository/SyncLogRepository.java | expanded (+12 lines) | ~214 |
+| 10:38 | Created src/main/java/com/techstore/dto/response/SyncLogResponseDTO.java | — | ~273 |
+| 10:39 | Edited src/main/java/com/techstore/controller/AdminController.java | added 1 import(s) | ~400 |
+| 10:40 | Edited src/main/java/com/techstore/controller/AdminController.java | modified backfillProductSlugs() | ~258 |
+| 10:43 | Created ../../care-tech-ui/src/pages/admin/Sync/SyncLogsLayout.jsx | — | ~2882 |
+| 10:44 | Edited ../../care-tech-ui/src/pages/admin/Dashboard/Sidebar.jsx | 7→8 lines | ~30 |
+| 10:44 | Edited ../../care-tech-ui/src/pages/admin/Dashboard/Sidebar.jsx | 6→11 lines | ~77 |
+| 10:44 | Edited ../../care-tech-ui/src/App.js | added 1 import(s) | ~36 |
+| 10:45 | Edited ../../care-tech-ui/src/App.js | 2→3 lines | ~44 |
+| 10:47 | Added sync logs admin page: SyncLogRepository filters, SyncLogResponseDTO, GET /api/admin/sync-logs, SyncLogsLayout.jsx, Sidebar + App.js route | 6 files | success | ~400 |
+| 10:47 | Session end: 18 writes across 12 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql, ProductRepository.java, TekraSyncService.java, ValiSyncService.java) | 23 reads | ~88834 tok |
+| 11:06 | Session end: 18 writes across 12 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql, ProductRepository.java, TekraSyncService.java, ValiSyncService.java) | 24 reads | ~89232 tok |
+| 11:17 | Session end: 18 writes across 12 files (AsbisSyncService.java, 17_fix_all_hidden_category_products.sql, ProductRepository.java, TekraSyncService.java, ValiSyncService.java) | 24 reads | ~89232 tok |
+
+## Session: 2026-05-27 11:20
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:20 | Session resumed after context compaction. All prior work complete. Waiting for nightly ASBIS sync to run (01:00) to diagnose 557 errors. Backend deploy to EC2 needed for sync-logs admin page. | — | pending | ~0 |

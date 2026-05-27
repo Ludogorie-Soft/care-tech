@@ -5,6 +5,7 @@ import com.techstore.dto.request.*;
 import com.techstore.dto.response.*;
 import com.techstore.entity.Product;
 import com.techstore.enums.OrderStatus;
+import com.techstore.repository.SyncLogRepository;
 import com.techstore.service.*;
 import com.techstore.service.admin.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +39,7 @@ public class AdminController {
     private final ParameterService parameterService;
     private final CategoryService categoryService;
     private final ManufacturerService manufacturerService;
+    private final SyncLogRepository syncLogRepository;
 
     @GetMapping("/products/pageable")
     public ResponseEntity<Page<ProductResponseDTO>> getAllAdminProducts(
@@ -367,5 +369,19 @@ public class AdminController {
         int updated = productService.backfillMissingSlugs();
         log.info("Slug backfill completed: {} products updated", updated);
         return ResponseEntity.ok(Map.of("updated", updated));
+    }
+
+    @GetMapping("/sync-logs")
+    public ResponseEntity<Page<SyncLogResponseDTO>> getSyncLogs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String syncType,
+            @RequestParam(required = false) String status) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<SyncLogResponseDTO> logs = syncLogRepository
+                .findByFilters(syncType, status, pageable)
+                .map(SyncLogResponseDTO::new);
+        return ResponseEntity.ok(logs);
     }
 }
