@@ -1,20 +1,22 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-27T07:45:06.178Z
-> Files: 395 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-29T13:58:34.008Z
+> Files: 433 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
-- `MEMORY.md` — Memory Index (~100 tok)
+- `MEMORY.md` — Memory Index (~149 tok)
 - `project_most_api.md` (~136 tok)
+- `tbi_leasing_integration.md` — Status: Backend + Frontend COMPLETE (2026-05-29) (~710 tok)
 
 ## ../../care-tech-ui/src/
 
-- `App.js` — Declares ScrollToTop (~2444 tok)
+- `App.js` — Declares ScrollToTop (~2481 tok)
 
 ## ../../care-tech-ui/src/components/
 
 - `Breadcrumbs.jsx` — Breadcrumbs (~504 tok)
+- `TbiCheckoutModal.jsx` — Two-step TBI leasing modal: Step 1 = Speedy/home address form, Step 2 = TBI iframe. Supports single product prop OR cartItems+totalLeva+totalEuro props. TbiLogo accepts color prop (use "#fff" in header). programmaticQueryRef prevents city dropdown re-show. (~5200 tok)
 
 ## ../../care-tech-ui/src/components/home/
 
@@ -22,12 +24,21 @@
 
 ## ../../care-tech-ui/src/pages/
 
+- `Cart.jsx` — Full cart page. TBI integration: isTbiEligible check (50–15000 EUR), tbiCartItems mapping (finalPrice*1.2 with VAT), TbiCheckoutModal rendered on orange "Купи на изплащане" button click. Old RegisterBasket/script approach removed. (~14000 tok)
 - `OurClients.jsx` — clients (~2686 tok)
-- `ProductPage.jsx` — EURO_RATE (~7323 tok)
+- `ProductPage.jsx` — EURO_RATE (~7599 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Dashboard/
 
-- `Sidebar.jsx` — Sidebar (~916 tok)
+- `Sidebar.jsx` — Sidebar (~970 tok)
+
+## ../../care-tech-ui/src/pages/admin/Leasing/
+
+- `LeasingLayout.jsx` — STATUS_CONFIG (~4981 tok)
+
+## ../../care-tech-ui/src/pages/admin/Orders/
+
+- `useOrderUtils.js` — Exports useOrderUtils (~790 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Sync/
 
@@ -38,6 +49,11 @@
 - `OrderDetails.jsx` — OrderDetails (~3165 tok)
 - `ProfileLayout.jsx` — links (~1723 tok)
 - `WarrantyCards.jsx` — WarrantyCards (~886 tok)
+
+## ../../care-tech-ui/src/redux/
+
+- `leasingSlice.js` — 4 async thunks: fetchLeasingApplications, fetchLeasingById, fetchLeasingStatistics, registerLeasingApplication. registerError stores true (flag only, not backend payload). State: registerStatus, registeredUrl, registeredApplicationId. (~1100 tok)
+- `store.js` — Exports store, persistor (~483 tok)
 
 ## ./
 
@@ -191,7 +207,7 @@
 - `CacheConfig.java` — Thread-safe cache for Asbis products (~493 tok)
 - `CacheInitializer.java` — Component: CacheInitializer (~234 tok)
 - `DatabaseConfig.java` — @Configuration (~428 tok)
-- `DebugController.java` — RestController: DebugController (5 endpoints) (~5007 tok)
+- `DebugController.java` — RestController: DebugController (5 endpoints). Class-level @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')"). (~4699 tok)
 - `JacksonConfig.java` — Configuration: JacksonConfig (~470 tok)
 - `JwtAuthenticationFilter.java` — Component: JwtAuthenticationFilter (~1305 tok)
 - `OpenApiConfig.java` — Configuration: OpenApiConfig (~712 tok)
@@ -199,32 +215,34 @@
 - `S3Config.java` — Configuration: S3Config (~289 tok)
 - `SearchConfig.java` — Configuration: SearchConfig (~424 tok)
 - `SearchIndexManager.java` — Component: SearchIndexManager (~4470 tok)
-- `SecurityConfig.java` — ").permitAll() (~2046 tok)
+- `SecurityConfig.java` — Configuration: SecurityConfig. Orders: POST public, rest authenticated. sync/upload/internal/swagger → admin only. Defense-in-depth URL rules. (~2333 tok)
 - `ShippingConfig.java` — Изчислява цената на доставка (~379 tok)
 - `SlugRegenerationRunner.java` — Component: SlugRegenerationRunner (~401 tok)
 - `SpeedyConfig.java` — Configuration: SpeedyConfig (~136 tok)
+- `TbiConfig.java` — AES-256-CTR encryption key provided by TBI for the BIVD merchant account. (~402 tok)
 - `TekraConfig.java` — import com.fasterxml.jackson.databind.DeserializationFeature; (~177 tok)
 - `WebClientConfig.java` — Configuration: WebClientConfig (~802 tok)
 - `WebConfig.java` — Configuration: WebConfig (~670 tok)
 
 ## src/main/java/com/techstore/controller/
 
-- `AdminController.java` — Get all orders with pagination and sorting (~4459 tok)
+- `AdminController.java` — @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')") at class level. Orders, leasing, product, category, markup endpoints. (~4827 tok)
 - `AuthController.java` — RestController: AuthController (9 endpoints) (~1192 tok)
-- `CacheClearController.java` — RestController: CacheClearController (2 endpoints) (~248 tok)
+- `CacheClearController.java` — POST /api/internal/cache/clear-all. @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')") + URL-level guard. (~264 tok)
 - `CartController.java` — RestController: CartController (6 endpoints) (~2192 tok)
 - `CategoryController.java` — RestController: CategoryController (5 endpoints) (~854 tok)
 - `CategoryReorganizationController.java` — CategoryReorganizationController (~979 tok)
 - `ContactController.java` — RestController: ContactController (2 endpoints) (~331 tok)
-- `FileUploadController.java` — RestController: FileUploadController (5 endpoints) (~647 tok)
+- `FileUploadController.java` — /api/upload/**. @PreAuthorize per method. @CrossOrigin removed — uses global CORS. (~592 tok)
 - `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1905 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
-- `OrderController.java` — Създаване на нова поръчка (~1568 tok)
+- `OrderController.java` — POST public (guest checkout). All other endpoints authenticated. IDOR fix on getOrderById/getOrderByNumber/cancel (ownership check). (~1566 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
 - `ProductController.java` — Record to hold sort field and direction information (~3884 tok)
 - `ProductSearchController.java` — RestController: ProductSearchController (8 endpoints) (~1491 tok)
 - `SpeedyController.java` — RestController: SpeedyController (4 endpoints) (~1716 tok)
 - `SubscriptionController.java` — RestController: SubscriptionController (5 endpoints) (~562 tok)
+- `TbiLeasingController.java` — 3 endpoints: POST /register (@PreAuthorize isAuthenticated), POST /webhook (public, ResellerCode validated), GET /application/{id} (IDOR fix: ownership or admin check). (~846 tok)
 - `UserController.java` — RestController: UserController (18 endpoints) (~2059 tok)
 - `UserFavoriteController.java` — RestController: UserFavoriteController (7 endpoints) (~2295 tok)
 
@@ -280,7 +298,7 @@
 - `ManufacturerRequestDto.java` — Class: ManufacturerRequestDto (~102 tok)
 - `MarkupUpdateDTO.java` — If true, applies markup only to products that currently have markupPercentage = 0 (~269 tok)
 - `MessageToAdmin.java` — Class: MessageToAdmin (~100 tok)
-- `OrderCreateRequestDTO.java` — Class: OrderCreateRequestDTO (~842 tok)
+- `OrderCreateRequestDTO.java` — When true: order is created with LEASING_PENDING status and no confirmation email is sent. (~850 tok)
 - `OrderFilterDTO.java` — Class: OrderFilterDTO (~232 tok)
 - `OrderItemCreateDTO.java` — Class: OrderItemCreateDTO (~116 tok)
 - `OrderStatusUpdateDTO.java` — Class: OrderStatusUpdateDTO (~122 tok)
@@ -354,6 +372,29 @@
 - `SpeedySite.java` — Class: SpeedySite (~167 tok)
 - `SpeedySiteResponse.java` — Class: SpeedySiteResponse (~54 tok)
 
+## src/main/java/com/techstore/dto/tbi/
+
+- `LeasingApplicationResponseDto.java` — Admin-facing representation of a TBI leasing application. (~886 tok)
+- `LeasingApplicationResponseDto.java` — Admin-facing leasing application DTO with static from() factory (~180 tok)
+- `LeasingApplicationStatisticsDto.java` — Aggregated statistics shown on the admin leasing dashboard. (~214 tok)
+- `LeasingApplicationStatisticsDto.java` — Aggregated stats: total, approved, rejected, signed, amounts (~100 tok)
+- `LeasingOrderCreateRequestDto.java` — Class: LeasingOrderCreateRequestDto (~266 tok)
+- `TbiApplicationDataDto.java` — The plain-text JSON object that gets AES-256-CTR encrypted and placed (~413 tok)
+- `TbiApplicationDataDto.java` — Plain-text JSON encrypted and sent as `data` to TBI RegisterApplication (~120 tok)
+- `TbiCartItemRequestDto.java` — A single cart item sent from the frontend when initiating a leasing application (~143 tok)
+- `TbiDeliveryAddressDto.java` — Delivery address within the TBI application payload. (~295 tok)
+- `TbiDeliveryAddressDto.java` — Delivery address for TBI payload; static empty() builder (~100 tok)
+- `TbiItemDto.java` — A single item in the TBI RegisterApplication items list. (~214 tok)
+- `TbiItemDto.java` — Single item in TBI items list: name, qty, price, sku, category, imagelink (~90 tok)
+- `TbiRegisterApplicationResponseDto.java` — Response from TBI POST /api/RegisterApplication. (~259 tok)
+- `TbiRegisterApplicationResponseDto.java` — TBI RegisterApplication response: error, order_id, token, url (~90 tok)
+- `TbiRegisterRequestDto.java` — Sent by the frontend when the customer clicks "Buy with TBI". (~416 tok)
+- `TbiRegisterRequestDto.java` — From frontend: productId, productName, priceEuro, priceLeva, sku, quantity, imageUrl (~80 tok)
+- `TbiRegisterResponseDto.java` — Returned to the frontend after a successful RegisterApplication call. (~124 tok)
+- `TbiRegisterResponseDto.java` — Returned to frontend: applicationId + TBI iframe url (~50 tok)
+- `TbiStatusWebhookDto.java` — Webhook payload POSTed by TBI to our statusURL when an application changes state. (~550 tok)
+- `TbiStatusWebhookDto.java` — TBI webhook payload on status change: CreditApplicationId, OrderId, Message, Status (~120 tok)
+
 ## src/main/java/com/techstore/dto/tekra/
 
 - `TekraApiResponse.java` — TekraApiResponse: isSuccess (~193 tok)
@@ -372,6 +413,8 @@
 - `BaseEntity.java` — Entity: BaseEntity (~411 tok)
 - `CartItem.java` — Entity: CartItem (~242 tok)
 - `Category.java` — Entity: Category (~884 tok)
+- `LeasingApplication.java` — order_id returned by TBI RegisterApplication (~1179 tok)
+- `LeasingApplication.java` — Entity: TBI leasing application; links to Order, stores TBI order_id/token, status, status_history (JSON), financial details (~400 tok)
 - `Manufacturer.java` — Entity: Manufacturer (~476 tok)
 - `Order.java` — Entity: Order (~1750 tok)
 - `OrderItem.java` — Entity: OrderItem (~559 tok)
@@ -389,8 +432,8 @@
 
 ## src/main/java/com/techstore/enums/
 
-- `OrderStatus.java` — Class: OrderStatus (~45 tok)
-- `PaymentMethod.java` — PaymentMethod: getDisplayName (~134 tok)
+- `OrderStatus.java` — Class: OrderStatus (~54 tok)
+- `PaymentMethod.java` — PaymentMethod: getDisplayName (~133 tok)
 - `PaymentStatus.java` — Class: PaymentStatus (~37 tok)
 - `Platform.java` — Platform/Source of data integration (~339 tok)
 - `ProductStatus.java` — ProductStatus: fromCode, getCode, getNameBg, getNameEn (~281 tok)
@@ -409,7 +452,7 @@
 - `BusinessLogicException.java` — Class: BusinessLogicException (~52 tok)
 - `DuplicateResourceException.java` — Class: DuplicateResourceException (~54 tok)
 - `ExternalApiException.java` — ExternalApiException: getStatusCode, getResponseBody (~209 tok)
-- `GlobalExceptionHandler.java` — RestController: GlobalExceptionHandler (~6060 tok)
+- `GlobalExceptionHandler.java` — RestController: GlobalExceptionHandler (~5811 tok)
 - `InsufficientStockException.java` — Class: InsufficientStockException (~54 tok)
 - `InvalidCredentialsException.java` — Class: InvalidCredentialsException (~55 tok)
 - `InvalidTokenException.java` — Class: InvalidTokenException (~52 tok)
@@ -435,6 +478,7 @@
 
 - `CartItemRepository.java` — Repository: CartItemRepository (~274 tok)
 - `CategoryRepository.java` — Repository: CategoryRepository (~316 tok)
+- `LeasingApplicationRepository.java` — Repository: LeasingApplicationRepository (~338 tok)
 - `ManufacturerRepository.java` — Repository: ManufacturerRepository (~209 tok)
 - `OrderItemRepository.java` — Repository: OrderItemRepository (~87 tok)
 - `OrderRepository.java` — Repository: OrderRepository (~1414 tok)
@@ -458,17 +502,19 @@
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~13424 tok)
 - `CategoryService.java` — Service: CategoryService (~4425 tok)
 - `CronJobService.java` — Service: CronJobService (~788 tok)
-- `EmailService.java` — Service for sending email notifications (~3751 tok)
+- `EmailService.java` — Service for sending email notifications (~3992 tok)
 - `FileUploadService.java` — Service: FileUploadService (~7252 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3823 tok)
-- `OrderService.java` — Creates a new order (~5783 tok)
+- `OrderService.java` — Creates a new order (~5860 tok)
 - `ParameterService.java` — Service: ParameterService (~10236 tok)
 - `ProductSearchService.java` — Service: ProductSearchService (~1890 tok)
 - `ProductService.java` — Service: ProductService (~14076 tok)
 - `S3Service.java` — Service: S3Service (~2077 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
+- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~7048 tok)
+- `TbiLeasingService.java` — TBI Fusion Pay integration: registerApplication (AES encrypt → TBI API), processStatusWebhook, getStatistics, admin queries (~350 tok)
 - `TekraApiService.java` — Get categories using JSON parsing (categories return JSON) (~4698 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
 - `UserService.java` — Service: UserService (~6853 tok)
@@ -493,11 +539,12 @@
 - `LogHelper.java` — Service: LogHelper (~398 tok)
 - `SecurityHelper.java` — Component: SecurityHelper (~640 tok)
 - `SyncHelper.java` — Find category by hierarchical path (e.g., "zahranvaniya-i-baterii/za-postoyanno-naprezhenie") (~2631 tok)
+- `TbiEncryptionUtil.java` — TBI Fusion Pay encryption utility. (~1015 tok)
 
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` (~2444 tok)
+- `application.yml` — Secrets via env vars (MAIL_PASSWORD, ASBIS_USERNAME/PASSWORD). server.error: never. swagger: ${SWAGGER_ENABLED:false}. (~2566 tok)
 
 ## src/main/resources/db/
 
@@ -508,6 +555,8 @@
 - `V1__initial_schema.sql` — V1__initial_schema.sql (~6089 tok)
 - `V10__add_audit_columns_to_user_tables.sql` — Add missing BaseEntity audit columns to user_addresses (~137 tok)
 - `V11__add_seat_management_address_to_user_companies.sql` — SQL: 1 alter(s) (~39 tok)
+- `V12__add_tbi_leasing_applications.sql` — V12: TBI Fusion Pay leasing applications (~714 tok)
+- `V16__add_shipping_to_leasing_applications.sql` — Add shipping address fields to leasing_applications table (~190 tok)
 - `V2__add_isFilter_to_product_parameters.sql` — SQL: 1 alter(s) (~48 tok)
 - `V3__add_most_key_to_product.sql` — SQL: 1 alter(s) (~42 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)

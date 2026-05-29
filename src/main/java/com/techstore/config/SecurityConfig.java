@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -91,40 +92,47 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        // Public endpoints
+                        // ── Fully public ────────────────────────────────────────────────────
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/products/**").permitAll()
                         .requestMatchers("/api/categories/**").permitAll()
                         .requestMatchers("/api/images/**").permitAll()
-                        .requestMatchers("/api/orders/**").permitAll()
                         .requestMatchers("/api/cart/**").permitAll()
-                        .requestMatchers("/api/favorites/**").permitAll()
-                        .requestMatchers("/api/upload/**").permitAll()
                         .requestMatchers("/api/manufacturers/**").permitAll()
                         .requestMatchers("/api/parameters/**").permitAll()
                         .requestMatchers("/api/speedy/**").permitAll()
                         .requestMatchers("/api/subscriptions/**").permitAll()
-                        .requestMatchers("/api/sync/**").permitAll()
                         .requestMatchers("/api/contact/**").permitAll()
-                        .requestMatchers("/api/internal/**").permitAll()
+                        .requestMatchers("/api/tbi/webhook").permitAll()
                         .requestMatchers("/api/og/**").permitAll()
                         .requestMatchers("/og/**").permitAll()
                         .requestMatchers("/api/sitemap.xml").permitAll()
 
-                        // Swagger/OpenAPI endpoints
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // ── Orders: POST (guest checkout) is public; everything else requires auth ──
+                        .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
+                        .requestMatchers("/api/orders/**").authenticated()
 
-                        // Admin panel static files
+                        // ── Sync & upload: admin only ────────────────────────────────────────
+                        .requestMatchers("/api/sync/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        .requestMatchers("/api/upload/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        .requestMatchers("/api/internal/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+
+                        // ── User management: method-level @PreAuthorize handles granularity ──
+                        .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/favorites/**").authenticated()
+
+                        // ── Swagger/OpenAPI: admin only in production ────────────────────────
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                            .hasAnyRole("ADMIN", "SUPER_ADMIN")
+
+                        // ── Static assets & health ───────────────────────────────────────────
                         .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**").permitAll()
-
-                        // Health check endpoints
                         .requestMatchers("/actuator/health", "/actuator/info", "/actuator/metrics").permitAll()
 
-                        // Admin endpoints
+                        // ── Admin endpoints ──────────────────────────────────────────────────
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 
-                        // All other requests need authentication
+                        // ── Everything else requires authentication ──────────────────────────
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

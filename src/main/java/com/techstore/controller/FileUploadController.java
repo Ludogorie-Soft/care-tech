@@ -16,7 +16,6 @@ import java.util.Map;
 @RequestMapping("/api/upload")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class FileUploadController {
 
     private final FileUploadService fileUploadService;

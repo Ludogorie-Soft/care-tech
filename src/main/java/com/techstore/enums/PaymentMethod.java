@@ -7,7 +7,8 @@ public enum PaymentMethod {
     DEBIT_CARD("Дебитна карта"),
     EPAY("ePay"),
     EASYPAY("EasyPay"),
-    PAYPAL("PayPal");
+    PAYPAL("PayPal"),
+    TBI_LEASING("TBI Лизинг");
 
     private final String displayName;
 

@@ -28,6 +28,19 @@
 ## Session: 2026-05-22 08:31
 
 | Time | Action | File(s) | Outcome | ~Tokens |
+
+## Session: 2026-05-29 (Security Audit)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+| — | SecurityConfig: split /api/orders (POST public, rest auth), sync/upload/internal/swagger → admin only | SecurityConfig.java | done | ~400 |
+| — | OrderController: IDOR fix — ownership check on getOrderById/getOrderByNumber/cancelOrder | OrderController.java | done | ~200 |
+| — | DebugController: class-level @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')") | DebugController.java | done | ~50 |
+| — | application.yml: MAIL_PASSWORD, ASBIS_USERNAME/PASSWORD env vars; server.error=never; swagger disabled by default | application.yml | done | ~100 |
+| — | TbiLeasingController: @PreAuthorize("isAuthenticated()") on /register; IDOR fix on GET /application/{id} | TbiLeasingController.java | done | ~150 |
+| — | GlobalExceptionHandler: IllegalArgumentException no longer exposes raw ex.getMessage() | GlobalExceptionHandler.java | done | ~50 |
+| — | AdminController: hasRole('ADMIN') → hasAnyRole('ADMIN','SUPER_ADMIN') — SUPER_ADMIN was locked out of all admin endpoints | AdminController.java | done | ~100 |
+| — | FileUploadController: removed @CrossOrigin(origins="*") — was bypassing global CORS config | FileUploadController.java | done | ~50 |
+| — | CacheClearController: added @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')") for defense in depth | CacheClearController.java | done | ~50 |
 |------|--------|---------|---------|--------|
 | 00:07 | Fixed Tekra UnexpectedRollbackException: setTekraParametersToProductSimplified() replaced Hibernate collection with orphanRemoval → transaction rollback-only. Changed to in-place mutation (clear+addAll) | TekraSyncService.java | done | ~400 |
 | 2026-05-25 | Most sync rewrite: new URL (portal.mostbg.com), XML parser (PartNumber/pictureUrl/inStock), field mappings, name_en cross-match, orphanRemoval fix, new MOST_CATEGORY_MAPPING | MostApiService.java, MostSyncService.java, application.yml | done | ~1200 |
@@ -258,3 +271,187 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 11:20 | Session resumed after context compaction. All prior work complete. Waiting for nightly ASBIS sync to run (01:00) to diagnose 557 errors. Backend deploy to EC2 needed for sync-logs admin page. | — | pending | ~0 |
+
+## Session: 2026-05-29 12:52
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:35 | Created src/main/java/com/techstore/util/TbiEncryptionUtil.java | — | ~1015 |
+| 14:36 | Created src/main/resources/db/migration/V12__add_tbi_leasing_applications.sql | — | ~714 |
+| 14:38 | Created src/main/java/com/techstore/dto/tbi/TbiRegisterRequestDto.java | — | ~162 |
+| 14:39 | Created src/main/java/com/techstore/dto/tbi/TbiItemDto.java | — | ~214 |
+| 14:39 | Created src/main/java/com/techstore/dto/tbi/TbiDeliveryAddressDto.java | — | ~295 |
+| 14:40 | Created src/main/java/com/techstore/dto/tbi/TbiApplicationDataDto.java | — | ~413 |
+| 14:40 | Created src/main/java/com/techstore/dto/tbi/TbiRegisterApplicationResponseDto.java | — | ~259 |
+| 14:40 | Created src/main/java/com/techstore/dto/tbi/TbiStatusWebhookDto.java | — | ~550 |
+| 14:40 | Created src/main/java/com/techstore/dto/tbi/LeasingApplicationResponseDto.java | — | ~660 |
+| 14:41 | Created src/main/java/com/techstore/dto/tbi/LeasingApplicationStatisticsDto.java | — | ~214 |
+| 14:41 | Created src/main/java/com/techstore/dto/tbi/TbiRegisterResponseDto.java | — | ~124 |
+| 14:42 | Created src/main/java/com/techstore/entity/LeasingApplication.java | — | ~956 |
+| 14:42 | Created src/main/java/com/techstore/repository/LeasingApplicationRepository.java | — | ~338 |
+| 14:42 | Created src/main/java/com/techstore/config/TbiConfig.java | — | ~402 |
+| 14:42 | Edited src/main/resources/application.yml | expanded (+9 lines) | ~110 |
+| 14:44 | Created src/main/java/com/techstore/service/TbiLeasingService.java | — | ~4315 |
+| 14:47 | Edited src/main/java/com/techstore/service/EmailService.java | added error handling | ~260 |
+| 14:51 | Created src/main/java/com/techstore/controller/TbiLeasingController.java | — | ~734 |
+| 14:53 | Edited src/main/java/com/techstore/enums/PaymentMethod.java | 7→8 lines | ~64 |
+| 14:53 | Edited src/main/java/com/techstore/controller/AdminController.java | added 3 import(s) | ~80 |
+| 14:53 | Edited src/main/java/com/techstore/controller/AdminController.java | 7→8 lines | ~110 |
+| 14:53 | Edited src/main/java/com/techstore/controller/AdminController.java | modified getApplicationsByStatus() | ~329 |
+| 14:54 | Edited src/main/java/com/techstore/config/SecurityConfig.java | 2→3 lines | ~58 |
+| 14:55 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/tbi_leasing_integration.md | — | ~646 |
+| 14:56 | Edited ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/MEMORY.md | modified complete() | ~87 |
+| 14:56 | Session end: 25 writes across 23 files (TbiEncryptionUtil.java, V12__add_tbi_leasing_applications.sql, TbiRegisterRequestDto.java, TbiItemDto.java, TbiDeliveryAddressDto.java) | 13 reads | ~25147 tok |
+
+## Session: 2026-05-29 15:01
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:01 | Created src/main/java/com/techstore/dto/tbi/LeasingOrderCreateRequestDto.java | — | ~266 |
+| 15:02 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added 3 import(s) | ~270 |
+| 15:02 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | 5→10 lines | ~135 |
+| 15:02 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added 3 condition(s) | ~1159 |
+| 15:03 | Edited src/main/java/com/techstore/controller/AdminController.java | added 1 import(s) | ~48 |
+| 15:03 | Edited src/main/java/com/techstore/controller/AdminController.java | modified getLeasingStatistics() | ~159 |
+| 15:03 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added 2 import(s) | ~72 |
+| 15:03 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | 6→7 lines | ~114 |
+| 15:03 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | 7→10 lines | ~167 |
+| 15:04 | Created ../../care-tech-ui/src/redux/leasingSlice.js | — | ~1068 |
+| 15:04 | Edited ../../care-tech-ui/src/redux/store.js | added 1 import(s) | ~38 |
+| 15:05 | Edited ../../care-tech-ui/src/redux/store.js | 2→3 lines | ~22 |
+| 15:06 | Created ../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx | — | ~6845 |
+| 15:06 | Edited ../../care-tech-ui/src/pages/admin/Dashboard/Sidebar.jsx | added 1 import(s) | ~32 |
+| 15:06 | Edited ../../care-tech-ui/src/pages/admin/Dashboard/Sidebar.jsx | 6→11 lines | ~79 |
+| 15:07 | Edited ../../care-tech-ui/src/App.js | added 1 import(s) | ~55 |
+| 15:09 | Edited ../../care-tech-ui/src/App.js | 2→3 lines | ~44 |
+| 15:10 | Implemented TBI leasing admin panel: create-order backend endpoint + leasingSlice + LeasingLayout + Sidebar + App.js routing | TbiLeasingService.java, AdminController.java, leasingSlice.js, LeasingLayout.jsx, Sidebar.jsx, App.js | complete | ~8000 |
+| 15:10 | Session end: 17 writes across 8 files (LeasingOrderCreateRequestDto.java, TbiLeasingService.java, AdminController.java, leasingSlice.js, store.js) | 11 reads | ~24060 tok |
+| 15:12 | Session end: 17 writes across 8 files (LeasingOrderCreateRequestDto.java, TbiLeasingService.java, AdminController.java, leasingSlice.js, store.js) | 11 reads | ~24060 tok |
+| 15:14 | Session end: 17 writes across 8 files (LeasingOrderCreateRequestDto.java, TbiLeasingService.java, AdminController.java, leasingSlice.js, store.js) | 11 reads | ~24060 tok |
+| 15:17 | Session end: 17 writes across 8 files (LeasingOrderCreateRequestDto.java, TbiLeasingService.java, AdminController.java, leasingSlice.js, store.js) | 11 reads | ~24060 tok |
+| 15:23 | Edited src/main/java/com/techstore/enums/OrderStatus.java | 9→11 lines | ~46 |
+| 15:23 | Edited src/main/java/com/techstore/dto/request/OrderCreateRequestDTO.java | expanded (+6 lines) | ~82 |
+| 15:24 | Edited src/main/java/com/techstore/service/OrderService.java | 5→6 lines | ~82 |
+| 15:24 | Edited src/main/java/com/techstore/service/OrderService.java | added 1 condition(s) | ~96 |
+| 15:24 | Edited src/main/java/com/techstore/dto/tbi/TbiRegisterRequestDto.java | expanded (+23 lines) | ~354 |
+| 15:24 | Edited src/main/java/com/techstore/entity/LeasingApplication.java | expanded (+26 lines) | ~244 |
+| 15:24 | Created src/main/resources/db/migration/V16__add_shipping_to_leasing_applications.sql | — | ~190 |
+| 15:24 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added 2 import(s) | ~94 |
+| 15:24 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | expanded (+6 lines) | ~122 |
+| 15:25 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | modified getFirstName() | ~750 |
+| 15:25 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added error handling | ~511 |
+| 15:25 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | modified buildOrderRequest() | ~519 |
+| 15:26 | Edited src/main/java/com/techstore/controller/AdminController.java | 3→2 lines | ~33 |
+| 15:26 | Edited src/main/java/com/techstore/controller/AdminController.java | — | ~0 |
+| 15:26 | Edited src/main/java/com/techstore/dto/tbi/LeasingApplicationResponseDto.java | expanded (+10 lines) | ~121 |
+| 15:26 | Edited src/main/java/com/techstore/dto/tbi/LeasingApplicationResponseDto.java | expanded (+9 lines) | ~175 |
+| 15:26 | Edited ../../care-tech-ui/src/redux/leasingSlice.js | modified catch() | ~108 |
+| 15:26 | Edited ../../care-tech-ui/src/redux/leasingSlice.js | 2→4 lines | ~32 |
+| 15:26 | Edited ../../care-tech-ui/src/redux/leasingSlice.js | clearCreateOrderStatus() → clearRegisterStatus() | ~54 |
+| 15:27 | Edited ../../care-tech-ui/src/redux/leasingSlice.js | 12→16 lines | ~196 |
+| 15:27 | Edited ../../care-tech-ui/src/redux/leasingSlice.js | inline fix | ~25 |
+| 15:27 | Created ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | — | ~3691 |
+| 15:28 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | 5→5 lines | ~70 |
+| 15:28 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | 7→8 lines | ~103 |
+| 15:28 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | expanded (+11 lines) | ~358 |
+| 15:28 | Edited ../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx | added 1 import(s) | ~91 |
+| 15:29 | Edited ../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx | modified catch() | ~1544 |
+| 15:29 | Edited ../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx | 34→33 lines | ~285 |
+| 15:29 | Edited ../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx | 7→7 lines | ~55 |
+| 15:29 | Edited ../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx | inline fix | ~34 |
+| 15:30 | Edited ../../care-tech-ui/src/pages/admin/Orders/useOrderUtils.js | 9→11 lines | ~92 |
+| 15:30 | Edited ../../care-tech-ui/src/pages/admin/Orders/useOrderUtils.js | modified switch() | ~80 |
+| 15:30 | Refactored TBI leasing to Option B: order created immediately as LEASING_PENDING, auto-transitions on webhook, TbiCheckoutModal with Speedy, removed create-order admin endpoint | OrderStatus, TbiRegisterRequestDto, TbiLeasingService, LeasingApplication, V16 migration, TbiCheckoutModal, leasingSlice, LeasingLayout, useOrderUtils | complete | ~6000 |
+| 15:30 | Session end: 49 writes across 18 files (LeasingOrderCreateRequestDto.java, TbiLeasingService.java, AdminController.java, leasingSlice.js, store.js) | 21 reads | ~35485 tok |
+| 15:33 | Edited src/main/java/com/techstore/service/EmailService.java | modified switch() | ~123 |
+| 15:34 | Session end: 50 writes across 19 files (LeasingOrderCreateRequestDto.java, TbiLeasingService.java, AdminController.java, leasingSlice.js, store.js) | 22 reads | ~39578 tok |
+| 15:34 | Edited src/main/resources/application.yml | 2→2 lines | ~62 |
+| 15:35 | Edited ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/tbi_leasing_integration.md | 4→5 lines | ~105 |
+| 15:35 | Session end: 52 writes across 21 files (LeasingOrderCreateRequestDto.java, TbiLeasingService.java, AdminController.java, leasingSlice.js, store.js) | 24 reads | ~42292 tok |
+| 15:35 | Session end: 52 writes across 21 files (LeasingOrderCreateRequestDto.java, TbiLeasingService.java, AdminController.java, leasingSlice.js, store.js) | 24 reads | ~42292 tok |
+| 15:38 | Session end: 52 writes across 21 files (LeasingOrderCreateRequestDto.java, TbiLeasingService.java, AdminController.java, leasingSlice.js, store.js) | 24 reads | ~42292 tok |
+| 15:42 | Created ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | — | ~4266 |
+| 15:43 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | CSS: active, backgroundColor, color | ~222 |
+| 15:45 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | inline fix | ~2 |
+| 15:45 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | inline fix | ~2 |
+| 15:45 | Session end: 56 writes across 21 files (LeasingOrderCreateRequestDto.java, TbiLeasingService.java, AdminController.java, leasingSlice.js, store.js) | 25 reads | ~46784 tok |
+| 15:47 | Created src/main/java/com/techstore/dto/tbi/TbiCartItemRequestDto.java | — | ~143 |
+| 15:47 | Edited src/main/java/com/techstore/dto/tbi/TbiRegisterRequestDto.java | added 1 import(s) | ~36 |
+| 15:47 | Edited src/main/java/com/techstore/dto/tbi/TbiRegisterRequestDto.java | expanded (+6 lines) | ~78 |
+| 15:47 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added 1 condition(s) | ~451 |
+| 15:47 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added 1 condition(s) | ~247 |
+| 15:48 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added 2 condition(s) | ~361 |
+
+## Session: 2026-05-29 15:50
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:51 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | added optional chaining | ~71 |
+| 15:51 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | added 1 condition(s) | ~161 |
+| 15:51 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | expanded (+21 lines) | ~442 |
+| 15:51 | Edited ../../care-tech-ui/src/pages/Cart.jsx | removed 13 lines | ~18 |
+| 15:52 | Edited ../../care-tech-ui/src/pages/Cart.jsx | removed 166 lines | ~161 |
+| 15:52 | Edited ../../care-tech-ui/src/pages/Cart.jsx | CSS: backgroundColor | ~332 |
+| 15:52 | Edited ../../care-tech-ui/src/pages/Cart.jsx | setTbiModalOpen() → setTbiCheckoutOpen() | ~73 |
+| 15:53 | Session end: 7 writes across 2 files (TbiCheckoutModal.jsx, Cart.jsx) | 1 reads | ~1258 tok |
+| 15:54 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | added 1 condition(s) | ~194 |
+| 15:54 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | 7→8 lines | ~75 |
+| 15:54 | Session end: 9 writes across 2 files (TbiCheckoutModal.jsx, Cart.jsx) | 1 reads | ~1527 tok |
+| 15:56 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | 3→1 lines | ~23 |
+| 15:56 | Edited ../../care-tech-ui/src/redux/leasingSlice.js | 4→4 lines | ~44 |
+| 15:56 | Session end: 11 writes across 3 files (TbiCheckoutModal.jsx, Cart.jsx, leasingSlice.js) | 2 reads | ~1594 tok |
+| 15:57 | Session end: 11 writes across 3 files (TbiCheckoutModal.jsx, Cart.jsx, leasingSlice.js) | 2 reads | ~1594 tok |
+| 15:58 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | 5→5 lines | ~79 |
+| 15:58 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | inline fix | ~17 |
+| 15:58 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | 2→2 lines | ~28 |
+| 15:58 | Session end: 14 writes across 3 files (TbiCheckoutModal.jsx, Cart.jsx, leasingSlice.js) | 2 reads | ~1718 tok |
+
+## Session: 2026-05-29 (continued — TBI multi-product + UX fixes)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:00 | Updated TbiCheckoutModal.jsx to support cartItems prop (single product + cart modes); isCart detection, per-item summary, cart-aware handleDeliverySubmit | TbiCheckoutModal.jsx | done | ~800 |
+| 15:05 | Replaced old TBI hybrid approach in Cart.jsx (RegisterBasket, script inject, click intercept) with TbiCheckoutModal; added visible TBI orange button; tbiCartItems mapping | Cart.jsx | done | ~1200 |
+| 15:10 | Fixed city dropdown re-showing after selection: cityQuery useEffect re-triggered setShowCityDropdown(true) after handleCitySelect set query. Added programmaticQueryRef flag | TbiCheckoutModal.jsx | done | ~200 |
+| 15:15 | Removed raw backend error from TBI modal error display; leasingSlice registerError now stores true (flag only) instead of backend payload | TbiCheckoutModal.jsx, leasingSlice.js | done | ~100 |
+| 15:20 | Fixed TBI logo invisible in header: SVG fill was TBI_RED on TBI_RED background. Added color prop to TbiLogo, passed color="#fff" in header | TbiCheckoutModal.jsx | done | ~100 |
+| 15:25 | Button text "Продължи към TBI →" → "Продължи" per user request | TbiCheckoutModal.jsx | done | ~50 |
+| 16:09 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/tbi_leasing_integration.md | — | ~757 |
+| 16:10 | Session end: 15 writes across 4 files (TbiCheckoutModal.jsx, Cart.jsx, leasingSlice.js, tbi_leasing_integration.md) | 3 reads | ~2529 tok |
+| 16:13 | Session end: 15 writes across 4 files (TbiCheckoutModal.jsx, Cart.jsx, leasingSlice.js, tbi_leasing_integration.md) | 10 reads | ~13671 tok |
+| 16:14 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added 1 condition(s) | ~216 |
+| 16:14 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added error handling | ~389 |
+| 16:15 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | getPhone() → normalizePhone() | ~12 |
+| 16:15 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | inline fix | ~13 |
+| 16:15 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added 2 condition(s) | ~266 |
+| 16:15 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | modified getShippingCountry() | ~307 |
+| 16:15 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | modified catch() | ~79 |
+| 16:17 | Session end: 22 writes across 5 files (TbiCheckoutModal.jsx, Cart.jsx, leasingSlice.js, tbi_leasing_integration.md, TbiLeasingService.java) | 12 reads | ~16734 tok |
+| 16:19 | Session end: 22 writes across 5 files (TbiCheckoutModal.jsx, Cart.jsx, leasingSlice.js, tbi_leasing_integration.md, TbiLeasingService.java) | 19 reads | ~44762 tok |
+| 16:50 | Edited src/main/java/com/techstore/config/SecurityConfig.java | added 1 import(s) | ~102 |
+| 16:50 | Edited src/main/java/com/techstore/config/SecurityConfig.java | expanded (+6 lines) | ~796 |
+| 16:50 | Edited src/main/java/com/techstore/controller/OrderController.java | modified getOrderById() | ~131 |
+| 16:50 | Edited src/main/java/com/techstore/config/DebugController.java | 6→7 lines | ~56 |
+
+## Session: 2026-05-29 16:52
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:52 | Edited src/main/resources/application.yml | inline fix | ~10 |
+| 16:52 | Edited src/main/java/com/techstore/exception/GlobalExceptionHandler.java | 6→6 lines | ~62 |
+| 16:53 | Edited src/main/resources/application.yml | 6→6 lines | ~45 |
+| 16:53 | Edited src/main/resources/application.yml | 5→5 lines | ~42 |
+| 16:53 | Edited src/main/resources/application.yml | 8→8 lines | ~58 |
+| 16:53 | Edited src/main/java/com/techstore/controller/TbiLeasingController.java | added 1 import(s) | ~63 |
+| 16:53 | Edited src/main/java/com/techstore/controller/TbiLeasingController.java | 2→3 lines | ~38 |
+| 16:53 | Session end: 7 writes across 3 files (application.yml, GlobalExceptionHandler.java, TbiLeasingController.java) | 3 reads | ~7123 tok |
+| 16:57 | Session end: 7 writes across 3 files (application.yml, GlobalExceptionHandler.java, TbiLeasingController.java) | 10 reads | ~21507 tok |
+| 16:58 | Edited src/main/java/com/techstore/controller/AdminController.java | "hasRole(" → "hasAnyRole(" | ~14 |
+| 16:58 | Edited src/main/java/com/techstore/controller/FileUploadController.java | 2→1 lines | ~10 |
+| 16:58 | Edited src/main/java/com/techstore/controller/CacheClearController.java | added 1 import(s) | ~113 |
+| 16:58 | Edited src/main/java/com/techstore/controller/CacheClearController.java | modified clearAllCaches() | ~33 |
+| 16:58 | Edited src/main/java/com/techstore/controller/TbiLeasingController.java | added 1 import(s) | ~75 |
+| 16:58 | Edited src/main/java/com/techstore/controller/TbiLeasingController.java | added 1 condition(s) | ~152 |
+| 17:00 | Session end: 13 writes across 6 files (application.yml, GlobalExceptionHandler.java, TbiLeasingController.java, AdminController.java, FileUploadController.java) | 11 reads | ~23110 tok |
+| 17:02 | Session end: 13 writes across 6 files (application.yml, GlobalExceptionHandler.java, TbiLeasingController.java, AdminController.java, FileUploadController.java) | 13 reads | ~23110 tok |
+| 17:05 | Session end: 13 writes across 6 files (application.yml, GlobalExceptionHandler.java, TbiLeasingController.java, AdminController.java, FileUploadController.java) | 13 reads | ~23110 tok |

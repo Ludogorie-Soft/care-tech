@@ -3,6 +3,9 @@ package com.techstore.controller;
 import com.techstore.dto.response.CategoryResponseDTO;
 import com.techstore.dto.request.*;
 import com.techstore.dto.response.*;
+import com.techstore.dto.tbi.LeasingApplicationResponseDto;
+import com.techstore.dto.tbi.LeasingApplicationStatisticsDto;
+import com.techstore.service.TbiLeasingService;
 import com.techstore.entity.Product;
 import com.techstore.enums.OrderStatus;
 import com.techstore.repository.SyncLogRepository;
@@ -29,7 +32,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 @Slf4j
 public class AdminController {
 
@@ -40,6 +43,7 @@ public class AdminController {
     private final CategoryService categoryService;
     private final ManufacturerService manufacturerService;
     private final SyncLogRepository syncLogRepository;
+    private final TbiLeasingService tbiLeasingService;
 
     @GetMapping("/products/pageable")
     public ResponseEntity<Page<ProductResponseDTO>> getAllAdminProducts(
@@ -370,6 +374,33 @@ public class AdminController {
         log.info("Slug backfill completed: {} products updated", updated);
         return ResponseEntity.ok(Map.of("updated", updated));
     }
+
+    // ============ TBI LEASING ENDPOINTS ============
+
+    @GetMapping("/leasing/all")
+    public ResponseEntity<Page<LeasingApplicationResponseDto>> getAllLeasingApplications(
+            @RequestParam(defaultValue = "0")    int page,
+            @RequestParam(defaultValue = "20")   int size,
+            @RequestParam(required = false)      String status) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<LeasingApplicationResponseDto> result = status != null && !status.isBlank()
+                ? tbiLeasingService.getApplicationsByStatus(status, pageable)
+                : tbiLeasingService.getAllApplications(pageable);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/leasing/{id}")
+    public ResponseEntity<LeasingApplicationResponseDto> getLeasingApplicationById(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(tbiLeasingService.getApplicationById(id));
+    }
+
+    @GetMapping("/leasing/statistics")
+    public ResponseEntity<LeasingApplicationStatisticsDto> getLeasingStatistics() {
+        return ResponseEntity.ok(tbiLeasingService.getStatistics());
+    }
+
 
     @GetMapping("/sync-logs")
     public ResponseEntity<Page<SyncLogResponseDTO>> getSyncLogs(

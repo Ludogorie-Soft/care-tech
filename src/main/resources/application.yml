@@ -16,7 +16,7 @@ spring:
       port: 587
       protocol: smtp
       username: orders@caretech.bg
-      password: 184562@!Zas2
+      password: ${MAIL_PASSWORD}
       properties:
         mail:
           smtp:
@@ -142,9 +142,9 @@ tekra:
 server:
     port: 8080
     error:
-        include-message: always
-        include-binding-errors: always
-        include-stacktrace: on_param  # Include stack trace only when trace=true parameter is passed
+        include-message: never
+        include-binding-errors: never
+        include-stacktrace: never
         include-exception: false
     servlet:
         encoding:
@@ -268,7 +268,7 @@ springdoc:
         path: /v3/api-docs
     swagger-ui:
         path: /swagger-ui.html
-        enabled: true
+        enabled: ${SWAGGER_ENABLED:false}
         operations-sorter: method
         tags-sorter: alpha
 
@@ -292,8 +292,8 @@ asbis:
   api:
     enabled: true
     base-url: "https://services.it4profit.com/product/bg/714"
-    username: "detelin"
-    password: "951753gG@."
+    username: ${ASBIS_USERNAME}
+    password: ${ASBIS_PASSWORD}
     timeout: 60000
     retry-attempts: 3
     retry-delay: 2000
@@ -302,6 +302,15 @@ asbis:
 excluded:
     categories:
         external-ids: ${VALI_EXCLUDED_CATEGORIES_IDS}
+
+tbi:
+  fusion-pay:
+    api-base-url: ${TBI_API_BASE_URL:https://beta.tbibank.support}
+    reseller-code: ${TBI_RESELLER_CODE:BIVD}
+    reseller-key: ${TBI_RESELLER_KEY:caretech}
+    encryption-key: ${TBI_ENCRYPTION_KEY:wXkG6YYmpIQ8LVcb1dg6n1ufdJCqi4M6ud0cIg4WruaBX6keTLPBRNm9Tdubri8A0X6nIOCR#T#sDo0!r#ec3yZILtXOYPaUMIHr0Li8ejxsbCHGTZqBkrJLl@ByY7rK}
+    webhook-url: ${TBI_WEBHOOK_URL:https://api.caretech.bg/api/tbi/webhook}
+    enabled: ${TBI_ENABLED:true}
 
 speedy:
     base-url: https://api.speedy.bg/v1/

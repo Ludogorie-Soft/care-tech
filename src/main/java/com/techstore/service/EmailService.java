@@ -290,6 +290,26 @@ public class EmailService {
     }
 
     /**
+     * Send a plain HTML email without a Thymeleaf template.
+     * Used for internal admin notifications (e.g. TBI leasing status updates).
+     */
+    @Async
+    public void sendHtmlEmail(String to, String subject, String htmlBody) {
+        try {
+            MimeMessage mime = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mime, true, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true);
+            mailSender.send(mime);
+            log.info("HTML email sent to {}: {}", to, subject);
+        } catch (Exception e) {
+            log.error("Failed to send HTML email to {}: {}", to, e.getMessage());
+        }
+    }
+
+    /**
      * Send HTML email using Thymeleaf template
      */
     private void sendHtmlEmail(String from, String to, String subject, String templateName, Map<String, Object> variables)
@@ -335,6 +355,8 @@ public class EmailService {
      */
     private String getStatusInBulgarian(OrderStatus status) {
         return switch (status) {
+            case LEASING_PENDING -> "Чака одобрение от TBI";
+            case LEASING_REJECTED -> "Лизинг отказан";
             case PENDING -> "Изчакваща";
             case CONFIRMED -> "Потвърдена";
             case PROCESSING -> "В обработка";

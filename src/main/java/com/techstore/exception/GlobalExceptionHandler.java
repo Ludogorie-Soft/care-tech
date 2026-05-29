@@ -506,7 +506,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = createErrorResponse(
                 HttpStatus.BAD_REQUEST,
                 "Invalid Argument",
-                ex.getMessage(),
+                "Invalid request argument",
                 request.getRequestURI()
         );
 

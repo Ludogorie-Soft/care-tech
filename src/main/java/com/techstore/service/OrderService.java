@@ -86,7 +86,8 @@ public class OrderService {
         Order order = new Order();
         order.setUser(user);
         order.setOrderNumber(generateOrderNumber());
-        order.setStatus(OrderStatus.PENDING);
+        boolean isLeasing = Boolean.TRUE.equals(request.getIsLeasingOrder());
+        order.setStatus(isLeasing ? OrderStatus.LEASING_PENDING : OrderStatus.PENDING);
         order.setPaymentStatus(PaymentStatus.PENDING);
         order.setPaymentMethod(request.getPaymentMethod());
         order.setShippingMethod(request.getShippingMethod());
@@ -176,9 +177,12 @@ public class OrderService {
 
         cartItemRepository.deleteByUserEmail(request.getCustomerEmail());
 
-        log.info("Order created successfully: {}", order.getOrderNumber());
+        log.info("Order created successfully: {} (status={})", order.getOrderNumber(), order.getStatus());
 
-        eventPublisher.publishEvent(new OrderCreatedEvent(this, order));
+        // Leasing orders skip the confirmation email — it is sent when TBI confirms the contract
+        if (!isLeasing) {
+            eventPublisher.publishEvent(new OrderCreatedEvent(this, order));
+        }
 
         return mapToResponseDTO(order);
     }

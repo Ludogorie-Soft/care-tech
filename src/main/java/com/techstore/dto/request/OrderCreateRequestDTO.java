@@ -110,4 +110,10 @@ public class OrderCreateRequestDTO {
 
     private String password;
     private String confirmPassword;
+
+    /**
+     * When true: order is created with LEASING_PENDING status and no confirmation email is sent.
+     * The status transitions to PENDING when TBI confirms the leasing contract.
+     */
+    private Boolean isLeasingOrder = false;
 }

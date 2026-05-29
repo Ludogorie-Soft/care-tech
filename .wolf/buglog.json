@@ -684,6 +684,480 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-27T07:44:22.332Z"
+    },
+    {
+      "id": "bug-041",
+      "timestamp": "2026-05-29T11:47:24.625Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/EmailService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T11:47:24.625Z"
+    },
+    {
+      "id": "bug-042",
+      "timestamp": "2026-05-29T11:53:46.973Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/controller/AdminController.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T11:53:46.973Z"
+    },
+    {
+      "id": "bug-043",
+      "timestamp": "2026-05-29T12:02:55.475Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:02:55.475Z"
+    },
+    {
+      "id": "bug-044",
+      "timestamp": "2026-05-29T12:03:55.434Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 7→10 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:03:55.434Z"
+    },
+    {
+      "id": "bug-045",
+      "timestamp": "2026-05-29T12:06:49.956Z",
+      "error_message": "CSS fix: name, icon, path",
+      "file": "../../care-tech-ui/src/pages/admin/Dashboard/Sidebar.jsx",
+      "root_cause": "name: \"Синхронизации\", → \"Лизинг заявки\",; icon: <FiRefreshCw className=\"w-5 h-5\" />, → <BsCreditCard2Back className=\"w-5 h-5\" />,; path: \"/admin/dashboard/sync-logs\", → \"/admin/dashboard/leasing\",",
+      "fix": "Changed name: \"Синхронизации\", → \"Лизинг заявки\",; icon: <FiRefreshCw className=\"w-5 h-5\" />, → <BsCreditCard2Back className=\"w-5 h-5\" />,; path: \"/admin/dashboard/sync-logs\", → \"/admin/dashboard/leasing\",",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:06:49.956Z"
+    },
+    {
+      "id": "bug-046",
+      "timestamp": "2026-05-29T12:24:54.183Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 3→9 lines (2 removed) | Also: application.setStoreOrderId(\"0\");; if (user != null) { | Also: // ── Admin: create order from leasing application; /**",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-05-29T12:25:59.113Z"
+    },
+    {
+      "id": "bug-047",
+      "timestamp": "2026-05-29T12:25:20.823Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:25:20.823Z"
+    },
+    {
+      "id": "bug-048",
+      "timestamp": "2026-05-29T12:26:53.450Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/redux/leasingSlice.js",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 4→6 lines (3 removed) | Also: // createOrderFromLeasing; .addCase(createOrderFromLeasing.pending, (state) =",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-29T12:27:01.413Z"
+    },
+    {
+      "id": "bug-049",
+      "timestamp": "2026-05-29T12:27:08.989Z",
+      "error_message": "Wrong reference: clearCreateOrderStatus should be clearRegisterStatus",
+      "file": "../../care-tech-ui/src/redux/leasingSlice.js",
+      "root_cause": "Used \"clearCreateOrderStatus\" instead of \"clearRegisterStatus\"",
+      "fix": "Changed clearCreateOrderStatus → clearRegisterStatus",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:27:08.989Z"
+    },
+    {
+      "id": "bug-050",
+      "timestamp": "2026-05-29T12:28:20.120Z",
+      "error_message": "CSS fix: enabled",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "enabled: !!item?.id && priceInfo.finalLeva >= 100 && user?.role === \"ADMIN\", → false, // TBI script no longer drives the flow — we use TbiCheckoutModal",
+      "fix": "Changed enabled: !!item?.id && priceInfo.finalLeva >= 100 && user?.role === \"ADMIN\", → false, // TBI script no longer drives the flow — we use TbiCheckoutModal",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:28:20.120Z"
+    },
+    {
+      "id": "bug-051",
+      "timestamp": "2026-05-29T12:28:31.702Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 13→24 lines (9 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:28:31.702Z"
+    },
+    {
+      "id": "bug-052",
+      "timestamp": "2026-05-29T12:29:34.715Z",
+      "error_message": "CSS fix: hover, md",
+      "file": "../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx",
+      "root_cause": "hover: bg-slate-600 text-slate-300 rounded-xl transition-colors text-sm\" → bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors\"; md: grid-cols-2 gap-3\"> → grid-cols-2 gap-4\">",
+      "fix": "Changed hover: bg-slate-600 text-slate-300 rounded-xl transition-colors text-sm\" → bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors\"; md: grid-cols-2 gap-3\"> → grid-cols-2 gap-4\">",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:29:34.715Z"
+    },
+    {
+      "id": "bug-053",
+      "timestamp": "2026-05-29T12:34:57.070Z",
+      "error_message": "Wrong reference: pika4uCredit$ should be caretech",
+      "file": "src/main/resources/application.yml",
+      "root_cause": "Used \"pika4uCredit$\" instead of \"caretech\"",
+      "fix": "Changed pika4uCredit$ → caretech",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "yml"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:34:57.070Z"
+    },
+    {
+      "id": "bug-054",
+      "timestamp": "2026-05-29T12:35:04.272Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/tbi_leasing_integration.md",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 4→5 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:35:04.272Z"
+    },
+    {
+      "id": "bug-055",
+      "timestamp": "2026-05-29T12:43:06.842Z",
+      "error_message": "CSS fix: hover",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "hover: bg-blue-500 hover:text-white font-semibold text-sm transition-colors\" → opacity-90 active:opacity-80\"",
+      "fix": "Changed hover: bg-blue-500 hover:text-white font-semibold text-sm transition-colors\" → opacity-90 active:opacity-80\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:43:06.842Z"
+    },
+    {
+      "id": "bug-056",
+      "timestamp": "2026-05-29T12:45:15.923Z",
+      "error_message": "Wrong reference: E3001B should be F07800",
+      "file": "../../care-tech-ui/src/components/TbiCheckoutModal.jsx",
+      "root_cause": "Used \"E3001B\" instead of \"F07800\"",
+      "fix": "Changed E3001B → F07800",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:45:15.923Z"
+    },
+    {
+      "id": "bug-057",
+      "timestamp": "2026-05-29T12:45:17.297Z",
+      "error_message": "Wrong reference: E3001B should be F07800",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "Used \"E3001B\" instead of \"F07800\"",
+      "fix": "Changed E3001B → F07800",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:45:17.297Z"
+    },
+    {
+      "id": "bug-058",
+      "timestamp": "2026-05-29T12:51:27.978Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/components/TbiCheckoutModal.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:51:27.978Z"
+    },
+    {
+      "id": "bug-059",
+      "timestamp": "2026-05-29T12:51:44.807Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/components/TbiCheckoutModal.jsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 9→30 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:51:44.807Z"
+    },
+    {
+      "id": "bug-060",
+      "timestamp": "2026-05-29T12:52:27.762Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/pages/Cart.jsx",
+      "root_cause": "148 lines replaced/restructured",
+      "fix": "Rewrote 166→14 lines (148 removed) | Also: <TbiInfoModal; isOpen={tbiModalOpen}",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-29T12:52:48.341Z"
+    },
+    {
+      "id": "bug-061",
+      "timestamp": "2026-05-29T12:58:33.828Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/components/TbiCheckoutModal.jsx",
+      "root_cause": "Had \"Продължи към TBI →\"",
+      "fix": "Changed to \"Продължи\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T12:58:33.828Z"
+    },
+    {
+      "id": "bug-062",
+      "timestamp": "2026-05-29T15:10:00Z",
+      "error_message": "After selecting a city in TBI modal Speedy form, the city dropdown re-opens instead of showing the office selector",
+      "file": "../../care-tech-ui/src/components/TbiCheckoutModal.jsx",
+      "root_cause": "handleCitySelect called setCityQuery(city.name), which triggered the cityQuery useEffect. After 300ms the effect called dispatch(fetchCities) and setShowCityDropdown(true), re-opening the dropdown on top of the office selector.",
+      "fix": "Added programmaticQueryRef = useRef(false). Set to true in handleCitySelect before calling setCityQuery. useEffect checks the flag and returns early (resetting it), skipping the fetch+dropdown-open when the change was programmatic.",
+      "tags": [
+        "frontend",
+        "dropdown",
+        "useEffect",
+        "controlled-input",
+        "TBI-modal"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T15:10:00Z"
+    },
+    {
+      "id": "bug-063",
+      "timestamp": "2026-05-29T13:14:59.689Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T13:14:59.689Z"
+    },
+    {
+      "id": "bug-064",
+      "timestamp": "2026-05-29T13:50:40.141Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/config/SecurityConfig.java",
+      "root_cause": "13 lines replaced/restructured",
+      "fix": "Rewrote 38→44 lines (13 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T13:50:40.141Z"
+    },
+    {
+      "id": "bug-065",
+      "timestamp": "2026-05-29T13:53:09.305Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/resources/application.yml",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→5 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "yml"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T13:53:09.305Z"
+    },
+    {
+      "id": "bug-066",
+      "timestamp": "2026-05-29T13:53:17.731Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/controller/TbiLeasingController.java",
+      "root_cause": "Had \"/register\"",
+      "fix": "Changed to \"isAuthenticated()\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T13:53:17.731Z"
+    },
+    {
+      "id": "bug-067",
+      "timestamp": "2026-05-29T13:58:08.233Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/controller/AdminController.java",
+      "root_cause": "Had \"hasRole('",
+      "fix": "Changed to \"hasAnyRole('",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T13:58:08.233Z"
+    },
+    {
+      "id": "bug-068",
+      "timestamp": "2026-05-29T13:58:21.790Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/controller/CacheClearController.java",
+      "root_cause": "Had \"/clear-all\"",
+      "fix": "Changed to \"hasAnyRole('",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T13:58:21.790Z"
+    },
+    {
+      "id": "bug-069",
+      "timestamp": "2026-05-29T00:00:00.000Z",
+      "error_message": "SUPER_ADMIN cannot access any /api/admin/** endpoints",
+      "file": "src/main/java/com/techstore/controller/AdminController.java",
+      "root_cause": "Class-level @PreAuthorize(\"hasRole('ADMIN')\") checks for ROLE_ADMIN only. User.getAuthorities() returns ROLE_SUPER_ADMIN for SUPER_ADMIN — that authority never matches ROLE_ADMIN.",
+      "fix": "Changed to @PreAuthorize(\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\")",
+      "tags": ["security", "authorization", "super-admin", "role"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T00:00:00.000Z"
+    },
+    {
+      "id": "bug-070",
+      "timestamp": "2026-05-29T00:00:00.000Z",
+      "error_message": "IDOR: any authenticated user can read any leasing application status via GET /api/tbi/application/{id}",
+      "file": "src/main/java/com/techstore/controller/TbiLeasingController.java",
+      "root_cause": "No ownership check on getApplicationStatus — sequential ID enumeration exposed all applications.",
+      "fix": "Added check: if (!currentUser.isAdmin() && !currentUser.getEmail().equalsIgnoreCase(response.getCustomerEmail())) return 403",
+      "tags": ["security", "idor", "tbi", "authorization"],
+      "related_bugs": ["bug-061"],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T00:00:00.000Z"
     }
   ]
 }
