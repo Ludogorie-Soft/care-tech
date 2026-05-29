@@ -208,6 +208,30 @@ public class EmailService {
     }
 
     /**
+     * Send leasing rejected email to customer
+     */
+    @Async
+    public void sendLeasingRejectedEmail(Order order, String productName) {
+        try {
+            log.info("Sending leasing rejected email to: {}", order.getCustomerEmail());
+
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("customerName", order.getCustomerFirstName() + " " + order.getCustomerLastName());
+            variables.put("orderNumber", order.getOrderNumber());
+            variables.put("productName", productName);
+            variables.put("appName", appName);
+            variables.put("appUrl", appUrl);
+
+            String subject = appName + " - Заявката за лизинг не беше одобрена #" + order.getOrderNumber();
+            sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "leasing-rejected", variables);
+
+            log.info("Leasing rejected email sent to: {}", order.getCustomerEmail());
+        } catch (Exception e) {
+            log.error("Failed to send leasing rejected email to: {}", order.getCustomerEmail(), e);
+        }
+    }
+
+    /**
      * Send password reset email
      */
     @Async

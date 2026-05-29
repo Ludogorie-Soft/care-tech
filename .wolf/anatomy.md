@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-29T13:58:34.008Z
-> Files: 433 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-05-29T15:59:49.515Z
+> Files: 437 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -73,7 +73,7 @@
 - `mvnw.cmd` — Declares Directory (~2262 tok)
 - `nginx.conf` — Nginx configuration (~575 tok)
 - `parameters_202605130941.sql` (~43615 tok)
-- `pom.xml` — Maven project configuration (~1724 tok)
+- `pom.xml` (~1642 tok)
 - `README.md` — Project documentation (~1777 tok)
 
 ## .claude/
@@ -502,7 +502,7 @@
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~13424 tok)
 - `CategoryService.java` — Service: CategoryService (~4425 tok)
 - `CronJobService.java` — Service: CronJobService (~788 tok)
-- `EmailService.java` — Service for sending email notifications (~3992 tok)
+- `EmailService.java` — Service for sending email notifications (~4282 tok)
 - `FileUploadService.java` — Service: FileUploadService (~7252 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3823 tok)
@@ -513,7 +513,7 @@
 - `S3Service.java` — Service: S3Service (~2077 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
-- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~7048 tok)
+- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~7131 tok)
 - `TbiLeasingService.java` — TBI Fusion Pay integration: registerApplication (AES encrypt → TBI API), processStatusWebhook, getStatistics, admin queries (~350 tok)
 - `TekraApiService.java` — Get categories using JSON parsing (categories return JSON) (~4698 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
@@ -544,7 +544,7 @@
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` — Secrets via env vars (MAIL_PASSWORD, ASBIS_USERNAME/PASSWORD). server.error: never. swagger: ${SWAGGER_ENABLED:false}. (~2566 tok)
+- `application.yml` (~2566 tok)
 
 ## src/main/resources/db/
 
@@ -569,6 +569,7 @@
 ## src/main/resources/templates/email/
 
 - `admin-new-order.html` — Нова поръчка (~1787 tok)
+- `leasing-rejected.html` — Заявка за лизинг (~3009 tok)
 - `message-to-admin.html` (~142 tok)
 - `order-cancelled.html` — Поръчката е отменена (~3845 tok)
 - `order-confirmation.html` — Потвърждение на поръчка (~4507 tok)
@@ -580,4 +581,17 @@
 
 ## src/test/java/com/techstore/
 
-- `TechStoreApiApplicationTests.java` — Class: TechStoreApiApplicationTests (~61 tok)
+- `TechStoreApiApplicationTests.java` — @SpringBootTest @ActiveProfiles("test") context-load smoke test. Uses H2 + application-test.properties. (~78 tok)
+
+## src/test/java/com/techstore/controller/
+
+- `TbiLeasingControllerTest.java` — @WebMvcTest security tests: POST /register (401/200), POST /webhook (public 200), GET /application/{id} IDOR (401/200 owner/403 non-owner/200 admin/200 SUPER_ADMIN). 8 tests. (~2081 tok)
+
+## src/test/java/com/techstore/service/
+
+- `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
+
+## src/test/resources/
+
+- `application-test.properties` — ── Datasource — H2 in-memory (replaces PostgreSQL for context-load tests) ── (~580 tok)
+- `application.properties` — Overrides for ALL tests — resolves placeholders that have no default in application.yml (~40 tok)

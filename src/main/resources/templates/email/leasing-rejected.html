@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявка за лизинг</title>
+</head>
+<body style="margin:0; padding:0; font-family:Arial,sans-serif; background-color:#0a0a0a;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0a0a;">
+    <tr>
+        <td align="center" style="padding:20px 10px;">
+            <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
+
+                <!-- Header -->
+                <tr>
+                    <td align="center" style="background-color:#F07800; padding:40px 20px;">
+                        <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
+                        <p style="color:rgba(255,255,255,0.85); font-size:13px; margin:8px 0 0 0;">TBI Fusion Pay — Лизинг</p>
+                    </td>
+                </tr>
+
+                <!-- Icon + Title -->
+                <tr>
+                    <td align="center" style="padding:40px 20px 30px; background-color:#1a1a1a;">
+                        <div style="width:80px; height:80px; background-color:#ef4444; border-radius:50%; margin:0 auto 20px; display:inline-block; text-align:center; line-height:80px;">
+                            <span style="color:#ffffff; font-size:38px; font-weight:bold;">✕</span>
+                        </div>
+                        <h2 style="color:#ffffff; font-size:24px; margin:0 0 12px 0;">Заявката за лизинг не беше одобрена</h2>
+                        <p style="color:#929497; font-size:15px; line-height:1.6; margin:0;">
+                            Здравейте, <span th:text="${customerName}" style="color:#ffffff;">Клиент</span>.<br/>
+                            Съжаляваме, но TBI Bank не одобри Вашата заявка за разсрочено плащане.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Order Number -->
+                <tr>
+                    <td style="padding:0 20px 30px;">
+                        <table width="100%" cellpadding="20" cellspacing="0" border="0" style="background-color:#262626; border:2px solid #ef4444; border-radius:8px;">
+                            <tr>
+                                <td align="center">
+                                    <p style="color:#929497; font-size:12px; text-transform:uppercase; letter-spacing:1px; margin:0 0 8px 0;">Номер на поръчка</p>
+                                    <p style="color:#ef4444; font-size:24px; font-weight:bold; margin:0; letter-spacing:1px;" th:text="${orderNumber}">ORD-2026-00001</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Product info -->
+                <tr th:if="${productName != null}">
+                    <td style="padding:0 20px 30px;">
+                        <table width="100%" cellpadding="16" cellspacing="0" border="0" style="background-color:#262626; border-radius:8px;">
+                            <tr>
+                                <td>
+                                    <p style="color:#929497; font-size:12px; text-transform:uppercase; letter-spacing:1px; margin:0 0 6px 0;">Продукт</p>
+                                    <p style="color:#f5f5f5; font-size:14px; font-weight:600; margin:0;" th:text="${productName}">Продукт</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- What's next -->
+                <tr>
+                    <td style="padding:0 20px 30px; background-color:#1a1a1a;">
+                        <h3 style="color:#ffffff; font-size:18px; margin:0 0 16px 0;">Какво можете да направите?</h3>
+
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#262626; border-radius:8px; margin-bottom:20px;">
+                            <tr>
+                                <td style="padding:16px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="36" valign="top">
+                                                <div style="width:30px; height:30px; background-color:#F07800; border-radius:50%; text-align:center; line-height:30px;">
+                                                    <span style="color:#ffffff; font-size:14px; font-weight:bold;">1</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding-left:12px;" valign="top">
+                                                <p style="color:#f5f5f5; font-size:14px; font-weight:600; margin:0 0 4px 0;">Поръчайте с друг начин на плащане</p>
+                                                <p style="color:#929497; font-size:13px; line-height:1.5; margin:0;">Можете да завършите поръчката с карта, банков превод или наложен платеж.</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:16px; border-top:1px solid #333333;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="36" valign="top">
+                                                <div style="width:30px; height:30px; background-color:#F07800; border-radius:50%; text-align:center; line-height:30px;">
+                                                    <span style="color:#ffffff; font-size:14px; font-weight:bold;">2</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding-left:12px;" valign="top">
+                                                <p style="color:#f5f5f5; font-size:14px; font-weight:600; margin:0 0 4px 0;">Свържете се с нас</p>
+                                                <p style="color:#929497; font-size:13px; line-height:1.5; margin:0;">Нашият екип може да Ви помогне да намерите подходящо решение.</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:16px; border-top:1px solid #333333;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td width="36" valign="top">
+                                                <div style="width:30px; height:30px; background-color:#F07800; border-radius:50%; text-align:center; line-height:30px;">
+                                                    <span style="color:#ffffff; font-size:14px; font-weight:bold;">3</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding-left:12px;" valign="top">
+                                                <p style="color:#f5f5f5; font-size:14px; font-weight:600; margin:0 0 4px 0;">Опитайте отново по-късно</p>
+                                                <p style="color:#929497; font-size:13px; line-height:1.5; margin:0;">TBI Bank може да преразгледа заявката при промяна на финансовото Ви положение.</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Info box -->
+                        <table width="100%" cellpadding="15" cellspacing="0" border="0" style="background-color:#262626; border-left:4px solid #929497; border-radius:4px; margin-bottom:24px;">
+                            <tr>
+                                <td>
+                                    <p style="color:#929497; font-size:13px; line-height:1.6; margin:0;">
+                                        Решението за одобрение се взима изцяло от TBI Bank. CareTech не разполага с информация за
+                                        причините за отказа. За подробности можете да се свържете директно с TBI Bank.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- CTA Buttons -->
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td align="center" style="padding:10px 0;">
+                                    <a th:href="${appUrl}" style="display:inline-block; background-color:#ed1c24; color:#ffffff; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:15px; font-weight:600; margin:5px;">Разгледайте продуктите</a>
+                                    <a th:href="${appUrl} + '/contact'" style="display:inline-block; background-color:#6c6e70; color:#ffffff; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:15px; font-weight:600; margin:5px;">Свържете се с нас</a>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td align="center" style="background-color:#0f0f0f; padding:25px 20px; border-top:2px solid #F07800;">
+                        <p style="color:#6c6e70; font-size:13px; margin:0 0 12px 0;">
+                            Благодарим Ви за доверието към <span th:text="${appName}">CareTech</span>!
+                        </p>
+                        <p style="margin:10px 0;">
+                            <a th:href="${appUrl}" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Начало</a>
+                            <a th:href="${appUrl} + '/contact'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Контакти</a>
+                            <a th:href="${appUrl} + '/orders'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Моите поръчки</a>
+                        </p>
+                        <p style="color:#6c6e70; font-size:11px; margin:10px 0 0 0;">
+                            &copy; 2025 <span th:text="${appName}">CareTech</span>. Всички права запазени.
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

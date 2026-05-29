@@ -455,3 +455,42 @@
 | 17:00 | Session end: 13 writes across 6 files (application.yml, GlobalExceptionHandler.java, TbiLeasingController.java, AdminController.java, FileUploadController.java) | 11 reads | ~23110 tok |
 | 17:02 | Session end: 13 writes across 6 files (application.yml, GlobalExceptionHandler.java, TbiLeasingController.java, AdminController.java, FileUploadController.java) | 13 reads | ~23110 tok |
 | 17:05 | Session end: 13 writes across 6 files (application.yml, GlobalExceptionHandler.java, TbiLeasingController.java, AdminController.java, FileUploadController.java) | 13 reads | ~23110 tok |
+| 18:22 | Session end: 13 writes across 6 files (application.yml, GlobalExceptionHandler.java, TbiLeasingController.java, AdminController.java, FileUploadController.java) | 15 reads | ~34150 tok |
+| 18:24 | Created src/main/resources/templates/email/leasing-rejected.html | — | ~3009 |
+| 18:25 | Edited src/main/java/com/techstore/service/EmailService.java | added error handling | ~303 |
+| 18:25 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added error handling | ~164 |
+| 18:25 | Session end: 16 writes across 9 files (application.yml, GlobalExceptionHandler.java, TbiLeasingController.java, AdminController.java, FileUploadController.java) | 17 reads | ~41719 tok |
+| 18:32 | Created src/test/java/com/techstore/service/TbiLeasingServiceTest.java | — | ~4042 |
+| 18:33 | Created src/test/java/com/techstore/controller/TbiLeasingControllerTest.java | — | ~2081 |
+
+## Session: 2026-05-29 18:44
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 18:46 | Edited src/main/resources/application.yml | inline fix | ~12 |
+| 18:46 | Edited src/test/java/com/techstore/service/TbiLeasingServiceTest.java | modified correctResellerCodeCaseInsensitive_processed() | ~125 |
+| 18:46 | Edited src/test/java/com/techstore/service/TbiLeasingServiceTest.java | modified byCreditApplicationId_firstPriority() | ~122 |
+| 18:46 | Edited src/test/java/com/techstore/service/TbiLeasingServiceTest.java | modified byTbiOrderId_whenCreditAppIdMissing() | ~121 |
+| 18:46 | Edited src/test/java/com/techstore/service/TbiLeasingServiceTest.java | modified byStoreOrderId_whenOrderIdIsNotNumeric() | ~127 |
+| 18:47 | Edited src/test/java/com/techstore/service/TbiLeasingServiceTest.java | modified orderIdZero_skippedInLookup() | ~107 |
+| 18:48 | Edited src/main/resources/application.yml | inline fix | ~14 |
+| 18:50 | Fixed TbiLeasingControllerTest ApplicationContext failure (SPRING_PROFILES_ACTIVE/LOGGING_FILE_NAME missing defaults in yml) | application.yml | fixed | ~200 |
+| 18:50 | Fixed UnnecessaryStubbing in TbiLeasingServiceTest (5 tests, removed unused orderRepository stubs) | TbiLeasingServiceTest.java | fixed | ~100 |
+| 18:50 | All 23 TBI integration tests pass (15 service + 8 controller) | TbiLeasingServiceTest, TbiLeasingControllerTest | success | ~50 |
+| 18:51 | Session end: 7 writes across 2 files (application.yml, TbiLeasingServiceTest.java) | 4 reads | ~12701 tok |
+| 18:54 | Session end: 7 writes across 2 files (application.yml, TbiLeasingServiceTest.java) | 5 reads | ~12762 tok |
+| 18:54 | Session end: 7 writes across 2 files (application.yml, TbiLeasingServiceTest.java) | 5 reads | ~12762 tok |
+| 18:55 | Session end: 7 writes across 2 files (application.yml, TbiLeasingServiceTest.java) | 6 reads | ~12762 tok |
+| 18:59 | Edited src/main/resources/application.yml | inline fix | ~12 |
+| 18:59 | Edited src/main/resources/application.yml | inline fix | ~10 |
+| 18:59 | Edited pom.xml | 5→10 lines | ~74 |
+| 18:59 | Created src/test/resources/application.properties | — | ~40 |
+| 18:59 | Created src/test/resources/application-test.properties | — | ~580 |
+| 18:59 | Edited src/test/java/com/techstore/TechStoreApiApplicationTests.java | added 1 import(s) | ~62 |
+| 19:00 | Session end: 13 writes across 6 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 7 reads | ~15321 tok |
+| 19:05 | Reverted application.yml changes; created src/test/resources/application.properties + application-test.properties (H2, Flyway off) | pom.xml, TechStoreApiApplicationTests.java | fixed | ~150 |
+| 19:05 | Added TBI vars to .env; all 24 tests pass (BUILD SUCCESS) | .env | complete | ~50 |
+| 19:05 | Session end: Security audit complete, TBI integration tests complete, test infrastructure set up | session summary | — | — |
+| 19:02 | Session end: 13 writes across 6 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 7 reads | ~15321 tok |
+| 19:03 | Session end: 13 writes across 6 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 7 reads | ~15321 tok |
+| 19:05 | Session end: 13 writes across 6 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 7 reads | ~15321 tok |

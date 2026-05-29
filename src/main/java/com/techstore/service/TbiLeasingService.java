@@ -249,6 +249,12 @@ public class TbiLeasingService {
             orderRepository.save(order);
             log.info("Order {} marked LEASING_REJECTED after TBI status '{}'",
                     order.getOrderNumber(), tbiStatus);
+            try {
+                emailService.sendLeasingRejectedEmail(order, application.getProductName());
+            } catch (Exception e) {
+                log.error("Failed to send leasing rejected email for order {}: {}",
+                        order.getOrderNumber(), e.getMessage());
+            }
         }
     }
 

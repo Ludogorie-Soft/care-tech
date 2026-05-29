@@ -1142,7 +1142,12 @@
       "file": "src/main/java/com/techstore/controller/AdminController.java",
       "root_cause": "Class-level @PreAuthorize(\"hasRole('ADMIN')\") checks for ROLE_ADMIN only. User.getAuthorities() returns ROLE_SUPER_ADMIN for SUPER_ADMIN — that authority never matches ROLE_ADMIN.",
       "fix": "Changed to @PreAuthorize(\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\")",
-      "tags": ["security", "authorization", "super-admin", "role"],
+      "tags": [
+        "security",
+        "authorization",
+        "super-admin",
+        "role"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-29T00:00:00.000Z"
@@ -1154,10 +1159,73 @@
       "file": "src/main/java/com/techstore/controller/TbiLeasingController.java",
       "root_cause": "No ownership check on getApplicationStatus — sequential ID enumeration exposed all applications.",
       "fix": "Added check: if (!currentUser.isAdmin() && !currentUser.getEmail().equalsIgnoreCase(response.getCustomerEmail())) return 403",
-      "tags": ["security", "idor", "tbi", "authorization"],
-      "related_bugs": ["bug-061"],
+      "tags": [
+        "security",
+        "idor",
+        "tbi",
+        "authorization"
+      ],
+      "related_bugs": [
+        "bug-061"
+      ],
       "occurrences": 1,
       "last_seen": "2026-05-29T00:00:00.000Z"
+    },
+    {
+      "id": "bug-071",
+      "timestamp": "2026-05-29T15:25:05.307Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/EmailService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T15:25:05.307Z"
+    },
+    {
+      "id": "bug-072",
+      "timestamp": "2026-05-29T15:25:15.286Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T15:25:15.286Z"
+    },
+    {
+      "id": "bug-073",
+      "timestamp": "2026-05-29T15:50:00.000Z",
+      "error_message": "TbiLeasingControllerTest: Failed to load ApplicationContext — Profile '${SPRING_PROFILES_ACTIVE}' must contain a letter, digit or allowed char",
+      "file": "src/main/resources/application.yml",
+      "root_cause": "application.yml had spring.profiles.active: ${SPRING_PROFILES_ACTIVE} with no default value — env var not set during @WebMvcTest, Spring Boot rejects literal placeholder as invalid profile name",
+      "fix": "Changed to ${SPRING_PROFILES_ACTIVE:} (empty default). Also fixed ${LOGGING_FILE_NAME} → ${LOGGING_FILE_NAME:logs/app.log} for the same reason.",
+      "tags": ["test", "spring-boot", "webmvctest", "application-yml", "placeholder"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T15:50:00.000Z"
+    },
+    {
+      "id": "bug-074",
+      "timestamp": "2026-05-29T15:50:00.000Z",
+      "error_message": "UnnecessaryStubbing in TbiLeasingServiceTest — 5 tests failed with Mockito strict stubbing",
+      "file": "src/test/java/com/techstore/service/TbiLeasingServiceTest.java",
+      "root_cause": "Tests stubbed orderRepository.findById() for applications that have order=null — the transitionOrderStatus code never called orderRepository when app.getOrder() is null. Also orderIdZero_skippedInLookup stubbed findByTbiApplicationId/findByStoreOrderId but resolveApplication returns null immediately for orderId='0' with no creditAppId.",
+      "fix": "Removed unused stubs. Changed orderIdZero test to verifyNoInteractions instead.",
+      "tags": ["test", "mockito", "unnecessary-stubbing"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-29T15:50:00.000Z"
     }
   ]
 }
