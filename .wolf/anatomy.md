@@ -1,32 +1,41 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-05-29T15:59:49.515Z
-> Files: 437 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-02T12:44:04.392Z
+> Files: 442 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
 - `MEMORY.md` — Memory Index (~149 tok)
 - `project_most_api.md` (~136 tok)
-- `tbi_leasing_integration.md` — Status: Backend + Frontend COMPLETE (2026-05-29) (~710 tok)
+- `tbi_leasing_integration.md` — Status: Backend + Frontend COMPLETE (2026-05-29) (~753 tok)
 
 ## ../../care-tech-ui/src/
 
-- `App.js` — Declares ScrollToTop (~2481 tok)
+- `App.js` — Declares ScrollToTop (~2518 tok)
 
 ## ../../care-tech-ui/src/components/
 
 - `Breadcrumbs.jsx` — Breadcrumbs (~504 tok)
-- `TbiCheckoutModal.jsx` — Two-step TBI leasing modal: Step 1 = Speedy/home address form, Step 2 = TBI iframe. Supports single product prop OR cartItems+totalLeva+totalEuro props. TbiLogo accepts color prop (use "#fff" in header). programmaticQueryRef prevents city dropdown re-show. (~5200 tok)
+- `TbiCheckoutModal.jsx` — TBI brand color (~5172 tok)
 
 ## ../../care-tech-ui/src/components/home/
 
+- `PromoProductsSection.jsx` — PromoProductsSection (~2722 tok)
 - `ReviewsSlider.jsx` — PrevArrow (~1554 tok)
+
+## ../../care-tech-ui/src/components/navbar/
+
+- `NavBar.jsx` — NavBar (~4064 tok)
+
+## ../../care-tech-ui/src/components/products/
+
+- `ProductCard.jsx` — ProductCard (~3379 tok)
 
 ## ../../care-tech-ui/src/pages/
 
-- `Cart.jsx` — Full cart page. TBI integration: isTbiEligible check (50–15000 EUR), tbiCartItems mapping (finalPrice*1.2 with VAT), TbiCheckoutModal rendered on orange "Купи на изплащане" button click. Old RegisterBasket/script approach removed. (~14000 tok)
+- `Cart.jsx` — EURO_RATE (~16576 tok)
 - `OurClients.jsx` — clients (~2686 tok)
-- `ProductPage.jsx` — EURO_RATE (~7599 tok)
+- `ProductPage.jsx` — EURO_RATE (~7627 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Dashboard/
 
@@ -34,7 +43,7 @@
 
 ## ../../care-tech-ui/src/pages/admin/Leasing/
 
-- `LeasingLayout.jsx` — STATUS_CONFIG (~4981 tok)
+- `LeasingLayout.jsx` — STATUS_CONFIG (~4989 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Orders/
 
@@ -242,7 +251,7 @@
 - `ProductSearchController.java` — RestController: ProductSearchController (8 endpoints) (~1491 tok)
 - `SpeedyController.java` — RestController: SpeedyController (4 endpoints) (~1716 tok)
 - `SubscriptionController.java` — RestController: SubscriptionController (5 endpoints) (~562 tok)
-- `TbiLeasingController.java` — 3 endpoints: POST /register (@PreAuthorize isAuthenticated), POST /webhook (public, ResellerCode validated), GET /application/{id} (IDOR fix: ownership or admin check). (~846 tok)
+- `TbiLeasingController.java` — POST /api/tbi/register (~846 tok)
 - `UserController.java` — RestController: UserController (18 endpoints) (~2059 tok)
 - `UserFavoriteController.java` — RestController: UserFavoriteController (7 endpoints) (~2295 tok)
 
@@ -388,7 +397,7 @@
 - `TbiItemDto.java` — Single item in TBI items list: name, qty, price, sku, category, imagelink (~90 tok)
 - `TbiRegisterApplicationResponseDto.java` — Response from TBI POST /api/RegisterApplication. (~259 tok)
 - `TbiRegisterApplicationResponseDto.java` — TBI RegisterApplication response: error, order_id, token, url (~90 tok)
-- `TbiRegisterRequestDto.java` — Sent by the frontend when the customer clicks "Buy with TBI". (~416 tok)
+- `TbiRegisterRequestDto.java` — Sent by the frontend when the customer clicks "Buy with TBI". (~374 tok)
 - `TbiRegisterRequestDto.java` — From frontend: productId, productName, priceEuro, priceLeva, sku, quantity, imageUrl (~80 tok)
 - `TbiRegisterResponseDto.java` — Returned to the frontend after a successful RegisterApplication call. (~124 tok)
 - `TbiRegisterResponseDto.java` — Returned to frontend: applicationId + TBI iframe url (~50 tok)
@@ -413,7 +422,7 @@
 - `BaseEntity.java` — Entity: BaseEntity (~411 tok)
 - `CartItem.java` — Entity: CartItem (~242 tok)
 - `Category.java` — Entity: Category (~884 tok)
-- `LeasingApplication.java` — order_id returned by TBI RegisterApplication (~1179 tok)
+- `LeasingApplication.java` — order_id returned by TBI RegisterApplication (~1252 tok)
 - `LeasingApplication.java` — Entity: TBI leasing application; links to Order, stores TBI order_id/token, status, status_history (JSON), financial details (~400 tok)
 - `Manufacturer.java` — Entity: Manufacturer (~476 tok)
 - `Order.java` — Entity: Order (~1750 tok)
@@ -478,7 +487,7 @@
 
 - `CartItemRepository.java` — Repository: CartItemRepository (~274 tok)
 - `CategoryRepository.java` — Repository: CategoryRepository (~316 tok)
-- `LeasingApplicationRepository.java` — Repository: LeasingApplicationRepository (~338 tok)
+- `LeasingApplicationRepository.java` — Repository: LeasingApplicationRepository (~376 tok)
 - `ManufacturerRepository.java` — Repository: ManufacturerRepository (~209 tok)
 - `OrderItemRepository.java` — Repository: OrderItemRepository (~87 tok)
 - `OrderRepository.java` — Repository: OrderRepository (~1414 tok)
@@ -513,7 +522,7 @@
 - `S3Service.java` — Service: S3Service (~2077 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
-- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~7131 tok)
+- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8443 tok)
 - `TbiLeasingService.java` — TBI Fusion Pay integration: registerApplication (AES encrypt → TBI API), processStatusWebhook, getStatistics, admin queries (~350 tok)
 - `TekraApiService.java` — Get categories using JSON parsing (categories return JSON) (~4698 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
@@ -544,7 +553,7 @@
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` (~2566 tok)
+- `application.yml` (~2570 tok)
 
 ## src/main/resources/db/
 
@@ -557,7 +566,9 @@
 - `V11__add_seat_management_address_to_user_companies.sql` — SQL: 1 alter(s) (~39 tok)
 - `V12__add_tbi_leasing_applications.sql` — V12: TBI Fusion Pay leasing applications (~714 tok)
 - `V16__add_shipping_to_leasing_applications.sql` — Add shipping address fields to leasing_applications table (~190 tok)
+- `V19__make_order_shipping_nullable.sql` — Allow shipping address fields to be null for leasing orders (~89 tok)
 - `V2__add_isFilter_to_product_parameters.sql` — SQL: 1 alter(s) (~48 tok)
+- `V20__add_pending_order_json_to_leasing.sql` — Stores the serialised OrderCreateRequestDTO so the order can be created (~64 tok)
 - `V3__add_most_key_to_product.sql` — SQL: 1 alter(s) (~42 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)

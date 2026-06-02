@@ -1210,7 +1210,13 @@
       "file": "src/main/resources/application.yml",
       "root_cause": "application.yml had spring.profiles.active: ${SPRING_PROFILES_ACTIVE} with no default value — env var not set during @WebMvcTest, Spring Boot rejects literal placeholder as invalid profile name",
       "fix": "Changed to ${SPRING_PROFILES_ACTIVE:} (empty default). Also fixed ${LOGGING_FILE_NAME} → ${LOGGING_FILE_NAME:logs/app.log} for the same reason.",
-      "tags": ["test", "spring-boot", "webmvctest", "application-yml", "placeholder"],
+      "tags": [
+        "test",
+        "spring-boot",
+        "webmvctest",
+        "application-yml",
+        "placeholder"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-29T15:50:00.000Z"
@@ -1222,10 +1228,398 @@
       "file": "src/test/java/com/techstore/service/TbiLeasingServiceTest.java",
       "root_cause": "Tests stubbed orderRepository.findById() for applications that have order=null — the transitionOrderStatus code never called orderRepository when app.getOrder() is null. Also orderIdZero_skippedInLookup stubbed findByTbiApplicationId/findByStoreOrderId but resolveApplication returns null immediately for orderId='0' with no creditAppId.",
       "fix": "Removed unused stubs. Changed orderIdZero test to verifyNoInteractions instead.",
-      "tags": ["test", "mockito", "unnecessary-stubbing"],
+      "tags": [
+        "test",
+        "mockito",
+        "unnecessary-stubbing"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-05-29T15:50:00.000Z"
+    },
+    {
+      "id": "bug-075",
+      "timestamp": "2026-06-02T06:45:42.219Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/components/navbar/NavBar.jsx",
+      "root_cause": "Had \"md:hidden absolute z-[1] top-[58px] pt-1 pb-2 ps-",
+      "fix": "Changed to \"md:hidden absolute z-[1] top-[58px] pb-2 ps-2 pe-",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T06:45:42.219Z"
+    },
+    {
+      "id": "bug-076",
+      "timestamp": "2026-06-02T08:14:23.355Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: req.setBillingAddress(request.getShippingAddress() != null ?; req.setBillingCity(request.getShippingCity() != null ? reque",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-02T08:14:29.049Z"
+    },
+    {
+      "id": "bug-077",
+      "timestamp": "2026-06-02T08:21:28.627Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/dto/tbi/TbiRegisterRequestDto.java",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 5→3 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:21:28.627Z"
+    },
+    {
+      "id": "bug-078",
+      "timestamp": "2026-06-02T08:22:05.147Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/pages/Cart.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:22:05.147Z"
+    },
+    {
+      "id": "bug-079",
+      "timestamp": "2026-06-02T08:25:38.612Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:25:38.612Z"
+    },
+    {
+      "id": "bug-080",
+      "timestamp": "2026-06-02T08:38:48.210Z",
+      "error_message": "Wrong reference: SPEEDY should be ShippingMethod",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Used \"SPEEDY\" instead of \"ShippingMethod\"",
+      "fix": "Changed SPEEDY → ShippingMethod",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:38:48.210Z"
+    },
+    {
+      "id": "bug-081",
+      "timestamp": "2026-06-02T08:51:51.727Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/tbi_leasing_integration.md",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→12 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:51:51.727Z"
+    },
+    {
+      "id": "bug-082",
+      "timestamp": "2026-06-02T08:54:38.365Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx",
+      "root_cause": "Had \"Чернова\"",
+      "fix": "Changed to \"Регистрирана\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T08:54:38.365Z"
+    },
+    {
+      "id": "bug-083",
+      "timestamp": "2026-06-02T09:14:25.922Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/components/TbiCheckoutModal.jsx",
+      "root_cause": "Had \"680px\"",
+      "fix": "Changed to \"760px\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:14:25.922Z"
+    },
+    {
+      "id": "bug-084",
+      "timestamp": "2026-06-02T09:14:33.597Z",
+      "error_message": "CSS fix: minHeight",
+      "file": "../../care-tech-ui/src/components/TbiCheckoutModal.jsx",
+      "root_cause": "minHeight: \"520px\", border: \"none\" → \"680px\", height: \"100%\", border: \"none\"",
+      "fix": "Changed minHeight: \"520px\", border: \"none\" → \"680px\", height: \"100%\", border: \"none\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:14:33.597Z"
+    },
+    {
+      "id": "bug-085",
+      "timestamp": "2026-06-02T09:24:21.121Z",
+      "error_message": "Missing guard clause",
+      "file": "../../care-tech-ui/src/components/TbiCheckoutModal.jsx",
+      "root_cause": "No early return/throw for edge case: hasRegistered.current",
+      "fix": "Added guard clause: if (hasRegistered.current)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:24:21.121Z"
+    },
+    {
+      "id": "bug-086",
+      "timestamp": "2026-06-02T09:36:59.128Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:36:59.128Z"
+    },
+    {
+      "id": "bug-087",
+      "timestamp": "2026-06-02T09:37:55.575Z",
+      "error_message": "Wrong operator: != should be ||",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Used \"!=\" instead of \"||\"",
+      "fix": "Changed operator != → ||",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T09:37:55.575Z"
+    },
+    {
+      "id": "bug-088",
+      "timestamp": "2026-06-02T09:49:24.902Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Had \"TBI webhook received: orderId={} status={}\"",
+      "fix": "Changed to \"[TBI WEBHOOK] received: orderId={} status={} rese",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 4,
+      "last_seen": "2026-06-02T09:49:42.335Z"
+    },
+    {
+      "id": "bug-089",
+      "timestamp": "2026-06-02T10:08:22.448Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../care-tech-ui/src/components/TbiCheckoutModal.jsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T10:08:22.448Z"
+    },
+    {
+      "id": "bug-090",
+      "timestamp": "2026-06-02T10:13:57.910Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/components/TbiCheckoutModal.jsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 11→18 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T10:13:57.910Z"
+    },
+    {
+      "id": "bug-091",
+      "timestamp": "2026-06-02T12:12:49.630Z",
+      "error_message": "Wrong reference: Optional should be Collection",
+      "file": "src/main/java/com/techstore/repository/LeasingApplicationRepository.java",
+      "root_cause": "Used \"Optional\" instead of \"Collection\"",
+      "fix": "Changed Optional → Collection",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T12:12:49.630Z"
+    },
+    {
+      "id": "bug-092",
+      "timestamp": "2026-06-02T12:13:11.427Z",
+      "error_message": "Wrong return value",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Was returning: repository.findByStatusOrderByCreatedAtDesc(status",
+      "fix": "Now returns: repository.findByStatusInOrderByCreatedAtDesc(stat",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T12:13:11.427Z"
+    },
+    {
+      "id": "bug-093",
+      "timestamp": "2026-06-02T12:13:21.490Z",
+      "error_message": "CSS fix: value",
+      "file": "../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx",
+      "root_cause": "value: \"Canceled\", label: \"Отменени\" → \"Canceled\",     label: \"Отменени\"",
+      "fix": "Changed value: \"Canceled\", label: \"Отменени\" → \"Canceled\",     label: \"Отменени\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T12:13:21.490Z"
+    },
+    {
+      "id": "bug-094",
+      "timestamp": "2026-06-02T12:29:42.169Z",
+      "error_message": "CSS fix: dots",
+      "file": "../../care-tech-ui/src/components/home/PromoProductsSection.jsx",
+      "root_cause": "dots: true, → false,",
+      "fix": "Changed dots: true, → false,",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T12:29:42.169Z"
+    },
+    {
+      "id": "bug-095",
+      "timestamp": "2026-06-02T12:37:43.663Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx",
+      "root_cause": "Had \"Регистрирана\"",
+      "fix": "Changed to \"Чернова\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T12:37:43.663Z"
+    },
+    {
+      "id": "bug-096",
+      "timestamp": "2026-06-02T12:43:29.101Z",
+      "error_message": "Missing guard clause",
+      "file": "../../care-tech-ui/src/components/TbiCheckoutModal.jsx",
+      "root_cause": "No early return/throw for edge case: event.origin !== window.location.origin",
+      "fix": "Added guard clause: if (event.origin !== window.location.origin)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T12:43:29.101Z"
+    },
+    {
+      "id": "bug-097",
+      "timestamp": "2026-06-02T12:43:57.687Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/pages/Cart.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T12:43:57.687Z"
+    },
+    {
+      "id": "bug-098",
+      "timestamp": "2026-06-02T12:44:04.410Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Had \"https://caretech.bg\"",
+      "fix": "Changed to \"https://caretech.bg/leasing/complete\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-02T12:44:04.410Z"
     }
   ]
 }

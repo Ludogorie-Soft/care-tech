@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Optional;
 
 @Repository
@@ -22,6 +23,8 @@ public interface LeasingApplicationRepository extends JpaRepository<LeasingAppli
     Page<LeasingApplication> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     Page<LeasingApplication> findByStatusOrderByCreatedAtDesc(String status, Pageable pageable);
+
+    Page<LeasingApplication> findByStatusInOrderByCreatedAtDesc(Collection<String> statuses, Pageable pageable);
 
     long countByStatus(String status);
 

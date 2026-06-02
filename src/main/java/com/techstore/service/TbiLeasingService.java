@@ -42,6 +42,16 @@ public class TbiLeasingService {
             "Canceled", "approved & signed", "rejected", "canceled"
     );
 
+    // Status groups used by the admin filter — maps a filter key to all matching DB values
+    private static final Map<String, List<String>> STATUS_GROUPS = Map.of(
+            "in_progress",    List.of("in_progress", "InProgress", "InProgressAssessment", "MP Sent", "KYC", "ContractSigning"),
+            "Approved",       List.of("Approved"),
+            "ContractSigned", List.of("ContractSigned", "approved & signed"),
+            "Paid",           List.of("Paid"),
+            "Rejected",       List.of("Rejected", "rejected"),
+            "Canceled",       List.of("Canceled", "canceled", "expired")
+    );
+
     // TBI statuses that mean the contract is signed — transition order to PENDING (ready to ship)
     private static final Set<String> CONTRACT_SIGNED_STATUSES = Set.of(
             "ContractSigned", "approved & signed", "Paid"
@@ -76,25 +86,69 @@ public class TbiLeasingService {
             throw new IllegalStateException("TBI integration is disabled");
         }
 
+        // ── Customer info ───────────────────────────────────────────────────
+        String firstName = user != null ? user.getFirstName() : "";
+        String lastName  = user != null ? user.getLastName()  : "";
+        String email     = user != null ? user.getEmail()     : "";
+        String phone     = normalizePhone(user);
+
+        // ── Save application first to get our ID ────────────────────────────
+        // We use our own leasing application ID as the TBI orderid so that
+        // TBI echoes it back in every webhook — enabling reliable matching.
+        LeasingApplication application = new LeasingApplication();
+        application.setStatus("Draft");
+        application.setStatusHistory(buildInitialHistory());
+        application.setCustomerFirstName(firstName);
+        application.setCustomerLastName(lastName);
+        application.setCustomerPhone(phone);
+        application.setCustomerEmail(email);
+        if (isCartOrder(request)) {
+            double totalEur = request.getCartItems().stream()
+                    .mapToDouble(ci -> (ci.getPriceEuro() != null ? ci.getPriceEuro() : 0)
+                            * (ci.getQuantity() != null ? ci.getQuantity() : 1))
+                    .sum();
+            application.setAmountEur(BigDecimal.valueOf(totalEur));
+            application.setProductName("Кошница (" + request.getCartItems().size() + " продукта)");
+        } else {
+            application.setAmountEur(request.getPriceEuro() != null
+                    ? BigDecimal.valueOf(request.getPriceEuro()) : null);
+            application.setProductId(request.getProductId());
+            application.setProductName(request.getProductName());
+        }
+        application.setShippingAddress(request.getShippingAddress());
+        application.setShippingCity(request.getShippingCity());
+        application.setShippingPostalCode(request.getShippingPostalCode());
+        application.setIsToSpeedyOffice(request.getIsToSpeedyOffice());
+        application.setShippingSpeedySiteId(request.getShippingSpeedySiteId());
+        application.setShippingSpeedyOfficeId(request.getShippingSpeedyOfficeId());
+        application.setShippingSpeedySiteName(request.getShippingSpeedySiteName());
+        application.setShippingSpeedyOfficeName(request.getShippingSpeedyOfficeName());
+
+        LeasingApplication saved = repository.save(application);
+        String ourOrderId = saved.getId().toString();
+
+        // ── Build and encrypt TBI payload ────────────────────────────────────
         List<TbiItemDto> items = buildItems(request);
         String itemsJson = serializeQuietly(items);
 
         TbiApplicationDataDto data = TbiApplicationDataDto.builder()
-                .orderid("0")
-                .firstname(user != null ? user.getFirstName() : "")
-                .lastname(user  != null ? user.getLastName()  : "")
+                .orderid(ourOrderId)           // ← our ID so TBI echoes it in webhooks
+                .firstname(firstName)
+                .lastname(lastName)
                 .surname("")
-                .email(user   != null ? user.getEmail()     : "")
-                .phone(normalizePhone(user))
-                .deliveryaddress(TbiDeliveryAddressDto.empty())
+                .email(email)
+                .phone(phone)
+                .deliveryaddress(buildDeliveryAddress(request))
                 .items(items)
                 .statusURL(tbiConfig.getWebhookUrl())
+                .successRedirectURL("https://caretech.bg/leasing/complete")
+                .failRedirectURL("https://caretech.bg")
                 .build();
 
-        String encryptedData = TbiEncryptionUtil.encrypt(
-                serializeQuietly(data),
-                tbiConfig.getEncryptionKey()
-        );
+        String plainJson = serializeQuietly(data);
+        log.warn("[TBI DEBUG] Plain JSON to encrypt: {}", plainJson);
+
+        String encryptedData = TbiEncryptionUtil.encrypt(plainJson, tbiConfig.getEncryptionKey());
 
         Map<String, String> requestBody = Map.of(
                 "reseller_code", tbiConfig.getResellerCode(),
@@ -111,67 +165,22 @@ public class TbiLeasingService {
         if (!tbiResponse.isSuccess()) {
             log.error("TBI RegisterApplication failed: error={} message={}",
                     tbiResponse.getError(), tbiResponse.getMessage());
-            throw new IllegalStateException(
-                    "TBI registration failed: " + tbiResponse.getMessage());
+            throw new IllegalStateException("TBI registration failed: " + tbiResponse.getMessage());
         }
 
-        // ── Build customer info ─────────────────────────────────────────────
-        String firstName = user != null ? user.getFirstName() : "";
-        String lastName  = user != null ? user.getLastName()  : "";
-        String email     = user != null ? user.getEmail()     : "";
-        String phone     = normalizePhone(user);
-
-        // ── Create order immediately with LEASING_PENDING status ────────────
+        // ── Update application with TBI response ────────────────────────────
         OrderCreateRequestDTO orderRequest = buildOrderRequest(request, firstName, lastName, email, phone);
-        OrderResponseDTO createdOrder = orderService.createOrder(orderRequest);
 
-        Order orderEntity = orderRepository.findById(createdOrder.getId())
-                .orElseThrow(() -> new IllegalStateException("Order not found after creation"));
+        saved.setTbiOrderId(tbiResponse.getOrderId());
+        saved.setTbiToken(tbiResponse.getToken());
+        saved.setStoreOrderId(ourOrderId);   // matched by resolveApplication step 3
+        saved.setItemsJson(itemsJson);
+        saved.setPendingOrderJson(serializeQuietly(orderRequest));
+        saved.setTbiRawResponse(serializeQuietly(tbiResponse));
+        repository.save(saved);
 
-        // ── Save leasing application ────────────────────────────────────────
-        LeasingApplication application = new LeasingApplication();
-        application.setOrder(orderEntity);
-        application.setTbiOrderId(tbiResponse.getOrderId());
-        application.setTbiToken(tbiResponse.getToken());
-        application.setStoreOrderId(createdOrder.getOrderNumber());
-        application.setStatus("Draft");
-        if (isCartOrder(request)) {
-            // Cart: total EUR = sum of (priceEuro * quantity) across all items
-            double totalEur = request.getCartItems().stream()
-                    .mapToDouble(ci -> (ci.getPriceEuro() != null ? ci.getPriceEuro() : 0)
-                            * (ci.getQuantity() != null ? ci.getQuantity() : 1))
-                    .sum();
-            application.setAmountEur(BigDecimal.valueOf(totalEur));
-            application.setProductId(null);
-            application.setProductName("Кошница (" + request.getCartItems().size() + " продукта)");
-        } else {
-            application.setAmountEur(request.getPriceEuro() != null
-                    ? BigDecimal.valueOf(request.getPriceEuro()) : null);
-            application.setProductId(request.getProductId());
-            application.setProductName(request.getProductName());
-        }
-        application.setItemsJson(itemsJson);
-        application.setTbiRawResponse(serializeQuietly(tbiResponse));
-        application.setStatusHistory(buildInitialHistory());
-
-        application.setCustomerFirstName(firstName);
-        application.setCustomerLastName(lastName);
-        application.setCustomerPhone(phone);
-        application.setCustomerEmail(email);
-
-        // Shipping
-        application.setShippingAddress(request.getShippingAddress());
-        application.setShippingCity(request.getShippingCity());
-        application.setShippingPostalCode(request.getShippingPostalCode());
-        application.setIsToSpeedyOffice(request.getIsToSpeedyOffice());
-        application.setShippingSpeedySiteId(request.getShippingSpeedySiteId());
-        application.setShippingSpeedyOfficeId(request.getShippingSpeedyOfficeId());
-        application.setShippingSpeedySiteName(request.getShippingSpeedySiteName());
-        application.setShippingSpeedyOfficeName(request.getShippingSpeedyOfficeName());
-
-        LeasingApplication saved = repository.save(application);
-        log.info("TBI leasing application created: id={} tbiOrderId={} orderId={}",
-                saved.getId(), saved.getTbiOrderId(), orderEntity.getId());
+        log.warn("[TBI] Leasing application created: id={} tbiOrderId={} storeOrderId={}",
+                saved.getId(), saved.getTbiOrderId(), ourOrderId);
 
         return new TbiRegisterResponseDto(saved.getId(), tbiResponse.getUrl());
     }
@@ -182,8 +191,8 @@ public class TbiLeasingService {
      */
     @Transactional
     public void processStatusWebhook(TbiStatusWebhookDto payload) {
-        log.info("TBI webhook received: orderId={} status={}",
-                payload.getOrderId(), payload.resolvedStatus());
+        log.warn("[TBI WEBHOOK] received: orderId={} status={} resellerCode={}",
+                payload.getOrderId(), payload.resolvedStatus(), payload.getResellerCode());
 
         // Guard against spoofed webhooks — TBI always includes the reseller code
         if (!tbiConfig.getResellerCode().equalsIgnoreCase(payload.getResellerCode())) {
@@ -213,10 +222,14 @@ public class TbiLeasingService {
 
         repository.save(application);
 
-        log.info("TBI application {} status: {} → {}", application.getId(), previousStatus, newStatus);
+        log.warn("[TBI WEBHOOK] application {} status: {} → {}", application.getId(), previousStatus, newStatus);
 
-        // ── Auto-transition the linked order ────────────────────────────────
-        if (!newStatus.equals(previousStatus) && application.getOrder() != null) {
+        // ── Auto-transition / create the linked order ───────────────────────
+        // For ContractSigned: order is created here for the first time.
+        // For Declined: only acts if an order already exists.
+        boolean isActionableStatus = CONTRACT_SIGNED_STATUSES.contains(newStatus)
+                || DECLINED_STATUSES.contains(newStatus);
+        if (!newStatus.equals(previousStatus) && isActionableStatus) {
             transitionOrderStatus(application, newStatus);
         }
 
@@ -226,25 +239,29 @@ public class TbiLeasingService {
     }
 
     private void transitionOrderStatus(LeasingApplication application, String tbiStatus) {
-        Order order = orderRepository.findById(application.getOrder().getId()).orElse(null);
-        if (order == null || order.getStatus() != OrderStatus.LEASING_PENDING) return;
-
         if (CONTRACT_SIGNED_STATUSES.contains(tbiStatus)) {
-            order.setStatus(OrderStatus.PENDING);
-            if ("Paid".equals(tbiStatus)) {
-                order.setPaymentStatus(PaymentStatus.PAID);
-            }
-            orderRepository.save(order);
-            log.info("Order {} transitioned to PENDING after TBI status '{}'",
+            // Order is created lazily here — only after TBI approval
+            Order order = getOrCreateOrder(application, tbiStatus);
+            if (order == null) return;
+
+            log.info("Order {} created/confirmed with PENDING status after TBI status '{}'",
                     order.getOrderNumber(), tbiStatus);
-            // Send the confirmation email that was withheld at order creation
             try {
                 emailService.sendOrderConfirmationEmail(order);
                 emailService.sendNewOrderNotificationToAdmin(order);
             } catch (Exception e) {
                 log.error("Failed to send order confirmation after leasing approval: {}", e.getMessage());
             }
+
         } else if (DECLINED_STATUSES.contains(tbiStatus)) {
+            // If the application was declined before an order was created — nothing to do
+            if (application.getOrder() == null) {
+                log.info("TBI application {} declined ({}), no order to cancel", application.getId(), tbiStatus);
+                return;
+            }
+            Order order = orderRepository.findById(application.getOrder().getId()).orElse(null);
+            if (order == null || order.getStatus() != OrderStatus.LEASING_PENDING) return;
+
             order.setStatus(OrderStatus.LEASING_REJECTED);
             orderRepository.save(order);
             log.info("Order {} marked LEASING_REJECTED after TBI status '{}'",
@@ -255,6 +272,60 @@ public class TbiLeasingService {
                 log.error("Failed to send leasing rejected email for order {}: {}",
                         order.getOrderNumber(), e.getMessage());
             }
+        }
+    }
+
+    /**
+     * Returns the linked order if it already exists, or creates it from
+     * {@code pendingOrderJson} when the first ContractSigned webhook arrives.
+     */
+    private Order getOrCreateOrder(LeasingApplication application, String tbiStatus) {
+        // Order already exists (e.g. duplicate webhook) — just ensure PENDING status
+        if (application.getOrder() != null) {
+            Order order = orderRepository.findById(application.getOrder().getId()).orElse(null);
+            if (order != null && order.getStatus() == OrderStatus.LEASING_PENDING) {
+                order.setStatus(OrderStatus.PENDING);
+                if ("Paid".equals(tbiStatus)) order.setPaymentStatus(PaymentStatus.PAID);
+                orderRepository.save(order);
+            }
+            return order;
+        }
+
+        // First time — create the order from stored JSON
+        if (application.getPendingOrderJson() == null) {
+            log.error("TBI application {} has no pendingOrderJson — cannot create order", application.getId());
+            return null;
+        }
+
+        try {
+            OrderCreateRequestDTO orderRequest =
+                    objectMapper.readValue(application.getPendingOrderJson(), OrderCreateRequestDTO.class);
+
+            // Order goes directly to PENDING (already approved by TBI)
+            orderRequest.setIsLeasingOrder(false);
+            OrderResponseDTO created = orderService.createOrder(orderRequest);
+
+            Order orderEntity = orderRepository.findById(created.getId())
+                    .orElseThrow(() -> new IllegalStateException("Order not found after creation"));
+
+            // Immediately move to PENDING since TBI already approved
+            orderEntity.setStatus(OrderStatus.PENDING);
+            if ("Paid".equals(tbiStatus)) orderEntity.setPaymentStatus(PaymentStatus.PAID);
+            orderRepository.save(orderEntity);
+
+            // Link back and clear the pending JSON to free space
+            application.setOrder(orderEntity);
+            application.setStoreOrderId(orderEntity.getOrderNumber());
+            application.setPendingOrderJson(null);
+            repository.save(application);
+
+            log.warn("[TBI] Lazy order created: {} for TBI application {}", orderEntity.getOrderNumber(), application.getId());
+            return orderEntity;
+
+        } catch (Exception e) {
+            log.error("Failed to create order from pendingOrderJson for leasing application {}: {}",
+                    application.getId(), e.getMessage());
+            return null;
         }
     }
 
@@ -318,11 +389,13 @@ public class TbiLeasingService {
 
         String country = request.getShippingCountry() != null ? request.getShippingCountry() : "Bulgaria";
 
-        req.setShippingAddress(request.getShippingAddress());
-        req.setShippingCity(request.getShippingCity());
-        req.setShippingPostalCode(request.getShippingPostalCode());
+        req.setShippingAddress(request.getShippingAddress() != null ? request.getShippingAddress() : "");
+        req.setShippingCity(request.getShippingCity() != null ? request.getShippingCity() : "");
+        req.setShippingPostalCode(request.getShippingPostalCode() != null ? request.getShippingPostalCode() : "");
         req.setShippingCountry(country);
-        req.setShippingMethod(request.getShippingMethod());
+        req.setShippingMethod(request.getShippingMethod() != null
+                ? request.getShippingMethod()
+                : com.techstore.enums.ShippingMethod.SPEEDY);
         req.setIsToSpeedyOffice(Boolean.TRUE.equals(request.getIsToSpeedyOffice()));
         req.setShippingSpeedySiteId(request.getShippingSpeedySiteId());
         req.setShippingSpeedyOfficeId(request.getShippingSpeedyOfficeId());
@@ -331,9 +404,9 @@ public class TbiLeasingService {
 
         // Billing mirrors shipping for leasing orders — customer fills billing during TBI flow
         req.setUseSameAddressForBilling(true);
-        req.setBillingAddress(request.getShippingAddress());
-        req.setBillingCity(request.getShippingCity());
-        req.setBillingPostalCode(request.getShippingPostalCode());
+        req.setBillingAddress(request.getShippingAddress() != null ? request.getShippingAddress() : "");
+        req.setBillingCity(request.getShippingCity() != null ? request.getShippingCity() : "");
+        req.setBillingPostalCode(request.getShippingPostalCode() != null ? request.getShippingPostalCode() : "");
         req.setBillingCountry(country);
 
         req.setPaymentMethod(PaymentMethod.TBI_LEASING);
@@ -376,7 +449,8 @@ public class TbiLeasingService {
     }
 
     public Page<LeasingApplicationResponseDto> getApplicationsByStatus(String status, Pageable pageable) {
-        return repository.findByStatusOrderByCreatedAtDesc(status, pageable)
+        List<String> statuses = STATUS_GROUPS.getOrDefault(status, List.of(status));
+        return repository.findByStatusInOrderByCreatedAtDesc(statuses, pageable)
                 .map(LeasingApplicationResponseDto::from);
     }
 
@@ -437,6 +511,21 @@ public class TbiLeasingService {
                 .category("0")
                 .imagelink(request.getImageUrl() != null ? request.getImageUrl() : "")
                 .build());
+    }
+
+    private TbiDeliveryAddressDto buildDeliveryAddress(TbiRegisterRequestDto request) {
+        return TbiDeliveryAddressDto.builder()
+                .country("Bulgaria")
+                .county("")
+                .city(request.getShippingCity() != null ? request.getShippingCity() : "")
+                .streetname(request.getShippingAddress() != null ? request.getShippingAddress() : "")
+                .streetno("")
+                .buildingno("")
+                .entranceno("")
+                .floorno("")
+                .apartmentno("")
+                .postalcode(request.getShippingPostalCode() != null ? request.getShippingPostalCode() : "")
+                .build();
     }
 
     private boolean isCartOrder(TbiRegisterRequestDto request) {

@@ -1,7 +1,6 @@
 package com.techstore.dto.tbi;
 
 import com.techstore.enums.ShippingMethod;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.util.List;
@@ -38,10 +37,8 @@ public class TbiRegisterRequestDto {
 
     // ── Shipping — collected from the customer before opening the TBI iframe ──
 
-    @NotBlank(message = "Shipping address is required")
     private String shippingAddress;
 
-    @NotBlank(message = "Shipping city is required")
     private String shippingCity;
 
     private String shippingPostalCode;

@@ -126,6 +126,13 @@ public class LeasingApplication extends BaseEntity {
     @Column(name = "tbi_raw_response", columnDefinition = "TEXT")
     private String tbiRawResponse;
 
+    /**
+     * Serialised OrderCreateRequestDTO — used to create the order lazily
+     * when the ContractSigned webhook arrives. Null after the order is created.
+     */
+    @Column(name = "pending_order_json", columnDefinition = "TEXT")
+    private String pendingOrderJson;
+
     // ── Timestamps ────────────────────────────────────────────────────────────
 
     @Column(name = "webhook_received_at")

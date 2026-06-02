@@ -54,7 +54,7 @@ public class TbiLeasingController {
     public ResponseEntity<Void> statusWebhook(
             @RequestBody TbiStatusWebhookDto payload) {
 
-        log.info("TBI webhook: orderId={} status={} creditAppId={}",
+        log.warn("[TBI WEBHOOK] orderId={} status={} creditAppId={}",
                 payload.getOrderId(),
                 payload.resolvedStatus(),
                 payload.getCreditApplicationId());

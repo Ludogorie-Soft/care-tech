@@ -494,3 +494,179 @@
 | 19:02 | Session end: 13 writes across 6 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 7 reads | ~15321 tok |
 | 19:03 | Session end: 13 writes across 6 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 7 reads | ~15321 tok |
 | 19:05 | Session end: 13 writes across 6 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 7 reads | ~15321 tok |
+| 09:42 | Edited ../../care-tech-ui/src/components/home/PromoProductsSection.jsx | 12→12 lines | ~109 |
+| 09:42 | Session end: 14 writes across 7 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 13 reads | ~15430 tok |
+| 09:42 | Session end: 14 writes across 7 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 13 reads | ~15430 tok |
+| 09:45 | Edited ../../care-tech-ui/src/components/navbar/NavBar.jsx | "md:hidden absolute z-[1] " → "md:hidden absolute z-[1] " | ~41 |
+| 09:45 | Session end: 15 writes across 8 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 15 reads | ~15471 tok |
+| 09:46 | Session end: 15 writes across 8 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 15 reads | ~15471 tok |
+| 09:48 | Edited ../../care-tech-ui/src/components/products/ProductCard.jsx | 7→8 lines | ~80 |
+| 09:48 | Session end: 16 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 17 reads | ~15551 tok |
+| 09:49 | Session end: 16 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 17 reads | ~15551 tok |
+| 09:53 | Session end: 16 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15551 tok |
+| 09:55 | Session end: 16 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15551 tok |
+| 10:04 | Session end: 16 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15551 tok |
+| 10:05 | Session end: 16 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15551 tok |
+| 10:06 | Session end: 16 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15551 tok |
+| 10:11 | Session end: 16 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15551 tok |
+| 10:14 | Session end: 16 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15551 tok |
+| 10:16 | Session end: 16 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15551 tok |
+| 10:17 | Edited src/main/resources/application.yml | 2→2 lines | ~19 |
+| 10:17 | Session end: 17 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15566 tok |
+| 10:18 | Edited src/main/resources/application.yml | 2→2 lines | ~24 |
+| 10:18 | Session end: 18 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15590 tok |
+| 10:22 | Session end: 18 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15590 tok |
+| 10:29 | Session end: 18 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15590 tok |
+| 10:30 | Session end: 18 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15590 tok |
+| 10:31 | Session end: 18 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15590 tok |
+| 10:31 | Session end: 18 writes across 9 files (application.yml, TbiLeasingServiceTest.java, pom.xml, application.properties, application-test.properties) | 18 reads | ~15590 tok |
+
+## Session: 2026-06-02 10:34
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:37 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | 2→5 lines | ~35 |
+| 10:37 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | 3→4 lines | ~103 |
+| 10:38 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | 3→4 lines | ~81 |
+| 10:38 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | 3→4 lines | ~84 |
+| 10:38 | Session end: 4 writes across 1 files (TbiCheckoutModal.jsx) | 2 reads | ~303 tok |
+| 10:44 | Session end: 4 writes across 1 files (TbiCheckoutModal.jsx) | 8 reads | ~9264 tok |
+| 10:46 | Session end: 4 writes across 1 files (TbiCheckoutModal.jsx) | 9 reads | ~9264 tok |
+| 10:49 | Edited src/main/resources/application.yml | 3→3 lines | ~74 |
+| 10:49 | Session end: 5 writes across 2 files (TbiCheckoutModal.jsx, application.yml) | 12 reads | ~9892 tok |
+| 11:14 | Created ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | — | ~1662 |
+| 11:14 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | modified getShippingAddress() | ~229 |
+| 11:14 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | modified getShippingAddress() | ~107 |
+| 11:14 | Session end: 8 writes across 3 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java) | 13 reads | ~11914 tok |
+| 11:16 | Session end: 8 writes across 3 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java) | 13 reads | ~11914 tok |
+| 11:21 | Edited src/main/java/com/techstore/dto/tbi/TbiRegisterRequestDto.java | 2→1 lines | ~6 |
+| 11:21 | Edited src/main/java/com/techstore/dto/tbi/TbiRegisterRequestDto.java | 5→3 lines | ~19 |
+| 11:21 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | modified if() | ~280 |
+| 11:21 | Edited ../../care-tech-ui/src/pages/Cart.jsx | 3→4 lines | ~50 |
+| 11:22 | Edited ../../care-tech-ui/src/pages/Cart.jsx | added nullish coalescing | ~666 |
+| 11:22 | Edited ../../care-tech-ui/src/pages/Cart.jsx | 8→12 lines | ~103 |
+| 11:22 | Session end: 14 writes across 5 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java, TbiRegisterRequestDto.java, Cart.jsx) | 15 reads | ~13455 tok |
+| 11:25 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | inline fix | ~17 |
+| 11:25 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | modified buildDeliveryAddress() | ~201 |
+| 11:25 | Session end: 16 writes across 5 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java, TbiRegisterRequestDto.java, Cart.jsx) | 15 reads | ~13689 tok |
+| 11:29 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | 4→7 lines | ~70 |
+| 11:29 | Session end: 17 writes across 5 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java, TbiRegisterRequestDto.java, Cart.jsx) | 16 reads | ~14031 tok |
+| 11:32 | Session end: 17 writes across 5 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java, TbiRegisterRequestDto.java, Cart.jsx) | 16 reads | ~14031 tok |
+| 11:34 | Session end: 17 writes across 5 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java, TbiRegisterRequestDto.java, Cart.jsx) | 16 reads | ~14031 tok |
+| 11:35 | Created src/main/resources/db/migration/V19__make_order_shipping_nullable.sql | — | ~89 |
+| 11:35 | Session end: 18 writes across 6 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java, TbiRegisterRequestDto.java, Cart.jsx) | 16 reads | ~14127 tok |
+| 11:38 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | inline fix | ~33 |
+| 11:39 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | modified getShippingMethod() | ~47 |
+| 11:39 | Session end: 20 writes across 6 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java, TbiRegisterRequestDto.java, Cart.jsx) | 16 reads | ~14241 tok |
+| 11:48 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | modified firstname() | ~177 |
+| 11:49 | Session end: 21 writes across 6 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java, TbiRegisterRequestDto.java, Cart.jsx) | 16 reads | ~14431 tok |
+
+## Session: 2026-06-02 (TBI Fix + Speedy Integration)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+| — | Fixed TBI error 207: wrong encryption key for TBI1/EX1. Updated .env + application.yml with correct test key | .env, application.yml | done | ~200 |
+| — | TbiCheckoutModal: removed delivery form, registers on open, SHOW_BGN flag, Euro+Leva prices | TbiCheckoutModal.jsx | done | ~300 |
+| — | Cart.jsx TBI button: validates Formik, extracts Speedy shipping data, passes to modal | Cart.jsx | done | ~400 |
+| — | TbiRegisterRequestDto: removed @NotBlank; TbiLeasingService: buildDeliveryAddress() pre-fills TBI form | TbiRegisterRequestDto.java, TbiLeasingService.java | done | ~150 |
+| — | V19 migration: shipping_address/city/method made nullable for leasing orders | V19__make_order_shipping_nullable.sql | done | ~50 |
+| — | Fixed successRedirectURL/failRedirectURL → caretech.bg to fix "refused to connect" at TBI flow end | TbiLeasingService.java | done | ~50 |
+| 11:51 | Edited ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/tbi_leasing_integration.md | expanded (+7 lines) | ~147 |
+| 11:51 | Session end: 22 writes across 7 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java, TbiRegisterRequestDto.java, Cart.jsx) | 16 reads | ~14589 tok |
+| 11:52 | Session end: 22 writes across 7 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java, TbiRegisterRequestDto.java, Cart.jsx) | 16 reads | ~14589 tok |
+| 11:53 | Session end: 22 writes across 7 files (TbiCheckoutModal.jsx, application.yml, TbiLeasingService.java, TbiRegisterRequestDto.java, Cart.jsx) | 16 reads | ~14589 tok |
+| 11:54 | Edited ../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx | "Чернова" → "Регистрирана" | ~29 |
+
+## Session: 2026-06-02 11:56
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-02 12:06
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:14 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | 2→2 lines | ~38 |
+| 12:14 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | CSS: height | ~107 |
+| 12:14 | Session end: 2 writes across 1 files (TbiCheckoutModal.jsx) | 5 reads | ~199 tok |
+| 12:14 | Session end: 2 writes across 1 files (TbiCheckoutModal.jsx) | 5 reads | ~199 tok |
+| 12:22 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | 4→4 lines | ~74 |
+| 12:24 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | added 1 condition(s) | ~280 |
+| 12:34 | Created src/main/resources/db/migration/V20__add_pending_order_json_to_leasing.sql | — | ~64 |
+| 12:34 | Edited src/main/java/com/techstore/entity/LeasingApplication.java | expanded (+7 lines) | ~116 |
+| 12:35 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | modified getFirstName() | ~374 |
+| 12:36 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | 3→4 lines | ~63 |
+| 12:36 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added 6 condition(s) | ~1185 |
+| 12:37 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | getOrder() → contains() | ~132 |
+| 12:38 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | 5→5 lines | ~81 |
+| 12:39 | Session end: 11 writes across 4 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java) | 7 reads | ~12170 tok |
+| 12:42 | Session end: 11 writes across 4 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java) | 7 reads | ~12170 tok |
+| 12:46 | Session end: 11 writes across 4 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java) | 8 reads | ~13016 tok |
+| 12:49 | Edited src/main/java/com/techstore/controller/TbiLeasingController.java | info() → warn() | ~54 |
+| 12:49 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | 2→2 lines | ~46 |
+| 12:49 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | "TBI application {} status" → "[TBI WEBHOOK] application" | ~31 |
+| 12:49 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | info() → warn() | ~43 |
+| 12:49 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | "Lazy order created: {} fo" → "[TBI] Lazy order created:" | ~34 |
+| 12:49 | Session end: 16 writes across 5 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 11 reads | ~18718 tok |
+| 12:50 | Session end: 16 writes across 5 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 11 reads | ~18718 tok |
+| 12:51 | Session end: 16 writes across 5 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 11 reads | ~18718 tok |
+| 12:52 | Session end: 16 writes across 5 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 12 reads | ~19131 tok |
+| 12:54 | Session end: 16 writes across 5 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 12 reads | ~19131 tok |
+| 13:04 | Session end: 16 writes across 5 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 12 reads | ~19131 tok |
+| 13:06 | Session end: 16 writes across 5 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 12 reads | ~19131 tok |
+| 13:07 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | inline fix | ~18 |
+| 13:08 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | added error handling | ~126 |
+| 13:08 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | 7→9 lines | ~90 |
+| 13:08 | Session end: 19 writes across 5 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 12 reads | ~19365 tok |
+| 13:13 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | includes() → origin() | ~218 |
+| 13:14 | Session end: 20 writes across 5 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 12 reads | ~19583 tok |
+| 13:17 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | clearRegisterStatus() → exists() | ~259 |
+| 13:17 | Edited ../../care-tech-ui/src/pages/Cart.jsx | added 1 import(s) | ~36 |
+| 13:17 | Edited ../../care-tech-ui/src/pages/Cart.jsx | 4→5 lines | ~46 |
+| 13:18 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | added 1 import(s) | ~45 |
+| 13:18 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | inline fix | ~28 |
+| 13:18 | Session end: 25 writes across 7 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 15 reads | ~19997 tok |
+| 13:26 | Session end: 25 writes across 7 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 15 reads | ~19997 tok |
+| 13:30 | Session end: 25 writes across 7 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 15 reads | ~19997 tok |
+| 13:32 | Session end: 25 writes across 7 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 15 reads | ~19997 tok |
+| 14:02 | Session end: 25 writes across 7 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 15 reads | ~19997 tok |
+| 14:15 | Created ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | — | ~5100 |
+| 14:15 | Session end: 26 writes across 7 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 20 reads | ~25227 tok |
+| 14:17 | Session end: 26 writes across 7 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 20 reads | ~25227 tok |
+| 14:22 | Session end: 26 writes across 7 files (TbiCheckoutModal.jsx, V20__add_pending_order_json_to_leasing.sql, LeasingApplication.java, TbiLeasingService.java, TbiLeasingController.java) | 20 reads | ~25227 tok |
+| 14:27 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | application() → toString() | ~1406 |
+
+## Session: 2026-06-02 14:28
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:59 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | expanded (+6 lines) | ~93 |
+| 14:59 | Session end: 1 writes across 1 files (TbiCheckoutModal.jsx) | 13 reads | ~9332 tok |
+| 15:06 | Session end: 1 writes across 1 files (TbiCheckoutModal.jsx) | 14 reads | ~9332 tok |
+| 15:09 | Session end: 1 writes across 1 files (TbiCheckoutModal.jsx) | 14 reads | ~9332 tok |
+| 15:12 | Edited src/main/java/com/techstore/repository/LeasingApplicationRepository.java | added 1 import(s) | ~23 |
+| 15:12 | Edited src/main/java/com/techstore/repository/LeasingApplicationRepository.java | 1→3 lines | ~56 |
+| 15:13 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | expanded (+10 lines) | ~210 |
+| 15:13 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | modified getApplicationsByStatus() | ~90 |
+| 15:13 | Edited ../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx | 8→8 lines | ~92 |
+| 15:13 | Session end: 6 writes across 4 files (TbiCheckoutModal.jsx, LeasingApplicationRepository.java, TbiLeasingService.java, LeasingLayout.jsx) | 16 reads | ~10168 tok |
+| 15:29 | Edited ../../care-tech-ui/src/components/home/PromoProductsSection.jsx | 36→36 lines | ~212 |
+| 15:29 | Edited ../../care-tech-ui/src/components/home/PromoProductsSection.jsx | — | ~0 |
+| 15:30 | Session end: 8 writes across 5 files (TbiCheckoutModal.jsx, LeasingApplicationRepository.java, TbiLeasingService.java, LeasingLayout.jsx, PromoProductsSection.jsx) | 18 reads | ~10380 tok |
+| 15:30 | Session end: 8 writes across 5 files (TbiCheckoutModal.jsx, LeasingApplicationRepository.java, TbiLeasingService.java, LeasingLayout.jsx, PromoProductsSection.jsx) | 18 reads | ~10380 tok |
+| 15:34 | Session end: 8 writes across 5 files (TbiCheckoutModal.jsx, LeasingApplicationRepository.java, TbiLeasingService.java, LeasingLayout.jsx, PromoProductsSection.jsx) | 18 reads | ~10380 tok |
+| 15:36 | Session end: 8 writes across 5 files (TbiCheckoutModal.jsx, LeasingApplicationRepository.java, TbiLeasingService.java, LeasingLayout.jsx, PromoProductsSection.jsx) | 18 reads | ~10380 tok |
+| 15:37 | Edited ../../care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx | "Регистрирана" → "Чернова" | ~30 |
+| 15:37 | Session end: 9 writes across 5 files (TbiCheckoutModal.jsx, LeasingApplicationRepository.java, TbiLeasingService.java, LeasingLayout.jsx, PromoProductsSection.jsx) | 18 reads | ~10410 tok |
+| 15:38 | Session end: 9 writes across 5 files (TbiCheckoutModal.jsx, LeasingApplicationRepository.java, TbiLeasingService.java, LeasingLayout.jsx, PromoProductsSection.jsx) | 18 reads | ~10410 tok |
+| 15:42 | Edited ../../care-tech-ui/src/App.js | added 1 import(s) | ~26 |
+| 15:42 | Edited ../../care-tech-ui/src/App.js | 1→2 lines | ~41 |
+| 15:43 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | added 1 condition(s) | ~413 |
+| 15:43 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | — | ~0 |
+| 15:43 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | inline fix | ~17 |
+| 15:43 | Edited ../../care-tech-ui/src/pages/Cart.jsx | added optional chaining | ~126 |
+| 15:44 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | "https://caretech.bg" → "https://caretech.bg/leasi" | ~20 |
+| 15:44 | Session end: 16 writes across 7 files (TbiCheckoutModal.jsx, LeasingApplicationRepository.java, TbiLeasingService.java, LeasingLayout.jsx, PromoProductsSection.jsx) | 19 reads | ~11055 tok |
+| 15:47 | Session end: 16 writes across 7 files (TbiCheckoutModal.jsx, LeasingApplicationRepository.java, TbiLeasingService.java, LeasingLayout.jsx, PromoProductsSection.jsx) | 19 reads | ~11055 tok |
+| 15:59 | Session end: 16 writes across 7 files (TbiCheckoutModal.jsx, LeasingApplicationRepository.java, TbiLeasingService.java, LeasingLayout.jsx, PromoProductsSection.jsx) | 20 reads | ~11605 tok |
+| 16:02 | Session end: 16 writes across 7 files (TbiCheckoutModal.jsx, LeasingApplicationRepository.java, TbiLeasingService.java, LeasingLayout.jsx, PromoProductsSection.jsx) | 20 reads | ~11605 tok |
+| 16:03 | Session end: 16 writes across 7 files (TbiCheckoutModal.jsx, LeasingApplicationRepository.java, TbiLeasingService.java, LeasingLayout.jsx, PromoProductsSection.jsx) | 20 reads | ~11605 tok |
