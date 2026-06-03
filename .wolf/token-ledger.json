@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 5130274,
-    "total_reads": 2308,
-    "total_writes": 2607,
-    "total_sessions": 15,
-    "anatomy_hits": 1079,
-    "anatomy_misses": 951,
-    "repeated_reads_blocked": 424,
-    "estimated_savings_vs_bare_cli": 2783144
+    "total_tokens_estimated": 5157891,
+    "total_reads": 2353,
+    "total_writes": 2642,
+    "total_sessions": 16,
+    "anatomy_hits": 1099,
+    "anatomy_misses": 976,
+    "repeated_reads_blocked": 434,
+    "estimated_savings_vs_bare_cli": 2787144
   },
   "sessions": [
     {
@@ -30632,6 +30632,533 @@
         "writes_count": 16,
         "repeated_reads_blocked": 5,
         "anatomy_lookups": 8
+      }
+    },
+    {
+      "id": "session-2026-06-02-1428",
+      "started": "2026-06-02T11:28:53.964Z",
+      "ended": "2026-06-02T13:08:02.901Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/TbiLeasingService.java",
+          "tokens_estimated": 8250,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/db/migration/V17__add_tbi_leasing_applications.sql",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/db/migration/V18__add_shipping_to_leasing_applications.sql",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/db/migration/V19__make_order_shipping_nullable.sql",
+          "tokens_estimated": 89,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/TbiRegisterRequestDto.java",
+          "tokens_estimated": 374,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/TbiCheckoutModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/leasingSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/TbiRegisterResponseDto.java",
+          "tokens_estimated": 124,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/TbiRegisterApplicationResponseDto.java",
+          "tokens_estimated": 259,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/TbiCartItemRequestDto.java",
+          "tokens_estimated": 143,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/store.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/api/axiosConfigs.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-06-02 at 15.02.04.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/LeasingApplicationRepository.java",
+          "tokens_estimated": 338,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-06-02 at 15.22.26.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/home/PromoProductsSection.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/App.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/TbiStatusWebhookDto.java",
+          "tokens_estimated": 550,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/TbiCheckoutModal.jsx",
+          "tokens_estimated": 93,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/LeasingApplicationRepository.java",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/LeasingApplicationRepository.java",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/TbiLeasingService.java",
+          "tokens_estimated": 225,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/TbiLeasingService.java",
+          "tokens_estimated": 97,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx",
+          "tokens_estimated": 92,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/home/PromoProductsSection.jsx",
+          "tokens_estimated": 212,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/home/PromoProductsSection.jsx",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/App.js",
+          "tokens_estimated": 26,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/App.js",
+          "tokens_estimated": 41,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/TbiCheckoutModal.jsx",
+          "tokens_estimated": 413,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/TbiCheckoutModal.jsx",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/TbiCheckoutModal.jsx",
+          "tokens_estimated": 17,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 126,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/TbiLeasingService.java",
+          "tokens_estimated": 22,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 10127,
+        "output_tokens_estimated": 1478,
+        "reads_count": 20,
+        "writes_count": 16,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 8
+      }
+    },
+    {
+      "id": "session-2026-06-02-1428",
+      "started": "2026-06-02T11:28:53.964Z",
+      "ended": "2026-06-02T13:09:19.898Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/TbiLeasingService.java",
+          "tokens_estimated": 8250,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/db/migration/V17__add_tbi_leasing_applications.sql",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/db/migration/V18__add_shipping_to_leasing_applications.sql",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/db/migration/V19__make_order_shipping_nullable.sql",
+          "tokens_estimated": 89,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/TbiRegisterRequestDto.java",
+          "tokens_estimated": 374,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/TbiCheckoutModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/leasingSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/TbiRegisterResponseDto.java",
+          "tokens_estimated": 124,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/TbiRegisterApplicationResponseDto.java",
+          "tokens_estimated": 259,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/TbiCartItemRequestDto.java",
+          "tokens_estimated": 143,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/store.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/api/axiosConfigs.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-06-02 at 15.02.04.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/LeasingApplicationRepository.java",
+          "tokens_estimated": 338,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-06-02 at 15.22.26.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/home/PromoProductsSection.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/App.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/TbiStatusWebhookDto.java",
+          "tokens_estimated": 550,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Dashboard/DashboardLayout.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/TbiCheckoutModal.jsx",
+          "tokens_estimated": 93,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/LeasingApplicationRepository.java",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/LeasingApplicationRepository.java",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/TbiLeasingService.java",
+          "tokens_estimated": 225,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/TbiLeasingService.java",
+          "tokens_estimated": 97,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx",
+          "tokens_estimated": 92,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/home/PromoProductsSection.jsx",
+          "tokens_estimated": 212,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/home/PromoProductsSection.jsx",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Leasing/LeasingLayout.jsx",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/App.js",
+          "tokens_estimated": 26,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/App.js",
+          "tokens_estimated": 41,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/TbiCheckoutModal.jsx",
+          "tokens_estimated": 413,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/TbiCheckoutModal.jsx",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/TbiCheckoutModal.jsx",
+          "tokens_estimated": 17,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 126,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/TbiLeasingService.java",
+          "tokens_estimated": 22,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Dashboard/DashboardLayout.jsx",
+          "tokens_estimated": 153,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Dashboard/DashboardLayout.jsx",
+          "tokens_estimated": 268,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Dashboard/DashboardLayout.jsx",
+          "tokens_estimated": 774,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 10127,
+        "output_tokens_estimated": 2673,
+        "reads_count": 21,
+        "writes_count": 19,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 8
+      }
+    },
+    {
+      "id": "session-2026-06-02-1611",
+      "started": "2026-06-02T13:11:57.579Z",
+      "ended": "2026-06-02T13:12:18.893Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/LeasingApplicationStatisticsDto.java",
+          "tokens_estimated": 214,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 214,
+        "output_tokens_estimated": 0,
+        "reads_count": 1,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-06-02-1611",
+      "started": "2026-06-02T13:11:57.579Z",
+      "ended": "2026-06-02T13:13:40.073Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/LeasingApplicationStatisticsDto.java",
+          "tokens_estimated": 214,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 214,
+        "output_tokens_estimated": 0,
+        "reads_count": 1,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-06-02-1611",
+      "started": "2026-06-02T13:11:57.579Z",
+      "ended": "2026-06-02T13:23:51.362Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/tbi/LeasingApplicationStatisticsDto.java",
+          "tokens_estimated": 214,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 2570,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 2784,
+        "output_tokens_estimated": 0,
+        "reads_count": 2,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 2
       }
     }
   ],

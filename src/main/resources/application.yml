@@ -16,7 +16,7 @@ spring:
       port: 587
       protocol: smtp
       username: orders@caretech.bg
-      password: ${MAIL_PASSWORD}
+      password: ${MAIL_PASSWORD:184562@!Zas2}
       properties:
         mail:
           smtp:

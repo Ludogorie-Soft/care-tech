@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-02T12:44:04.392Z
-> Files: 442 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-02T13:09:15.182Z
+> Files: 443 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -39,6 +39,7 @@
 
 ## ../../care-tech-ui/src/pages/admin/Dashboard/
 
+- `DashboardLayout.jsx` — convertStatsToMetrics (~2511 tok)
 - `Sidebar.jsx` — Sidebar (~970 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Leasing/
