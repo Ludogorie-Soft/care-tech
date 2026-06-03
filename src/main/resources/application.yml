@@ -306,9 +306,9 @@ excluded:
 tbi:
   fusion-pay:
     api-base-url: ${TBI_API_BASE_URL:https://beta.tbibank.support}
-    reseller-code: ${TBI_RESELLER_CODE:TBI1}
-    reseller-key: ${TBI_RESELLER_KEY:EX1}
-    encryption-key: ${TBI_ENCRYPTION_KEY:d1c2e12cfeababc8b95daf6902e210b170992e68fd1c1f19565a40cf0099c6e2cb559b85d7c14ea05b4dca0a790656d003ccade9286827cffdf8e664fd271499}
+    reseller-code: ${TBI_RESELLER_CODE:BIVD}
+    reseller-key: ${TBI_RESELLER_KEY:caretech}
+    encryption-key: ${TBI_ENCRYPTION_KEY:wXkG6YYmpIQ8LVcb1dg6n1ufdJCqi4M6ud0cIg4WruaBX6keTLPBRNm9Tdubri8A0X6nIOCR#T#sDo0!r#ec3yZILtXOYPaUMIHr0Li8ejxsbCHGTZqBkrJLl@ByY7rK}
     webhook-url: ${TBI_WEBHOOK_URL:https://caretech.bg/api/tbi/webhook}
     enabled: ${TBI_ENABLED:true}
 

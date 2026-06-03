@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-03T09:49:57.576Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-03T10:52:07.391Z
 > Files: 451 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -565,7 +565,7 @@
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` (~2570 tok)
+- `application.yml` (~2574 tok)
 
 ## src/main/resources/db/
 

@@ -755,3 +755,6 @@
 | 12:49 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | inline fix | ~32 |
 | 12:50 | Session end: 17 writes across 6 files (21_fix_laptop_category_remaining.sql, AsbisSyncService.java, ProductSearchRepository.java, 22_hide_products_without_images.sql, Category.jsx) | 6 reads | ~26104 tok |
 | 12:50 | Session end: 17 writes across 6 files (21_fix_laptop_category_remaining.sql, AsbisSyncService.java, ProductSearchRepository.java, 22_hide_products_without_images.sql, Category.jsx) | 6 reads | ~26104 tok |
+| 13:50 | Session end: 17 writes across 6 files (21_fix_laptop_category_remaining.sql, AsbisSyncService.java, ProductSearchRepository.java, 22_hide_products_without_images.sql, Category.jsx) | 6 reads | ~26104 tok |
+| 13:52 | Edited src/main/resources/application.yml | 3→3 lines | ~75 |
+| 13:52 | Session end: 18 writes across 7 files (21_fix_laptop_category_remaining.sql, AsbisSyncService.java, ProductSearchRepository.java, 22_hide_products_without_images.sql, Category.jsx) | 7 reads | ~28749 tok |
