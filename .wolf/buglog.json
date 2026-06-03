@@ -1636,6 +1636,182 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-02T13:09:15.206Z"
+    },
+    {
+      "id": "bug-100",
+      "timestamp": "2026-06-03T08:28:36.470Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Had \"https://caretech.bg/leasing/complete\"",
+      "fix": "Changed to \"https://caretech.bg/leasing-complete.html\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-03T08:28:36.470Z"
+    },
+    {
+      "id": "bug-101",
+      "timestamp": "2026-06-03T08:28:43.179Z",
+      "error_message": "Wrong reference: shippingAddress should be surname",
+      "file": "src/main/java/com/techstore/dto/tbi/TbiRegisterRequestDto.java",
+      "root_cause": "Used \"shippingAddress\" instead of \"surname\"",
+      "fix": "Changed shippingAddress → surname",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-03T08:28:43.179Z"
+    },
+    {
+      "id": "bug-102",
+      "timestamp": "2026-06-03T08:28:49.828Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-03T08:28:49.828Z"
+    },
+    {
+      "id": "bug-103",
+      "timestamp": "2026-06-03T08:49:02.082Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/Category.jsx",
+      "root_cause": "Had \"price_asc\"",
+      "fix": "Changed to \"price_desc\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-03T08:49:02.082Z"
+    },
+    {
+      "id": "bug-104",
+      "timestamp": "2026-06-03T08:55:56.025Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-03T08:55:56.025Z"
+    },
+    {
+      "id": "bug-105",
+      "timestamp": "2026-06-03T08:58:59.665Z",
+      "error_message": "Missing guard clause",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "No early return/throw for edge case: mapped == null || productName == null",
+      "fix": "Added guard clause: if (mapped == null || productName == null)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-03T08:58:59.665Z"
+    },
+    {
+      "id": "bug-106",
+      "timestamp": "2026-06-03T09:10:13.922Z",
+      "error_message": "Significant refactor of ",
+      "file": "scripts/20_fix_laptop_category_covers.sql",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 9→14 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "sql"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-03T09:10:13.922Z"
+    },
+    {
+      "id": "bug-107",
+      "timestamp": "2026-06-03T09:10:26.889Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "Had \" CASE\"",
+      "fix": "Changed to \"CASE\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-03T09:10:26.889Z"
+    },
+    {
+      "id": "bug-108",
+      "timestamp": "2026-06-03T09:29:00.900Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 8→15 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-03T09:29:00.900Z"
+    },
+    {
+      "id": "bug-109",
+      "timestamp": "2026-06-03T09:40:49.406Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/Category.jsx",
+      "root_cause": "Had \"price_desc\"",
+      "fix": "Changed to \"price_asc\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-03T09:40:49.406Z"
+    },
+    {
+      "id": "bug-110",
+      "timestamp": "2026-06-03T09:47:25.002Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/redux/paramSlice.js",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 17→28 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-03T09:47:25.002Z"
     }
   ]
 }

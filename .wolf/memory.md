@@ -680,3 +680,78 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 11:28 | Created ../../care-tech-ui/public/leasing-complete.html | — | ~71 |
+| 11:28 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | "https://caretech.bg/leasi" → "https://caretech.bg/leasi" | ~22 |
+| 11:28 | Edited src/main/java/com/techstore/dto/tbi/TbiRegisterRequestDto.java | 1→3 lines | ~18 |
+| 11:28 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | inline fix | ~22 |
+| 11:28 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | 3→4 lines | ~62 |
+| 11:29 | Edited ../../care-tech-ui/src/components/TbiCheckoutModal.jsx | CSS: surname, surname | ~345 |
+| 11:31 | Session end: 6 writes across 4 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx) | 6 reads | ~12150 tok |
+| 11:32 | Session end: 6 writes across 4 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx) | 6 reads | ~12150 tok |
+| 11:36 | Session end: 6 writes across 4 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx) | 6 reads | ~12150 tok |
+| 11:39 | Session end: 6 writes across 4 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx) | 6 reads | ~12150 tok |
+| 11:44 | Session end: 6 writes across 4 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx) | 10 reads | ~19104 tok |
+| 11:45 | Session end: 6 writes across 4 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx) | 11 reads | ~31518 tok |
+| 11:49 | Edited ../../care-tech-ui/src/pages/Category.jsx | "price_asc" → "price_desc" | ~16 |
+| 11:49 | Session end: 7 writes across 5 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 12 reads | ~31534 tok |
+| 11:50 | Session end: 7 writes across 5 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 12 reads | ~31534 tok |
+| 11:50 | Session end: 7 writes across 5 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 12 reads | ~31534 tok |
+| 11:52 | Session end: 7 writes across 5 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 12 reads | ~31534 tok |
+| 11:53 | Session end: 7 writes across 5 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 12 reads | ~31534 tok |
+| 11:54 | Session end: 7 writes across 5 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 12 reads | ~31534 tok |
+| 11:55 | Created scripts/18_fix_laptop_category_accessories.sql | — | ~516 |
+| 11:55 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | 4→8 lines | ~119 |
+| 11:55 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | modified if() | ~234 |
+| 11:56 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | inline fix | ~32 |
+| 11:58 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | added 5 condition(s) | ~456 |
+| 11:59 | Session end: 12 writes across 7 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 13 reads | ~33328 tok |
+| 11:59 | Session end: 12 writes across 7 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 13 reads | ~33328 tok |
+| 12:01 | Created scripts/19_fix_laptop_category_accessories_v2.sql | — | ~391 |
+| 12:01 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | 24→27 lines | ~328 |
+| 12:01 | Session end: 14 writes across 8 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 13 reads | ~34509 tok |
+| 12:03 | Session end: 14 writes across 8 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 13 reads | ~34509 tok |
+| 12:04 | Session end: 14 writes across 8 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 13 reads | ~34509 tok |
+| 12:05 | Session end: 14 writes across 8 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 13 reads | ~34509 tok |
+| 12:06 | Session end: 14 writes across 8 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 13 reads | ~34509 tok |
+| 12:06 | Session end: 14 writes across 8 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 13 reads | ~34509 tok |
+| 12:07 | Created scripts/20_fix_laptop_category_covers.sql | — | ~159 |
+| 12:07 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | 7→7 lines | ~154 |
+| 12:07 | Session end: 16 writes across 9 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 13 reads | ~34845 tok |
+| 12:08 | Session end: 16 writes across 9 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 13 reads | ~34845 tok |
+| 12:08 | Session end: 16 writes across 9 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 13 reads | ~34845 tok |
+| 12:10 | Edited scripts/20_fix_laptop_category_covers.sql | 9→14 lines | ~137 |
+| 12:10 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | " CASE" → "CASE" | ~14 |
+| 12:10 | Session end: 18 writes across 9 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 14 reads | ~35165 tok |
+| 12:20 | Session end: 18 writes across 9 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 14 reads | ~35165 tok |
+| 12:21 | Session end: 18 writes across 9 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 14 reads | ~35165 tok |
+| 12:23 | Session end: 18 writes across 9 files (leasing-complete.html, TbiLeasingService.java, TbiRegisterRequestDto.java, TbiCheckoutModal.jsx, Category.jsx) | 14 reads | ~35165 tok |
+
+## Session: 2026-06-03 12:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:28 | Created scripts/21_fix_laptop_category_remaining.sql | — | ~370 |
+| 12:29 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | added 1 condition(s) | ~156 |
+| 12:30 | created script 21 + updated sync service: FOLIO→47, ROG AC→42, tablets hidden | scripts/21_fix_laptop_category_remaining.sql, AsbisSyncService.java | done | ~200 |
+| 12:31 | Session end: 2 writes across 2 files (21_fix_laptop_category_remaining.sql, AsbisSyncService.java) | 2 reads | ~13754 tok |
+| 12:34 | Created scripts/21_fix_laptop_category_remaining.sql | — | ~462 |
+| 12:34 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | 4→5 lines | ~92 |
+| 12:34 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | 7→9 lines | ~179 |
+| 12:34 | Session end: 5 writes across 2 files (21_fix_laptop_category_remaining.sql, AsbisSyncService.java) | 3 reads | ~14999 tok |
+| 12:38 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 3→4 lines | ~68 |
+| 12:38 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 4→5 lines | ~84 |
+| 12:38 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 6→7 lines | ~99 |
+| 12:38 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 5→6 lines | ~92 |
+| 12:38 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 6→7 lines | ~143 |
+| 12:38 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 6→7 lines | ~137 |
+| 12:38 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 5→6 lines | ~123 |
+| 12:39 | Created scripts/22_hide_products_without_images.sql | — | ~185 |
+| 12:39 | Session end: 13 writes across 4 files (21_fix_laptop_category_remaining.sql, AsbisSyncService.java, ProductSearchRepository.java, 22_hide_products_without_images.sql) | 4 reads | ~25514 tok |
+| 12:40 | Edited ../../care-tech-ui/src/pages/Category.jsx | "price_desc" → "price_asc" | ~15 |
+| 12:40 | Session end: 14 writes across 5 files (21_fix_laptop_category_remaining.sql, AsbisSyncService.java, ProductSearchRepository.java, 22_hide_products_without_images.sql, Category.jsx) | 5 reads | ~25529 tok |
+| 12:40 | Session end: 14 writes across 5 files (21_fix_laptop_category_remaining.sql, AsbisSyncService.java, ProductSearchRepository.java, 22_hide_products_without_images.sql, Category.jsx) | 5 reads | ~25529 tok |
+| 12:47 | Edited ../../care-tech-ui/src/redux/paramSlice.js | modified catch() | ~219 |
+| 12:49 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | modified for() | ~277 |
+| 12:49 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | inline fix | ~32 |
+| 12:50 | Session end: 17 writes across 6 files (21_fix_laptop_category_remaining.sql, AsbisSyncService.java, ProductSearchRepository.java, 22_hide_products_without_images.sql, Category.jsx) | 6 reads | ~26104 tok |
+| 12:50 | Session end: 17 writes across 6 files (21_fix_laptop_category_remaining.sql, AsbisSyncService.java, ProductSearchRepository.java, 22_hide_products_without_images.sql, Category.jsx) | 6 reads | ~26104 tok |

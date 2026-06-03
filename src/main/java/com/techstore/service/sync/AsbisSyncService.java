@@ -136,6 +136,10 @@ public class AsbisSyncService {
             // Load all existing categories — build parent-aware lookup structures
             List<Category> allExistingCats = categoryRepository.findAll();
 
+            // Category id → Category lookup (used for accessory corrections)
+            Map<Long, Category> catsById = allExistingCats.stream()
+                    .collect(java.util.stream.Collectors.toMap(Category::getId, c -> c));
+
             // Root categories (parent == null) → by normalizedNameBg
             Map<String, Category> rootByName = new HashMap<>();
             // Child categories → by "parentId:::normalizedNameBg"
@@ -513,6 +517,10 @@ public class AsbisSyncService {
                 }
             }
 
+            // Category id → Category lookup (used for accessory corrections)
+            Map<Long, Category> catsById = allCategoriesForProducts.stream()
+                    .collect(Collectors.toMap(Category::getId, c -> c, (e, d) -> e));
+
             List<Map<String, Object>> allProducts = asbisApiService.getAllProducts();
             log.info("Fetched {} products from Asbis API", allProducts.size());
 
@@ -601,10 +609,10 @@ public class AsbisSyncService {
                         product.setPlatform(Platform.ASBIS);
                         product.setCreatedBy("system");
                         product.setManufacturer(manufacturer);
-                        product.setCategory(category);
+                        product.setCategory(correctLaptopAccessoryCategory(category, getString(asbisProduct, "productdescription"), catsById));
                         setAsbisProductFields(product, asbisProduct, true);
                     } else {
-                        product.setCategory(category);
+                        product.setCategory(correctLaptopAccessoryCategory(category, product.getNameEn(), catsById));
                         setAsbisProductFields(product, asbisProduct, false);
                     }
 
@@ -947,5 +955,54 @@ public class AsbisSyncService {
     private String getString(Map<String, Object> map, String key) {
         Object value = map.get(key);
         return value != null ? value.toString() : null;
+    }
+
+    /**
+     * Corrects the category for Asbis products that Asbis maps to "Laptops"
+     * but are actually accessories (bags, chargers, films, etc.).
+     * Mirrors the logic in scripts/18_fix_laptop_category_accessories.sql.
+     */
+    private Category correctLaptopAccessoryCategory(Category mapped, String productName, Map<Long, Category> catsById) {
+        if (mapped == null || productName == null) return mapped;
+        // Only correct products mapped to Лаптопи (id=37)
+        if (mapped.getId() == null || mapped.getId() != 37L) return mapped;
+
+        String name = productName.toUpperCase();
+
+        // Чанти / раници / калъфи / ръкави → id=40
+        // LENOVO T2xx = ThinkPad Essential bag series
+        if (name.contains("BACKPACK") || name.contains("CARRY CASE") || name.contains("PORTFOLIO CASE")
+                || name.contains("PORTFOL CASE") || name.contains("PORTF CASE")
+                || name.contains("PROTECTIVE CASE") || name.contains("TURN CASE")
+                || name.contains("SLEEVE") || name.contains("POCKET") || name.contains(" BAG")
+                || name.contains("CASE") || name.contains("COVER")
+                || name.matches("ASUS BP\\d.*")
+                || name.matches("LENOVO T2\\d.*")) {         // LENOVO T210/T215 = bags
+            Category c = catsById.get(40L);
+            return c != null ? c : mapped;
+        }
+
+        // Зарядни / адаптери → id=42
+        if (name.contains("CHARGER") || name.contains("ADAPT")) {
+            Category c = catsById.get(42L);
+            return c != null ? c : mapped;
+        }
+
+        // Зарядни / адаптери / ASUS ROG AC → id=42
+        if (name.matches("ASUS ROG AC\\d.*")) {
+            Category c = catsById.get(42L);
+            return c != null ? c : mapped;
+        }
+
+        // Докинг / донгъли / фолиа / комплекти / folio клавиатури / стилуси → id=47
+        if (name.contains("DOCKING STATION") || name.contains("DOCK")
+                || name.contains("DONGLE") || name.contains("PROTECT FILM")
+                || name.contains(" KIT") || name.contains("FOLIO")
+                || name.contains("SIMPRO")) {
+            Category c = catsById.get(47L);
+            return c != null ? c : mapped;
+        }
+
+        return mapped;
     }
 }

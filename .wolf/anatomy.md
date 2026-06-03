@@ -1,13 +1,17 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-02T13:09:15.182Z
-> Files: 443 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-03T09:49:57.576Z
+> Files: 451 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
 - `MEMORY.md` — Memory Index (~149 tok)
 - `project_most_api.md` (~136 tok)
 - `tbi_leasing_integration.md` — Status: Backend + Frontend COMPLETE (2026-05-29) (~753 tok)
+
+## ../../care-tech-ui/public/
+
+- `leasing-complete.html` — TBI Complete (~71 tok)
 
 ## ../../care-tech-ui/src/
 
@@ -16,7 +20,7 @@
 ## ../../care-tech-ui/src/components/
 
 - `Breadcrumbs.jsx` — Breadcrumbs (~504 tok)
-- `TbiCheckoutModal.jsx` — TBI brand color (~5172 tok)
+- `TbiCheckoutModal.jsx` — TBI brand color (~5204 tok)
 
 ## ../../care-tech-ui/src/components/home/
 
@@ -34,6 +38,7 @@
 ## ../../care-tech-ui/src/pages/
 
 - `Cart.jsx` — EURO_RATE (~16576 tok)
+- `Category.jsx` — Category (~5536 tok)
 - `OurClients.jsx` — clients (~2686 tok)
 - `ProductPage.jsx` — EURO_RATE (~7627 tok)
 
@@ -63,6 +68,7 @@
 ## ../../care-tech-ui/src/redux/
 
 - `leasingSlice.js` — 4 async thunks: fetchLeasingApplications, fetchLeasingById, fetchLeasingStatistics, registerLeasingApplication. registerError stores true (flag only, not backend payload). State: registerStatus, registeredUrl, registeredApplicationId. (~1100 tok)
+- `paramSlice.js` — API routes: GET, POST, PUT, PATCH, DELETE (15 endpoints) (~5217 tok)
 - `store.js` — Exports store, persistor (~483 tok)
 
 ## ./
@@ -187,7 +193,12 @@
 - `15_hide_zero_price_products.sql` — ============================================================ (~315 tok)
 - `16_fix_products_in_hidden_categories.sql` — ============================================================ (~780 tok)
 - `17_fix_all_hidden_category_products.sql` — ============================================================ (~2213 tok)
+- `18_fix_laptop_category_accessories.sql` — ============================================================ (~516 tok)
+- `19_fix_laptop_category_accessories_v2.sql` — ============================================================ (~391 tok)
 - `2_rebrand_vali_to_caretech.sql` — Ребрандиране: VALI COMPUTERS → CARETECH (~536 tok)
+- `20_fix_laptop_category_covers.sql` — ============================================================ (~193 tok)
+- `21_fix_laptop_category_remaining.sql` — ============================================================ (~462 tok)
+- `22_hide_products_without_images.sql` — ============================================================ (~185 tok)
 - `3_reorder_top_categories.sql` — Пренарежда главните категории (sort_order) вкл. 3-те нови Asbis roots (~1086 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
 - `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)
@@ -398,7 +409,7 @@
 - `TbiItemDto.java` — Single item in TBI items list: name, qty, price, sku, category, imagelink (~90 tok)
 - `TbiRegisterApplicationResponseDto.java` — Response from TBI POST /api/RegisterApplication. (~259 tok)
 - `TbiRegisterApplicationResponseDto.java` — TBI RegisterApplication response: error, order_id, token, url (~90 tok)
-- `TbiRegisterRequestDto.java` — Sent by the frontend when the customer clicks "Buy with TBI". (~374 tok)
+- `TbiRegisterRequestDto.java` — Sent by the frontend when the customer clicks "Buy with TBI". (~382 tok)
 - `TbiRegisterRequestDto.java` — From frontend: productId, productName, priceEuro, priceLeva, sku, quantity, imageUrl (~80 tok)
 - `TbiRegisterResponseDto.java` — Returned to the frontend after a successful RegisterApplication call. (~124 tok)
 - `TbiRegisterResponseDto.java` — Returned to frontend: applicationId + TBI iframe url (~50 tok)
@@ -496,7 +507,7 @@
 - `ParameterRepository.java` — Repository: ParameterRepository (~1143 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~512 tok)
 - `ProductRepository.java` — Cross-platform deduplication by SKU. (~1771 tok)
-- `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9519 tok)
+- `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9020 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
 - `SyncLogRepository.java` — Repository: SyncLogRepository (~214 tok)
 - `UserAddressRepository.java` — Repository: UserAddressRepository (~261 tok)
@@ -523,7 +534,7 @@
 - `S3Service.java` — Service: S3Service (~2077 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
-- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8443 tok)
+- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8458 tok)
 - `TbiLeasingService.java` — TBI Fusion Pay integration: registerApplication (AES encrypt → TBI API), processStatusWebhook, getStatistics, admin queries (~350 tok)
 - `TekraApiService.java` — Get categories using JSON parsing (categories return JSON) (~4698 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
@@ -536,7 +547,7 @@
 
 ## src/main/java/com/techstore/service/sync/
 
-- `AsbisSyncService.java` — AsbisSyncService (~12414 tok)
+- `AsbisSyncService.java` — AsbisSyncService (~13182 tok)
 - `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~10804 tok)
 - `TekraSyncService.java` — Service: TekraSyncService (~22688 tok)
 - `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~13944 tok)

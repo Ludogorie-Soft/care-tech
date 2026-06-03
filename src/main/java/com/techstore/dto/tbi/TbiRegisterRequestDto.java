@@ -37,6 +37,8 @@ public class TbiRegisterRequestDto {
 
     // ── Shipping — collected from the customer before opening the TBI iframe ──
 
+    private String surname;
+
     private String shippingAddress;
 
     private String shippingCity;

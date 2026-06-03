@@ -135,13 +135,13 @@ public class TbiLeasingService {
                 .orderid(ourOrderId)           // ← our ID so TBI echoes it in webhooks
                 .firstname(firstName)
                 .lastname(lastName)
-                .surname("")
+                .surname(request.getSurname() != null ? request.getSurname() : "")
                 .email(email)
                 .phone(phone)
                 .deliveryaddress(buildDeliveryAddress(request))
                 .items(items)
                 .statusURL(tbiConfig.getWebhookUrl())
-                .successRedirectURL("https://caretech.bg/leasing/complete")
+                .successRedirectURL("https://caretech.bg/leasing-complete.html")
                 .failRedirectURL("https://caretech.bg")
                 .build();
 
