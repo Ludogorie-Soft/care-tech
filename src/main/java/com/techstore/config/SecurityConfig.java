@@ -97,7 +97,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/products/**").permitAll()
                         .requestMatchers("/api/categories/**").permitAll()
                         .requestMatchers("/api/images/**").permitAll()
-                        .requestMatchers("/api/cart/**").permitAll()
+                        .requestMatchers("/api/cart/**").authenticated()
                         .requestMatchers("/api/manufacturers/**").permitAll()
                         .requestMatchers("/api/parameters/**").permitAll()
                         .requestMatchers("/api/speedy/**").permitAll()

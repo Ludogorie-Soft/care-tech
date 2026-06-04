@@ -30,6 +30,7 @@ public class UserResponseDTO {
     private LocalDateTime lastLoginAt;
     private String fullName;
     private Set<CartItemResponseDto> cartItems;
+    private Integer cartItemCount;
     private List<UserFavoriteResponseDto> userFavorites;
     private Boolean subscribed;
     private String phone;

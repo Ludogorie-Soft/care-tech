@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лична оферта</title>
+</head>
+<body style="margin:0; padding:0; font-family:Arial,sans-serif; background-color:#0a0a0a;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0a0a;">
+    <tr>
+        <td align="center" style="padding:20px 10px;">
+            <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
+
+                <!-- Header -->
+                <tr>
+                    <td align="center" style="background-color:#ed1c24; padding:40px 20px;">
+                        <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
+                    </td>
+                </tr>
+
+                <!-- Offer Icon & Title -->
+                <tr>
+                    <td align="center" style="padding:40px 20px 20px; background-color:#1a1a1a;">
+                        <div style="width:80px; height:80px; background-color:#ed1c24; border-radius:50%; margin:0 auto 20px; display:inline-block; text-align:center; line-height:80px;">
+                            <span style="color:#ffffff; font-size:36px;">🎁</span>
+                        </div>
+                        <h2 style="color:#ffffff; font-size:22px; margin:0 0 10px 0;">Имате лична оферта!</h2>
+                        <p style="color:#929497; font-size:15px; line-height:1.6; margin:0;">
+                            Здравейте, <span th:text="${customerName}" style="color:#ffffff;">Клиент</span>!<br/>
+                            Подготвихме специална оферта само за Вас.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Offer Title -->
+                <tr>
+                    <td style="padding:0 30px 20px; background-color:#1a1a1a;">
+                        <div style="background-color:#2a2a2a; border-left:4px solid #ed1c24; padding:16px 20px; border-radius:4px;">
+                            <h3 style="color:#ffffff; margin:0 0 8px 0; font-size:18px;" th:text="${offerTitle}">Заглавие на офертата</h3>
+                            <p th:if="${offerMessage}" th:text="${offerMessage}"
+                               style="color:#d1d5db; font-size:14px; line-height:1.6; margin:0;"></p>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Discount Badge -->
+                <tr th:if="${discountPercent != null}">
+                    <td align="center" style="padding:0 30px 20px; background-color:#1a1a1a;">
+                        <div style="display:inline-block; background-color:#ed1c24; color:#ffffff; font-size:20px; font-weight:bold; padding:10px 24px; border-radius:30px;">
+                            <span th:text="${discountPercent}">10</span>% отстъпка
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Offer Items -->
+                <tr th:if="${offerItems != null and !offerItems.isEmpty()}">
+                    <td style="padding:0 30px 20px; background-color:#1a1a1a;">
+                        <h4 style="color:#929497; font-size:12px; text-transform:uppercase; letter-spacing:1px; margin:0 0 12px 0;">Продукти в офертата</h4>
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr th:each="item : ${offerItems}">
+                                <td style="padding:12px 0; border-bottom:1px solid #2a2a2a;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td style="width:60px; vertical-align:middle;">
+                                                <img th:if="${item.imageUrl != null}" th:src="${item.imageUrl}"
+                                                     width="50" height="50"
+                                                     style="border-radius:6px; object-fit:cover; display:block;" alt=""/>
+                                            </td>
+                                            <td style="padding-left:12px; vertical-align:middle;">
+                                                <div style="color:#ffffff; font-size:14px; font-weight:600;"
+                                                     th:text="${item.productName}">Продукт</div>
+                                                <div style="margin-top:4px;">
+                                                    <span th:if="${item.originalPrice != null and item.offerPrice != null and item.originalPrice != item.offerPrice}"
+                                                          th:text="${#numbers.formatDecimal(item.originalPrice,1,2)} + ' лв.'"
+                                                          style="color:#929497; font-size:12px; text-decoration:line-through; margin-right:8px;"></span>
+                                                    <span th:text="${#numbers.formatDecimal(item.offerPrice,1,2)} + ' лв.'"
+                                                          style="color:#ed1c24; font-size:14px; font-weight:bold;"></span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Expiry -->
+                <tr th:if="${expiresAt != null}">
+                    <td style="padding:0 30px 20px; background-color:#1a1a1a;">
+                        <p style="color:#929497; font-size:13px; margin:0;">
+                            ⏰ Офертата е валидна до: <span th:text="${expiresAt}" style="color:#ffffff; font-weight:bold;"></span>
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- CTA Button -->
+                <tr>
+                    <td align="center" style="padding:10px 30px 40px; background-color:#1a1a1a;">
+                        <a th:href="${offersUrl}" href="#"
+                           style="display:inline-block; background-color:#ed1c24; color:#ffffff; text-decoration:none; font-size:16px; font-weight:bold; padding:14px 36px; border-radius:8px;">
+                            Виж офертата
+                        </a>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td align="center" style="background-color:#111111; padding:24px 20px;">
+                        <p style="color:#555555; font-size:12px; margin:0;">
+                            © <span th:text="${appName}">CareTech</span> |
+                            <a th:href="${appUrl}" style="color:#ed1c24; text-decoration:none;" th:text="${appUrl}"></a>
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

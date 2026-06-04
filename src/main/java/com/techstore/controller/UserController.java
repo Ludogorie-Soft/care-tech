@@ -7,9 +7,11 @@ import com.techstore.dto.request.UserAddressDTO;
 import com.techstore.dto.request.UserCompanyDTO;
 import com.techstore.dto.request.UserProfileUpdateDTO;
 import com.techstore.dto.request.UserRequestDTO;
+import com.techstore.dto.response.PersonalOfferResponseDto;
 import com.techstore.dto.response.UserAddressResponseDTO;
 import com.techstore.dto.response.UserCompanyResponseDTO;
 import com.techstore.service.EmailService;
+import com.techstore.service.PersonalOfferService;
 import com.techstore.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -43,9 +45,10 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final PersonalOfferService personalOfferService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<Page<UserResponseDTO>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -61,14 +64,14 @@ public class UserController {
     }
 
     @GetMapping(value = "/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         UserResponseDTO user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 
     @GetMapping(value = "/email/{email}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserResponseDTO> getUserByEmail(@PathVariable String email) {
         UserResponseDTO user = userService.getUserByEmail(email);
         return ResponseEntity.ok(user);
@@ -82,7 +85,7 @@ public class UserController {
     }
 
     @PutMapping(value = "/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserResponseDTO> updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UserRequestDTO requestDTO) {
@@ -177,5 +180,36 @@ public class UserController {
     public ResponseEntity<Void> deleteCompany(@PathVariable Long id) {
         userService.deleteCompany(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ========== PERSONAL OFFERS ==========
+
+    @GetMapping("/profile/offers")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<PersonalOfferResponseDto>> getMyOffers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(personalOfferService.getCurrentUserOffers(pageable));
+    }
+
+    @GetMapping("/profile/offers/unread-count")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Long> getUnreadOffersCount() {
+        return ResponseEntity.ok(personalOfferService.countUnreadForCurrentUser());
+    }
+
+    @PutMapping("/profile/offers/{id}/read")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PersonalOfferResponseDto> markOfferAsRead(@PathVariable Long id) {
+        return ResponseEntity.ok(personalOfferService.markAsRead(id));
+    }
+
+    @PutMapping("/profile/offers/{id}/status")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PersonalOfferResponseDto> updateOfferStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
+        return ResponseEntity.ok(personalOfferService.updateStatus(id, status));
     }
 }

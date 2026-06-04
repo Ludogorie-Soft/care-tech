@@ -3,7 +3,9 @@ package com.techstore.controller;
 import com.techstore.dto.request.CartItemRequestDto;
 import com.techstore.dto.response.CartItemResponseDto;
 import com.techstore.dto.response.CartSummaryDto;
+import com.techstore.exception.UnauthorizedException;
 import com.techstore.service.CartService;
+import com.techstore.util.SecurityHelper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,10 +34,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/cart")
 @RequiredArgsConstructor
 @Slf4j
+@PreAuthorize("isAuthenticated()")
 @Tag(name = "Cart Management", description = "APIs for managing shopping cart operations")
 public class CartController {
 
     private final CartService cartService;
+    private final SecurityHelper securityHelper;
+
+    private void requireAccess(Long userId) {
+        if (!securityHelper.hasAccessToResource(userId)) {
+            throw new UnauthorizedException("Access denied to cart of user " + userId);
+        }
+    }
 
     @GetMapping("/{userId}/summary")
     @Operation(
@@ -54,6 +65,7 @@ public class CartController {
             @Parameter(description = "Language code for product localization", example = "en")
             @RequestParam(defaultValue = "en") String language) {
 
+        requireAccess(userId);
         log.info("Getting cart summary for user: {}", userId);
         CartSummaryDto cartSummary = cartService.getCartSummary(userId, language);
         return ResponseEntity.ok(cartSummary);
@@ -81,6 +93,7 @@ public class CartController {
             @Parameter(description = "Language code for product localization", example = "en")
             @RequestParam(defaultValue = "en") String language) {
 
+        requireAccess(userId);
         log.info("Adding item to cart for user: {}, product: {}", userId, request.getProductId());
         CartItemResponseDto cartItem = cartService.addToCart(userId, request, language);
         return ResponseEntity.ok(cartItem);
@@ -111,6 +124,7 @@ public class CartController {
             @Parameter(description = "Language code for product localization", example = "en")
             @RequestParam(defaultValue = "en") String language) {
 
+        requireAccess(userId);
         log.info("Updating cart item: {} for user: {} with quantity: {}", cartItemId, userId, quantity);
         CartItemResponseDto updatedItem = cartService.updateCartItem(userId, cartItemId, quantity, language);
         return ResponseEntity.ok(updatedItem);
@@ -134,6 +148,7 @@ public class CartController {
             @Parameter(description = "Cart item ID", example = "1", required = true)
             @PathVariable Long cartItemId) {
 
+        requireAccess(userId);
         log.info("Removing cart item: {} for user: {}", cartItemId, userId);
         cartService.removeFromCart(userId, cartItemId);
         return ResponseEntity.noContent().build();
@@ -154,6 +169,7 @@ public class CartController {
             @Parameter(description = "User ID", example = "1", required = true)
             @PathVariable Long userId) {
 
+        requireAccess(userId);
         log.info("Clearing cart for user: {}", userId);
         cartService.clearCart(userId);
         return ResponseEntity.noContent().build();

@@ -17,6 +17,7 @@ import com.techstore.repository.OrderRepository;
 import com.techstore.util.TbiEncryptionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
@@ -61,6 +62,9 @@ public class TbiLeasingService {
     private static final Set<String> DECLINED_STATUSES = Set.of(
             "Rejected", "rejected", "Canceled", "canceled", "expired"
     );
+
+    @Value("${spring.mail.username}")
+    private String fromEmail;
 
     private final TbiConfig                    tbiConfig;
     private final LeasingApplicationRepository repository;
@@ -644,7 +648,7 @@ public class TbiLeasingService {
                     application.getTbiApplicationId() != null ? application.getTbiApplicationId() : "N/A"
             );
 
-            emailService.sendHtmlEmail("info@caretech.bg", subject, body);
+            emailService.sendHtmlEmail(fromEmail, subject, body);
             log.info("Admin notification sent for leasing application {} status {}", application.getId(), status);
         } catch (Exception e) {
             log.error("Failed to send admin notification for leasing application {}: {}",

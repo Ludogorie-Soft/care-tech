@@ -1,26 +1,31 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-03T10:52:07.391Z
-> Files: 451 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-04T10:18:27.747Z
+> Files: 485 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
-- `MEMORY.md` — Memory Index (~149 tok)
+- `euro_rate_convention.md` — Declares EURO_RATE (~194 tok)
+- `MEMORY.md` — Memory Index (~232 tok)
 - `project_most_api.md` (~136 tok)
-- `tbi_leasing_integration.md` — Status: Backend + Frontend COMPLETE (2026-05-29) (~753 tok)
+- `session_2026_06_03.md` — Backend (`tech-store-api`) (~574 tok)
+- `tbi_leasing_integration.md` — Status: Backend + Frontend COMPLETE (2026-06-03 — updated credentials + modal fix) (~881 tok)
+- `user_role_and_workflow.md` (~279 tok)
 
 ## ../../care-tech-ui/public/
 
-- `leasing-complete.html` — TBI Complete (~71 tok)
+- `leasing-complete.html` — TBI Complete (~184 tok)
 
 ## ../../care-tech-ui/src/
 
-- `App.js` — Declares ScrollToTop (~2518 tok)
+- `App.js` — Declares ScrollToTop (~2756 tok)
+- `index.css` — Styles: 37 rules (~2068 tok)
 
 ## ../../care-tech-ui/src/components/
 
 - `Breadcrumbs.jsx` — Breadcrumbs (~504 tok)
-- `TbiCheckoutModal.jsx` — TBI brand color (~5204 tok)
+- `DateTimePicker.jsx` — MONTHS (~2516 tok)
+- `TbiCheckoutModal.jsx` — TBI brand color (~5322 tok)
 
 ## ../../care-tech-ui/src/components/home/
 
@@ -29,7 +34,8 @@
 
 ## ../../care-tech-ui/src/components/navbar/
 
-- `NavBar.jsx` — NavBar (~4064 tok)
+- `AuthDropDown.jsx` — AuthDropDown — renders form (~3716 tok)
+- `NavBar.jsx` — NavBar (~4388 tok)
 
 ## ../../care-tech-ui/src/components/products/
 
@@ -37,19 +43,29 @@
 
 ## ../../care-tech-ui/src/pages/
 
-- `Cart.jsx` — EURO_RATE (~16576 tok)
+- `Cart.jsx` — EURO_RATE (~16680 tok)
 - `Category.jsx` — Category (~5536 tok)
 - `OurClients.jsx` — clients (~2686 tok)
-- `ProductPage.jsx` — EURO_RATE (~7627 tok)
+- `ProductPage.jsx` — EURO_RATE (~7820 tok)
+
+## ../../care-tech-ui/src/pages/admin/Customers/
+
+- `CustomersLayout.jsx` — CustomersLayout.jsx (~4646 tok)
+- `SendOfferModal.jsx` — EURO_RATE — renders form (~2547 tok)
+- `UserCartModal.jsx` — EURO_RATE (~1423 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Dashboard/
 
 - `DashboardLayout.jsx` — convertStatsToMetrics (~2511 tok)
-- `Sidebar.jsx` — Sidebar (~970 tok)
+- `Sidebar.jsx` — Sidebar (~1009 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Leasing/
 
 - `LeasingLayout.jsx` — STATUS_CONFIG (~4989 tok)
+
+## ../../care-tech-ui/src/pages/admin/Offers/
+
+- `OffersLayout.jsx` — EURO_RATE — renders table (~4411 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Orders/
 
@@ -61,15 +77,22 @@
 
 ## ../../care-tech-ui/src/pages/profile/
 
-- `OrderDetails.jsx` — OrderDetails (~3165 tok)
-- `ProfileLayout.jsx` — links (~1723 tok)
+- `MyOffers.jsx` — EURO_RATE (~2517 tok)
+- `OrderDetails.jsx` — OrderDetails (~3809 tok)
+- `ProfileLayout.jsx` — links (~1930 tok)
 - `WarrantyCards.jsx` — WarrantyCards (~886 tok)
 
 ## ../../care-tech-ui/src/redux/
 
 - `leasingSlice.js` — 4 async thunks: fetchLeasingApplications, fetchLeasingById, fetchLeasingStatistics, registerLeasingApplication. registerError stores true (flag only, not backend payload). State: registerStatus, registeredUrl, registeredApplicationId. (~1100 tok)
+- `offersSlice.js` — API routes: GET, PUT, POST (8 endpoints) (~2119 tok)
 - `paramSlice.js` — API routes: GET, POST, PUT, PATCH, DELETE (15 endpoints) (~5217 tok)
-- `store.js` — Exports store, persistor (~483 tok)
+- `store.js` — Exports store, persistor (~502 tok)
+
+## ../../care-tech-ui/src/utils/
+
+- `loginRedirect.js` — Exports setLoginRedirect, consumeLoginRedirect (~73 tok)
+- `tokenRefresh.js` — Exports setupTokenRefresh (~572 tok)
 
 ## ./
 
@@ -104,6 +127,21 @@
 ## .mvn/wrapper/
 
 - `maven-wrapper.properties` (~40 tok)
+
+## New files added 2026-06-04
+
+- `../../care-tech-ui/src/pages/admin/Customers/SendOfferModal.jsx` — Admin modal: compose and send personal offer with prefilled cart items (~500 tok)
+- `../../care-tech-ui/src/pages/admin/Customers/UserCartModal.jsx` — Admin modal: shows user's cart, "Изпрати оферта" button (~300 tok)
+- `../../care-tech-ui/src/pages/profile/MyOffers.jsx` — User profile page: list offers, accept/reject, mark as read (~500 tok)
+- `../../care-tech-ui/src/redux/offersSlice.js` — Redux slice: admin (fetchUserCart, fetchUserOffers, sendPersonalOffer) + user (fetchMyOffers, markOfferRead, updateOfferStatus) (~600 tok)
+- `../../care-tech-ui/src/utils/loginRedirect.js` — Utility: setLoginRedirect(path) / consumeLoginRedirect() — stores post-login redirect in sessionStorage (~50 tok)
+- `src/main/java/com/techstore/dto/request/PersonalOfferCreateDto.java` — Request DTO: title, message, items[], discountPercent, expiresAt (~150 tok)
+- `src/main/java/com/techstore/dto/response/PersonalOfferResponseDto.java` — Response DTO with static from() factory, expired flag (~200 tok)
+- `src/main/java/com/techstore/entity/PersonalOffer.java` — Entity: PersonalOffer with inner OfferItem @Data class and OfferStatus enum (~250 tok)
+- `src/main/java/com/techstore/repository/PersonalOfferRepository.java` — Repository: PersonalOfferRepository (~150 tok)
+- `src/main/java/com/techstore/service/PersonalOfferService.java` — Service: createAndSend, getOffersForUser, getCurrentUserOffers, markAsRead, updateStatus (~400 tok)
+- `src/main/resources/db/migration/V21__add_personal_offers.sql` — Creates personal_offers table with JSONB offer_items, status ENUM, user FK (~80 tok)
+- `src/main/resources/templates/email/personal-offer.html` — Thymeleaf email template for personal offers (~500 tok)
 
 ## lucene-indexes/Manufacturer/
 
@@ -236,7 +274,7 @@
 - `S3Config.java` — Configuration: S3Config (~289 tok)
 - `SearchConfig.java` — Configuration: SearchConfig (~424 tok)
 - `SearchIndexManager.java` — Component: SearchIndexManager (~4470 tok)
-- `SecurityConfig.java` — Configuration: SecurityConfig. Orders: POST public, rest authenticated. sync/upload/internal/swagger → admin only. Defense-in-depth URL rules. (~2333 tok)
+- `SecurityConfig.java` — Configuration: SecurityConfig (~2334 tok)
 - `ShippingConfig.java` — Изчислява цената на доставка (~379 tok)
 - `SlugRegenerationRunner.java` — Component: SlugRegenerationRunner (~401 tok)
 - `SpeedyConfig.java` — Configuration: SpeedyConfig (~136 tok)
@@ -247,10 +285,10 @@
 
 ## src/main/java/com/techstore/controller/
 
-- `AdminController.java` — @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')") at class level. Orders, leasing, product, category, markup endpoints. (~4827 tok)
+- `AdminController.java` — Get all orders with pagination and sorting (~5318 tok)
 - `AuthController.java` — RestController: AuthController (9 endpoints) (~1192 tok)
 - `CacheClearController.java` — POST /api/internal/cache/clear-all. @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')") + URL-level guard. (~264 tok)
-- `CartController.java` — RestController: CartController (6 endpoints) (~2192 tok)
+- `CartController.java` — RestController: CartController (6 endpoints) (~2208 tok)
 - `CategoryController.java` — RestController: CategoryController (5 endpoints) (~854 tok)
 - `CategoryReorganizationController.java` — CategoryReorganizationController (~979 tok)
 - `ContactController.java` — RestController: ContactController (2 endpoints) (~331 tok)
@@ -264,7 +302,7 @@
 - `SpeedyController.java` — RestController: SpeedyController (4 endpoints) (~1716 tok)
 - `SubscriptionController.java` — RestController: SubscriptionController (5 endpoints) (~562 tok)
 - `TbiLeasingController.java` — POST /api/tbi/register (~846 tok)
-- `UserController.java` — RestController: UserController (18 endpoints) (~2059 tok)
+- `UserController.java` — RestController: UserController (22 endpoints) (~2298 tok)
 - `UserFavoriteController.java` — RestController: UserFavoriteController (7 endpoints) (~2295 tok)
 
 ## src/main/java/com/techstore/controller/sync/
@@ -327,6 +365,7 @@
 - `ParameterOrderDto.java` — Class: ParameterOrderDto (~152 tok)
 - `ParameterRequestDto.java` — Class: ParameterRequestDto (~130 tok)
 - `ParameterValueRequestDto.java` — Class: ParameterValueRequestDto (~142 tok)
+- `PersonalOfferCreateDto.java` — Class: PersonalOfferCreateDto (~202 tok)
 - `ProductCreateRequestDTO.java` — Class: ProductCreateRequestDTO (~759 tok)
 - `ProductImageOperationsDTO.java` — Class: ProductImageOperationsDTO (~140 tok)
 - `ProductImageUpdateDTO.java` — Class: ProductImageUpdateDTO (~94 tok)
@@ -362,6 +401,7 @@
 - `OrderStatisticsResponseDTO.java` — Class: OrderStatisticsResponseDTO (~408 tok)
 - `ParameterOptionResponseDto.java` — Class: ParameterOptionResponseDto (~149 tok)
 - `ParameterResponseDto.java` — Class: ParameterResponseDto (~135 tok)
+- `PersonalOfferResponseDto.java` — PersonalOfferResponseDto: from (~380 tok)
 - `ProductDocumentResponseDto.java` — Class: ProductDocumentResponseDto (~54 tok)
 - `ProductFlagResponseDto.java` — Class: ProductFlagResponseDto (~60 tok)
 - `ProductImageResponseDto.java` — Class: ProductImageResponseDto (~61 tok)
@@ -377,7 +417,7 @@
 - `UserAddressResponseDTO.java` — Class: UserAddressResponseDTO (~130 tok)
 - `UserCompanyResponseDTO.java` — Class: UserCompanyResponseDTO (~131 tok)
 - `UserFavoriteResponseDto.java` — Class: UserFavoriteResponseDto (~68 tok)
-- `UserResponseDTO.java` — Class: UserResponseDTO (~325 tok)
+- `UserResponseDTO.java` — Class: UserResponseDTO (~313 tok)
 
 ## src/main/java/com/techstore/dto/speedy/
 
@@ -441,6 +481,7 @@
 - `OrderItem.java` — Entity: OrderItem (~559 tok)
 - `Parameter.java` — Entity: Parameter (~544 tok)
 - `ParameterOption.java` — Entity: ParameterOption (~260 tok)
+- `PersonalOffer.java` — Entity: PersonalOffer (~391 tok)
 - `Product.java` — Entity: Product (~2886 tok)
 - `ProductFlag.java` — Entity: ProductFlag (~231 tok)
 - `ProductParameter.java` — Entity: ProductParameter (~266 tok)
@@ -497,7 +538,7 @@
 
 ## src/main/java/com/techstore/repository/
 
-- `CartItemRepository.java` — Repository: CartItemRepository (~274 tok)
+- `CartItemRepository.java` — Repository: CartItemRepository (~296 tok)
 - `CategoryRepository.java` — Repository: CategoryRepository (~316 tok)
 - `LeasingApplicationRepository.java` — Repository: LeasingApplicationRepository (~376 tok)
 - `ManufacturerRepository.java` — Repository: ManufacturerRepository (~209 tok)
@@ -505,6 +546,7 @@
 - `OrderRepository.java` — Repository: OrderRepository (~1414 tok)
 - `ParameterOptionRepository.java` — Repository: ParameterOptionRepository (~420 tok)
 - `ParameterRepository.java` — Repository: ParameterRepository (~1143 tok)
+- `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~246 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~512 tok)
 - `ProductRepository.java` — Cross-platform deduplication by SKU. (~1771 tok)
 - `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9020 tok)
@@ -523,22 +565,23 @@
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~13424 tok)
 - `CategoryService.java` — Service: CategoryService (~4425 tok)
 - `CronJobService.java` — Service: CronJobService (~788 tok)
-- `EmailService.java` — Service for sending email notifications (~4282 tok)
+- `EmailService.java` — Service for sending email notifications (~4664 tok)
 - `FileUploadService.java` — Service: FileUploadService (~7252 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3823 tok)
 - `OrderService.java` — Creates a new order (~5860 tok)
 - `ParameterService.java` — Service: ParameterService (~10236 tok)
+- `PersonalOfferService.java` — Service: PersonalOfferService (~1415 tok)
 - `ProductSearchService.java` — Service: ProductSearchService (~1890 tok)
 - `ProductService.java` — Service: ProductService (~14076 tok)
 - `S3Service.java` — Service: S3Service (~2077 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
-- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8458 tok)
+- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8490 tok)
 - `TbiLeasingService.java` — TBI Fusion Pay integration: registerApplication (AES encrypt → TBI API), processStatusWebhook, getStatistics, admin queries (~350 tok)
 - `TekraApiService.java` — Get categories using JSON parsing (categories return JSON) (~4698 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
-- `UserService.java` — Service: UserService (~6853 tok)
+- `UserService.java` — Service: UserService (~6466 tok)
 - `ValiApiService.java` — Get categories (no pagination available) (~9746 tok)
 
 ## src/main/java/com/techstore/service/admin/
@@ -581,6 +624,8 @@
 - `V19__make_order_shipping_nullable.sql` — Allow shipping address fields to be null for leasing orders (~89 tok)
 - `V2__add_isFilter_to_product_parameters.sql` — SQL: 1 alter(s) (~48 tok)
 - `V20__add_pending_order_json_to_leasing.sql` — Stores the serialised OrderCreateRequestDTO so the order can be created (~64 tok)
+- `V21__add_personal_offers.sql` — SQL: tables: personal_offers (~191 tok)
+- `V22__fix_personal_offers_audit_columns.sql` — Fix audit column name: BaseEntity uses last_modified_by, not updated_by (~40 tok)
 - `V3__add_most_key_to_product.sql` — SQL: 1 alter(s) (~42 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
@@ -601,6 +646,7 @@
 - `order-status-update.html` — Промяна в статуса на поръчка (~2598 tok)
 - `password-changed-confirmation.html` — Парола променена (~2113 tok)
 - `password-reset-email.html` — Нулиране на парола (~2270 tok)
+- `personal-offer.html` — Лична оферта (~1925 tok)
 
 ## src/test/java/com/techstore/
 

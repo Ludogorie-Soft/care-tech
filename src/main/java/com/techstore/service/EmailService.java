@@ -2,6 +2,8 @@ package com.techstore.service;
 
 import com.techstore.dto.request.MessageToAdmin;
 import com.techstore.entity.Order;
+import com.techstore.entity.PersonalOffer;
+import com.techstore.entity.User;
 import com.techstore.enums.OrderStatus;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -90,7 +92,7 @@ public class EmailService {
             variables.put("items", order.getOrderItems());
             variables.put("appName", appName);
             variables.put("appUrl", appUrl);
-            variables.put("orderUrl", appUrl + "/admin/orders/" + order.getId());
+            variables.put("orderUrl", appUrl + "/admin/dashboard/orders/" + order.getId());
 
             String subject = appName + " - Нова поръчка #" + order.getOrderNumber();
             sendHtmlEmail(fromEmail, fromEmail, subject, "admin-new-order", variables);
@@ -310,6 +312,35 @@ public class EmailService {
 
         } catch (Exception e) {
             log.error("Failed to send admin message: {}", dto, e);
+        }
+    }
+
+    /**
+     * Send personal offer email to a user
+     */
+    @Async
+    public void sendPersonalOfferEmail(User user, PersonalOffer offer) {
+        try {
+            log.info("Sending personal offer email to: {}", user.getEmail());
+
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("customerName", user.getFirstName() + " " + user.getLastName());
+            variables.put("offerTitle", offer.getTitle());
+            variables.put("offerMessage", offer.getMessage());
+            variables.put("offerItems", offer.getOfferItems());
+            variables.put("discountPercent", offer.getDiscountPercent());
+            variables.put("expiresAt", offer.getExpiresAt() != null
+                    ? offer.getExpiresAt().format(DATE_FORMATTER) : null);
+            variables.put("offersUrl", appUrl + "/profile/my-offers");
+            variables.put("appName", appName);
+            variables.put("appUrl", appUrl);
+
+            String subject = appName + " - Лична оферта за вас: " + offer.getTitle();
+            sendHtmlEmail(fromEmail, user.getEmail(), subject, "personal-offer", variables);
+
+            log.info("Personal offer email sent to: {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send personal offer email to: {}", user.getEmail(), e);
         }
     }
 

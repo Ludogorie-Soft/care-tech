@@ -6,6 +6,9 @@
 
 ## User Preferences
 
+- **EURO_RATE е винаги 1.95583** (официален фиксиран курс лев/евро). Никога не използвай 1.96 или друга стойност.
+- **Цените се изписват винаги първо в Евро (€), след това в лева (лв.)** — напр. "199.99 €  /  391.12 лв.". Лева цената е обвита в отделен `<span>` или компонент за лесно премахване в бъдеще. Никога не показвай само лева.
+
 - Never show raw backend error messages (stack traces, `message` fields, Spring error objects) on customer-facing UI. Always replace with a fixed Bulgarian user-friendly string.
 - Admin-panel errors (ManufacturerModal, ParamsLayout etc.) may still show technical details — only customer-facing pages need sanitized messages.
 - TBI modal button labels should be minimal Bulgarian — e.g. "Продължи", not "Продължи към TBI →".
@@ -53,6 +56,9 @@
 
 ## Do-Not-Repeat (Security)
 
+- [2026-06-04] NEVER leave `/api/cart/**` as `permitAll()` in SecurityConfig — this was an IDOR: any unauthenticated user could read/write any user's cart. Always use `authenticated()` at URL level + `SecurityHelper.hasAccessToResource(userId)` in the controller.
+- [2026-06-04] When adding new entities that store JSON in PostgreSQL, use `@JdbcTypeCode(SqlTypes.JSON)` + `columnDefinition = "jsonb"` on the field. Do NOT use plain `@Column` — Hibernate won't know how to serialize/deserialize the Java object.
+
 - [2026-05-29] NEVER use `hasRole('ADMIN')` alone on controllers that should be accessible to SUPER_ADMIN. `getAuthorities()` returns exactly one role string (`ROLE_ADMIN` or `ROLE_SUPER_ADMIN`) — `hasRole('ADMIN')` will silently block SUPER_ADMIN. Always use `hasAnyRole('ADMIN', 'SUPER_ADMIN')`.
 - [2026-05-29] NEVER add `@CrossOrigin(origins = "*")` to individual controllers — it overrides the global CORS config and opens all origins for those endpoints. Use the global config only.
 - [2026-05-29] When adding an IDOR fix to a TBI/order endpoint, check whether the frontend actually calls that exact path. `fetchLeasingById` in leasingSlice calls `admin/leasing/{id}` (AdminController), NOT `tbi/application/{id}` (TbiLeasingController) — these are two different endpoints.
@@ -61,6 +67,12 @@
 - [2026-05-29] **Test infrastructure:** `src/test/resources/application.properties` overrides `spring.profiles.active` and `logging.file.name` for ALL tests (needed because @WebMvcTest also loads application.yml). `src/test/resources/application-test.properties` provides full H2 + disabled Flyway config for @SpringBootTest. `TechStoreApiApplicationTests` uses `@ActiveProfiles("test")`. H2 added as test-scoped dependency in pom.xml.
 - [2026-05-29] **UnnecessaryStubbing pattern:** Mockito strict mode throws if a stubbed method is never called. When an entity has `order = null`, `transitionOrderStatus` returns early — `orderRepository.findById()` is never invoked. Don't stub it in those tests.
 - [2026-05-29] **@WebMvcTest + @Import(SecurityConfig):** Needs `@MockBean` for `UserRepository` and `JwtUtil` (SecurityConfig constructor deps). Also needs `@MockBean SecurityHelper` if the controller uses it. Test properties must supply `spring.cors.allowedOrigins`.
+
+## Key Learnings
+
+- **PersonalOffer entity** uses `@JdbcTypeCode(SqlTypes.JSON)` + `columnDefinition = "jsonb"` to store `List<OfferItem>` as PostgreSQL JSONB. The `OfferItem` is a `@Data` inner static class.
+- **offersSlice.js** combines both admin-side (fetchUserCart, fetchUserOffers, sendPersonalOffer) and user-side (fetchMyOffers, markOfferRead, updateOfferStatus) actions in one slice. State keys: `myOffers`, `unreadCount`, `userCart`, `userOffers`, `sendStatus`.
+- **CartController security fix (2026-06-04):** `/api/cart/**` was `permitAll()` in SecurityConfig — any unauthenticated user could read/write any user's cart. Fixed to `authenticated()` + class-level `@PreAuthorize("isAuthenticated()")` + `requireAccess(userId)` ownership check using `SecurityHelper.hasAccessToResource()`.
 
 ## Decision Log
 

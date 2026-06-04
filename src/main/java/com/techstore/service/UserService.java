@@ -15,6 +15,7 @@ import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.DuplicateResourceException;
 import com.techstore.exception.ResourceNotFoundException;
 import com.techstore.exception.ValidationException;
+import com.techstore.repository.CartItemRepository;
 import com.techstore.repository.UserAddressRepository;
 import com.techstore.repository.UserCompanyRepository;
 import com.techstore.repository.UserRepository;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final CartItemRepository cartItemRepository;
     private final UserAddressRepository userAddressRepository;
     private final UserCompanyRepository userCompanyRepository;
     private final PasswordEncoder passwordEncoder;
@@ -536,6 +538,7 @@ public class UserService {
     }
 
     private UserResponseDTO convertToResponseDTO(User user) {
+        Integer cartCount = cartItemRepository.countTotalItemsByUserId(user.getId());
         return UserResponseDTO.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -548,6 +551,7 @@ public class UserService {
                 .updatedAt(user.getUpdatedAt())
                 .lastLoginAt(user.getLastLoginAt())
                 .fullName(user.getFullName())
+                .cartItemCount(cartCount != null ? cartCount : 0)
                 .build();
     }
 

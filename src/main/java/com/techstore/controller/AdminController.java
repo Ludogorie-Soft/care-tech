@@ -9,7 +9,11 @@ import com.techstore.service.TbiLeasingService;
 import com.techstore.entity.Product;
 import com.techstore.enums.OrderStatus;
 import com.techstore.repository.SyncLogRepository;
+import com.techstore.dto.request.PersonalOfferCreateDto;
+import com.techstore.dto.response.CartSummaryDto;
+import com.techstore.dto.response.PersonalOfferResponseDto;
 import com.techstore.service.*;
+import com.techstore.service.PersonalOfferService;
 import com.techstore.service.admin.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -44,6 +48,8 @@ public class AdminController {
     private final ManufacturerService manufacturerService;
     private final SyncLogRepository syncLogRepository;
     private final TbiLeasingService tbiLeasingService;
+    private final CartService cartService;
+    private final PersonalOfferService personalOfferService;
 
     @GetMapping("/products/pageable")
     public ResponseEntity<Page<ProductResponseDTO>> getAllAdminProducts(
@@ -401,6 +407,40 @@ public class AdminController {
         return ResponseEntity.ok(tbiLeasingService.getStatistics());
     }
 
+
+    // ============ USER MANAGEMENT ENDPOINTS ============
+
+    @GetMapping("/users/{userId}/cart")
+    public ResponseEntity<CartSummaryDto> getUserCart(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "bg") String language) {
+        return ResponseEntity.ok(cartService.getCartSummary(userId, language));
+    }
+
+    @GetMapping("/offers")
+    public ResponseEntity<Page<PersonalOfferResponseDto>> getAllOffers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String status) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(personalOfferService.getAllOffers(status, pageable));
+    }
+
+    @PostMapping("/users/{userId}/offers")
+    public ResponseEntity<PersonalOfferResponseDto> sendOffer(
+            @PathVariable Long userId,
+            @Valid @RequestBody PersonalOfferCreateDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(personalOfferService.createAndSend(userId, dto));
+    }
+
+    @GetMapping("/users/{userId}/offers")
+    public ResponseEntity<Page<PersonalOfferResponseDto>> getUserOffers(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(personalOfferService.getOffersForUser(userId, pageable));
+    }
 
     @GetMapping("/sync-logs")
     public ResponseEntity<Page<SyncLogResponseDTO>> getSyncLogs(
