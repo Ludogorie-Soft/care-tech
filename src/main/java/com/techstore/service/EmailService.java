@@ -304,6 +304,7 @@ public class EmailService {
             helper.setTo(infoEmail);
             helper.setSubject("Ново съобщение от " + dto.getName());
             helper.setText(html, true);
+            mime.addHeader("Sender", fromEmail);
 
 
             mailSender.send(mime);
@@ -391,6 +392,11 @@ public class EmailService {
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(htmlContent, true);
+        // When sending from a different address than the SMTP account,
+        // add Sender header (RFC 5321) so spam filters don't flag the mismatch
+        if (!from.equals(fromEmail)) {
+            message.addHeader("Sender", fromEmail);
+        }
 
         if (attachmentPath != null) {
             try {

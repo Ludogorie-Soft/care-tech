@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-04T10:18:27.747Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-04T10:39:05.432Z
 > Files: 485 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -92,7 +92,7 @@
 ## ../../care-tech-ui/src/utils/
 
 - `loginRedirect.js` — Exports setLoginRedirect, consumeLoginRedirect (~73 tok)
-- `tokenRefresh.js` — Exports setupTokenRefresh (~572 tok)
+- `tokenRefresh.js` — Exports setupTokenRefresh (~568 tok)
 
 ## ./
 
@@ -565,7 +565,7 @@
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~13424 tok)
 - `CategoryService.java` — Service: CategoryService (~4425 tok)
 - `CronJobService.java` — Service: CronJobService (~788 tok)
-- `EmailService.java` — Service for sending email notifications (~4664 tok)
+- `EmailService.java` — Service for sending email notifications (~4745 tok)
 - `FileUploadService.java` — Service: FileUploadService (~7252 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3823 tok)

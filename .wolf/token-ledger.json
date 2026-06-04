@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 7109615,
-    "total_reads": 3241,
-    "total_writes": 4133,
+    "total_tokens_estimated": 7149692,
+    "total_reads": 3296,
+    "total_writes": 4259,
     "total_sessions": 20,
-    "anatomy_hits": 1571,
-    "anatomy_misses": 1301,
-    "repeated_reads_blocked": 901,
-    "estimated_savings_vs_bare_cli": 5790515
+    "anatomy_hits": 1578,
+    "anatomy_misses": 1349,
+    "repeated_reads_blocked": 1000,
+    "estimated_savings_vs_bare_cli": 5805907
   },
   "sessions": [
     {
@@ -45232,6 +45232,1068 @@
         "writes_count": 19,
         "repeated_reads_blocked": 7,
         "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-06-04-1257",
+      "started": "2026-06-04T09:57:47.154Z",
+      "ended": "2026-06-04T10:24:50.802Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/App.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/NavBar.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/loginRedirect.js",
+          "tokens_estimated": 73,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 47,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/NavBar.jsx",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 129,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 116,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 140,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 577,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 104,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 171,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 324,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 160,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 113,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 110,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 36,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 2536,
+        "reads_count": 8,
+        "writes_count": 20,
+        "repeated_reads_blocked": 16,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-06-04-1257",
+      "started": "2026-06-04T09:57:47.154Z",
+      "ended": "2026-06-04T10:25:15.387Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/App.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/NavBar.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/loginRedirect.js",
+          "tokens_estimated": 73,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 47,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/NavBar.jsx",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 129,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 116,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 140,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 577,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 104,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 171,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 324,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 160,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 113,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 110,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 36,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 2536,
+        "reads_count": 8,
+        "writes_count": 20,
+        "repeated_reads_blocked": 16,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-06-04-1257",
+      "started": "2026-06-04T09:57:47.154Z",
+      "ended": "2026-06-04T10:31:40.943Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/App.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/NavBar.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 2574,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/loginRedirect.js",
+          "tokens_estimated": 73,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 47,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/NavBar.jsx",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 129,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 116,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 140,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 577,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 104,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 171,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 324,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 160,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 113,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 110,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 36,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 2574,
+        "output_tokens_estimated": 2536,
+        "reads_count": 9,
+        "writes_count": 20,
+        "repeated_reads_blocked": 16,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-06-04-1257",
+      "started": "2026-06-04T09:57:47.154Z",
+      "ended": "2026-06-04T10:39:20.519Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/App.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/NavBar.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 2574,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/EmailService.java",
+          "tokens_estimated": 4664,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/loginRedirect.js",
+          "tokens_estimated": 73,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 47,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/NavBar.jsx",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 129,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 116,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 140,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 577,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 104,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 171,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 324,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 160,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 113,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 110,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 36,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/EmailService.java",
+          "tokens_estimated": 111,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/EmailService.java",
+          "tokens_estimated": 80,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 7238,
+        "output_tokens_estimated": 2727,
+        "reads_count": 10,
+        "writes_count": 22,
+        "repeated_reads_blocked": 17,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-06-04-1257",
+      "started": "2026-06-04T09:57:47.154Z",
+      "ended": "2026-06-04T10:40:16.117Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/App.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/NavBar.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 2574,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/EmailService.java",
+          "tokens_estimated": 4664,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/loginRedirect.js",
+          "tokens_estimated": 73,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 47,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/NavBar.jsx",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 129,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 116,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 140,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 577,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 104,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 171,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 324,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 160,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 113,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 110,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 36,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/EmailService.java",
+          "tokens_estimated": 111,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/EmailService.java",
+          "tokens_estimated": 80,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 7238,
+        "output_tokens_estimated": 2727,
+        "reads_count": 10,
+        "writes_count": 22,
+        "repeated_reads_blocked": 17,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-06-04-1257",
+      "started": "2026-06-04T09:57:47.154Z",
+      "ended": "2026-06-04T10:40:54.472Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/App.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/NavBar.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 2574,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/EmailService.java",
+          "tokens_estimated": 4664,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/loginRedirect.js",
+          "tokens_estimated": 73,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/AuthDropDown.jsx",
+          "tokens_estimated": 47,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/navbar/NavBar.jsx",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/ProfileLayout.jsx",
+          "tokens_estimated": 129,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 116,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 140,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 577,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 104,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 171,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 324,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Cart.jsx",
+          "tokens_estimated": 160,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 113,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 110,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/utils/tokenRefresh.js",
+          "tokens_estimated": 36,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/EmailService.java",
+          "tokens_estimated": 111,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/EmailService.java",
+          "tokens_estimated": 80,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 7238,
+        "output_tokens_estimated": 2727,
+        "reads_count": 10,
+        "writes_count": 22,
+        "repeated_reads_blocked": 17,
+        "anatomy_lookups": 2
       }
     }
   ],

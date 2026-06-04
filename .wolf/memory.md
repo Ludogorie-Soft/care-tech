@@ -971,3 +971,13 @@
 | 13:18 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | modified if() | ~110 |
 | 13:18 | Session end: 19 writes across 8 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 7 reads | ~2500 tok |
 | 13:19 | Session end: 19 writes across 8 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 7 reads | ~2500 tok |
+| 13:24 | Edited ../../care-tech-ui/src/utils/tokenRefresh.js | modified catch() | ~36 |
+| 13:24 | Session end: 20 writes across 8 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 8 reads | ~2536 tok |
+| 13:25 | Session end: 20 writes across 8 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 8 reads | ~2536 tok |
+| 13:31 | Session end: 20 writes across 8 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 9 reads | ~5110 tok |
+| 13:38 | Edited src/main/java/com/techstore/service/EmailService.java | added 1 condition(s) | ~104 |
+| 13:39 | Edited src/main/java/com/techstore/service/EmailService.java | 5→6 lines | ~75 |
+| 13:39 | EmailService: added Sender header (RFC 5321) when From != fromEmail — fixes SPF mismatch for info@ emails sent via orders@ SMTP | EmailService.java | done | ~100 |
+| 13:39 | Session end: 22 writes across 9 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 10 reads | ~9965 tok |
+| 13:40 | Session end: 22 writes across 9 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 10 reads | ~9965 tok |
+| 13:40 | Session end: 22 writes across 9 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 10 reads | ~9965 tok |
