@@ -997,3 +997,5 @@
 | 15:23 | Edited src/main/java/com/techstore/service/AbandonedCartService.java | "0 0 22 * * ?" → "0 0 9 * * ?" | ~16 |
 | 15:23 | Session end: 33 writes across 15 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 16 reads | ~18366 tok |
 | 15:23 | Session end: 33 writes across 15 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 16 reads | ~18366 tok |
+| 15:26 | Edited src/main/java/com/techstore/repository/CartItemRepository.java | added 1 import(s) | ~36 |
+| 15:27 | Session end: 34 writes across 15 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 16 reads | ~18404 tok |

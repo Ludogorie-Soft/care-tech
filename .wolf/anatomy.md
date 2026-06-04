@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-04T12:23:13.603Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-04T12:26:47.843Z
 > Files: 488 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -538,7 +538,7 @@
 
 ## src/main/java/com/techstore/repository/
 
-- `CartItemRepository.java` — Find users with abandoned carts: (~567 tok)
+- `CartItemRepository.java` — Find users with abandoned carts: (~576 tok)
 - `CategoryRepository.java` — Repository: CategoryRepository (~316 tok)
 - `LeasingApplicationRepository.java` — Repository: LeasingApplicationRepository (~376 tok)
 - `ManufacturerRepository.java` — Repository: ManufacturerRepository (~209 tok)
