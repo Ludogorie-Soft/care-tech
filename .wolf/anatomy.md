@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-04T12:26:47.843Z
-> Files: 488 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-04T13:51:48.490Z
+> Files: 500 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -18,7 +18,7 @@
 
 ## ../../care-tech-ui/src/
 
-- `App.js` — Declares ScrollToTop (~2756 tok)
+- `App.js` — Declares ScrollToTop (~2793 tok)
 - `index.css` — Styles: 37 rules (~2068 tok)
 
 ## ../../care-tech-ui/src/components/
@@ -46,7 +46,11 @@
 - `Cart.jsx` — EURO_RATE (~16680 tok)
 - `Category.jsx` — Category (~5536 tok)
 - `OurClients.jsx` — clients (~2686 tok)
-- `ProductPage.jsx` — EURO_RATE (~7820 tok)
+- `ProductPage.jsx` — EURO_RATE (~10208 tok)
+
+## ../../care-tech-ui/src/pages/admin/
+
+- `Dashboard.jsx` — Dashboard (~622 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Customers/
 
@@ -57,7 +61,7 @@
 ## ../../care-tech-ui/src/pages/admin/Dashboard/
 
 - `DashboardLayout.jsx` — convertStatsToMetrics (~2511 tok)
-- `Sidebar.jsx` — Sidebar (~1009 tok)
+- `Sidebar.jsx` — Sidebar (~1193 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Leasing/
 
@@ -70,6 +74,10 @@
 ## ../../care-tech-ui/src/pages/admin/Orders/
 
 - `useOrderUtils.js` — Exports useOrderUtils (~790 tok)
+
+## ../../care-tech-ui/src/pages/admin/Reviews/
+
+- `ReviewsLayout.jsx` — STATUS_CONFIG — renders table (~2891 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Sync/
 
@@ -87,7 +95,8 @@
 - `leasingSlice.js` — 4 async thunks: fetchLeasingApplications, fetchLeasingById, fetchLeasingStatistics, registerLeasingApplication. registerError stores true (flag only, not backend payload). State: registerStatus, registeredUrl, registeredApplicationId. (~1100 tok)
 - `offersSlice.js` — API routes: GET, PUT, POST (8 endpoints) (~2119 tok)
 - `paramSlice.js` — API routes: GET, POST, PUT, PATCH, DELETE (15 endpoints) (~5217 tok)
-- `store.js` — Exports store, persistor (~502 tok)
+- `reviewsSlice.js` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~1554 tok)
+- `store.js` — Exports store, persistor (~523 tok)
 
 ## ../../care-tech-ui/src/utils/
 
@@ -274,7 +283,7 @@
 - `S3Config.java` — Configuration: S3Config (~289 tok)
 - `SearchConfig.java` — Configuration: SearchConfig (~424 tok)
 - `SearchIndexManager.java` — Component: SearchIndexManager (~4470 tok)
-- `SecurityConfig.java` — Configuration: SecurityConfig (~2334 tok)
+- `SecurityConfig.java` — Configuration: SecurityConfig (~2408 tok)
 - `ShippingConfig.java` — Изчислява цената на доставка (~379 tok)
 - `SlugRegenerationRunner.java` — Component: SlugRegenerationRunner (~401 tok)
 - `SpeedyConfig.java` — Configuration: SpeedyConfig (~136 tok)
@@ -299,6 +308,7 @@
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
 - `ProductController.java` — Record to hold sort field and direction information (~3884 tok)
 - `ProductSearchController.java` — RestController: ProductSearchController (8 endpoints) (~1491 tok)
+- `ReviewController.java` — RestController: ReviewController (6 endpoints) (~709 tok)
 - `SpeedyController.java` — RestController: SpeedyController (4 endpoints) (~1716 tok)
 - `SubscriptionController.java` — RestController: SubscriptionController (5 endpoints) (~562 tok)
 - `TbiLeasingController.java` — POST /api/tbi/register (~846 tok)
@@ -377,6 +387,7 @@
 - `ProductSearchRequestDto.java` — Class: ProductSearchRequestDto (~227 tok)
 - `ProductUpdateRequestDTO.java` — Class: ProductUpdateRequestDTO (~92 tok)
 - `ResetPasswordRequestDTO.java` — Class: ResetPasswordRequestDTO (~185 tok)
+- `ReviewRequestDto.java` — Class: ReviewRequestDto (~97 tok)
 - `ShippingPreviewRequestDTO.java` — Class: ShippingPreviewRequestDTO (~188 tok)
 - `UserAddressDTO.java` — Class: UserAddressDTO (~306 tok)
 - `UserCompanyDTO.java` — Class: UserCompanyDTO (~285 tok)
@@ -411,6 +422,7 @@
 - `ProductSearchResponse.java` — Class: ProductSearchResponse (~156 tok)
 - `ProductSearchResult.java` — Class: ProductSearchResult (~229 tok)
 - `ProductSummaryDto.java` — Class: ProductSummaryDto (~95 tok)
+- `ReviewResponseDto.java` — ReviewResponseDto: from (~322 tok)
 - `ShippingPreviewResponseDTO.java` — Class: ShippingPreviewResponseDTO (~209 tok)
 - `SubscriptionDto.java` — Class: SubscriptionDto (~81 tok)
 - `SyncLogResponseDTO.java` — Class: SyncLogResponseDTO (~273 tok)
@@ -485,6 +497,7 @@
 - `Product.java` — Entity: Product (~2886 tok)
 - `ProductFlag.java` — Entity: ProductFlag (~231 tok)
 - `ProductParameter.java` — Entity: ProductParameter (~266 tok)
+- `Review.java` — Entity: Review (~219 tok)
 - `Subscription.java` — Entity: Subscription (~120 tok)
 - `SyncLog.java` — Entity: SyncLog (~337 tok)
 - `User.java` — Entity: User (~965 tok)
@@ -499,6 +512,7 @@
 - `PaymentStatus.java` — Class: PaymentStatus (~37 tok)
 - `Platform.java` — Platform/Source of data integration (~339 tok)
 - `ProductStatus.java` — ProductStatus: fromCode, getCode, getNameBg, getNameEn (~281 tok)
+- `ReviewStatus.java` — Class: ReviewStatus (~27 tok)
 - `ShippingMethod.java` — Class: ShippingMethod (~31 tok)
 
 ## src/main/java/com/techstore/event/
@@ -550,6 +564,7 @@
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~512 tok)
 - `ProductRepository.java` — Cross-platform deduplication by SKU. (~1771 tok)
 - `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9020 tok)
+- `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
 - `SyncLogRepository.java` — Repository: SyncLogRepository (~214 tok)
 - `UserAddressRepository.java` — Repository: UserAddressRepository (~261 tok)
@@ -575,6 +590,7 @@
 - `PersonalOfferService.java` — Service: PersonalOfferService (~1415 tok)
 - `ProductSearchService.java` — Service: ProductSearchService (~1890 tok)
 - `ProductService.java` — Service: ProductService (~14076 tok)
+- `ReviewService.java` — Service: ReviewService (~927 tok)
 - `S3Service.java` — Service: S3Service (~2077 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
@@ -628,6 +644,8 @@
 - `V21__add_personal_offers.sql` — SQL: tables: personal_offers (~191 tok)
 - `V22__fix_personal_offers_audit_columns.sql` — Fix audit column name: BaseEntity uses last_modified_by, not updated_by (~40 tok)
 - `V23__add_abandoned_cart_reminder_to_users.sql` (~20 tok)
+- `V24__add_product_reviews.sql` — SQL: tables: product_reviews (~219 tok)
+- `V25__review_status_to_varchar.sql` (~73 tok)
 - `V3__add_most_key_to_product.sql` — SQL: 1 alter(s) (~42 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)

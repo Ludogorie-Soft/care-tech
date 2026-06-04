@@ -2439,6 +2439,86 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-04T12:23:13.622Z"
+    },
+    {
+      "id": "bug-150",
+      "timestamp": "2026-06-04T13:10:42.888Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: {/* ====== REVIEWS SECTION - START ====== */}; {(() => {",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-04T13:11:05.215Z"
+    },
+    {
+      "id": "bug-151",
+      "timestamp": "2026-06-04T13:13:11.655Z",
+      "error_message": "CSS fix: name, icon, path",
+      "file": "../../care-tech-ui/src/pages/admin/Dashboard/Sidebar.jsx",
+      "root_cause": "name: \"Лизинг заявки\", → \"Отзиви\",; icon: <BsCreditCard2Back className=\"w-5 h-5\" />, → <FiMessageSquare className=\"w-5 h-5\" />,; path: \"/admin/dashboard/leasing\", → \"/admin/dashboard/reviews\",",
+      "fix": "Changed name: \"Лизинг заявки\", → \"Отзиви\",; icon: <BsCreditCard2Back className=\"w-5 h-5\" />, → <FiMessageSquare className=\"w-5 h-5\" />,; path: \"/admin/dashboard/leasing\", → \"/admin/dashboard/reviews\",",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-04T13:13:11.655Z"
+    },
+    {
+      "id": "bug-152",
+      "timestamp": "2026-06-04T13:16:51.012Z",
+      "error_message": "Missing await",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-04T13:16:51.012Z"
+    },
+    {
+      "id": "bug-153",
+      "timestamp": "2026-06-04T13:44:56.928Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-04T13:44:56.928Z"
+    },
+    {
+      "id": "bug-154",
+      "timestamp": "2026-06-04T13:47:43.353Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../care-tech-ui/src/redux/reviewsSlice.js",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-04T13:47:43.353Z"
     }
   ]
 }
