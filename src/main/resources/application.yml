@@ -221,6 +221,10 @@ app:
                 - pozharoizvesyavane
                 - perimetrova-zashtita
 
+    cart:
+        abandoned-reminder-after-days: 3
+        abandoned-reminder-resend-after-days: 30
+
     markup:
         default-percentage: 20.0
         max-percentage: 200.0

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-04T10:39:05.432Z
-> Files: 485 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-04T12:23:13.603Z
+> Files: 488 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -487,7 +487,7 @@
 - `ProductParameter.java` — Entity: ProductParameter (~266 tok)
 - `Subscription.java` — Entity: Subscription (~120 tok)
 - `SyncLog.java` — Entity: SyncLog (~337 tok)
-- `User.java` — Entity: User (~1003 tok)
+- `User.java` — Entity: User (~965 tok)
 - `UserAddress.java` — Entity: UserAddress (~283 tok)
 - `UserCompany.java` — Entity: UserCompany (~273 tok)
 - `UserFavorite.java` — Entity: UserFavorite (~211 tok)
@@ -538,7 +538,7 @@
 
 ## src/main/java/com/techstore/repository/
 
-- `CartItemRepository.java` — Repository: CartItemRepository (~296 tok)
+- `CartItemRepository.java` — Find users with abandoned carts: (~567 tok)
 - `CategoryRepository.java` — Repository: CategoryRepository (~316 tok)
 - `LeasingApplicationRepository.java` — Repository: LeasingApplicationRepository (~376 tok)
 - `ManufacturerRepository.java` — Repository: ManufacturerRepository (~209 tok)
@@ -559,13 +559,14 @@
 
 ## src/main/java/com/techstore/service/
 
+- `AbandonedCartService.java` — Service: AbandonedCartService (~624 tok)
 - `AsbisApiService.java` — Extract categories from Asbis products (~9352 tok)
 - `AuthService.java` — Service: AuthService (~6388 tok)
 - `CartService.java` — Service: CartService (~1669 tok)
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~13424 tok)
 - `CategoryService.java` — Service: CategoryService (~4425 tok)
 - `CronJobService.java` — Service: CronJobService (~788 tok)
-- `EmailService.java` — Service for sending email notifications (~4745 tok)
+- `EmailService.java` — Service for sending email notifications (~5028 tok)
 - `FileUploadService.java` — Service: FileUploadService (~7252 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3823 tok)
@@ -608,7 +609,7 @@
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` (~2574 tok)
+- `application.yml` (~2603 tok)
 
 ## src/main/resources/db/
 
@@ -626,6 +627,7 @@
 - `V20__add_pending_order_json_to_leasing.sql` — Stores the serialised OrderCreateRequestDTO so the order can be created (~64 tok)
 - `V21__add_personal_offers.sql` — SQL: tables: personal_offers (~191 tok)
 - `V22__fix_personal_offers_audit_columns.sql` — Fix audit column name: BaseEntity uses last_modified_by, not updated_by (~40 tok)
+- `V23__add_abandoned_cart_reminder_to_users.sql` (~20 tok)
 - `V3__add_most_key_to_product.sql` — SQL: 1 alter(s) (~42 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
@@ -636,6 +638,7 @@
 
 ## src/main/resources/templates/email/
 
+- `abandoned-cart.html` — Забравихте нещо в количката (~1715 tok)
 - `admin-new-order.html` — Нова поръчка (~1787 tok)
 - `leasing-rejected.html` — Заявка за лизинг (~3009 tok)
 - `message-to-admin.html` (~142 tok)

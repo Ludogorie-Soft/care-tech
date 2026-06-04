@@ -1,6 +1,7 @@
 package com.techstore.service;
 
 import com.techstore.dto.request.MessageToAdmin;
+import com.techstore.entity.CartItem;
 import com.techstore.entity.Order;
 import com.techstore.entity.PersonalOffer;
 import com.techstore.entity.User;
@@ -21,6 +22,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -313,6 +315,30 @@ public class EmailService {
 
         } catch (Exception e) {
             log.error("Failed to send admin message: {}", dto, e);
+        }
+    }
+
+    /**
+     * Send abandoned cart reminder email
+     */
+    @Async
+    public void sendAbandonedCartEmail(User user, List<CartItem> items) {
+        try {
+            log.info("Sending abandoned cart reminder to: {}", user.getEmail());
+
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("customerName", user.getFirstName() != null ? user.getFirstName() : user.getEmail());
+            variables.put("cartItems", items);
+            variables.put("cartUrl", appUrl + "/cart");
+            variables.put("appName", appName);
+            variables.put("appUrl", appUrl);
+
+            String subject = appName + " - Забравихте нещо в количката си 🛒";
+            sendHtmlEmail(fromEmail, user.getEmail(), subject, "abandoned-cart", variables);
+
+            log.info("Abandoned cart reminder sent to: {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send abandoned cart reminder to: {}", user.getEmail(), e);
         }
     }
 

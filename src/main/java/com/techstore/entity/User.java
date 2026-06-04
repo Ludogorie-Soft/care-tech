@@ -50,6 +50,9 @@ public class User extends BaseEntity implements UserDetails {
 
     private LocalDateTime lastLoginAt;
 
+    @Column(name = "abandoned_cart_reminder_sent_at")
+    private LocalDateTime abandonedCartReminderSentAt;
+
     @Column(name = "is_correct", nullable = false)
     private Boolean isCorrect = true;
 

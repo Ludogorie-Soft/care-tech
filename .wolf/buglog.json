@@ -2407,6 +2407,38 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-04T10:17:03.435Z"
+    },
+    {
+      "id": "bug-148",
+      "timestamp": "2026-06-04T12:21:17.596Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/EmailService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-04T12:21:17.596Z"
+    },
+    {
+      "id": "bug-149",
+      "timestamp": "2026-06-04T12:23:13.622Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/service/AbandonedCartService.java",
+      "root_cause": "Had \"0 0 22 * * ?\"",
+      "fix": "Changed to \"0 0 9 * * ?\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-04T12:23:13.622Z"
     }
   ]
 }

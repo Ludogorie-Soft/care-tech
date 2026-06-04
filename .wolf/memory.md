@@ -981,3 +981,19 @@
 | 13:39 | Session end: 22 writes across 9 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 10 reads | ~9965 tok |
 | 13:40 | Session end: 22 writes across 9 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 10 reads | ~9965 tok |
 | 13:40 | Session end: 22 writes across 9 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 10 reads | ~9965 tok |
+| 15:16 | Session end: 22 writes across 9 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 14 reads | ~11702 tok |
+| 15:19 | Created src/main/resources/db/migration/V23__add_abandoned_cart_reminder_to_users.sql | — | ~20 |
+| 15:19 | Edited src/main/java/com/techstore/entity/User.java | 1→4 lines | ~40 |
+| 15:19 | Edited src/main/java/com/techstore/repository/CartItemRepository.java | added 1 import(s) | ~30 |
+| 15:20 | Edited src/main/java/com/techstore/repository/CartItemRepository.java | expanded (+24 lines) | ~303 |
+| 15:21 | Edited src/main/resources/application.yml | 2→6 lines | ~42 |
+| 15:21 | Edited src/main/java/com/techstore/service/EmailService.java | added error handling | ~283 |
+| 15:21 | Edited src/main/java/com/techstore/service/EmailService.java | added 1 import(s) | ~53 |
+| 15:21 | Edited src/main/java/com/techstore/service/EmailService.java | added 1 import(s) | ~39 |
+| 15:21 | Created src/main/java/com/techstore/service/AbandonedCartService.java | — | ~624 |
+| 15:22 | Created src/main/resources/templates/email/abandoned-cart.html | — | ~1715 |
+| 15:22 | Abandoned cart email: V23 migration, User.abandonedCartReminderSentAt, CartItemRepository.findUsersWithAbandonedCarts, AbandonedCartService @Scheduled 22:00, EmailService.sendAbandonedCartEmail, abandoned-cart.html template | V23 migration, User.java, CartItemRepository.java, AbandonedCartService.java, EmailService.java, abandoned-cart.html, application.yml | done | ~600 |
+| 15:22 | Session end: 32 writes across 15 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 16 reads | ~18349 tok |
+| 15:23 | Edited src/main/java/com/techstore/service/AbandonedCartService.java | "0 0 22 * * ?" → "0 0 9 * * ?" | ~16 |
+| 15:23 | Session end: 33 writes across 15 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 16 reads | ~18366 tok |
+| 15:23 | Session end: 33 writes across 15 files (loginRedirect.js, AuthDropDown.jsx, NavBar.jsx, ProfileLayout.jsx, OrderDetails.jsx) | 16 reads | ~18366 tok |

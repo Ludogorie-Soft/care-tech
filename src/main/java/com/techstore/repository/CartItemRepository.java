@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,4 +29,28 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     @Query("SELECT SUM(ci.quantity) FROM CartItem ci WHERE ci.user.id = :userId")
     Integer countTotalItemsByUserId(@Param("userId") Long userId);
+
+    /**
+     * Find users with abandoned carts:
+     * - have at least one cart item
+     * - all items were last updated before the given cutoff (no recent activity)
+     * - no reminder sent yet, OR last reminder was sent before the resend cutoff
+     */
+    @Query("""
+            SELECT DISTINCT ci.user FROM CartItem ci
+            WHERE ci.user.active = true
+              AND ci.user.emailVerified = true
+              AND ci.user.role = com.techstore.entity.User.Role.USER
+              AND (
+                SELECT MAX(ci2.updatedAt) FROM CartItem ci2 WHERE ci2.user = ci.user
+              ) < :activityCutoff
+              AND (
+                ci.user.abandonedCartReminderSentAt IS NULL
+                OR ci.user.abandonedCartReminderSentAt < :resendCutoff
+              )
+            """)
+    List<User> findUsersWithAbandonedCarts(
+            @Param("activityCutoff") LocalDateTime activityCutoff,
+            @Param("resendCutoff") LocalDateTime resendCutoff
+    );
 }
