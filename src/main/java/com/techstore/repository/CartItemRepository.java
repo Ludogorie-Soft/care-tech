@@ -24,6 +24,10 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     void deleteByUserEmail(String email);
 
+    @Modifying
+    @Query("DELETE FROM CartItem ci WHERE ci.user.id = :userId AND ci.product.id IN :productIds")
+    void deleteByUserIdAndProductIdIn(@Param("userId") Long userId, @Param("productIds") java.util.Collection<Long> productIds);
+
     @Query("SELECT SUM(ci.quantity * p.finalPrice) FROM CartItem ci " +
             "JOIN ci.product p WHERE ci.user.id = :userId")
     BigDecimal calculateTotalPriceByUserId(@Param("userId") Long userId);

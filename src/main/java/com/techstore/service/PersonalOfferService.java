@@ -13,6 +13,7 @@ import com.techstore.entity.User;
 import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.ResourceNotFoundException;
 import com.techstore.exception.UnauthorizedException;
+import com.techstore.repository.CartItemRepository;
 import com.techstore.repository.PersonalOfferRepository;
 import com.techstore.repository.UserRepository;
 import com.techstore.util.SecurityHelper;
@@ -36,6 +37,7 @@ public class PersonalOfferService {
     private final EmailService emailService;
     private final SecurityHelper securityHelper;
     private final OrderService orderService;
+    private final CartItemRepository cartItemRepository;
 
     @Transactional
     public PersonalOfferResponseDto createAndSend(Long userId, PersonalOfferCreateDto dto) {
@@ -177,6 +179,15 @@ public class PersonalOfferService {
 
         offer.setStatus(OfferStatus.CONVERTED);
         offerRepository.save(offer);
+
+        // Remove only the offer's products from the user's cart
+        List<Long> productIds = offer.getOfferItems().stream()
+                .map(OfferItem::getProductId)
+                .filter(id -> id != null)
+                .toList();
+        if (!productIds.isEmpty()) {
+            cartItemRepository.deleteByUserIdAndProductIdIn(user.getId(), productIds);
+        }
 
         log.info("Offer {} converted to order {}", offerId, createdOrder.getOrderNumber());
         return createdOrder;

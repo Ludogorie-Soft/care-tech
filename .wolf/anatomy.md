@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-19T11:49:33.292Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-19T11:53:52.942Z
 > Files: 508 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -559,7 +559,7 @@
 
 ## src/main/java/com/techstore/repository/
 
-- `CartItemRepository.java` — Find users with abandoned carts: (~576 tok)
+- `CartItemRepository.java` — Find users with abandoned carts: (~641 tok)
 - `CategoryRepository.java` — Repository: CategoryRepository (~316 tok)
 - `LeasingApplicationRepository.java` — Repository: LeasingApplicationRepository (~376 tok)
 - `ManufacturerRepository.java` — Repository: ManufacturerRepository (~209 tok)
@@ -594,7 +594,7 @@
 - `MostApiService.java` — Test API connectivity (~3823 tok)
 - `OrderService.java` — Creates a new order (~5942 tok)
 - `ParameterService.java` — Service: ParameterService (~10236 tok)
-- `PersonalOfferService.java` — Service: PersonalOfferService (~3229 tok)
+- `PersonalOfferService.java` — Service: PersonalOfferService (~3359 tok)
 - `ProductSearchService.java` — Service: ProductSearchService (~1890 tok)
 - `ProductService.java` — Service: ProductService (~14076 tok)
 - `ReviewService.java` — Service: ReviewService (~927 tok)
