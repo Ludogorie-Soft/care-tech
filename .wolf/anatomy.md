@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-19T11:53:52.942Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-19T13:14:46.590Z
 > Files: 508 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -374,7 +374,7 @@
 - `ManufacturerRequestDto.java` — Class: ManufacturerRequestDto (~102 tok)
 - `MarkupUpdateDTO.java` — If true, applies markup only to products that currently have markupPercentage = 0 (~269 tok)
 - `MessageToAdmin.java` — Class: MessageToAdmin (~100 tok)
-- `OrderCreateRequestDTO.java` — Admin-only: when set, overrides the product's current price (used for offer-to-order conversion). (~970 tok)
+- `OrderCreateRequestDTO.java` — Admin-only: when set, overrides the product's current price (used for offer-to-order conversion). (~1011 tok)
 - `OrderFilterDTO.java` — Class: OrderFilterDTO (~232 tok)
 - `OrderItemCreateDTO.java` — Class: OrderItemCreateDTO (~116 tok)
 - `OrderStatusUpdateDTO.java` — Class: OrderStatusUpdateDTO (~122 tok)
@@ -592,9 +592,9 @@
 - `FileUploadService.java` — Service: FileUploadService (~7252 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3823 tok)
-- `OrderService.java` — Creates a new order (~5942 tok)
+- `OrderService.java` — Creates a new order (~5971 tok)
 - `ParameterService.java` — Service: ParameterService (~10236 tok)
-- `PersonalOfferService.java` — Service: PersonalOfferService (~3359 tok)
+- `PersonalOfferService.java` — Service: PersonalOfferService (~3538 tok)
 - `ProductSearchService.java` — Service: ProductSearchService (~1890 tok)
 - `ProductService.java` — Service: ProductService (~14076 tok)
 - `ReviewService.java` — Service: ReviewService (~927 tok)
