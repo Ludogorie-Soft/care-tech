@@ -2,6 +2,7 @@ package com.techstore.controller;
 
 import com.techstore.dto.UserResponseDTO;
 import com.techstore.dto.request.ChangePasswordDTO;
+import com.techstore.dto.request.AcceptOfferRequestDto;
 import com.techstore.dto.request.MessageToAdmin;
 import com.techstore.dto.request.UserAddressDTO;
 import com.techstore.dto.request.UserCompanyDTO;
@@ -203,6 +204,14 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PersonalOfferResponseDto> markOfferAsRead(@PathVariable Long id) {
         return ResponseEntity.ok(personalOfferService.markAsRead(id));
+    }
+
+    @PostMapping("/profile/offers/{id}/accept")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PersonalOfferResponseDto> acceptOfferWithDetails(
+            @PathVariable Long id,
+            @Valid @RequestBody AcceptOfferRequestDto dto) {
+        return ResponseEntity.ok(personalOfferService.acceptWithDetails(id, dto));
     }
 
     @PutMapping("/profile/offers/{id}/status")

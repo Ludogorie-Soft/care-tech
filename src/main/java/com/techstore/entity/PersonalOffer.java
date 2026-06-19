@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.techstore.enums.PaymentMethod;
+import com.techstore.enums.ShippingMethod;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,8 +42,32 @@ public class PersonalOffer extends BaseEntity {
     @Column(nullable = false, length = 20)
     private OfferStatus status = OfferStatus.PENDING;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "shipping_details", columnDefinition = "jsonb")
+    private ShippingDetails shippingDetails;
+
     public enum OfferStatus {
-        PENDING, READ, ACCEPTED, REJECTED
+        PENDING, READ, ACCEPTED, REJECTED, CONVERTED
+    }
+
+    @Data
+    public static class ShippingDetails {
+        private String customerPhone;
+        private String shippingAddress;
+        private String shippingCity;
+        private String shippingPostalCode;
+        private String shippingCountry;
+        private Boolean isToSpeedyOffice;
+        private Long shippingSpeedySiteId;
+        private Long shippingSpeedyOfficeId;
+        private String shippingSpeedySiteName;
+        private String shippingSpeedyOfficeName;
+        private PaymentMethod paymentMethod;
+        private ShippingMethod shippingMethod;
+        private String customerCompany;
+        private String customerVatNumber;
+        private Boolean customerVatRegistered;
+        private String customerNotes;
     }
 
     @Data
@@ -51,6 +77,7 @@ public class PersonalOffer extends BaseEntity {
         private String imageUrl;
         private BigDecimal originalPrice;
         private BigDecimal offerPrice;
+        private BigDecimal discountPercent;
         private Integer quantity;
     }
 }

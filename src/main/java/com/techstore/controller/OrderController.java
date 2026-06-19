@@ -42,6 +42,11 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderResponseDTO> createOrder(
             @Valid @RequestBody OrderCreateRequestDTO request) {
+        // Security: strip admin-only fields — this endpoint is permitAll (guest checkout)
+        if (request.getItems() != null) {
+            request.getItems().forEach(item -> item.setCustomPriceEuro(null));
+        }
+        request.setSkipCartClear(false);
         OrderResponseDTO order = orderService.createOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }

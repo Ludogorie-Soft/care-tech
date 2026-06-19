@@ -9,6 +9,7 @@ import com.techstore.service.TbiLeasingService;
 import com.techstore.entity.Product;
 import com.techstore.enums.OrderStatus;
 import com.techstore.repository.SyncLogRepository;
+import com.techstore.dto.request.ConvertOfferToOrderRequestDto;
 import com.techstore.dto.request.PersonalOfferCreateDto;
 import com.techstore.dto.response.CartSummaryDto;
 import com.techstore.dto.response.PersonalOfferResponseDto;
@@ -431,6 +432,14 @@ public class AdminController {
             @PathVariable Long userId,
             @Valid @RequestBody PersonalOfferCreateDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(personalOfferService.createAndSend(userId, dto));
+    }
+
+    @PostMapping("/offers/{offerId}/convert-to-order")
+    public ResponseEntity<OrderResponseDTO> convertOfferToOrder(
+            @PathVariable Long offerId,
+            @Valid @RequestBody ConvertOfferToOrderRequestDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(personalOfferService.convertToOrder(offerId, dto));
     }
 
     @GetMapping("/users/{userId}/offers")

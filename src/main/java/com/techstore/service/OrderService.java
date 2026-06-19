@@ -155,10 +155,14 @@ public class OrderService {
             orderItem.setProductModel(product.getModel());
             orderItem.setQuantity(itemDto.getQuantity());
 
-            orderItem.setUnitPrice(product.getFinalPrice() != null ? product.getFinalPrice() : product.getPriceClient());
+            if (itemDto.getCustomPriceEuro() != null) {
+                orderItem.setUnitPrice(itemDto.getCustomPriceEuro());
+                orderItem.setDiscountAmount(BigDecimal.ZERO);
+            } else {
+                orderItem.setUnitPrice(product.getFinalPrice() != null ? product.getFinalPrice() : product.getPriceClient());
+                orderItem.setDiscountAmount(product.getDiscount());
+            }
             orderItem.setTaxRate(new BigDecimal("20.00"));
-
-            orderItem.setDiscountAmount(product.getDiscount());
 
             orderItem.calculateLineTotals();
             order.addOrderItem(orderItem);
@@ -175,7 +179,9 @@ public class OrderService {
 
         order = orderRepository.save(order);
 
-        cartItemRepository.deleteByUserEmail(request.getCustomerEmail());
+        if (!Boolean.TRUE.equals(request.getSkipCartClear())) {
+            cartItemRepository.deleteByUserEmail(request.getCustomerEmail());
+        }
 
         log.info("Order created successfully: {} (status={})", order.getOrderNumber(), order.getStatus());
 

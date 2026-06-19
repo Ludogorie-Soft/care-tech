@@ -22,6 +22,7 @@ public class PersonalOfferResponseDto {
     private String status;
     private LocalDateTime createdAt;
     private boolean expired;
+    private PersonalOffer.ShippingDetails shippingDetails;
 
     public static PersonalOfferResponseDto from(PersonalOffer offer) {
         PersonalOfferResponseDto dto = new PersonalOfferResponseDto();
@@ -37,6 +38,7 @@ public class PersonalOfferResponseDto {
         dto.setStatus(offer.getStatus().name());
         dto.setCreatedAt(offer.getCreatedAt());
         dto.setExpired(offer.getExpiresAt() != null && offer.getExpiresAt().isBefore(LocalDateTime.now()));
+        dto.setShippingDetails(offer.getShippingDetails());
         return dto;
     }
 }

@@ -1,14 +1,16 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-04T13:51:48.490Z
-> Files: 500 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-19T11:49:33.292Z
+> Files: 508 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
 - `euro_rate_convention.md` — Declares EURO_RATE (~194 tok)
-- `MEMORY.md` — Memory Index (~232 tok)
+- `MEMORY.md` — Memory Index (~307 tok)
+- `personal_offer_flow.md` — Declares stored (~373 tok)
 - `project_most_api.md` (~136 tok)
 - `session_2026_06_03.md` — Backend (`tech-store-api`) (~574 tok)
+- `speedy_autocomplete_pattern.md` (~297 tok)
 - `tbi_leasing_integration.md` — Status: Backend + Frontend COMPLETE (2026-06-03 — updated credentials + modal fix) (~881 tok)
 - `user_role_and_workflow.md` (~279 tok)
 
@@ -55,7 +57,7 @@
 ## ../../care-tech-ui/src/pages/admin/Customers/
 
 - `CustomersLayout.jsx` — CustomersLayout.jsx (~4646 tok)
-- `SendOfferModal.jsx` — EURO_RATE — renders form (~2547 tok)
+- `SendOfferModal.jsx` — EURO_RATE — renders form (~4082 tok)
 - `UserCartModal.jsx` — EURO_RATE (~1423 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Dashboard/
@@ -69,7 +71,8 @@
 
 ## ../../care-tech-ui/src/pages/admin/Offers/
 
-- `OffersLayout.jsx` — EURO_RATE — renders table (~4411 tok)
+- `ConvertOfferToOrderModal.jsx` — EURO_RATE — renders form (~4254 tok)
+- `OffersLayout.jsx` — EURO_RATE — renders table (~4796 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Orders/
 
@@ -85,7 +88,8 @@
 
 ## ../../care-tech-ui/src/pages/profile/
 
-- `MyOffers.jsx` — EURO_RATE (~2517 tok)
+- `AcceptOfferModal.jsx` — EURO_RATE — renders form (~6210 tok)
+- `MyOffers.jsx` — EURO_RATE (~2344 tok)
 - `OrderDetails.jsx` — OrderDetails (~3809 tok)
 - `ProfileLayout.jsx` — links (~1930 tok)
 - `WarrantyCards.jsx` — WarrantyCards (~886 tok)
@@ -93,7 +97,7 @@
 ## ../../care-tech-ui/src/redux/
 
 - `leasingSlice.js` — 4 async thunks: fetchLeasingApplications, fetchLeasingById, fetchLeasingStatistics, registerLeasingApplication. registerError stores true (flag only, not backend payload). State: registerStatus, registeredUrl, registeredApplicationId. (~1100 tok)
-- `offersSlice.js` — API routes: GET, PUT, POST (8 endpoints) (~2119 tok)
+- `offersSlice.js` — API routes: GET, PUT, POST (10 endpoints) (~2790 tok)
 - `paramSlice.js` — API routes: GET, POST, PUT, PATCH, DELETE (15 endpoints) (~5217 tok)
 - `reviewsSlice.js` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~1554 tok)
 - `store.js` — Exports store, persistor (~523 tok)
@@ -120,6 +124,7 @@
 - `mvnw` — or more contributor license agreements.  See the NOTICE file (~3144 tok)
 - `mvnw.cmd` — Declares Directory (~2262 tok)
 - `nginx.conf` — Nginx configuration (~575 tok)
+- `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
 - `parameters_202605130941.sql` (~43615 tok)
 - `pom.xml` (~1642 tok)
 - `README.md` — Project documentation (~1777 tok)
@@ -294,7 +299,7 @@
 
 ## src/main/java/com/techstore/controller/
 
-- `AdminController.java` — Get all orders with pagination and sorting (~5318 tok)
+- `AdminController.java` — Get all orders with pagination and sorting (~5433 tok)
 - `AuthController.java` — RestController: AuthController (9 endpoints) (~1192 tok)
 - `CacheClearController.java` — POST /api/internal/cache/clear-all. @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')") + URL-level guard. (~264 tok)
 - `CartController.java` — RestController: CartController (6 endpoints) (~2208 tok)
@@ -304,7 +309,7 @@
 - `FileUploadController.java` — /api/upload/**. @PreAuthorize per method. @CrossOrigin removed — uses global CORS. (~592 tok)
 - `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1905 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
-- `OrderController.java` — POST public (guest checkout). All other endpoints authenticated. IDOR fix on getOrderById/getOrderByNumber/cancel (ownership check). (~1566 tok)
+- `OrderController.java` — Създаване на нова поръчка (~1636 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
 - `ProductController.java` — Record to hold sort field and direction information (~3884 tok)
 - `ProductSearchController.java` — RestController: ProductSearchController (8 endpoints) (~1491 tok)
@@ -312,7 +317,7 @@
 - `SpeedyController.java` — RestController: SpeedyController (4 endpoints) (~1716 tok)
 - `SubscriptionController.java` — RestController: SubscriptionController (5 endpoints) (~562 tok)
 - `TbiLeasingController.java` — POST /api/tbi/register (~846 tok)
-- `UserController.java` — RestController: UserController (22 endpoints) (~2298 tok)
+- `UserController.java` — RestController: UserController (23 endpoints) (~2406 tok)
 - `UserFavoriteController.java` — RestController: UserFavoriteController (7 endpoints) (~2295 tok)
 
 ## src/main/java/com/techstore/controller/sync/
@@ -355,10 +360,12 @@
 
 ## src/main/java/com/techstore/dto/request/
 
+- `AcceptOfferRequestDto.java` — Class: AcceptOfferRequestDto (~307 tok)
 - `CartItemRequestDto.java` — Class: CartItemRequestDto (~134 tok)
 - `CategoryRequestDto.java` — Class: CategoryRequestDto (~289 tok)
 - `CategoryRequestFromExternalDto.java` — Class: CategoryRequestFromExternalDto (~96 tok)
 - `ChangePasswordDTO.java` — Class: ChangePasswordDTO (~132 tok)
+- `ConvertOfferToOrderRequestDto.java` — Class: ConvertOfferToOrderRequestDto (~310 tok)
 - `DocumentRequestDto.java` — Class: DocumentRequestDto (~103 tok)
 - `FavoriteRequestDto.java` — Class: FavoriteRequestDto (~72 tok)
 - `LoginRequestDTO.java` — Class: LoginRequestDTO (~168 tok)
@@ -367,7 +374,7 @@
 - `ManufacturerRequestDto.java` — Class: ManufacturerRequestDto (~102 tok)
 - `MarkupUpdateDTO.java` — If true, applies markup only to products that currently have markupPercentage = 0 (~269 tok)
 - `MessageToAdmin.java` — Class: MessageToAdmin (~100 tok)
-- `OrderCreateRequestDTO.java` — When true: order is created with LEASING_PENDING status and no confirmation email is sent. (~850 tok)
+- `OrderCreateRequestDTO.java` — Admin-only: when set, overrides the product's current price (used for offer-to-order conversion). (~970 tok)
 - `OrderFilterDTO.java` — Class: OrderFilterDTO (~232 tok)
 - `OrderItemCreateDTO.java` — Class: OrderItemCreateDTO (~116 tok)
 - `OrderStatusUpdateDTO.java` — Class: OrderStatusUpdateDTO (~122 tok)
@@ -375,7 +382,7 @@
 - `ParameterOrderDto.java` — Class: ParameterOrderDto (~152 tok)
 - `ParameterRequestDto.java` — Class: ParameterRequestDto (~130 tok)
 - `ParameterValueRequestDto.java` — Class: ParameterValueRequestDto (~142 tok)
-- `PersonalOfferCreateDto.java` — Class: PersonalOfferCreateDto (~202 tok)
+- `PersonalOfferCreateDto.java` — Class: PersonalOfferCreateDto (~277 tok)
 - `ProductCreateRequestDTO.java` — Class: ProductCreateRequestDTO (~759 tok)
 - `ProductImageOperationsDTO.java` — Class: ProductImageOperationsDTO (~140 tok)
 - `ProductImageUpdateDTO.java` — Class: ProductImageUpdateDTO (~94 tok)
@@ -412,7 +419,7 @@
 - `OrderStatisticsResponseDTO.java` — Class: OrderStatisticsResponseDTO (~408 tok)
 - `ParameterOptionResponseDto.java` — Class: ParameterOptionResponseDto (~149 tok)
 - `ParameterResponseDto.java` — Class: ParameterResponseDto (~135 tok)
-- `PersonalOfferResponseDto.java` — PersonalOfferResponseDto: from (~380 tok)
+- `PersonalOfferResponseDto.java` — PersonalOfferResponseDto: from (~412 tok)
 - `ProductDocumentResponseDto.java` — Class: ProductDocumentResponseDto (~54 tok)
 - `ProductFlagResponseDto.java` — Class: ProductFlagResponseDto (~60 tok)
 - `ProductImageResponseDto.java` — Class: ProductImageResponseDto (~61 tok)
@@ -493,7 +500,7 @@
 - `OrderItem.java` — Entity: OrderItem (~559 tok)
 - `Parameter.java` — Entity: Parameter (~544 tok)
 - `ParameterOption.java` — Entity: ParameterOption (~260 tok)
-- `PersonalOffer.java` — Entity: PersonalOffer (~391 tok)
+- `PersonalOffer.java` — Entity: PersonalOffer (~665 tok)
 - `Product.java` — Entity: Product (~2886 tok)
 - `ProductFlag.java` — Entity: ProductFlag (~231 tok)
 - `ProductParameter.java` — Entity: ProductParameter (~266 tok)
@@ -560,7 +567,7 @@
 - `OrderRepository.java` — Repository: OrderRepository (~1414 tok)
 - `ParameterOptionRepository.java` — Repository: ParameterOptionRepository (~420 tok)
 - `ParameterRepository.java` — Repository: ParameterRepository (~1143 tok)
-- `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~246 tok)
+- `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~512 tok)
 - `ProductRepository.java` — Cross-platform deduplication by SKU. (~1771 tok)
 - `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9020 tok)
@@ -585,9 +592,9 @@
 - `FileUploadService.java` — Service: FileUploadService (~7252 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3823 tok)
-- `OrderService.java` — Creates a new order (~5860 tok)
+- `OrderService.java` — Creates a new order (~5942 tok)
 - `ParameterService.java` — Service: ParameterService (~10236 tok)
-- `PersonalOfferService.java` — Service: PersonalOfferService (~1415 tok)
+- `PersonalOfferService.java` — Service: PersonalOfferService (~3229 tok)
 - `ProductSearchService.java` — Service: ProductSearchService (~1890 tok)
 - `ProductService.java` — Service: ProductService (~14076 tok)
 - `ReviewService.java` — Service: ReviewService (~927 tok)
@@ -646,6 +653,7 @@
 - `V23__add_abandoned_cart_reminder_to_users.sql` (~20 tok)
 - `V24__add_product_reviews.sql` — SQL: tables: product_reviews (~219 tok)
 - `V25__review_status_to_varchar.sql` (~73 tok)
+- `V26__add_shipping_details_to_personal_offers.sql` (~22 tok)
 - `V3__add_most_key_to_product.sql` — SQL: 1 alter(s) (~42 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
