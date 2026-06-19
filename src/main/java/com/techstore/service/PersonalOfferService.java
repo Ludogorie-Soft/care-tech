@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -144,6 +145,14 @@ public class PersonalOfferService {
                     item.setProductId(i.getProductId());
                     item.setQuantity(i.getQuantity() != null ? i.getQuantity() : 1);
                     item.setCustomPriceEuro(i.getOfferPrice());
+                    if (i.getOriginalPrice() != null && i.getOriginalPrice().compareTo(BigDecimal.ZERO) > 0
+                            && i.getOfferPrice() != null && i.getOfferPrice().compareTo(i.getOriginalPrice()) < 0) {
+                        BigDecimal discountPct = BigDecimal.ONE
+                                .subtract(i.getOfferPrice().divide(i.getOriginalPrice(), 4, java.math.RoundingMode.HALF_UP))
+                                .multiply(new BigDecimal("100"))
+                                .setScale(2, java.math.RoundingMode.HALF_UP);
+                        item.setDiscountPercent(discountPct);
+                    }
                     return item;
                 }).toList();
 

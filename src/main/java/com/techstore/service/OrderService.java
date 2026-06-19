@@ -157,7 +157,9 @@ public class OrderService {
 
             if (itemDto.getCustomPriceEuro() != null) {
                 orderItem.setUnitPrice(itemDto.getCustomPriceEuro());
-                orderItem.setDiscountAmount(BigDecimal.ZERO);
+                orderItem.setDiscountAmount(
+                    itemDto.getDiscountPercent() != null ? itemDto.getDiscountPercent() : BigDecimal.ZERO
+                );
             } else {
                 orderItem.setUnitPrice(product.getFinalPrice() != null ? product.getFinalPrice() : product.getPriceClient());
                 orderItem.setDiscountAmount(product.getDiscount());

@@ -92,6 +92,9 @@ public class OrderCreateRequestDTO {
         /** Admin-only: when set, overrides the product's current price (used for offer-to-order conversion). */
         @DecimalMin(value = "0.01", message = "Custom price must be greater than zero")
         private BigDecimal customPriceEuro;
+
+        /** Admin-only: discount percentage to show alongside the custom price (e.g. 37.5 for 37.5% off). */
+        private BigDecimal discountPercent;
     }
 
     @NotNull(message = "Payment method is required")
