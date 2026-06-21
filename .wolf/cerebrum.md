@@ -74,6 +74,14 @@
 - **offersSlice.js** combines both admin-side (fetchUserCart, fetchUserOffers, sendPersonalOffer) and user-side (fetchMyOffers, markOfferRead, updateOfferStatus) actions in one slice. State keys: `myOffers`, `unreadCount`, `userCart`, `userOffers`, `sendStatus`.
 - **CartController security fix (2026-06-04):** `/api/cart/**` was `permitAll()` in SecurityConfig — any unauthenticated user could read/write any user's cart. Fixed to `authenticated()` + class-level `@PreAuthorize("isAuthenticated()")` + `requireAccess(userId)` ownership check using `SecurityHelper.hasAccessToResource()`.
 
+## Key Learnings
+
+- **Personal offer → order pricing:** `offerPrice` is VAT-inclusive (what the customer pays). `OrderService.unitPrice` is always pre-VAT. So when converting: `unitPrice = offerPrice / 1.20`. `originalPrice` from `SendOfferModal` = `product.finalPrice` (pre-VAT), so original VAT-inclusive = `originalPrice × 1.20`. Discount% = `(1 - offerPrice / (originalPrice × 1.20)) × 100`. Without the /1.20 division, the customer would be charged 20% extra on top of the agreed price.
+- **Regular orders are NOT affected** by the customPriceEuro changes — they send only productId+quantity, so `customPriceEuro == null` and `OrderService` uses `product.getFinalPrice()` as before.
+- **OrderItem.discountAmount** stores a PERCENTAGE (not an absolute amount), consistent with `product.getDiscount()`. Frontend uses: `originalPrice = lineTotalWithTax / (1 - discountAmount / 100)`.
+- **Cart cleanup on offer conversion:** After `orderService.createOrder()`, `cartItemRepository.deleteByUserIdAndProductIdIn(userId, productIds)` removes only the converted products from the cart. `skipCartClear = true` prevents OrderService from clearing the whole cart.
+- **Speedy autocomplete (non-Formik):** Use `useState` + `useRef` for city/office selectors. Dispatch `fetchCities(query)` on city input change; on city select dispatch `fetchOffies(cityId)` and focus the office input. Store both the ID and the display name. Reference: `AcceptOfferModal.jsx`.
+
 ## Decision Log
 
 <!-- Significant technical decisions with rationale. Why X was chosen over Y. -->

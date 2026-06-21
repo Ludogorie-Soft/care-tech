@@ -104,7 +104,7 @@ public class S3Service {
         }
 
         String extension = getFileExtension(file.getOriginalFilename());
-        List<String> allowed = Arrays.asList("pdf", "doc", "docx", "xls", "xlsx", "odt", "ods", "rtf", "txt");
+        List<String> allowed = Arrays.asList("pdf", "doc", "docx", "xls", "xlsx", "odt", "ods", "rtf", "txt", "jpg", "jpeg", "png", "webp", "heic");
         if (!allowed.contains(extension)) {
             throw new BusinessLogicException("File type not allowed for warranty documents. Allowed: " + allowed);
         }

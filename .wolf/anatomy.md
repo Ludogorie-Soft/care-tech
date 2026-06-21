@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-19T13:14:46.590Z
-> Files: 508 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-21T12:38:52.943Z
+> Files: 510 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -58,7 +58,7 @@
 
 - `CustomersLayout.jsx` — CustomersLayout.jsx (~4646 tok)
 - `SendOfferModal.jsx` — EURO_RATE — renders form (~4082 tok)
-- `UserCartModal.jsx` — EURO_RATE (~1423 tok)
+- `UserCartModal.jsx` — EURO_RATE (~1466 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Dashboard/
 
@@ -76,6 +76,7 @@
 
 ## ../../care-tech-ui/src/pages/admin/Orders/
 
+- `OrderDetailPage.jsx` — OrderDetailPage (~5421 tok)
 - `useOrderUtils.js` — Exports useOrderUtils (~790 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Reviews/
@@ -97,7 +98,8 @@
 ## ../../care-tech-ui/src/redux/
 
 - `leasingSlice.js` — 4 async thunks: fetchLeasingApplications, fetchLeasingById, fetchLeasingStatistics, registerLeasingApplication. registerError stores true (flag only, not backend payload). State: registerStatus, registeredUrl, registeredApplicationId. (~1100 tok)
-- `offersSlice.js` — API routes: GET, PUT, POST (10 endpoints) (~2790 tok)
+- `offersSlice.js` — API routes: GET, PUT, POST (10 endpoints) (~2807 tok)
+- `orderSlice.js` — orderSlice.js (~2806 tok)
 - `paramSlice.js` — API routes: GET, POST, PUT, PATCH, DELETE (15 endpoints) (~5217 tok)
 - `reviewsSlice.js` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~1554 tok)
 - `store.js` — Exports store, persistor (~523 tok)
@@ -309,7 +311,7 @@
 - `FileUploadController.java` — /api/upload/**. @PreAuthorize per method. @CrossOrigin removed — uses global CORS. (~592 tok)
 - `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1905 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
-- `OrderController.java` — Създаване на нова поръчка (~1636 tok)
+- `OrderController.java` — Създаване на нова поръчка (~1745 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
 - `ProductController.java` — Record to hold sort field and direction information (~3884 tok)
 - `ProductSearchController.java` — RestController: ProductSearchController (8 endpoints) (~1491 tok)
@@ -594,11 +596,11 @@
 - `MostApiService.java` — Test API connectivity (~3823 tok)
 - `OrderService.java` — Creates a new order (~5971 tok)
 - `ParameterService.java` — Service: ParameterService (~10236 tok)
-- `PersonalOfferService.java` — Service: PersonalOfferService (~3538 tok)
+- `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Service: ProductSearchService (~1890 tok)
 - `ProductService.java` — Service: ProductService (~14076 tok)
 - `ReviewService.java` — Service: ReviewService (~927 tok)
-- `S3Service.java` — Service: S3Service (~2077 tok)
+- `S3Service.java` — Service: S3Service (~2087 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
 - `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8490 tok)

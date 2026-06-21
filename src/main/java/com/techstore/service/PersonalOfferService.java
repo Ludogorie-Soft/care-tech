@@ -144,14 +144,24 @@ public class PersonalOfferService {
                     OrderCreateRequestDTO.OrderItemRequestDTO item = new OrderCreateRequestDTO.OrderItemRequestDTO();
                     item.setProductId(i.getProductId());
                     item.setQuantity(i.getQuantity() != null ? i.getQuantity() : 1);
-                    item.setCustomPriceEuro(i.getOfferPrice());
-                    if (i.getOriginalPrice() != null && i.getOriginalPrice().compareTo(BigDecimal.ZERO) > 0
-                            && i.getOfferPrice() != null && i.getOfferPrice().compareTo(i.getOriginalPrice()) < 0) {
-                        BigDecimal discountPct = BigDecimal.ONE
-                                .subtract(i.getOfferPrice().divide(i.getOriginalPrice(), 4, java.math.RoundingMode.HALF_UP))
-                                .multiply(new BigDecimal("100"))
-                                .setScale(2, java.math.RoundingMode.HALF_UP);
-                        item.setDiscountPercent(discountPct);
+                    // offerPrice is VAT-inclusive (what the customer pays).
+                    // unitPrice in OrderItem is always pre-VAT — divide by 1.20.
+                    BigDecimal VAT = new BigDecimal("1.20");
+                    if (i.getOfferPrice() != null && i.getOfferPrice().compareTo(BigDecimal.ZERO) > 0) {
+                        BigDecimal unitPrice = i.getOfferPrice().divide(VAT, 2, java.math.RoundingMode.HALF_UP);
+                        item.setCustomPriceEuro(unitPrice);
+                        // originalPrice (from SendOfferModal) is product.finalPrice — also pre-VAT.
+                        // Compare VAT-inclusive prices to get the customer-facing discount %.
+                        if (i.getOriginalPrice() != null && i.getOriginalPrice().compareTo(BigDecimal.ZERO) > 0) {
+                            BigDecimal originalVat = i.getOriginalPrice().multiply(VAT);
+                            if (i.getOfferPrice().compareTo(originalVat) < 0) {
+                                BigDecimal discountPct = BigDecimal.ONE
+                                        .subtract(i.getOfferPrice().divide(originalVat, 4, java.math.RoundingMode.HALF_UP))
+                                        .multiply(new BigDecimal("100"))
+                                        .setScale(2, java.math.RoundingMode.HALF_UP);
+                                item.setDiscountPercent(discountPct);
+                            }
+                        }
                     }
                     return item;
                 }).toList();

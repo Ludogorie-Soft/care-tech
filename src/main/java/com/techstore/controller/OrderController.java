@@ -120,12 +120,20 @@ public class OrderController {
         String filename = key.substring(key.lastIndexOf('/') + 1);
         String extension = filename.contains(".") ? filename.substring(filename.lastIndexOf('.') + 1).toLowerCase() : "";
         String contentType = switch (extension) {
-            case "pdf" -> "application/pdf";
-            case "doc" -> "application/msword";
+            case "pdf"  -> "application/pdf";
+            case "doc"  -> "application/msword";
             case "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-            case "xls" -> "application/vnd.ms-excel";
+            case "xls"  -> "application/vnd.ms-excel";
             case "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            default -> "application/octet-stream";
+            case "odt"  -> "application/vnd.oasis.opendocument.text";
+            case "ods"  -> "application/vnd.oasis.opendocument.spreadsheet";
+            case "rtf"  -> "application/rtf";
+            case "txt"  -> "text/plain";
+            case "jpg", "jpeg" -> "image/jpeg";
+            case "png"  -> "image/png";
+            case "webp" -> "image/webp";
+            case "heic" -> "image/heic";
+            default     -> "application/octet-stream";
         };
 
         return ResponseEntity.ok()
