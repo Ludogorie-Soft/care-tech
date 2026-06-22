@@ -82,6 +82,19 @@
 - **Cart cleanup on offer conversion:** After `orderService.createOrder()`, `cartItemRepository.deleteByUserIdAndProductIdIn(userId, productIds)` removes only the converted products from the cart. `skipCartClear = true` prevents OrderService from clearing the whole cart.
 - **Speedy autocomplete (non-Formik):** Use `useState` + `useRef` for city/office selectors. Dispatch `fetchCities(query)` on city input change; on city select dispatch `fetchOffies(cityId)` and focus the office input. Store both the ID and the display name. Reference: `AcceptOfferModal.jsx`.
 
+## Key Learnings
+
+- **AdImageSectionTwo.jsx** (`care-tech-ui/src/components/home/AdImageSectionTwo.jsx`) holds a hardcoded `slides` array with `{ src, brandId }` pairs for the homepage ad banners. The `brandId` must match the live DB manufacturer ID. Initial values had `f-1.jpg → 201` (Lian-Li) and `f-3.jpg → 194` (LANDE) — should be `205` (Logitech) and `198` (Lenovo). Always verify these IDs against `/api/manufacturers` when changing ad images.
+- **Brand navigation bug pattern:** When a homepage ad image (AdImageSectionTwo) or partner logo (OurPartnersSection) navigates to the wrong brand page, check the hardcoded `brandId` in the `slides`/`partners` array first. These are static JS files, not derived from the DB.
+- **Duplicate `language` param bug:** `fetchProductsByBrand` thunk in productSlice.js previously had `?language=bg` hardcoded in the URL AND passed `language` in the `params` object. Axios appended both → Spring's `validateLanguage()` received `bg,bg` → 400 error. Fix: remove the hardcoded query string from the URL, pass only via `params`.
+
+## Do-Not-Repeat
+
+- [2026-06-21] `FileUploadService.ALLOWED_SUBFOLDERS` е whitelist — при нови upload endpoints ВИНАГИ добавяй новия subfolder в него. Субпапки с `/` (напр. `"blog/covers"`) не минават `SAFE_SUBFOLDER_PATTERN = "^[a-zA-Z0-9_-]+$"`. Ползвай flat имена: `"blog-covers"`, `"blog-images"`.
+- [2026-06-22] Blog/image uploads ТРЯБВА да минават през `S3Service.uploadProductImage()`, НЕ `FileUploadService.uploadFile()`. FileUploadService записва на локален диск и връща `/blog-covers/...` (relative path) — браузърът го резолвира към frontend origin-а, не към бекенда. Само S3 връща пълен `https://` URL който работи навсякъде. ProductService вече ползва S3 (`uploadImageSafely`), следвай същия pattern.
+- [2026-06-21] `dangerouslySetInnerHTML` с admin-въведен HTML съдържание ВИНАГИ изисква DOMPurify sanitization — дори admin-only съдържание, защото компрометиран акаунт е реален вектор.
+- [2026-06-21] Redux slice с shared `posts` array за публичен и admin изглед създава state pollution. Ползвай отделни keys: `publicPosts`/`publicStatus` vs `adminPosts`/`adminStatus`.
+
 ## Decision Log
 
 <!-- Significant technical decisions with rationale. Why X was chosen over Y. -->

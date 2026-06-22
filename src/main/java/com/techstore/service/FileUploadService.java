@@ -40,7 +40,7 @@ public class FileUploadService {
     // Constants
     private static final long MAX_TOTAL_STORAGE = 5L * 1024 * 1024 * 1024; // 5GB
     private static final int MAX_FILES_PER_FOLDER = 10000;
-    private static final Set<String> ALLOWED_SUBFOLDERS = Set.of("products", "categories", "brands", "documents");
+    private static final Set<String> ALLOWED_SUBFOLDERS = Set.of("products", "categories", "brands", "documents", "blog-covers", "blog-images");
 
     // Validation patterns
     private static final Pattern SAFE_FILENAME_PATTERN = Pattern.compile("^[a-zA-Z0-9._-]+$");

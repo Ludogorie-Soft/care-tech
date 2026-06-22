@@ -35,9 +35,11 @@ public abstract class BaseEntity {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 
-    @Column(nullable = true, updatable = false, length = 100)
-    private String createdBy = "system";
+    @CreatedBy
+    @Column(updatable = false, length = 100)
+    private String createdBy;
 
-    @Column(nullable = true, length = 100)
-    private String lastModifiedBy = "system";
+    @LastModifiedBy
+    @Column(length = 100)
+    private String lastModifiedBy;
 }

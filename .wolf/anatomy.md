@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-21T12:38:52.943Z
-> Files: 510 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-22T11:53:47.265Z
+> Files: 553 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -20,7 +20,7 @@
 
 ## ../../care-tech-ui/src/
 
-- `App.js` — Declares ScrollToTop (~2793 tok)
+- `App.js` — Declares ScrollToTop (~2884 tok)
 - `index.css` — Styles: 37 rules (~2068 tok)
 
 ## ../../care-tech-ui/src/components/
@@ -31,6 +31,8 @@
 
 ## ../../care-tech-ui/src/components/home/
 
+- `AdImageSectionTwo.jsx` — slides (~993 tok)
+- `OurPartnersSection.jsx` — PrevArrow (~1619 tok)
 - `PromoProductsSection.jsx` — PromoProductsSection (~2722 tok)
 - `ReviewsSlider.jsx` — PrevArrow (~1554 tok)
 
@@ -45,14 +47,25 @@
 
 ## ../../care-tech-ui/src/pages/
 
+- `Blog.jsx` — formatDate (~2633 tok)
+- `BlogPostPage.jsx` — formatDate (~1801 tok)
 - `Cart.jsx` — EURO_RATE (~16680 tok)
 - `Category.jsx` — Category (~5536 tok)
+- `ComingSoonPage.jsx` — ComingSoonPage (~385 tok)
 - `OurClients.jsx` — clients (~2686 tok)
 - `ProductPage.jsx` — EURO_RATE (~10208 tok)
 
 ## ../../care-tech-ui/src/pages/admin/
 
 - `Dashboard.jsx` — Dashboard (~622 tok)
+
+## ../../care-tech-ui/src/pages/admin/Blog/
+
+- `BlogCategoryManager.jsx` — CategoryModal — renders form (~4108 tok)
+- `BlogLayout.jsx` — formatDate — renders table (~5184 tok)
+- `BlogPostModal.jsx` — TagPicker — renders form (~7210 tok)
+- `BlogPostPreviewModal.jsx` — formatDate (~1529 tok)
+- `BlogTagManager.jsx` — TagModal — renders form (~3027 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Customers/
 
@@ -63,7 +76,7 @@
 ## ../../care-tech-ui/src/pages/admin/Dashboard/
 
 - `DashboardLayout.jsx` — convertStatsToMetrics (~2511 tok)
-- `Sidebar.jsx` — Sidebar (~1193 tok)
+- `Sidebar.jsx` — Sidebar (~1231 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Leasing/
 
@@ -97,17 +110,22 @@
 
 ## ../../care-tech-ui/src/redux/
 
+- `blogSlice.js` — ── Public thunks ────────────────────────────────────────────────────────────── (~4239 tok)
 - `leasingSlice.js` — 4 async thunks: fetchLeasingApplications, fetchLeasingById, fetchLeasingStatistics, registerLeasingApplication. registerError stores true (flag only, not backend payload). State: registerStatus, registeredUrl, registeredApplicationId. (~1100 tok)
 - `offersSlice.js` — API routes: GET, PUT, POST (10 endpoints) (~2807 tok)
 - `orderSlice.js` — orderSlice.js (~2806 tok)
 - `paramSlice.js` — API routes: GET, POST, PUT, PATCH, DELETE (15 endpoints) (~5217 tok)
+- `productSlice.js` — API routes: GET, POST, PUT, DELETE (12 endpoints) (~6019 tok)
 - `reviewsSlice.js` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~1554 tok)
-- `store.js` — Exports store, persistor (~523 tok)
+- `store.js` — Exports store, persistor (~540 tok)
 
 ## ../../care-tech-ui/src/utils/
 
 - `loginRedirect.js` — Exports setLoginRedirect, consumeLoginRedirect (~73 tok)
+- `partners.js` — Exports partners (~425 tok)
+- `slugify.js` — Exports slugify (~217 tok)
 - `tokenRefresh.js` — Exports setupTokenRefresh (~568 tok)
+- `utils.js` — Exports SITE_URL, specificationsMap, ORDER_FORMS, getStatusBadge + 4 more (~488 tok)
 
 ## ./
 
@@ -115,6 +133,7 @@
 - `.DS_Store` (~2186 tok)
 - `.gitattributes` — Git attributes (~11 tok)
 - `.gitignore` — Git ignore rules (~124 tok)
+- `BLOG_PLAN.md` — План: Блог функционалност (~1556 tok)
 - `categories_202605130941.sql` (~14427 tok)
 - `CLAUDE.md` — OpenWolf (~57 tok)
 - `database_backup_script.txt` (~121 tok)
@@ -290,7 +309,7 @@
 - `S3Config.java` — Configuration: S3Config (~289 tok)
 - `SearchConfig.java` — Configuration: SearchConfig (~424 tok)
 - `SearchIndexManager.java` — Component: SearchIndexManager (~4470 tok)
-- `SecurityConfig.java` — Configuration: SecurityConfig (~2408 tok)
+- `SecurityConfig.java` — Configuration: SecurityConfig (~2485 tok)
 - `ShippingConfig.java` — Изчислява цената на доставка (~379 tok)
 - `SlugRegenerationRunner.java` — Component: SlugRegenerationRunner (~401 tok)
 - `SpeedyConfig.java` — Configuration: SpeedyConfig (~136 tok)
@@ -303,12 +322,15 @@
 
 - `AdminController.java` — Get all orders with pagination and sorting (~5433 tok)
 - `AuthController.java` — RestController: AuthController (9 endpoints) (~1192 tok)
+- `BlogCategoryController.java` — RestController: BlogCategoryController (6 endpoints) (~750 tok)
+- `BlogPostController.java` — RestController: BlogPostController (9 endpoints) (~1416 tok)
+- `BlogTagController.java` — RestController: BlogTagController (4 endpoints) (~599 tok)
 - `CacheClearController.java` — POST /api/internal/cache/clear-all. @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')") + URL-level guard. (~264 tok)
 - `CartController.java` — RestController: CartController (6 endpoints) (~2208 tok)
 - `CategoryController.java` — RestController: CategoryController (5 endpoints) (~854 tok)
 - `CategoryReorganizationController.java` — CategoryReorganizationController (~979 tok)
 - `ContactController.java` — RestController: ContactController (2 endpoints) (~331 tok)
-- `FileUploadController.java` — /api/upload/**. @PreAuthorize per method. @CrossOrigin removed — uses global CORS. (~592 tok)
+- `FileUploadController.java` — RestController: FileUploadController (7 endpoints) (~831 tok)
 - `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1905 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
 - `OrderController.java` — Създаване на нова поръчка (~1745 tok)
@@ -316,6 +338,7 @@
 - `ProductController.java` — Record to hold sort field and direction information (~3884 tok)
 - `ProductSearchController.java` — RestController: ProductSearchController (8 endpoints) (~1491 tok)
 - `ReviewController.java` — RestController: ReviewController (6 endpoints) (~709 tok)
+- `SitemapController.java` — RestController: SitemapController (1 endpoints) (~1292 tok)
 - `SpeedyController.java` — RestController: SpeedyController (4 endpoints) (~1716 tok)
 - `SubscriptionController.java` — RestController: SubscriptionController (5 endpoints) (~562 tok)
 - `TbiLeasingController.java` — POST /api/tbi/register (~846 tok)
@@ -363,6 +386,9 @@
 ## src/main/java/com/techstore/dto/request/
 
 - `AcceptOfferRequestDto.java` — Class: AcceptOfferRequestDto (~307 tok)
+- `BlogCategoryRequestDto.java` — Class: BlogCategoryRequestDto (~254 tok)
+- `BlogPostRequestDto.java` — Class: BlogPostRequestDto (~498 tok)
+- `BlogTagRequestDto.java` — Class: BlogTagRequestDto (~175 tok)
 - `CartItemRequestDto.java` — Class: CartItemRequestDto (~134 tok)
 - `CategoryRequestDto.java` — Class: CategoryRequestDto (~289 tok)
 - `CategoryRequestFromExternalDto.java` — Class: CategoryRequestFromExternalDto (~96 tok)
@@ -405,6 +431,10 @@
 
 ## src/main/java/com/techstore/dto/response/
 
+- `BlogCategoryResponseDto.java` — BlogCategoryResponseDto: from (~358 tok)
+- `BlogPostResponseDto.java` — BlogPostResponseDto: from (~705 tok)
+- `BlogPostSummaryDto.java` — BlogPostSummaryDto: from (~478 tok)
+- `BlogTagResponseDto.java` — BlogTagResponseDto: from (~144 tok)
 - `CartItemResponseDto.java` — Class: CartItemResponseDto (~143 tok)
 - `CartSummaryDto.java` — Class: CartSummaryDto (~75 tok)
 - `CategoryResponseDTO.java` — Class: CategoryResponseDTO (~197 tok)
@@ -492,7 +522,10 @@
 
 ## src/main/java/com/techstore/entity/
 
-- `BaseEntity.java` — Entity: BaseEntity (~411 tok)
+- `BaseEntity.java` — Entity: BaseEntity (~378 tok)
+- `BlogCategory.java` — Entity: BlogCategory (~271 tok)
+- `BlogPost.java` — Entity: BlogPost (~511 tok)
+- `BlogTag.java` — Entity: BlogTag (~99 tok)
 - `CartItem.java` — Entity: CartItem (~242 tok)
 - `Category.java` — Entity: Category (~884 tok)
 - `LeasingApplication.java` — order_id returned by TBI RegisterApplication (~1252 tok)
@@ -516,6 +549,7 @@
 
 ## src/main/java/com/techstore/enums/
 
+- `BlogPostStatus.java` — Class: BlogPostStatus (~27 tok)
 - `OrderStatus.java` — Class: OrderStatus (~54 tok)
 - `PaymentMethod.java` — PaymentMethod: getDisplayName (~133 tok)
 - `PaymentStatus.java` — Class: PaymentStatus (~37 tok)
@@ -561,6 +595,9 @@
 
 ## src/main/java/com/techstore/repository/
 
+- `BlogCategoryRepository.java` — Repository: BlogCategoryRepository (~167 tok)
+- `BlogPostRepository.java` — Repository: BlogPostRepository (~616 tok)
+- `BlogTagRepository.java` — Repository: BlogTagRepository (~220 tok)
 - `CartItemRepository.java` — Find users with abandoned carts: (~641 tok)
 - `CategoryRepository.java` — Repository: CategoryRepository (~316 tok)
 - `LeasingApplicationRepository.java` — Repository: LeasingApplicationRepository (~376 tok)
@@ -586,12 +623,15 @@
 - `AbandonedCartService.java` — Service: AbandonedCartService (~624 tok)
 - `AsbisApiService.java` — Extract categories from Asbis products (~9352 tok)
 - `AuthService.java` — Service: AuthService (~6388 tok)
+- `BlogCategoryService.java` — Service: BlogCategoryService (~1803 tok)
+- `BlogPostService.java` — Service: BlogPostService (~3676 tok)
+- `BlogTagService.java` — Service: BlogTagService (~1086 tok)
 - `CartService.java` — Service: CartService (~1669 tok)
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~13424 tok)
 - `CategoryService.java` — Service: CategoryService (~4425 tok)
 - `CronJobService.java` — Service: CronJobService (~788 tok)
 - `EmailService.java` — Service for sending email notifications (~5028 tok)
-- `FileUploadService.java` — Service: FileUploadService (~7252 tok)
+- `FileUploadService.java` — Service: FileUploadService (~7260 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3823 tok)
 - `OrderService.java` — Creates a new order (~5971 tok)
@@ -600,7 +640,7 @@
 - `ProductSearchService.java` — Service: ProductSearchService (~1890 tok)
 - `ProductService.java` — Service: ProductService (~14076 tok)
 - `ReviewService.java` — Service: ReviewService (~927 tok)
-- `S3Service.java` — Service: S3Service (~2087 tok)
+- `S3Service.java` — Service: S3Service (~2218 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
 - `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8490 tok)
@@ -628,6 +668,7 @@
 - `JwtUtil.java` — Component: JwtUtil (~1188 tok)
 - `LogHelper.java` — Service: LogHelper (~398 tok)
 - `SecurityHelper.java` — Component: SecurityHelper (~640 tok)
+- `SlugUtils.java` — SlugUtils: generateSlug (~624 tok)
 - `SyncHelper.java` — Find category by hierarchical path (e.g., "zahranvaniya-i-baterii/za-postoyanno-naprezhenie") (~2631 tok)
 - `TbiEncryptionUtil.java` — TBI Fusion Pay encryption utility. (~1015 tok)
 
@@ -656,7 +697,12 @@
 - `V24__add_product_reviews.sql` — SQL: tables: product_reviews (~219 tok)
 - `V25__review_status_to_varchar.sql` (~73 tok)
 - `V26__add_shipping_details_to_personal_offers.sql` (~22 tok)
+- `V27__add_blog_posts.sql` — SQL: tables: blog_posts (~174 tok)
+- `V28__drop_redundant_blog_slug_index.sql` — The UNIQUE constraint on blog_posts.slug already creates an implicit B-tree index. (~61 tok)
+- `V29__add_blog_categories.sql` — SQL: tables: blog_categories (~168 tok)
 - `V3__add_most_key_to_product.sql` — SQL: 1 alter(s) (~42 tok)
+- `V30__add_blog_tags.sql` — SQL: tables: blog_tags, blog_post_tags (~165 tok)
+- `V31__upgrade_blog_posts.sql` — Add new columns (~267 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)

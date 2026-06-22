@@ -66,8 +66,14 @@ public class S3Service {
     }
 
     public void deleteImage(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) return;
         try {
             String key = extractKeyFromUrl(imageUrl);
+
+            if (key.isBlank()) {
+                log.debug("Skipping S3 delete — URL is not an S3 object: {}", imageUrl);
+                return;
+            }
 
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                     .bucket(bucketName)
@@ -203,8 +209,14 @@ public class S3Service {
 
     private String extractKeyFromUrl(String imageUrl) {
         // Extract key from URL like: https://bucket.s3.region.amazonaws.com/key
+        // ".amazonaws.com/" is 15 characters — use +15 to skip past the trailing slash
         try {
-            return imageUrl.substring(imageUrl.indexOf(".amazonaws.com/") + 14);
+            int idx = imageUrl.indexOf(".amazonaws.com/");
+            if (idx == -1) {
+                log.warn("URL is not an S3 URL, cannot extract key: {}", imageUrl);
+                return "";
+            }
+            return imageUrl.substring(idx + 15);
         } catch (Exception e) {
             log.warn("Could not extract key from URL: {}", imageUrl);
             return "";

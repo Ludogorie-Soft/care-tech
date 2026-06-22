@@ -108,6 +108,10 @@ public class SecurityConfig {
                         .requestMatchers("/og/**").permitAll()
                         .requestMatchers("/api/sitemap.xml").permitAll()
 
+                        // ── Blog: GET is public; view tracking is public; write ops via /api/admin/blog/** ──
+                        .requestMatchers(HttpMethod.GET, "/api/blog/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/blog/*/view").permitAll()
+
                         // ── Reviews: GET is public, POST requires auth ───────────────────────────
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/reviews").authenticated()

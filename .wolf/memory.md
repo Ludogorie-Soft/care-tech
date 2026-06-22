@@ -1267,3 +1267,356 @@
 | 15:26 | Session end: 30 writes across 13 files (AcceptOfferModal.jsx, personal_offer_flow.md, speedy_autocomplete_pattern.md, MEMORY.md, CartItemRepository.java) | 20 reads | ~22033 tok |
 | 15:38 | Edited src/main/java/com/techstore/controller/OrderController.java | modified switch() | ~232 |
 | 15:41 | Session end: 31 writes across 14 files (AcceptOfferModal.jsx, personal_offer_flow.md, speedy_autocomplete_pattern.md, MEMORY.md, CartItemRepository.java) | 21 reads | ~23917 tok |
+| 16:02 | Session end: 31 writes across 14 files (AcceptOfferModal.jsx, personal_offer_flow.md, speedy_autocomplete_pattern.md, MEMORY.md, CartItemRepository.java) | 25 reads | ~24687 tok |
+| 16:04 | Session end: 31 writes across 14 files (AcceptOfferModal.jsx, personal_offer_flow.md, speedy_autocomplete_pattern.md, MEMORY.md, CartItemRepository.java) | 25 reads | ~24687 tok |
+| 16:06 | Edited ../../care-tech-ui/src/utils/partners.js | reduced (-74 lines) | ~425 |
+
+## Session: 2026-06-21 16:08
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:08 | Edited ../../care-tech-ui/src/components/home/OurPartnersSection.jsx | "${p?.website}" → "/brands/${p.brandId}" | ~19 |
+| 16:08 | Session end: 1 writes across 1 files (OurPartnersSection.jsx) | 1 reads | ~19 tok |
+| 16:12 | Edited ../../care-tech-ui/src/redux/productSlice.js | 3→3 lines | ~39 |
+| 16:12 | Session end: 2 writes across 2 files (OurPartnersSection.jsx, productSlice.js) | 6 reads | ~19789 tok |
+| 16:17 | Session end: 2 writes across 2 files (OurPartnersSection.jsx, productSlice.js) | 7 reads | ~19789 tok |
+| 16:20 | Session end: 2 writes across 2 files (OurPartnersSection.jsx, productSlice.js) | 7 reads | ~19789 tok |
+
+## Session: 2026-06-21 16:24
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:25 | Edited ../../care-tech-ui/src/components/home/AdImageSectionTwo.jsx | 7→7 lines | ~73 |
+| 16:25 | Session end: 1 writes across 1 files (AdImageSectionTwo.jsx) | 1 reads | ~73 tok |
+| 16:25 | Session end: 1 writes across 1 files (AdImageSectionTwo.jsx) | 1 reads | ~73 tok |
+| 10:30 | Fixed AdImageSectionTwo.jsx: f-1.jpg brandId 201→205 (Logitech), f-3.jpg brandId 194→198 (Lenovo). Wrong IDs caused Logitech→Lian-Li and Lenovo→LANDE navigation | care-tech-ui/src/components/home/AdImageSectionTwo.jsx | fixed | ~200 |
+| 16:26 | Session end: 1 writes across 1 files (AdImageSectionTwo.jsx) | 1 reads | ~73 tok |
+| 16:29 | Session end: 1 writes across 1 files (AdImageSectionTwo.jsx) | 2 reads | ~73 tok |
+| 16:31 | Created BLOG_PLAN.md | — | ~1543 |
+| 16:31 | Created src/main/resources/db/migration/V27__add_blog_posts.sql | — | ~174 |
+| 16:31 | Edited src/main/resources/db/migration/V27__add_blog_posts.sql | 4→4 lines | ~43 |
+| 16:32 | Created src/main/java/com/techstore/entity/BlogPost.java | — | ~220 |
+| 16:32 | Created src/main/java/com/techstore/dto/request/BlogPostRequestDto.java | — | ~214 |
+| 16:32 | Created src/main/java/com/techstore/dto/response/BlogPostResponseDto.java | — | ~285 |
+| 16:32 | Created src/main/java/com/techstore/repository/BlogPostRepository.java | — | ~167 |
+| 16:33 | Created src/main/java/com/techstore/service/BlogPostService.java | — | ~2239 |
+| 16:33 | Created src/main/java/com/techstore/controller/BlogPostController.java | — | ~962 |
+| 16:33 | Edited src/main/java/com/techstore/config/SecurityConfig.java | 1→4 lines | ~77 |
+| 16:33 | Edited src/main/java/com/techstore/controller/FileUploadController.java | expanded (+16 lines) | ~268 |
+| 16:34 | Created ../../care-tech-ui/src/redux/blogSlice.js | — | ~1669 |
+| 16:34 | Edited ../../care-tech-ui/src/redux/store.js | added 1 import(s) | ~24 |
+| 16:34 | Edited ../../care-tech-ui/src/redux/store.js | 2→3 lines | ~15 |
+| 16:36 | Created ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | — | ~4334 |
+| 16:36 | Created ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | — | ~2660 |
+| 16:37 | Edited ../../care-tech-ui/src/pages/admin/Dashboard/Sidebar.jsx | 10→11 lines | ~42 |
+| 16:37 | Edited ../../care-tech-ui/src/pages/admin/Dashboard/Sidebar.jsx | 6→11 lines | ~72 |
+| 16:38 | Edited ../../care-tech-ui/src/App.js | added 1 import(s) | ~35 |
+| 16:38 | Edited ../../care-tech-ui/src/App.js | 2→3 lines | ~41 |
+| 16:38 | Created ../../care-tech-ui/src/pages/Blog.jsx | — | ~1565 |
+| 16:39 | Edited ../../care-tech-ui/src/pages/Blog.jsx | 6→6 lines | ~52 |
+| 16:39 | Created ../../care-tech-ui/src/pages/BlogPostPage.jsx | — | ~1292 |
+| 16:40 | Created ../../care-tech-ui/src/pages/ComingSoonPage.jsx | — | ~385 |
+| 16:40 | Edited ../../care-tech-ui/src/App.js | added 2 import(s) | ~39 |
+| 16:40 | Edited ../../care-tech-ui/src/App.js | 7→8 lines | ~198 |
+| 16:42 | Implemented full blog feature: V27 migration, BlogPost entity, DTOs, repository, service, controller, SecurityConfig update, FileUploadController blog endpoints, blogSlice.js, BlogLayout.jsx, BlogPostModal.jsx, Blog.jsx rewrite, BlogPostPage.jsx, ComingSoonPage.jsx, Sidebar + App.js routes | backend + care-tech-ui | complete | ~4000 |
+| 16:42 | Edited BLOG_PLAN.md | expanded (+7 lines) | ~244 |
+| 16:42 | Session end: 28 writes across 20 files (AdImageSectionTwo.jsx, BLOG_PLAN.md, V27__add_blog_posts.sql, BlogPost.java, BlogPostRequestDto.java) | 14 reads | ~26090 tok |
+| 16:45 | Session end: 28 writes across 20 files (AdImageSectionTwo.jsx, BLOG_PLAN.md, V27__add_blog_posts.sql, BlogPost.java, BlogPostRequestDto.java) | 21 reads | ~39067 tok |
+| 21:14 | Edited src/main/java/com/techstore/service/FileUploadService.java | inline fix | ~39 |
+| 21:14 | Edited src/main/java/com/techstore/controller/FileUploadController.java | "blog/covers" → "blog-covers" | ~21 |
+| 21:14 | Edited src/main/java/com/techstore/controller/FileUploadController.java | "blog/images" → "blog-images" | ~21 |
+| 21:16 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | added 1 import(s) | ~126 |
+| 21:16 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | inline fix | ~33 |
+| 21:16 | Edited src/main/java/com/techstore/controller/BlogPostController.java | 8→8 lines | ~103 |
+| 21:16 | Edited src/main/java/com/techstore/controller/BlogPostController.java | 9→9 lines | ~126 |
+| 21:17 | Created src/main/java/com/techstore/dto/request/BlogPostRequestDto.java | — | ~305 |
+| 21:17 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 import(s) | ~176 |
+| 21:17 | Edited src/main/java/com/techstore/service/BlogPostService.java | added error handling | ~135 |
+| 21:17 | Edited src/main/java/com/techstore/service/BlogPostService.java | added error handling | ~106 |
+| 21:17 | Created ../../care-tech-ui/src/redux/blogSlice.js | — | ~2242 |
+| 21:18 | Edited ../../care-tech-ui/src/pages/Blog.jsx | 3→3 lines | ~51 |
+| 21:18 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | inline fix | ~32 |
+| 21:18 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 5→5 lines | ~29 |
+| 21:18 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 2→2 lines | ~57 |
+| 21:18 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | clearBlogError() → clearAdminError() | ~70 |
+| 21:18 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | inline fix | ~23 |
+| 21:19 | Blog security audit fixes: ALLOWED_SUBFOLDERS (blog-covers/blog-images), DOMPurify XSS, size cap, @Size/@Pattern DTO, DataIntegrityViolationException, split Redux state (publicPosts/adminPosts) | FileUploadService, BlogPostRequestDto, BlogPostController, BlogPostService, blogSlice.js, BlogPostPage.jsx, Blog.jsx, BlogLayout.jsx, BlogPostModal.jsx | complete | ~1200 |
+| 21:19 | Session end: 46 writes across 21 files (AdImageSectionTwo.jsx, BLOG_PLAN.md, V27__add_blog_posts.sql, BlogPost.java, BlogPostRequestDto.java) | 21 reads | ~42834 tok |
+| 21:22 | Session end: 46 writes across 21 files (AdImageSectionTwo.jsx, BLOG_PLAN.md, V27__add_blog_posts.sql, BlogPost.java, BlogPostRequestDto.java) | 25 reads | ~43511 tok |
+
+## Session: 2026-06-21 21:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 21:25 | Created src/main/java/com/techstore/dto/response/BlogPostSummaryDto.java | — | ~265 |
+| 21:25 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 import(s) | ~54 |
+| 21:25 | Edited src/main/java/com/techstore/service/BlogPostService.java | 3→2 lines | ~15 |
+| 21:25 | Edited src/main/java/com/techstore/service/BlogPostService.java | modified getPublishedPosts() | ~634 |
+| 21:26 | Edited src/main/java/com/techstore/service/BlogPostService.java | modified generateSlug() | ~194 |
+| 21:26 | Edited src/main/java/com/techstore/controller/BlogPostController.java | added 1 import(s) | ~43 |
+| 21:26 | Edited src/main/java/com/techstore/controller/BlogPostController.java | 8→8 lines | ~102 |
+| 21:26 | Edited src/main/java/com/techstore/controller/BlogPostController.java | 9→9 lines | ~126 |
+| 21:26 | Edited ../../care-tech-ui/src/redux/blogSlice.js | 14→10 lines | ~166 |
+| 21:26 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | added 1 condition(s) | ~36 |
+| 21:26 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | modified if() | ~15 |
+| 21:26 | Edited ../../care-tech-ui/src/pages/Blog.jsx | inline fix | ~23 |
+| 21:27 | Session end: 12 writes across 7 files (BlogPostSummaryDto.java, BlogPostService.java, BlogPostController.java, blogSlice.js, BlogLayout.jsx) | 4 reads | ~4426 tok |
+| 21:29 | Session end: 12 writes across 7 files (BlogPostSummaryDto.java, BlogPostService.java, BlogPostController.java, blogSlice.js, BlogLayout.jsx) | 7 reads | ~5431 tok |
+| 21:30 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 4→5 lines | ~72 |
+| 21:31 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | added 1 condition(s) | ~109 |
+| 21:31 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 5→10 lines | ~138 |
+| 21:31 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 2 import(s) | ~32 |
+| 21:31 | Edited src/main/java/com/techstore/service/BlogPostService.java | 1→4 lines | ~60 |
+| 21:31 | Edited src/main/java/com/techstore/service/BlogPostService.java | modified catch() | ~113 |
+| 21:31 | Edited src/main/java/com/techstore/service/BlogPostService.java | added error handling | ~165 |
+| 21:31 | Edited ../../care-tech-ui/src/redux/blogSlice.js | 5→4 lines | ~52 |
+| 21:31 | Edited ../../care-tech-ui/src/redux/blogSlice.js | 5→4 lines | ~52 |
+| 21:31 | Edited ../../care-tech-ui/src/pages/Blog.jsx | 7→7 lines | ~91 |
+| 21:32 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | 4→4 lines | ~74 |
+| 21:32 | Edited src/main/java/com/techstore/dto/request/BlogPostRequestDto.java | 3→6 lines | ~82 |
+| 21:32 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | 8→11 lines | ~187 |
+| 21:32 | Session end: 25 writes across 9 files (BlogPostSummaryDto.java, BlogPostService.java, BlogPostController.java, blogSlice.js, BlogLayout.jsx) | 8 reads | ~6690 tok |
+| 21:37 | Session end: 25 writes across 9 files (BlogPostSummaryDto.java, BlogPostService.java, BlogPostController.java, blogSlice.js, BlogLayout.jsx) | 14 reads | ~9726 tok |
+| 21:39 | Created src/main/resources/db/migration/V28__drop_redundant_blog_slug_index.sql | — | ~61 |
+| 21:39 | Edited src/main/java/com/techstore/repository/BlogPostRepository.java | expanded (+6 lines) | ~243 |
+| 21:39 | Edited src/main/java/com/techstore/controller/SitemapController.java | added 1 import(s) | ~54 |
+| 21:39 | Edited src/main/java/com/techstore/controller/SitemapController.java | 2→3 lines | ~45 |
+| 21:39 | Edited src/main/java/com/techstore/controller/SitemapController.java | modified for() | ~120 |
+| 21:39 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 import(s) | ~39 |
+| 21:39 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 condition(s) | ~479 |
+| 21:40 | Edited src/main/java/com/techstore/service/BlogPostService.java | modified resolveSlug() | ~214 |
+| 21:40 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | CSS: hover | ~139 |
+| 21:40 | Edited ../../care-tech-ui/src/redux/blogSlice.js | removed 13 lines | ~8 |
+| 21:40 | Edited ../../care-tech-ui/src/redux/blogSlice.js | removed 15 lines | ~8 |
+| 21:40 | Edited ../../care-tech-ui/src/utils/utils.js | 1→3 lines | ~38 |
+| 21:40 | Edited ../../care-tech-ui/src/pages/Blog.jsx | added 1 import(s) | ~32 |
+| 21:40 | Edited ../../care-tech-ui/src/pages/Blog.jsx | 6→6 lines | ~44 |
+| 21:40 | Edited ../../care-tech-ui/src/pages/Blog.jsx | "https://www.caretech.bg/b" → "${SITE_URL}/blog" | ~11 |
+| 21:40 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | added 1 import(s) | ~36 |
+| 21:40 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | 4→4 lines | ~54 |
+| 21:40 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | 7→7 lines | ~68 |
+| 21:41 | Session end: 43 writes across 13 files (BlogPostSummaryDto.java, BlogPostService.java, BlogPostController.java, blogSlice.js, BlogLayout.jsx) | 16 reads | ~11509 tok |
+| 21:46 | Session end: 43 writes across 13 files (BlogPostSummaryDto.java, BlogPostService.java, BlogPostController.java, blogSlice.js, BlogLayout.jsx) | 18 reads | ~22258 tok |
+| 21:47 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 11→12 lines | ~44 |
+| 21:47 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | added 1 import(s) | ~90 |
+| 21:47 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | added error handling | ~82 |
+| 21:47 | Edited src/main/java/com/techstore/service/S3Service.java | added 1 condition(s) | ~171 |
+| 21:48 | Edited src/main/java/com/techstore/service/BlogPostService.java | modified deletePost() | ~257 |
+| 21:48 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 2 import(s) | ~51 |
+| 21:48 | Edited src/main/java/com/techstore/service/BlogPostService.java | 4→5 lines | ~85 |
+| 21:48 | Edited src/main/java/com/techstore/service/BlogPostService.java | modified catch() | ~268 |
+| 21:48 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 condition(s) | ~128 |
+| 21:48 | Edited src/main/java/com/techstore/service/BlogPostService.java | modified deleteInlineImages() | ~85 |
+| 21:48 | Edited src/main/java/com/techstore/controller/BlogPostController.java | added 1 import(s) | ~31 |
+| 21:48 | Edited src/main/java/com/techstore/controller/BlogPostController.java | added 1 import(s) | ~56 |
+| 21:48 | Edited src/main/java/com/techstore/controller/BlogPostController.java | 2→3 lines | ~42 |
+| 21:49 | Session end: 56 writes across 14 files (BlogPostSummaryDto.java, BlogPostService.java, BlogPostController.java, blogSlice.js, BlogLayout.jsx) | 18 reads | ~23733 tok |
+| 21:52 | Session end: 56 writes across 14 files (BlogPostSummaryDto.java, BlogPostService.java, BlogPostController.java, blogSlice.js, BlogLayout.jsx) | 19 reads | ~29844 tok |
+| 21:52 | Edited src/main/java/com/techstore/service/S3Service.java | added 2 condition(s) | ~228 |
+| 21:52 | Edited src/main/java/com/techstore/controller/SitemapController.java | 11→12 lines | ~148 |
+| 21:52 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 5→6 lines | ~89 |
+| 21:52 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 10→13 lines | ~104 |
+| 21:52 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | CSS: disabled | ~186 |
+| 21:53 | Session end: 61 writes across 14 files (BlogPostSummaryDto.java, BlogPostService.java, BlogPostController.java, blogSlice.js, BlogLayout.jsx) | 19 reads | ~30625 tok |
+
+## Session: 2026-06-21 22:01
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 22:30 | Blog feature: 5 audit rounds complete, all CRITICAL/HIGH fixed, both builds verified | BlogPostService, BlogLayout, blogSlice, S3Service, SitemapController + 8 more | SUCCESS — production-ready | ~12000 |
+
+## Session: 2026-06-22 12:38
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:41 | Edited src/main/java/com/techstore/dto/request/BlogPostRequestDto.java | 3→3 lines | ~65 |
+| 09:45 | Fixed coverImageUrl validation: @Pattern was https-only but FileUploadService returns /blog-covers/... relative paths | BlogPostRequestDto.java | Fixed - pattern now allows relative paths | ~150 |
+| 12:41 | Session end: 1 writes across 1 files (BlogPostRequestDto.java) | 10 reads | ~19989 tok |
+| 12:53 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 3→4 lines | ~65 |
+| 12:53 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | confirm() → setConfirmPost() | ~128 |
+| 12:53 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | CSS: hover, hover, hover | ~466 |
+| 12:54 | Session end: 4 writes across 2 files (BlogPostRequestDto.java, BlogLayout.jsx) | 11 reads | ~20648 tok |
+| 12:58 | Session end: 4 writes across 2 files (BlogPostRequestDto.java, BlogLayout.jsx) | 21 reads | ~27162 tok |
+| 12:58 | Edited src/main/java/com/techstore/controller/FileUploadController.java | added 1 import(s) | ~178 |
+| 12:58 | Edited src/main/java/com/techstore/controller/FileUploadController.java | uploadFile() → uploadProductImage() | ~218 |
+| 12:59 | Edited src/main/java/com/techstore/dto/request/BlogPostRequestDto.java | 3→3 lines | ~56 |
+| 09:55 | Fixed blog image uploads: routed /upload/blog-cover and /upload/blog-image through S3Service instead of FileUploadService; reverted coverImageUrl @Pattern to https-only | FileUploadController.java, BlogPostRequestDto.java | Fixed | ~100 |
+| 12:59 | Session end: 7 writes across 3 files (BlogPostRequestDto.java, BlogLayout.jsx, FileUploadController.java) | 21 reads | ~27646 tok |
+| 13:20 | Session end: 7 writes across 3 files (BlogPostRequestDto.java, BlogLayout.jsx, FileUploadController.java) | 23 reads | ~27820 tok |
+| 13:36 | Created src/main/resources/db/migration/V29__add_blog_categories.sql | — | ~168 |
+| 13:37 | Created src/main/resources/db/migration/V30__add_blog_tags.sql | — | ~165 |
+| 13:37 | Created src/main/resources/db/migration/V31__upgrade_blog_posts.sql | — | ~267 |
+| 13:37 | Created src/main/java/com/techstore/enums/BlogPostStatus.java | — | ~27 |
+| 13:37 | Created src/main/java/com/techstore/entity/BlogCategory.java | — | ~254 |
+| 13:37 | Created src/main/java/com/techstore/entity/BlogTag.java | — | ~99 |
+| 13:37 | Created src/main/java/com/techstore/entity/BlogPost.java | — | ~492 |
+| 13:37 | Created src/main/java/com/techstore/repository/BlogCategoryRepository.java | — | ~167 |
+| 13:38 | Created src/main/java/com/techstore/repository/BlogTagRepository.java | — | ~167 |
+| 13:38 | Created src/main/java/com/techstore/repository/BlogPostRepository.java | — | ~477 |
+| 13:38 | Created src/main/java/com/techstore/dto/request/BlogCategoryRequestDto.java | — | ~254 |
+| 13:38 | Created src/main/java/com/techstore/dto/response/BlogCategoryResponseDto.java | — | ~360 |
+| 13:38 | Created src/main/java/com/techstore/dto/request/BlogTagRequestDto.java | — | ~175 |
+| 13:38 | Created src/main/java/com/techstore/dto/response/BlogTagResponseDto.java | — | ~122 |
+| 13:38 | Created src/main/java/com/techstore/dto/request/BlogPostRequestDto.java | — | ~498 |
+| 13:38 | Created src/main/java/com/techstore/dto/response/BlogPostResponseDto.java | — | ~701 |
+| 13:39 | Created src/main/java/com/techstore/dto/response/BlogPostSummaryDto.java | — | ~474 |
+| 13:39 | Created src/main/java/com/techstore/service/BlogCategoryService.java | — | ~2346 |
+| 13:39 | Created src/main/java/com/techstore/service/BlogTagService.java | — | ~1595 |
+| 13:40 | Created src/main/java/com/techstore/service/BlogPostService.java | — | ~3767 |
+
+## Session: 2026-06-22 13:42
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:43 | Edited src/main/java/com/techstore/controller/BlogPostController.java | added 2 condition(s) | ~791 |
+| 13:43 | Created src/main/java/com/techstore/controller/BlogCategoryController.java | — | ~750 |
+| 13:43 | Created src/main/java/com/techstore/controller/BlogTagController.java | — | ~599 |
+| 13:45 | Created ../../care-tech-ui/src/redux/blogSlice.js | — | ~4007 |
+| 13:46 | Created ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | — | ~4169 |
+| 13:47 | Created ../../care-tech-ui/src/pages/admin/Blog/BlogCategoryManager.jsx | — | ~4155 |
+| 13:47 | Created ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | — | ~3111 |
+| 13:49 | Created ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | — | ~6996 |
+| 13:49 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | added nullish coalescing | ~147 |
+| 13:49 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | inline fix | ~34 |
+| 13:49 | Completed WordPress-level blog: controllers (BlogCategoryController, BlogTagController), updated BlogPostController with category/tag/featured filters; frontend: blogSlice (categories+tags thunks), BlogLayout (tabs), BlogCategoryManager, BlogTagManager, BlogPostModal (status/featured/category/tags/SEO) | multiple | success | ~8000 |
+| 13:50 | Session end: 10 writes across 8 files (BlogPostController.java, BlogCategoryController.java, BlogTagController.java, blogSlice.js, BlogLayout.jsx) | 8 reads | ~28934 tok |
+| 13:53 | Session end: 10 writes across 8 files (BlogPostController.java, BlogCategoryController.java, BlogTagController.java, blogSlice.js, BlogLayout.jsx) | 23 reads | ~32720 tok |
+| 13:55 | Edited src/main/java/com/techstore/entity/BlogPost.java | added 1 import(s) | ~62 |
+| 13:55 | Edited src/main/java/com/techstore/entity/BlogPost.java | 11→13 lines | ~123 |
+| 13:55 | Edited src/main/java/com/techstore/repository/BlogPostRepository.java | added 1 import(s) | ~144 |
+| 13:55 | Edited src/main/java/com/techstore/repository/BlogPostRepository.java | 3→5 lines | ~67 |
+| 13:55 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 import(s) | ~88 |
+| 13:55 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 condition(s) | ~177 |
+| 13:55 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 condition(s) | ~165 |
+| 13:56 | Edited src/main/java/com/techstore/entity/BaseEntity.java | 5→7 lines | ~55 |
+| 13:56 | Edited src/main/java/com/techstore/controller/BlogPostController.java | modified incrementView() | ~119 |
+| 13:56 | Edited ../../care-tech-ui/src/redux/blogSlice.js | added error handling | ~84 |
+| 13:57 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | inline fix | ~25 |
+| 13:57 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | added 2 condition(s) | ~151 |
+| 13:58 | Edited src/main/java/com/techstore/service/BlogTagService.java | removed 15 lines | ~8 |
+| 13:58 | Created src/main/java/com/techstore/util/SlugUtils.java | — | ~624 |
+| 13:58 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 import(s) | ~84 |
+| 13:58 | Edited src/main/java/com/techstore/service/BlogPostService.java | removed 20 lines | ~39 |
+| 13:58 | Edited src/main/java/com/techstore/service/BlogPostService.java | modified generateSlug() | ~49 |
+| 13:58 | Edited src/main/java/com/techstore/service/BlogPostService.java | 8→7 lines | ~52 |
+| 13:58 | Edited src/main/java/com/techstore/service/BlogCategoryService.java | added 1 import(s) | ~71 |
+| 13:58 | Edited src/main/java/com/techstore/service/BlogCategoryService.java | removed 19 lines | ~18 |
+| 13:58 | Edited src/main/java/com/techstore/service/BlogCategoryService.java | modified generateSlug() | ~50 |
+| 13:59 | Edited src/main/java/com/techstore/service/BlogCategoryService.java | 4→3 lines | ~21 |
+| 13:59 | Edited src/main/java/com/techstore/service/BlogTagService.java | added 1 import(s) | ~55 |
+| 13:59 | Edited src/main/java/com/techstore/service/BlogTagService.java | removed 19 lines | ~15 |
+| 13:59 | Edited src/main/java/com/techstore/service/BlogTagService.java | modified generateSlug() | ~48 |
+| 13:59 | Edited src/main/java/com/techstore/service/BlogTagService.java | 2→1 lines | ~6 |
+| 13:59 | Created ../../care-tech-ui/src/utils/slugify.js | — | ~217 |
+| 13:59 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | reduced (-21 lines) | ~62 |
+| 13:59 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | generateSlug() → slugify() | ~34 |
+| 13:59 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogCategoryManager.jsx | added 1 import(s) | ~57 |
+| 14:00 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogCategoryManager.jsx | removed 24 lines | ~44 |
+| 14:00 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | added 1 import(s) | ~46 |
+| 14:00 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | removed 22 lines | ~44 |
+| 14:00 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogCategoryManager.jsx | modified updateBlogCategory() | ~64 |
+| 14:00 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogCategoryManager.jsx | modified if() | ~58 |
+| 14:00 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogCategoryManager.jsx | added 2 condition(s) | ~212 |
+| 14:00 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | added 1 condition(s) | ~30 |
+| 14:00 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | 11→12 lines | ~148 |
+| 14:01 | Audit fixes: @BatchSize N+1, SCHEDULED cron, applyPublishedAt, tree refresh, @CreatedBy, view dedup endpoint+sessionStorage, dead code, SlugUtils, slugify.js, tab fetch dedup | 15 files | success | ~5000 |
+| 14:01 | Session end: 48 writes across 17 files (BlogPostController.java, BlogCategoryController.java, BlogTagController.java, blogSlice.js, BlogLayout.jsx) | 26 reads | ~40906 tok |
+| 14:03 | Edited src/main/java/com/techstore/service/BlogCategoryService.java | added 1 import(s) | ~27 |
+| 14:03 | Session end: 49 writes across 17 files (BlogPostController.java, BlogCategoryController.java, BlogTagController.java, blogSlice.js, BlogLayout.jsx) | 29 reads | ~44318 tok |
+
+## Session: 2026-06-22 14:08
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:08 | Edited src/main/java/com/techstore/config/SecurityConfig.java | 2→3 lines | ~77 |
+| 14:08 | Edited src/main/java/com/techstore/dto/response/BlogCategoryResponseDto.java | 2→2 lines | ~14 |
+| 14:08 | Edited src/main/java/com/techstore/dto/response/BlogCategoryResponseDto.java | 3→3 lines | ~20 |
+| 14:08 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 condition(s) | ~166 |
+| 14:09 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | 4→4 lines | ~63 |
+| 14:09 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogCategoryManager.jsx | added 2 condition(s) | ~226 |
+| 14:09 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogCategoryManager.jsx | modified while() | ~149 |
+| 14:09 | Session end: 7 writes across 5 files (SecurityConfig.java, BlogCategoryResponseDto.java, BlogPostService.java, BlogTagManager.jsx, BlogCategoryManager.jsx) | 2 reads | ~1095 tok |
+| 14:10 | Edited src/main/java/com/techstore/entity/BlogPost.java | 4→3 lines | ~30 |
+| 14:10 | Session end: 8 writes across 6 files (SecurityConfig.java, BlogCategoryResponseDto.java, BlogPostService.java, BlogTagManager.jsx, BlogCategoryManager.jsx) | 3 reads | ~1645 tok |
+| 14:12 | Edited src/main/java/com/techstore/repository/BlogPostRepository.java | 5→5 lines | ~139 |
+| 14:12 | Edited src/main/java/com/techstore/repository/BlogPostRepository.java | 2→2 lines | ~62 |
+| 14:12 | Edited src/main/java/com/techstore/service/BlogPostService.java | 2→2 lines | ~43 |
+| 14:13 | Edited src/main/java/com/techstore/service/BlogPostService.java | 2→2 lines | ~40 |
+| 14:13 | Edited src/main/java/com/techstore/controller/SitemapController.java | added 1 import(s) | ~65 |
+| 14:13 | Edited src/main/java/com/techstore/controller/SitemapController.java | inline fix | ~31 |
+| 14:13 | Edited src/main/java/com/techstore/entity/BlogCategory.java | added 1 import(s) | ~71 |
+| 14:14 | Session end: 15 writes across 9 files (SecurityConfig.java, BlogCategoryResponseDto.java, BlogPostService.java, BlogTagManager.jsx, BlogCategoryManager.jsx) | 10 reads | ~6176 tok |
+| 14:19 | Session end: 15 writes across 9 files (SecurityConfig.java, BlogCategoryResponseDto.java, BlogPostService.java, BlogTagManager.jsx, BlogCategoryManager.jsx) | 11 reads | ~6176 tok |
+| 14:20 | Edited ../../care-tech-ui/src/redux/blogSlice.js | 10→15 lines | ~101 |
+| 14:20 | Edited ../../care-tech-ui/src/redux/blogSlice.js | expanded (+11 lines) | ~176 |
+| 14:21 | Created ../../care-tech-ui/src/pages/Blog.jsx | — | ~2282 |
+| 14:21 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | inline fix | ~28 |
+| 14:21 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | CSS: hover | ~379 |
+| 14:21 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | added optional chaining | ~264 |
+| 14:21 | Edited ../../care-tech-ui/src/pages/Blog.jsx | 2→3 lines | ~55 |
+| 14:21 | Edited ../../care-tech-ui/src/pages/Blog.jsx | CSS: tag | ~79 |
+| 14:22 | Edited ../../care-tech-ui/src/pages/Blog.jsx | setCategory() → setSearchParams() | ~177 |
+| 14:22 | Session end: 24 writes across 12 files (SecurityConfig.java, BlogCategoryResponseDto.java, BlogPostService.java, BlogTagManager.jsx, BlogCategoryManager.jsx) | 12 reads | ~9717 tok |
+| 14:27 | Session end: 24 writes across 12 files (SecurityConfig.java, BlogCategoryResponseDto.java, BlogPostService.java, BlogTagManager.jsx, BlogCategoryManager.jsx) | 19 reads | ~10643 tok |
+| 14:27 | Edited ../../care-tech-ui/src/pages/Blog.jsx | inline fix | ~26 |
+| 14:28 | Edited ../../care-tech-ui/src/pages/Blog.jsx | expanded (+18 lines) | ~510 |
+| 14:28 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | 6→8 lines | ~129 |
+| 14:28 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | added 1 condition(s) | ~182 |
+| 14:28 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | onClose() → requestClose() | ~226 |
+| 14:28 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | 9→9 lines | ~103 |
+| 14:28 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | CSS: hover, hover, hover | ~364 |
+| 14:28 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | added 2 condition(s) | ~110 |
+| 14:28 | Session end: 32 writes across 14 files (SecurityConfig.java, BlogCategoryResponseDto.java, BlogPostService.java, BlogTagManager.jsx, BlogCategoryManager.jsx) | 19 reads | ~12293 tok |
+| 14:30 | Session end: 32 writes across 14 files (SecurityConfig.java, BlogCategoryResponseDto.java, BlogPostService.java, BlogTagManager.jsx, BlogCategoryManager.jsx) | 19 reads | ~12293 tok |
+| 14:32 | Session end: 32 writes across 14 files (SecurityConfig.java, BlogCategoryResponseDto.java, BlogPostService.java, BlogTagManager.jsx, BlogCategoryManager.jsx) | 26 reads | ~15195 tok |
+| 14:37 | Edited ../../care-tech-ui/src/pages/Blog.jsx | 3→3 lines | ~46 |
+| 14:37 | Edited ../../care-tech-ui/src/pages/Blog.jsx | added 1 condition(s) | ~62 |
+| 14:37 | Edited ../../care-tech-ui/src/pages/Blog.jsx | added optional chaining | ~132 |
+| 14:37 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | 3→4 lines | ~40 |
+| 14:37 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | modified if() | ~116 |
+| 14:37 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | 5→5 lines | ~78 |
+| 14:37 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | inline fix | ~30 |
+| 14:37 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | 5→5 lines | ~62 |
+| 14:37 | Edited src/main/java/com/techstore/service/BlogTagService.java | currentTimeMillis() → DuplicateResourceException() | ~42 |
+| 14:37 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 import(s) | ~44 |
+| 14:37 | Edited src/main/java/com/techstore/service/BlogPostService.java | 2→4 lines | ~65 |
+| 14:38 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 condition(s) | ~163 |
+| 14:38 | Edited ../../care-tech-ui/src/redux/blogSlice.js | 8→4 lines | ~55 |
+| 14:38 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 3→4 lines | ~56 |
+| 14:38 | Edited src/main/java/com/techstore/entity/BaseEntity.java | 7→7 lines | ~46 |
+| 14:39 | Session end: 47 writes across 16 files (SecurityConfig.java, BlogCategoryResponseDto.java, BlogPostService.java, BlogTagManager.jsx, BlogCategoryManager.jsx) | 26 reads | ~16256 tok |
+| 14:42 | Edited ../../care-tech-ui/src/pages/Blog.jsx | inline fix | ~20 |
+| 14:42 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | inline fix | ~17 |
+| 14:42 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | 4→5 lines | ~39 |
+| 14:42 | Edited src/main/java/com/techstore/service/BlogPostService.java | — | ~0 |
+| 14:43 | Session end: 51 writes across 16 files (SecurityConfig.java, BlogCategoryResponseDto.java, BlogPostService.java, BlogTagManager.jsx, BlogCategoryManager.jsx) | 26 reads | ~16332 tok |
+| 14:47 | Edited src/main/java/com/techstore/repository/BlogTagRepository.java | added 1 import(s) | ~68 |
+| 14:47 | Edited src/main/java/com/techstore/dto/response/BlogTagResponseDto.java | modified from() | ~107 |
+| 14:47 | Edited src/main/java/com/techstore/repository/BlogTagRepository.java | 2→5 lines | ~52 |
+| 14:47 | Edited src/main/java/com/techstore/service/BlogTagService.java | added 3 import(s) | ~29 |
+| 14:47 | Edited src/main/java/com/techstore/service/BlogTagService.java | modified getAllTags() | ~141 |
+| 14:47 | Edited src/main/java/com/techstore/service/BlogTagService.java | 3→3 lines | ~51 |
+| 14:47 | Edited src/main/java/com/techstore/service/BlogTagService.java | 3→7 lines | ~107 |
+| 14:47 | Edited src/main/java/com/techstore/repository/BlogPostRepository.java | expanded (+6 lines) | ~101 |
+| 14:47 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 3 condition(s) | ~227 |
+| 14:47 | Edited src/main/java/com/techstore/controller/BlogPostController.java | added 1 import(s) | ~67 |
+| 14:47 | Edited src/main/java/com/techstore/controller/BlogPostController.java | added error handling | ~226 |
+| 14:48 | Edited ../../care-tech-ui/src/redux/blogSlice.js | added 2 condition(s) | ~148 |
+| 14:48 | Created ../../care-tech-ui/src/pages/admin/Blog/BlogPostPreviewModal.jsx | — | ~1529 |
+| 14:48 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 29→32 lines | ~210 |
+| 14:48 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | CSS: status, search | ~398 |
+| 14:48 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | added error handling | ~126 |
+| 14:48 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | expanded (+32 lines) | ~717 |
+| 14:49 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | expanded (+10 lines) | ~569 |
+| 14:49 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 2→5 lines | ~71 |
+| 14:49 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | 4→9 lines | ~136 |
+| 14:49 | Edited src/main/java/com/techstore/dto/response/BlogPostResponseDto.java | 6→6 lines | ~74 |
+| 14:49 | Edited src/main/java/com/techstore/dto/response/BlogPostSummaryDto.java | 6→6 lines | ~74 |
+| 14:50 | Implemented blog search/filter/preview: BlogTagRepository countPostsPerTag, BlogTagResponseDto postCount, BlogTagService getAllTags with counts, BlogPostRepository 3 derived queries, BlogPostService getAllPosts(status,search), BlogPostController status+search params, blogSlice fetchAllBlogPosts params, BlogPostPreviewModal new file, BlogLayout search+filter toolbar+preview button, BlogTagManager postCount delete warning | 10 files | success | ~3500 |
+
+## Session: 2026-06-22 14:52
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:53 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 2→2 lines | ~37 |
+| 14:54 | Session end: 1 writes across 1 files (BlogLayout.jsx) | 2 reads | ~37 tok |

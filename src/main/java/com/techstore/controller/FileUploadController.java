@@ -1,6 +1,7 @@
 package com.techstore.controller;
 
 import com.techstore.service.FileUploadService;
+import com.techstore.service.S3Service;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class FileUploadController {
 
     private final FileUploadService fileUploadService;
+    private final S3Service s3Service;
 
     @PostMapping("/products")
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
@@ -42,6 +44,22 @@ public class FileUploadController {
         log.info("Uploading brand logo: {}", file.getOriginalFilename());
         String filePath = fileUploadService.uploadFile(file, "brands");
         return ResponseEntity.ok(Map.of("url", filePath));
+    }
+
+    @PostMapping("/blog-cover")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    public ResponseEntity<Map<String, String>> uploadBlogCover(@RequestParam("file") MultipartFile file) {
+        log.info("Uploading blog cover image: {}", file.getOriginalFilename());
+        String url = s3Service.uploadProductImage(file, "blog-covers");
+        return ResponseEntity.ok(Map.of("url", url));
+    }
+
+    @PostMapping("/blog-image")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    public ResponseEntity<Map<String, String>> uploadBlogImage(@RequestParam("file") MultipartFile file) {
+        log.info("Uploading blog inline image: {}", file.getOriginalFilename());
+        String url = s3Service.uploadProductImage(file, "blog-images");
+        return ResponseEntity.ok(Map.of("url", url));
     }
 
     @DeleteMapping

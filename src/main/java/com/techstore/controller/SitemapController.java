@@ -1,5 +1,7 @@
 package com.techstore.controller;
 
+import com.techstore.enums.BlogPostStatus;
+import com.techstore.repository.BlogPostRepository;
 import com.techstore.repository.CategoryRepository;
 import com.techstore.repository.ProductRepository;
 import com.techstore.repository.SitemapEntry;
@@ -25,6 +27,7 @@ public class SitemapController {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final BlogPostRepository blogPostRepository;
 
     @Value("${app.url:https://www.caretech.bg}")
     private String appUrl;
@@ -35,7 +38,8 @@ public class SitemapController {
             {"/",              "1.0", "daily"},
             {"/promotions",    "0.9", "daily"},
             {"/brands",        "0.7", "weekly"},
-            {"/about",          "0.5", "monthly"},
+            {"/blog",          "0.7", "weekly"},
+            {"/about",         "0.5", "monthly"},
             {"/why-us",        "0.5", "monthly"},
             {"/our-services",  "0.5", "monthly"},
             {"/certifications","0.5", "monthly"},
@@ -70,6 +74,14 @@ public class SitemapController {
                 String loc = appUrl + "/product/" + p.getSlug() + "/" + p.getId();
                 String lastmod = p.getUpdatedAt() != null ? p.getUpdatedAt().format(DATE_FMT) : today;
                 appendUrl(xml, loc, lastmod, "weekly", "0.9");
+            }
+
+            // Blog posts
+            List<SitemapEntry> blogPosts = blogPostRepository.findPublishedSitemapEntries(BlogPostStatus.PUBLISHED);
+            for (SitemapEntry bp : blogPosts) {
+                String loc = appUrl + "/blog/" + bp.getSlug();
+                String lastmod = bp.getUpdatedAt() != null ? bp.getUpdatedAt().format(DATE_FMT) : today;
+                appendUrl(xml, loc, lastmod, "monthly", "0.6");
             }
 
             xml.append("</urlset>");
