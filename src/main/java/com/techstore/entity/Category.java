@@ -14,7 +14,7 @@ import java.util.Set;
 @Entity
 @Table(name = "categories")
 @Data
-@EqualsAndHashCode(callSuper = false, exclude = {"parent", "children", "products", "parameters"})
+@EqualsAndHashCode(callSuper = false, exclude = {"parent", "children", "products", "parameters", "aliasOf"})
 public class Category extends BaseEntity {
 
     @Column(name = "is_promo_active", nullable = false)
@@ -62,6 +62,11 @@ public class Category extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Category parent;
+
+    /** When set, this category is an alias — products are served from the target category. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "alias_of_id")
+    private Category aliasOf;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Category> children = new ArrayList<>();

@@ -3,6 +3,7 @@ package com.techstore.service;
 import com.techstore.dto.request.ProductSearchRequest;
 import com.techstore.dto.response.FacetValue;
 import com.techstore.dto.response.ProductSearchResponse;
+import com.techstore.repository.CategoryRepository;
 import com.techstore.repository.ProductSearchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class ProductSearchService {
 
     private final ProductSearchRepository searchRepository;
+    private final CategoryRepository categoryRepository;
 
     public ProductSearchResponse searchProducts(ProductSearchRequest request) {
         long startTime = System.currentTimeMillis();
@@ -32,6 +34,11 @@ public class ProductSearchService {
 
             // Validate and sanitize input
             validateSearchRequest(request);
+
+            // Resolve alias category IDs before querying
+            if (request.getCategories() != null && !request.getCategories().isEmpty()) {
+                request.setCategories(resolveAliasCategories(request.getCategories()));
+            }
 
             // Основно търсене — FTS + ILIKE (бързо, ползва индекси)
             ProductSearchResponse response = searchRepository.searchProducts(request);
@@ -114,8 +121,9 @@ public class ProductSearchService {
         try {
             log.debug("Fetching parameters with counts for category: {}, language: {}", categoryId, language);
 
+            Long resolvedId = resolveAliasId(categoryId);
             Map<String, List<FacetValue>> parameters =
-                    searchRepository.getAvailableParametersWithCountsForCategory(categoryId, language);
+                    searchRepository.getAvailableParametersWithCountsForCategory(resolvedId, language);
 
             log.debug("Found {} parameters with counts for category {}", parameters.size(), categoryId);
             return parameters;
@@ -132,7 +140,8 @@ public class ProductSearchService {
             if (request.getLanguage() == null) {
                 request.setLanguage(language);
             }
-            return searchRepository.getFilteredFacets(categoryId, request, language);
+            Long resolvedId = resolveAliasId(categoryId);
+            return searchRepository.getFilteredFacets(resolvedId, request, language);
         } catch (Exception e) {
             log.error("Failed to get filtered facets for category: {}", categoryId, e);
             return Collections.emptyMap();
@@ -173,5 +182,26 @@ public class ProductSearchService {
                 .build();
 
         return searchProducts(request);
+    }
+
+    /** If the category is an alias, returns the target category's ID; otherwise returns the same ID. */
+    private Long resolveAliasId(Long categoryId) {
+        if (categoryId == null) return null;
+        return categoryRepository.findById(categoryId)
+                .map(c -> c.getAliasOf() != null ? c.getAliasOf().getId() : c.getId())
+                .orElse(categoryId);
+    }
+
+    private List<String> resolveAliasCategories(List<String> categories) {
+        return categories.stream()
+                .map(id -> {
+                    try {
+                        Long resolved = resolveAliasId(Long.parseLong(id));
+                        return resolved != null ? String.valueOf(resolved) : id;
+                    } catch (NumberFormatException e) {
+                        return id;
+                    }
+                })
+                .toList();
     }
 }

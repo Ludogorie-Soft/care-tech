@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-23T05:59:09.725Z
-> Files: 553 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-23T09:00:36.495Z
+> Files: 560 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -20,14 +20,18 @@
 
 ## ../../care-tech-ui/src/
 
-- `App.js` — Declares ScrollToTop (~2884 tok)
-- `index.css` — Styles: 37 rules (~2068 tok)
+- `App.js` — Declares ScrollToTop (~2987 tok)
+- `index.css` — Styles: 39 rules (~2126 tok)
 
 ## ../../care-tech-ui/src/components/
 
 - `Breadcrumbs.jsx` — Breadcrumbs (~504 tok)
 - `DateTimePicker.jsx` — MONTHS (~2516 tok)
 - `TbiCheckoutModal.jsx` — TBI brand color (~5322 tok)
+
+## ../../care-tech-ui/src/components/compare/
+
+- `CompareTray.jsx` — CompareTray (~1049 tok)
 
 ## ../../care-tech-ui/src/components/home/
 
@@ -43,7 +47,8 @@
 
 ## ../../care-tech-ui/src/components/products/
 
-- `ProductCard.jsx` — ProductCard (~3379 tok)
+- `CompareButton.jsx` — Reusable compare toggle button. (~695 tok)
+- `ProductCard.jsx` — ProductCard (~3407 tok)
 
 ## ../../care-tech-ui/src/pages/
 
@@ -52,8 +57,9 @@
 - `Cart.jsx` — EURO_RATE (~16680 tok)
 - `Category.jsx` — Category (~5536 tok)
 - `ComingSoonPage.jsx` — ComingSoonPage (~385 tok)
-- `OurClients.jsx` — clients (~2686 tok)
-- `ProductPage.jsx` — EURO_RATE (~10208 tok)
+- `ComparePage.jsx` — EURO_RATE — renders table (~3958 tok)
+- `OurClients.jsx` — clients (~2724 tok)
+- `ProductPage.jsx` — EURO_RATE (~10263 tok)
 
 ## ../../care-tech-ui/src/pages/admin/
 
@@ -111,13 +117,14 @@
 ## ../../care-tech-ui/src/redux/
 
 - `blogSlice.js` — ── Public thunks ────────────────────────────────────────────────────────────── (~4239 tok)
+- `compareSlice.js` — Exports selectCompareItems, selectCompareCount, selectIsInCompare (~386 tok)
 - `leasingSlice.js` — 4 async thunks: fetchLeasingApplications, fetchLeasingById, fetchLeasingStatistics, registerLeasingApplication. registerError stores true (flag only, not backend payload). State: registerStatus, registeredUrl, registeredApplicationId. (~1100 tok)
 - `offersSlice.js` — API routes: GET, PUT, POST (10 endpoints) (~2807 tok)
 - `orderSlice.js` — orderSlice.js (~2806 tok)
 - `paramSlice.js` — API routes: GET, POST, PUT, PATCH, DELETE (15 endpoints) (~5217 tok)
 - `productSlice.js` — API routes: GET, POST, PUT, DELETE (12 endpoints) (~6019 tok)
 - `reviewsSlice.js` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~1554 tok)
-- `store.js` — Exports store, persistor (~540 tok)
+- `store.js` — Exports store, persistor (~702 tok)
 
 ## ../../care-tech-ui/src/utils/
 
@@ -136,6 +143,7 @@
 - `BLOG_PLAN.md` — План: Блог функционалност (~1556 tok)
 - `categories_202605130941.sql` (~14427 tok)
 - `CLAUDE.md` — OpenWolf (~57 tok)
+- `COMPARE_PLAN.md` — План: Функционалност за Сравнение на Продукти (~1975 tok)
 - `database_backup_script.txt` (~121 tok)
 - `docker-compose.dev.yml` — Docker Compose: 4 services (~361 tok)
 - `docker-compose.yml` — Docker Compose services (~485 tok)
@@ -272,6 +280,7 @@
 - `20_fix_laptop_category_covers.sql` — ============================================================ (~193 tok)
 - `21_fix_laptop_category_remaining.sql` — ============================================================ (~462 tok)
 - `22_hide_products_without_images.sql` — ============================================================ (~185 tok)
+- `23_add_gaming_periphery_aliases_in_komp_periferiya.sql` — ============================================================================= (~1015 tok)
 - `3_reorder_top_categories.sql` — Пренарежда главните категории (sort_order) вкл. 3-те нови Asbis roots (~1086 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
 - `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)
@@ -527,7 +536,7 @@
 - `BlogPost.java` — Entity: BlogPost (~511 tok)
 - `BlogTag.java` — Entity: BlogTag (~99 tok)
 - `CartItem.java` — Entity: CartItem (~242 tok)
-- `Category.java` — Entity: Category (~884 tok)
+- `Category.java` — Entity: Category with aliasOf (ManyToOne self-ref, alias_of_id). Alias categories proxy products from target. (~900 tok)
 - `LeasingApplication.java` — order_id returned by TBI RegisterApplication (~1252 tok)
 - `LeasingApplication.java` — Entity: TBI leasing application; links to Order, stores TBI order_id/token, status, status_history (JSON), financial details (~400 tok)
 - `Manufacturer.java` — Entity: Manufacturer (~476 tok)
@@ -635,10 +644,10 @@
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3823 tok)
 - `OrderService.java` — Creates a new order (~5971 tok)
-- `ParameterService.java` — Service: ParameterService (~10236 tok)
+- `ParameterService.java` — Service: ParameterService (~9601 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
-- `ProductSearchService.java` — Service: ProductSearchService (~1890 tok)
-- `ProductService.java` — Service: ProductService (~14076 tok)
+- `ProductSearchService.java` — Service: alias-aware search. resolveAliasId() + resolveAliasCategories() applied in searchProducts, getAvailableParametersWithCountsForCategory, getFilteredFacets. (~2242 tok)
+- `ProductService.java` — Service: ProductService (~13303 tok)
 - `ReviewService.java` — Service: ReviewService (~927 tok)
 - `S3Service.java` — Service: S3Service (~2218 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
@@ -656,9 +665,9 @@
 
 ## src/main/java/com/techstore/service/sync/
 
-- `AsbisSyncService.java` — AsbisSyncService (~13182 tok)
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~10804 tok)
-- `TekraSyncService.java` — Service: TekraSyncService (~22688 tok)
+- `AsbisSyncService.java` — AsbisSyncService (~13358 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~11702 tok)
+- `TekraSyncService.java` — Service: TekraSyncService (~22944 tok)
 - `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~13944 tok)
 
 ## src/main/java/com/techstore/util/
@@ -703,6 +712,7 @@
 - `V3__add_most_key_to_product.sql` — SQL: 1 alter(s) (~42 tok)
 - `V30__add_blog_tags.sql` — SQL: tables: blog_tags, blog_post_tags (~165 tok)
 - `V31__upgrade_blog_posts.sql` — Add new columns (~267 tok)
+- `V32__add_alias_to_categories.sql` — V32: Add alias_of_id to categories to support "virtual" categories that (~134 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)

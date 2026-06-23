@@ -220,10 +220,13 @@ public class ParameterService {
         log.debug("Fetching all parameters for category: {}", categoryId);
 
         validateCategoryId(categoryId);
-        findCategoryByIdOrThrow(categoryId);
+        Category resolvedCategory = findCategoryByIdOrThrow(categoryId);
+        Long resolvedId = resolvedCategory.getAliasOf() != null
+                ? resolvedCategory.getAliasOf().getId()
+                : categoryId;
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            List<Parameter> parameters = parameterRepository.findByCategoryIdOrderByOrderAsc(categoryId);
+            List<Parameter> parameters = parameterRepository.findByCategoryIdOrderByOrderAsc(resolvedId);
 
             parameters.forEach(parameter -> {
                 List<ParameterOption> uniqueOptions =
@@ -232,7 +235,7 @@ public class ParameterService {
             });
 
             // Build per-category is_filter map from category_parameters table
-            Map<Long, Boolean> filterMap = parameterRepository.getCategoryParameterFilters(categoryId)
+            Map<Long, Boolean> filterMap = parameterRepository.getCategoryParameterFilters(resolvedId)
                     .stream()
                     .collect(Collectors.toMap(
                             row -> ((Number) row[0]).longValue(),

@@ -115,6 +115,66 @@ public class MostSyncService {
         map.put("CONTR I/O",    "Входно-изходни контролери");
         map.put("CAMERA",       "Аксесоари");
 
+        // ── Мрежово оборудване ─────────────────────────────────────────────
+        map.put("ROUTER",       "Мрежов хардуер");
+        map.put("SWITCH",       "Мрежов хардуер");
+        map.put("WIRELESS",     "Мрежов хардуер");
+        map.put("ACCESS POINT", "Мрежов хардуер");
+        map.put("AP",           "Мрежов хардуер");
+        map.put("MODEM",        "Мрежов хардуер");
+        map.put("FIREWALL",     "Мрежов хардуер");
+        map.put("NETWORK",      "Мрежов хардуер");
+
+        // ── Съхранение ─────────────────────────────────────────────────────
+        map.put("EXTERNAL HDD", "Твърди дискове");
+        map.put("EXT HDD",      "Твърди дискове");
+        map.put("EXTERNAL SSD", "SSD");
+        map.put("EXT SSD",      "SSD");
+        map.put("FLASH DRIVE",  "Флаш памети");
+        map.put("USB FLASH",    "Флаш памети");
+        map.put("PENDRIVE",     "Флаш памети");
+        map.put("MEMORY CARD",  "Флаш памети");
+        map.put("SD CARD",      "Флаш памети");
+        map.put("NAS DRIVE",    "Настолен NAS");
+
+        // ── Принтери и сканери ─────────────────────────────────────────────
+        map.put("SCANNER",      "Принтери, скенери и консумативи");
+        map.put("MFP",          "Принтери, скенери и консумативи");
+        map.put("MFD",          "Принтери, скенери и консумативи");
+        map.put("LABEL",        "Принтери, скенери и консумативи");
+        map.put("INK",          "Консумативи(тонери) за лазерни устройства");
+        map.put("TONER",        "Консумативи(тонери) за лазерни устройства");
+        map.put("DRUM",         "Консумативи(тонери) за лазерни устройства");
+
+        // ── Геймърска периферия ────────────────────────────────────────────
+        map.put("GAMING MOUSE",     "Геймърски мишки");
+        map.put("GAMING KEYBOARD",  "Геймърски клавиатури");
+        map.put("GAMING HEADSET",   "Геймърски слушалки");
+        map.put("GAMING CHAIR",     "Геймърска периферия");
+        map.put("GAMEPAD",          "Геймърска периферия");
+        map.put("JOYSTICK",         "Геймърска периферия");
+        map.put("GAME CONTROLLER",  "Геймърска периферия");
+        map.put("MOUSEPAD",         "Геймърска периферия");
+        map.put("GAMING MOUSEPAD",  "Геймърска периферия");
+
+        // ── Аксесоари ──────────────────────────────────────────────────────
+        map.put("CABLE",        "Аксесоари");
+        map.put("CABLES",       "Аксесоари");
+        map.put("USB HUB",      "Аксесоари");
+        map.put("HUB",          "Аксесоари");
+        map.put("CHARGER",      "Аксесоари");
+        map.put("ADAPTER",      "Аксесоари");
+        map.put("DOCKING",      "Аксесоари");
+        map.put("DOCK",         "Аксесоари");
+        map.put("PROJECTOR",    "Аксесоари");
+        map.put("SMART WATCH",  "Аксесоари");
+        map.put("SMARTWATCH",   "Аксесоари");
+        map.put("WEARABLE",     "Аксесоари");
+        map.put("LAPTOP BAG",   "Аксесоари");
+        map.put("BAG",          "Аксесоари");
+        map.put("COVER",        "Аксесоари");
+        map.put("STAND",        "Аксесоари");
+
         MOST_CATEGORY_MAPPING = Collections.unmodifiableMap(map);
     }
 
@@ -304,42 +364,44 @@ public class MostSyncService {
                     String categoryName = (String) product.get("category");
                     if (categoryName == null) continue;
 
+                    // Resolve category — if unmapped or missing, still collect parameters
+                    Category category = null;
                     String targetCategoryName = MOST_CATEGORY_MAPPING.get(categoryName);
                     if (targetCategoryName == null) {
-                        log.debug("Unknown Most category: {}", categoryName);
-                        continue;
+                        log.debug("Unknown Most category '{}' — collecting parameters without category", categoryName);
+                    } else {
+                        Optional<Category> categoryOpt = categoryRepository.findByNameBg(targetCategoryName);
+                        if (categoryOpt.isPresent()) {
+                            category = categoryOpt.get();
+                        } else {
+                            log.warn("Target category '{}' not found in database — collecting parameters without category",
+                                    targetCategoryName);
+                        }
                     }
 
-                    Optional<Category> categoryOpt = categoryRepository.findByNameBg(targetCategoryName);
-                    if (categoryOpt.isEmpty()) {
-                        log.warn("Target category '{}' not found in database", targetCategoryName);
-                        continue;
-                    }
-
-                    Category category = categoryOpt.get();
-
+                    final Category finalCategory = category;
                     Map<String, String> productParams = extractMostParameters(product);
 
                     for (Map.Entry<String, String> param : productParams.entrySet()) {
                         String paramName = param.getKey();
                         String paramValue = param.getValue();
 
-                        String mostKey = generateMostKey(paramName);  // ← ДОБАВЕНО!
+                        String mostKey = generateMostKey(paramName);
 
                         ParameterData paramData = allParametersData.computeIfAbsent(
-                                mostKey,  // ← ПРОМЕНЕНО!
+                                mostKey,
                                 k -> {
                                     ParameterData pd = new ParameterData();
                                     pd.nameBg = paramName;
                                     pd.nameEn = paramName;
-                                    pd.mostKey = mostKey;  // ← ДОБАВЕНО!
+                                    pd.mostKey = mostKey;
                                     pd.categories = new HashSet<>();
                                     pd.values = new HashSet<>();
                                     return pd;
                                 }
                         );
 
-                        paramData.categories.add(category);
+                        if (finalCategory != null) paramData.categories.add(finalCategory);
                         paramData.values.add(paramValue);
                     }
 

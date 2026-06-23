@@ -57,7 +57,8 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<ManufacturerResponseDto> getManufacturersByCategory(Long categoryId) {
-        return productRepository.findManufacturersByCategoryId(categoryId).stream()
+        Long resolvedId = resolveAliasId(categoryId);
+        return productRepository.findManufacturersByCategoryId(resolvedId).stream()
                 .map(manufacturerMapper::toResponseDto).toList();
     }
 
@@ -287,8 +288,8 @@ public class ProductService {
         validateCategoryId(categoryId);
         validatePaginationParameters(pageable);
         validateLanguage(lang);
-        findCategoryByIdOrThrow(categoryId);
-        return productRepository.findActiveByCategoryExcludingNotAvailable(categoryId, pageable)
+        Long resolvedId = resolveAliasId(categoryId);
+        return productRepository.findActiveByCategoryExcludingNotAvailable(resolvedId, pageable)
                 .map(p -> convertToResponseDTO(p, lang));
     }
 
@@ -316,7 +317,8 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Set<ProductParameterResponseDto> getProductsParametersByCategory(Long categoryId, String lang) {
-        List<Object[]> results = productParameterRepository.findParameterOptionsByCategoryAndActiveProducts(categoryId);
+        Long resolvedId = resolveAliasId(categoryId);
+        List<Object[]> results = productParameterRepository.findParameterOptionsByCategoryAndActiveProducts(resolvedId);
 
         Map<Long, ProductParameterResponseDto> resultMap = new HashMap<>();
 
@@ -743,6 +745,24 @@ public class ProductService {
     private Category findCategoryByIdOrThrow(Long id) {
         return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
     }
+
+    /**
+     * If the category is an alias, returns the ID of the target category.
+     * If the target category is hidden, returns the alias ID (no products served).
+     * Otherwise returns the original categoryId unchanged.
+     */
+    private Long resolveAliasId(Long categoryId) {
+        Category category = findCategoryByIdOrThrow(categoryId);
+        if (category.getAliasOf() != null) {
+            Category target = category.getAliasOf();
+            if (Boolean.FALSE.equals(target.getShow())) {
+                return categoryId; // original hidden — alias has no own products, result is empty
+            }
+            return target.getId();
+        }
+        return categoryId;
+    }
+
     private Manufacturer findManufacturerByIdOrThrow(Long id) {
         return manufacturerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Manufacturer not found with id: " + id));
     }

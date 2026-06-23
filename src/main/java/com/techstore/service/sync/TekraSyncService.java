@@ -842,8 +842,7 @@ public class TekraSyncService {
                         "SELECT DISTINCT pr.category_id, pp.parameter_id, false " +
                         "FROM product_parameters pp " +
                         "JOIN products pr ON pr.id = pp.product_id " +
-                        "JOIN parameters p  ON p.id  = pp.parameter_id " +
-                        "WHERE p.platform = 'TEKRA' " +
+                        "WHERE pr.platform = 'TEKRA' " +
                         "ON CONFLICT (category_id, parameter_id) DO NOTHING"
                 ).executeUpdate();
                 log.info("Tekra category_parameters synced from product_parameters");
@@ -1152,6 +1151,14 @@ public class TekraSyncService {
                 if (optionMap == null) { notFoundCount++; continue; }
 
                 Long optionId = optionMap.get(normalizeName(parameterValue));
+                if (optionId == null) {
+                    // Fuzzy fallback: strip all whitespace (handles "16 GB" vs "16GB")
+                    String stripped = parameterValue.toLowerCase().replaceAll("\\s+", "");
+                    optionId = optionMap.entrySet().stream()
+                            .filter(e -> e.getKey().replaceAll("\\s+", "").equals(stripped))
+                            .map(Map.Entry::getValue)
+                            .findFirst().orElse(null);
+                }
                 if (optionId == null) { notFoundCount++; continue; }
 
                 if (!seenKeys.add(parameterId + ":" + optionId)) continue; // dedup
@@ -1228,6 +1235,15 @@ public class TekraSyncService {
 
                     String normalizedValue = normalizeName(parameterValue);
                     ParameterOption option = parameterOptions.get(normalizedValue);
+
+                    if (option == null) {
+                        // Fuzzy fallback: strip all whitespace (handles "16 GB" vs "16GB")
+                        String stripped = parameterValue.toLowerCase().replaceAll("\\s+", "");
+                        option = parameterOptions.entrySet().stream()
+                                .filter(e -> e.getKey().replaceAll("\\s+", "").equals(stripped))
+                                .map(Map.Entry::getValue)
+                                .findFirst().orElse(null);
+                    }
 
                     if (option == null) {
                         notFoundCount++;

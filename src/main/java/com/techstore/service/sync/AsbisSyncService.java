@@ -743,7 +743,19 @@ public class AsbisSyncService {
 
             String normalizedValue = normalizeName(attrValue);
             ParameterOption option = paramOptions.get(normalizedValue);
-            if (option == null) continue;
+            if (option == null) {
+                // Fuzzy fallback: strip all whitespace and compare (handles "16 GB" vs "16GB")
+                String stripped = attrValue.toLowerCase().replaceAll("\\s+", "");
+                option = paramOptions.entrySet().stream()
+                        .filter(e -> e.getKey().replaceAll("\\s+", "").equals(stripped))
+                        .map(Map.Entry::getValue)
+                        .findFirst().orElse(null);
+            }
+            if (option == null) {
+                log.debug("No option match for attr '{}' value '{}' on product {}",
+                        attrName, attrValue, product.getAsbisCode());
+                continue;
+            }
 
             String key = parameter.getId() + "-" + option.getId();
             targetParams.put(key, parameter);

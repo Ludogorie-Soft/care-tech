@@ -3,6 +3,8 @@
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
 
+| 2026-06-23 | Имплементирана функционалност за сравнение на продукти (изцяло frontend) | compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx, ProductPage.jsx, CompareTray.jsx, ComparePage.jsx, App.js, index.css | SUCCESS |
+
 | 2026-05-19 | Created reorganize_asbis_categories.sql — dissolves 43 Asbis roots into Vali tree, 3 new roots kept (Роботизирани решения, Дигитална сигнализация IDS, Мултиборд→Офис) | scripts/reorganize_asbis_categories.sql | created |
 
 | 10:00 | Fixed MostSyncService: extractMostParameters now reads properties map; generateMostKey now handles Cyrillic | MostSyncService.java | done | ~800 |
@@ -1673,3 +1675,119 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 10:05 | Created COMPARE_PLAN.md | — | ~2107 |
+| 10:05 | Session end: 1 writes across 1 files (COMPARE_PLAN.md) | 9 reads | ~2657 tok |
+| 10:20 | Created ../../care-tech-ui/src/redux/compareSlice.js | — | ~386 |
+| 10:20 | Edited ../../care-tech-ui/src/redux/store.js | added 1 import(s) | ~40 |
+| 10:20 | Edited ../../care-tech-ui/src/redux/store.js | 3→4 lines | ~23 |
+| 10:20 | Edited ../../care-tech-ui/src/redux/store.js | added error handling | ~148 |
+| 10:21 | Created ../../care-tech-ui/src/components/products/CompareButton.jsx | — | ~695 |
+| 10:21 | Edited ../../care-tech-ui/src/components/products/ProductCard.jsx | added 1 import(s) | ~31 |
+| 10:22 | Edited ../../care-tech-ui/src/components/products/ProductCard.jsx | 5→7 lines | ~108 |
+| 10:23 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | added 1 import(s) | ~36 |
+| 10:23 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | 1→5 lines | ~52 |
+| 10:24 | Created ../../care-tech-ui/src/components/compare/CompareTray.jsx | — | ~1039 |
+| 10:25 | Created ../../care-tech-ui/src/pages/ComparePage.jsx | — | ~3827 |
+| 10:25 | Edited ../../care-tech-ui/src/App.js | added 2 import(s) | ~47 |
+| 10:25 | Edited ../../care-tech-ui/src/App.js | 1→2 lines | ~37 |
+| 10:25 | Edited ../../care-tech-ui/src/App.js | 2→3 lines | ~25 |
+| 10:25 | Edited ../../care-tech-ui/src/index.css | expanded (+15 lines) | ~65 |
+| 10:26 | Session end: 16 writes across 10 files (COMPARE_PLAN.md, compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx) | 15 reads | ~9216 tok |
+| 10:28 | Edited ../../care-tech-ui/src/pages/ComparePage.jsx | expanded (+7 lines) | ~72 |
+| 10:28 | Edited ../../care-tech-ui/src/pages/ComparePage.jsx | inline fix | ~15 |
+| 10:28 | Session end: 18 writes across 10 files (COMPARE_PLAN.md, compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx) | 15 reads | ~9303 tok |
+| 10:29 | Edited ../../care-tech-ui/src/redux/compareSlice.js | 4 → 3 | ~7 |
+| 10:29 | Session end: 19 writes across 10 files (COMPARE_PLAN.md, compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx) | 15 reads | ~9310 tok |
+| 10:30 | Edited ../../care-tech-ui/src/components/compare/CompareTray.jsx | 5→6 lines | ~34 |
+| 10:30 | Edited ../../care-tech-ui/src/components/compare/CompareTray.jsx | inline fix | ~22 |
+| 10:30 | Session end: 21 writes across 10 files (COMPARE_PLAN.md, compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx) | 15 reads | ~9366 tok |
+| 10:54 | Edited ../../care-tech-ui/src/pages/ComparePage.jsx | added 1 condition(s) | ~219 |
+| 10:54 | Edited ../../care-tech-ui/src/pages/ComparePage.jsx | 6→6 lines | ~68 |
+| 10:54 | Edited ../../care-tech-ui/src/App.js | added 1 import(s) | ~62 |
+| 10:55 | Edited ../../care-tech-ui/src/App.js | 1→2 lines | ~39 |
+| 10:55 | Edited ../../care-tech-ui/src/App.js | "flex-grow flex" → "flex-grow flex${compareCo" | ~27 |
+| 10:55 | Session end: 26 writes across 10 files (COMPARE_PLAN.md, compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx) | 17 reads | ~9781 tok |
+| 10:56 | Edited ../../care-tech-ui/src/pages/ComparePage.jsx | modified navigate() | ~122 |
+| 10:56 | Edited ../../care-tech-ui/src/pages/ComparePage.jsx | 11→11 lines | ~92 |
+| 10:56 | Session end: 28 writes across 10 files (COMPARE_PLAN.md, compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx) | 17 reads | ~9995 tok |
+| 10:56 | Session end: 28 writes across 10 files (COMPARE_PLAN.md, compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx) | 17 reads | ~9995 tok |
+| 10:58 | Session end: 28 writes across 10 files (COMPARE_PLAN.md, compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx) | 17 reads | ~9995 tok |
+| 11:00 | Session end: 28 writes across 10 files (COMPARE_PLAN.md, compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx) | 17 reads | ~9995 tok |
+| 11:02 | Session end: 28 writes across 10 files (COMPARE_PLAN.md, compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx) | 18 reads | ~10879 tok |
+| 11:04 | Session end: 28 writes across 10 files (COMPARE_PLAN.md, compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx) | 21 reads | ~20959 tok |
+| 11:06 | Created src/main/resources/db/migration/V32__add_alias_to_categories.sql | — | ~134 |
+| 11:06 | Edited src/main/java/com/techstore/entity/Category.java | inline fix | ~29 |
+| 11:06 | Edited src/main/java/com/techstore/entity/Category.java | 3→8 lines | ~82 |
+| 11:07 | Edited src/main/java/com/techstore/service/ProductService.java | modified findCategoryByIdOrThrow() | ~167 |
+| 11:07 | Edited src/main/java/com/techstore/service/ProductService.java | findCategoryByIdOrThrow() → resolveAliasId() | ~128 |
+| 11:07 | Edited src/main/java/com/techstore/service/ProductService.java | modified getManufacturersByCategory() | ~89 |
+| 11:07 | Edited src/main/java/com/techstore/service/ProductService.java | modified getProductsParametersByCategory() | ~85 |
+| 11:08 | Created scripts/23_add_gaming_periphery_aliases_in_komp_periferiya.sql | — | ~1015 |
+| 11:08 | Session end: 36 writes across 14 files (COMPARE_PLAN.md, compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx) | 25 reads | ~37463 tok |
+
+## Session: 2026-06-23 11:12
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:16 | Edited src/main/java/com/techstore/service/ProductSearchService.java | added 1 import(s) | ~168 |
+| 11:16 | Edited src/main/java/com/techstore/service/ProductSearchService.java | 1→2 lines | ~31 |
+| 11:16 | Edited src/main/java/com/techstore/service/ProductSearchService.java | added 1 condition(s) | ~132 |
+| 11:16 | Edited src/main/java/com/techstore/service/ProductSearchService.java | modified getAvailableParametersWithCountsForCategory() | ~152 |
+| 11:16 | Edited src/main/java/com/techstore/service/ProductSearchService.java | modified getFilteredFacets() | ~108 |
+| 11:17 | Edited src/main/java/com/techstore/service/ProductSearchService.java | added error handling | ~350 |
+| 11:17 | Edited src/main/java/com/techstore/service/ParameterService.java | modified getId() | ~240 |
+| 11:17 | Edited src/main/java/com/techstore/service/ProductService.java | added 2 condition(s) | ~186 |
+| 11:18 | Session end: 8 writes across 3 files (ProductSearchService.java, ParameterService.java, ProductService.java) | 5 reads | ~27743 tok |
+| 11:18 | Session end: 8 writes across 3 files (ProductSearchService.java, ParameterService.java, ProductService.java) | 5 reads | ~27743 tok |
+
+## Session: 2026-06-23 (alias критични поправки)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| — | Fix: alias resolution в ProductSearchService.searchProducts | ProductSearchService.java | Категория филтри работят на alias страници |
+| — | Fix: alias resolution в getAvailableParametersWithCountsForCategory | ProductSearchService.java | Facet counts коректни на alias страници |
+| — | Fix: alias resolution в getFilteredFacets | ProductSearchService.java | Динамични facets работят при приложени филтри |
+| — | Fix: alias resolution в ParameterService.findByCategory | ParameterService.java | GET /api/parameters/category/{id} връща правилни параметри |
+| — | Fix: hidden-original guard в ProductService.resolveAliasId | ProductService.java | Alias не сервира продукти ако оригиналната категория е скрита |
+| 11:22 | Session end: 8 writes across 3 files (ProductSearchService.java, ParameterService.java, ProductService.java) | 5 reads | ~27743 tok |
+| 11:23 | Edited ../../care-tech-ui/src/components/compare/CompareTray.jsx | "flex items-center gap-2 f" → "flex items-center gap-2 f" | ~30 |
+| 11:23 | Session end: 9 writes across 4 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx) | 6 reads | ~27773 tok |
+
+## Session: 2026-06-23 (CompareTray бутон fix)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| — | Fix: изрязан бутон за премахване в CompareTray | CompareTray.jsx | Добавени pt-2 pr-2 на overflow-x-auto контейнера |
+| 11:31 | Session end: 9 writes across 4 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx) | 6 reads | ~27773 tok |
+| 11:39 | Edited ../../care-tech-ui/src/pages/OurClients.jsx | 10→15 lines | ~98 |
+| 11:39 | Session end: 10 writes across 5 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx, OurClients.jsx) | 7 reads | ~27871 tok |
+| 11:42 | Session end: 10 writes across 5 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx, OurClients.jsx) | 8 reads | ~27871 tok |
+| 11:44 | Session end: 10 writes across 5 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx, OurClients.jsx) | 8 reads | ~27871 tok |
+| 11:44 | Session end: 10 writes across 5 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx, OurClients.jsx) | 8 reads | ~27871 tok |
+| 11:49 | Session end: 10 writes across 5 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx, OurClients.jsx) | 19 reads | ~77085 tok |
+| 11:55 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | added 1 condition(s) | ~223 |
+| 11:55 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | isEmpty() → isPresent() | ~580 |
+
+## Session: 2026-06-23 (Phase 1 — Parameter sync fixes)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| — | Fix 1.2: Fuzzy option matching в setAsbisParametersToProduct | AsbisSyncService.java | Handles "16 GB" vs "16GB" mismatch |
+| — | Fix 1.3: Не пропускай unmapped MOST категории | MostSyncService.java | Параметри се събират без категория вместо да се губят |
+| 11:56 | Session end: 12 writes across 7 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx, OurClients.jsx) | 19 reads | ~78122 tok |
+| 12:00 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | expanded (+60 lines) | ~996 |
+| 12:00 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | added 1 condition(s) | ~173 |
+| 12:00 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | added 1 condition(s) | ~223 |
+| 12:00 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | 7→6 lines | ~119 |
+
+## Session: 2026-06-23 (Phase 2 — Parameter sync fixes)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| — | Fix 2.1: Разширен MOST_CATEGORY_MAPPING с ~40 нови категории | MostSyncService.java | Покрива мрежово оборудване, флаш памети, геймърска периферия, аксесоари |
+| — | Fix 2.2: Fuzzy option matching в setTekraParametersToProduct | TekraSyncService.java | Handles whitespace mismatch в стойности на опции |
+| — | Fix 2.2: Fuzzy option matching в setTekraParametersToProductSimplified | TekraSyncService.java | Същото за Simplified метода |
+| — | Fix 2.3: SQL hack — WHERE p.platform → WHERE pr.platform | TekraSyncService.java | Включва параметри от всички платформи за Tekra продукти |
+| 12:01 | Session end: 16 writes across 8 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx, OurClients.jsx) | 19 reads | ~79824 tok |
+| 12:02 | Session end: 16 writes across 8 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx, OurClients.jsx) | 19 reads | ~79824 tok |
+| 12:11 | Session end: 16 writes across 8 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx, OurClients.jsx) | 19 reads | ~79824 tok |

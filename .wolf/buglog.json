@@ -4175,6 +4175,243 @@
       "related_bugs": [],
       "occurrences": 2,
       "last_seen": "2026-06-23T05:57:44.020Z"
+    },
+    {
+      "id": "bug-258",
+      "timestamp": "2026-06-23T07:20:23.539Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../care-tech-ui/src/redux/store.js",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T07:20:23.539Z"
+    },
+    {
+      "id": "bug-259",
+      "timestamp": "2026-06-23T07:30:28.511Z",
+      "error_message": "CSS fix: length",
+      "file": "../../care-tech-ui/src/components/compare/CompareTray.jsx",
+      "root_cause": "length: 4 - items.length → COMPARE_MAX - items.length",
+      "fix": "Changed length: 4 - items.length → COMPARE_MAX - items.length",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T07:30:28.511Z"
+    },
+    {
+      "id": "bug-260",
+      "timestamp": "2026-06-23T07:54:35.024Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/pages/ComparePage.jsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 14→20 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T07:54:35.024Z"
+    },
+    {
+      "id": "bug-261",
+      "timestamp": "2026-06-23T07:55:09.825Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/App.js",
+      "root_cause": "Had \"flex-grow flex\"",
+      "fix": "Changed to `flex-grow flex${compareCount > 0 && !isAdminRoute",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T07:55:09.825Z"
+    },
+    {
+      "id": "bug-262",
+      "timestamp": "2026-06-23T08:07:03.986Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T08:07:03.986Z"
+    },
+    {
+      "id": "bug-263",
+      "timestamp": "2026-06-23T08:07:23.985Z",
+      "error_message": "Wrong return value",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "Was returning: productRepository.findManufacturersByCategoryId(ca",
+      "fix": "Now returns: productRepository.findManufacturersByCategoryId(re",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T08:07:23.985Z"
+    },
+    {
+      "id": "bug-264",
+      "timestamp": "2026-06-23T08:16:46.759Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/ProductSearchService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T08:16:46.759Z"
+    },
+    {
+      "id": "bug-265",
+      "timestamp": "2026-06-23T08:17:05.043Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/ProductSearchService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T08:17:05.043Z"
+    },
+    {
+      "id": "bug-266",
+      "timestamp": "2026-06-23T08:17:18.044Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/ParameterService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T08:17:18.044Z"
+    },
+    {
+      "id": "bug-267",
+      "timestamp": "2026-06-23T00:00:00Z",
+      "error_message": "Филтрирането на продукти връща нулев резултат на alias категория страница",
+      "file": "src/main/java/com/techstore/service/ProductSearchService.java",
+      "root_cause": "POST /api/products/search изпраща alias category ID директно към ProductSearchRepository raw SQL (p.category_id IN (:categoryIds)). Продуктите са в оригиналната категория — alias ID не съвпада с никой ред.",
+      "fix": "Добавена resolveAliasCategories() в ProductSearchService.searchProducts() — преди да извика repository, map-ва всеки String category ID към оригиналния ID ако е alias.",
+      "tags": [
+        "alias",
+        "category",
+        "search",
+        "filter",
+        "ProductSearchService"
+      ],
+      "related_bugs": [
+        "bug-268",
+        "bug-269"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-06-23"
+    },
+    {
+      "id": "bug-268",
+      "timestamp": "2026-06-23T00:00:00Z",
+      "error_message": "Facet counts и filter sidebar са празни на alias категория страница",
+      "file": "src/main/java/com/techstore/service/ProductSearchService.java",
+      "root_cause": "getAvailableParametersWithCountsForCategory() и getFilteredFacets() предаваха alias categoryId директно на ProductSearchRepository — raw SQL не намираше продукти, връщаше 0 counts.",
+      "fix": "Добавена resolveAliasId() преди repository call в двата метода.",
+      "tags": [
+        "alias",
+        "category",
+        "facets",
+        "ProductSearchService"
+      ],
+      "related_bugs": [
+        "bug-267",
+        "bug-269"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-06-23"
+    },
+    {
+      "id": "bug-269",
+      "timestamp": "2026-06-23T00:00:00Z",
+      "error_message": "GET /api/parameters/category/{aliasId} връща празен списък вместо параметрите на оригиналната категория",
+      "file": "src/main/java/com/techstore/service/ParameterService.java",
+      "root_cause": "findByCategory() предаваше alias categoryId директно на parameterRepository — alias категорията няма собствени записи в category_parameters, резултатът е празен.",
+      "fix": "Добавена alias resolution: Category cat = findCategoryByIdOrThrow(categoryId); Long resolvedId = cat.getAliasOf() != null ? cat.getAliasOf().getId() : categoryId; — resolvedId се ползва за findByCategoryIdOrderByOrderAsc и getCategoryParameterFilters.",
+      "tags": [
+        "alias",
+        "category",
+        "parameters",
+        "ParameterService"
+      ],
+      "related_bugs": [
+        "bug-267",
+        "bug-268"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-06-23"
+    },
+    {
+      "id": "bug-270",
+      "timestamp": "2026-06-23T08:23:02.239Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/components/compare/CompareTray.jsx",
+      "root_cause": "Had \"flex items-center gap-2 flex-1 min-w-0 overflow-x",
+      "fix": "Changed to \"flex items-center gap-2 flex-1 min-w-0 overflow-x",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T08:23:02.239Z"
+    },
+    {
+      "id": "bug-271",
+      "timestamp": "2026-06-23T08:55:56.339Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T08:55:56.339Z"
     }
   ]
 }
