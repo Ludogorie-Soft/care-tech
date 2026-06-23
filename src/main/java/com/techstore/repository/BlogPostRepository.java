@@ -39,11 +39,15 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
 
     boolean existsBySlugAndIdNot(String slug, Long id);
 
-    List<BlogPost> findByStatusAndPublishedAtLessThanEqual(BlogPostStatus status, LocalDateTime now);
+    @Query(value = "SELECT * FROM blog_posts WHERE status = 'SCHEDULED' AND published_at <= :now FOR UPDATE SKIP LOCKED", nativeQuery = true)
+    List<BlogPost> findScheduledDueWithLock(@Param("now") LocalDateTime now);
 
     @Modifying
     @Query("UPDATE BlogPost b SET b.viewCount = b.viewCount + 1 WHERE b.id = :id")
     void incrementViewCount(@Param("id") Long id);
+
+    @Query("SELECT COUNT(b) FROM BlogPost b WHERE b.content LIKE CONCAT('%', :url, '%') AND b.id <> :excludeId")
+    long countOtherPostsReferencingUrl(@Param("url") String url, @Param("excludeId") Long excludeId);
 
     @Query("SELECT b.id as id, b.slug as slug, b.updatedAt as updatedAt FROM BlogPost b WHERE b.status = :status ORDER BY b.updatedAt DESC")
     List<SitemapEntry> findPublishedSitemapEntries(@Param("status") BlogPostStatus status);

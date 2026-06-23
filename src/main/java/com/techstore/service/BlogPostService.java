@@ -93,8 +93,9 @@ public class BlogPostService {
     @Scheduled(fixedDelay = 60_000)
     @Transactional
     public void publishScheduledPosts() {
-        List<BlogPost> due = blogPostRepository.findByStatusAndPublishedAtLessThanEqual(
-                BlogPostStatus.SCHEDULED, LocalDateTime.now());
+        // FOR UPDATE SKIP LOCKED ensures only one app instance processes each post,
+        // preventing duplicate publishes in multi-instance deployments.
+        List<BlogPost> due = blogPostRepository.findScheduledDueWithLock(LocalDateTime.now());
         if (due.isEmpty()) return;
         for (BlogPost post : due) {
             post.setStatus(BlogPostStatus.PUBLISHED);
@@ -197,10 +198,7 @@ public class BlogPostService {
             }
             Set<String> newInlineUrls = extractInlineImageUrls(request.getContent());
             oldInlineUrls.removeAll(newInlineUrls);
-            for (String url : oldInlineUrls) {
-                try { s3Service.deleteImage(url); }
-                catch (Exception e) { log.warn("Could not delete removed inline image from S3: {}", url); }
-            }
+            deleteInlineImages(oldInlineUrls, saved.getId());
 
             return BlogPostResponseDto.from(saved);
         } catch (DataIntegrityViolationException e) {
@@ -223,7 +221,7 @@ public class BlogPostService {
             try { s3Service.deleteImage(coverUrl); }
             catch (Exception e) { log.warn("Could not delete cover from S3 for post {}: {}", id, e.getMessage()); }
         }
-        deleteInlineImages(content);
+        deleteInlineImages(content, id);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
@@ -312,8 +310,17 @@ public class BlogPostService {
         return urls;
     }
 
-    private void deleteInlineImages(String content) {
-        for (String url : extractInlineImageUrls(content)) {
+    private void deleteInlineImages(String content, Long excludeId) {
+        deleteInlineImages(extractInlineImageUrls(content), excludeId);
+    }
+
+    private void deleteInlineImages(Set<String> urls, Long excludeId) {
+        for (String url : urls) {
+            long sharedCount = blogPostRepository.countOtherPostsReferencingUrl(url, excludeId);
+            if (sharedCount > 0) {
+                log.debug("Skipping S3 deletion — inline image referenced by {} other post(s): {}", sharedCount, url);
+                continue;
+            }
             try { s3Service.deleteImage(url); }
             catch (Exception e) { log.warn("Could not delete inline image from S3: {}", url); }
         }

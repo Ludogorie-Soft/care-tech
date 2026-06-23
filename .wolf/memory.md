@@ -1620,3 +1620,56 @@
 |------|--------|---------|---------|--------|
 | 14:53 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx | 2→2 lines | ~37 |
 | 14:54 | Session end: 1 writes across 1 files (BlogLayout.jsx) | 2 reads | ~37 tok |
+| 18:08 | Session end: 1 writes across 1 files (BlogLayout.jsx) | 18 reads | ~4903 tok |
+| 18:13 | Edited src/main/java/com/techstore/controller/BlogPostController.java | 2→2 lines | ~40 |
+| 18:13 | Edited src/main/java/com/techstore/dto/response/BlogPostResponseDto.java | 6→5 lines | ~47 |
+| 18:13 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx | 3→3 lines | ~74 |
+| 18:13 | Edited src/main/java/com/techstore/controller/BlogPostController.java | 2→2 lines | ~47 |
+| 18:13 | Edited src/main/java/com/techstore/controller/BlogPostController.java | inline fix | ~35 |
+| 18:13 | Edited src/main/java/com/techstore/service/BlogTagService.java | removed 3 lines | ~1 |
+| 18:13 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | 4→4 lines | ~52 |
+| 18:13 | Edited src/main/java/com/techstore/dto/response/BlogPostResponseDto.java | 6→5 lines | ~70 |
+| 18:14 | Session end: 9 writes across 6 files (BlogLayout.jsx, BlogPostController.java, BlogPostResponseDto.java, BlogPostModal.jsx, BlogTagService.java) | 18 reads | ~5285 tok |
+| 07:42 | Session end: 9 writes across 6 files (BlogLayout.jsx, BlogPostController.java, BlogPostResponseDto.java, BlogPostModal.jsx, BlogTagService.java) | 26 reads | ~13986 tok |
+| 07:43 | Edited src/main/java/com/techstore/repository/BlogPostRepository.java | 3→6 lines | ~98 |
+| 07:43 | Edited src/main/java/com/techstore/repository/BlogTagRepository.java | 2→5 lines | ~74 |
+| 07:43 | Edited src/main/java/com/techstore/repository/BlogTagRepository.java | added 1 import(s) | ~59 |
+| 07:43 | Edited src/main/java/com/techstore/service/BlogPostService.java | 6→3 lines | ~54 |
+| 07:44 | Edited src/main/java/com/techstore/service/BlogPostService.java | added 1 condition(s) | ~188 |
+| 07:44 | Edited src/main/java/com/techstore/service/BlogPostService.java | modified catch() | ~98 |
+| 07:44 | Edited src/main/java/com/techstore/service/BlogTagService.java | 5→2 lines | ~41 |
+| 07:44 | Edited src/main/java/com/techstore/service/BlogTagService.java | 3→1 lines | ~6 |
+| 07:44 | Edited src/main/java/com/techstore/controller/BlogPostController.java | added 1 condition(s) | ~168 |
+| 07:45 | Edited src/main/java/com/techstore/service/BlogTagService.java | added 2 import(s) | ~19 |
+| 07:45 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogCategoryManager.jsx | added 1 condition(s) | ~500 |
+| 07:46 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogCategoryManager.jsx | expanded (+17 lines) | ~1662 |
+| 07:46 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | added 1 condition(s) | ~198 |
+| 07:46 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | 6→6 lines | ~120 |
+| 07:46 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | 8→8 lines | ~145 |
+| 07:47 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx | expanded (+17 lines) | ~480 |
+| 07:47 | Session end: 25 writes across 11 files (BlogLayout.jsx, BlogPostController.java, BlogPostResponseDto.java, BlogPostModal.jsx, BlogTagService.java) | 27 reads | ~19580 tok |
+| 07:49 | Session end: 25 writes across 11 files (BlogLayout.jsx, BlogPostController.java, BlogPostResponseDto.java, BlogPostModal.jsx, BlogTagService.java) | 27 reads | ~19580 tok |
+| 08:57 | Edited src/main/java/com/techstore/service/BlogTagService.java | added 1 import(s) | ~48 |
+| 08:57 | Edited src/main/java/com/techstore/service/BlogCategoryService.java | added 1 import(s) | ~63 |
+| 08:57 | Edited src/main/java/com/techstore/service/BlogTagService.java | added error handling | ~124 |
+| 08:57 | Edited src/main/java/com/techstore/service/BlogTagService.java | added error handling | ~103 |
+| 08:57 | Edited src/main/java/com/techstore/service/BlogCategoryService.java | added error handling | ~105 |
+| 08:57 | Edited src/main/java/com/techstore/service/BlogCategoryService.java | added error handling | ~105 |
+| 08:57 | Edited src/main/java/com/techstore/repository/BlogPostRepository.java | 1→2 lines | ~59 |
+| 08:58 | Edited src/main/java/com/techstore/service/BlogPostService.java | findByStatusAndPublishedAtLessThanEqual() → findScheduledDueWithLock() | ~171 |
+| 08:59 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogCategoryManager.jsx | 5→8 lines | ~130 |
+| 08:59 | Session end: 34 writes across 12 files (BlogLayout.jsx, BlogPostController.java, BlogPostResponseDto.java, BlogPostModal.jsx, BlogTagService.java) | 27 reads | ~20545 tok |
+
+## Session: 2026-06-23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|---------|---------|---------|---------|
+| 10:00 | Audit #1: size=0 crash fix, createdBy leak removed, isDirty tag chip, navigate(-1), unused import | BlogPostController, BlogPostResponseDto, BlogPostModal, BlogPostPage, BlogTagService | done | ~600 |
+| 10:30 | Audit #2: S3 shared-image guard (countOtherPostsReferencingUrl), isDirty for CategoryModal+TagModal, countPostsByTagId, 400 dual filter | BlogPostRepository, BlogTagRepository, BlogPostService, BlogTagService, BlogCategoryManager, BlogTagManager, BlogPostController | done | ~800 |
+| 11:00 | Audit #3: DataIntegrityViolationException in Tag+Category services (→409), FOR UPDATE SKIP LOCKED scheduler, delete confirm text | BlogTagService, BlogCategoryService, BlogPostRepository, BlogPostService, BlogCategoryManager | done | ~400 |
+| 09:11 | Session end: 34 writes across 12 files (BlogLayout.jsx, BlogPostController.java, BlogPostResponseDto.java, BlogPostModal.jsx, BlogTagService.java) | 27 reads | ~20545 tok |
+
+## Session: 2026-06-23 09:44
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

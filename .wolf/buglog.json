@@ -3963,13 +3963,87 @@
       "last_seen": "2026-06-22T11:48:53.510Z"
     },
     {
+      "id": "bug-250",
+      "timestamp": "2026-06-22T13:00:00.000Z",
+      "error_message": "PageRequest with size=0 throws IllegalArgumentException (500)",
+      "file": "src/main/java/com/techstore/controller/BlogPostController.java",
+      "root_cause": "Math.min(size, 50) doesn't guard against 0 or negative — PageRequest requires size >= 1",
+      "fix": "Changed to Math.max(1, Math.min(size, N)) in all three pageable constructors",
+      "tags": [
+        "pagination",
+        "validation",
+        "500",
+        "blog"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-22T13:00:00.000Z"
+    },
+    {
+      "id": "bug-249",
+      "timestamp": "2026-06-22T13:00:00.000Z",
+      "error_message": "Admin email (createdBy) leaked in public GET /api/blog/{slug} response",
+      "file": "src/main/java/com/techstore/dto/response/BlogPostResponseDto.java",
+      "root_cause": "createdBy field (Spring Auditor username = admin email) was included in the public DTO",
+      "fix": "Removed createdBy field and setter call from BlogPostResponseDto",
+      "tags": [
+        "security",
+        "data-leak",
+        "blog",
+        "privacy"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-22T13:00:00.000Z"
+    },
+    {
+      "id": "bug-248",
+      "timestamp": "2026-06-22T13:00:00.000Z",
+      "error_message": "Tag chip removal in BlogPostModal does not set isDirty — close warning doesn't fire",
+      "file": "care-tech-ui/src/pages/admin/Blog/BlogPostModal.jsx",
+      "root_cause": "onClick handler for tag chip X button mutated form but forgot setIsDirty(true)",
+      "fix": "Added setIsDirty(true) to the tag chip removal handler",
+      "tags": [
+        "ux",
+        "isDirty",
+        "blog",
+        "admin",
+        "modal"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-22T13:00:00.000Z"
+    },
+    {
+      "id": "bug-247",
+      "timestamp": "2026-06-22T13:00:00.000Z",
+      "error_message": "navigate(-1) in BlogPostPage may navigate outside the app on direct link",
+      "file": "care-tech-ui/src/pages/BlogPostPage.jsx",
+      "root_cause": "navigate(-1) follows browser history — if user landed from Google, goes back to Google",
+      "fix": "Changed to navigate('/blog') for predictable behavior",
+      "tags": [
+        "ux",
+        "navigation",
+        "blog"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-22T13:00:00.000Z"
+    },
+    {
       "id": "bug-246",
       "timestamp": "2026-06-22T12:00:00.000Z",
       "error_message": "Infinite retry loop when tags fail to load in admin BlogLayout",
       "file": "care-tech-ui/src/pages/admin/Blog/BlogLayout.jsx",
       "root_cause": "useEffect with tagsStatus in deps array had condition `tagsStatus === 'idle' || tagsStatus === 'failed'` — when fetch fails, status becomes 'failed', triggers effect, dispatches again, loops",
       "fix": "Removed `|| tagsStatus === 'failed'` from condition, now only fetches on 'idle'",
-      "tags": ["infinite-loop", "useEffect", "redux", "blog", "admin"],
+      "tags": [
+        "infinite-loop",
+        "useEffect",
+        "redux",
+        "blog",
+        "admin"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-22T12:00:00.000Z"
@@ -3989,6 +4063,118 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-22T11:48:37.151Z"
+    },
+    {
+      "id": "bug-251",
+      "timestamp": "2026-06-23T04:43:58.116Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/BlogPostService.java",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 6→3 lines (4 removed) | Also: private void deleteInlineImages(String content) {; for (String url : extractInlineImageUrls(content))",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-23T04:44:11.573Z"
+    },
+    {
+      "id": "bug-252",
+      "timestamp": "2026-06-23T04:44:30.549Z",
+      "error_message": "Wrong return value",
+      "file": "src/main/java/com/techstore/service/BlogTagService.java",
+      "root_cause": "Was returning: BlogTagResponseDto.from(saved, countMap.getOrDefau",
+      "fix": "Now returns: BlogTagResponseDto.from(saved, blogTagRepository.c",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T04:44:30.549Z"
+    },
+    {
+      "id": "bug-253",
+      "timestamp": "2026-06-23T04:44:40.578Z",
+      "error_message": "Wrong reference: HashMap should be List",
+      "file": "src/main/java/com/techstore/service/BlogTagService.java",
+      "root_cause": "Used \"HashMap\" instead of \"List\"",
+      "fix": "Changed HashMap → List",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-23T04:45:17.337Z"
+    },
+    {
+      "id": "bug-254",
+      "timestamp": "2026-06-23T04:46:29.531Z",
+      "error_message": "CSS fix: hover",
+      "file": "../../care-tech-ui/src/pages/admin/Blog/BlogCategoryManager.jsx",
+      "root_cause": "hover: bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors\"> → bg-red-500 text-white text-sm font-medium rounded-xl transition-colors\">",
+      "fix": "Changed hover: bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors\"> → bg-red-500 text-white text-sm font-medium rounded-xl transition-colors\">",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T04:46:29.531Z"
+    },
+    {
+      "id": "bug-255",
+      "timestamp": "2026-06-23T04:47:03.028Z",
+      "error_message": "CSS fix: hover",
+      "file": "../../care-tech-ui/src/pages/admin/Blog/BlogTagManager.jsx",
+      "root_cause": "hover: bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors\"> → bg-red-500 text-white text-sm font-medium rounded-xl transition-colors\">",
+      "fix": "Changed hover: bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors\"> → bg-red-500 text-white text-sm font-medium rounded-xl transition-colors\">",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T04:47:03.028Z"
+    },
+    {
+      "id": "bug-256",
+      "timestamp": "2026-06-23T05:57:34.556Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/BlogTagService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block | Also: try {; } catch (DataIntegrityViolationException e) {",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-23T05:57:34.782Z"
+    },
+    {
+      "id": "bug-257",
+      "timestamp": "2026-06-23T05:57:43.787Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/BlogCategoryService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block | Also: try {; } catch (DataIntegrityViolationException e) {",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-23T05:57:44.020Z"
     }
   ]
 }

@@ -41,7 +41,10 @@ public class BlogPostController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String tag) {
 
-        Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(size, 50));
+        if (category != null && !category.isBlank() && tag != null && !tag.isBlank()) {
+            throw new com.techstore.exception.BusinessLogicException("Не може да се филтрира едновременно по категория и таг");
+        }
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, Math.min(size, 50)));
         if (category != null && !category.isBlank()) {
             return ResponseEntity.ok(blogPostService.getPublishedByCategory(category, pageable));
         }
@@ -56,7 +59,7 @@ public class BlogPostController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size) {
 
-        Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(size, 20));
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, Math.min(size, 20)));
         return ResponseEntity.ok(blogPostService.getFeaturedPosts(pageable));
     }
 
@@ -82,7 +85,7 @@ public class BlogPostController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String search) {
 
-        Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(size, 100), Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, Math.min(size, 100)), Sort.by("createdAt").descending());
         BlogPostStatus statusEnum = null;
         if (status != null && !status.isBlank()) {
             try { statusEnum = BlogPostStatus.valueOf(status.toUpperCase()); }

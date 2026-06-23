@@ -6,6 +6,7 @@ import com.techstore.entity.BlogCategory;
 import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.DuplicateResourceException;
 import com.techstore.exception.ResourceNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import com.techstore.repository.BlogCategoryRepository;
 import com.techstore.util.SlugUtils;
 import lombok.RequiredArgsConstructor;
@@ -87,9 +88,13 @@ public class BlogCategoryService {
             cat.setParent(parent);
         }
 
-        BlogCategory saved = blogCategoryRepository.save(cat);
-        log.info("Created blog category: id={}, slug={}", saved.getId(), saved.getSlug());
-        return BlogCategoryResponseDto.from(saved, false);
+        try {
+            BlogCategory saved = blogCategoryRepository.save(cat);
+            log.info("Created blog category: id={}, slug={}", saved.getId(), saved.getSlug());
+            return BlogCategoryResponseDto.from(saved, false);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateResourceException("Категория с този slug вече съществува");
+        }
     }
 
     @Transactional
@@ -115,9 +120,13 @@ public class BlogCategoryService {
             cat.setParent(null);
         }
 
-        BlogCategory saved = blogCategoryRepository.save(cat);
-        log.info("Updated blog category: id={}, slug={}", saved.getId(), saved.getSlug());
-        return BlogCategoryResponseDto.from(saved, false);
+        try {
+            BlogCategory saved = blogCategoryRepository.save(cat);
+            log.info("Updated blog category: id={}, slug={}", saved.getId(), saved.getSlug());
+            return BlogCategoryResponseDto.from(saved, false);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateResourceException("Категория с този slug вече съществува");
+        }
     }
 
     @Transactional

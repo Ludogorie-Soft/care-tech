@@ -28,7 +28,6 @@ public class BlogPostResponseDto {
     private LocalDateTime publishedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String createdBy;
 
     private static final Pattern HTML_TAG = Pattern.compile("<[^>]+>");
 
@@ -49,7 +48,6 @@ public class BlogPostResponseDto {
         dto.setPublishedAt(post.getPublishedAt());
         dto.setCreatedAt(post.getCreatedAt());
         dto.setUpdatedAt(post.getUpdatedAt());
-        dto.setCreatedBy(post.getCreatedBy());
 
         if (post.getCategory() != null) {
             dto.setCategory(BlogCategoryResponseDto.from(post.getCategory(), false));

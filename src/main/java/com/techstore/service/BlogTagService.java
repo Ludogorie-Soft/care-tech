@@ -5,6 +5,7 @@ import com.techstore.dto.response.BlogTagResponseDto;
 import com.techstore.entity.BlogTag;
 import com.techstore.exception.DuplicateResourceException;
 import com.techstore.exception.ResourceNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import com.techstore.repository.BlogTagRepository;
 import com.techstore.util.SlugUtils;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,9 +46,13 @@ public class BlogTagService {
         BlogTag tag = new BlogTag();
         tag.setName(name);
         tag.setSlug(slug);
-        BlogTag saved = blogTagRepository.save(tag);
-        log.info("Created blog tag: id={}, slug={}", saved.getId(), saved.getSlug());
-        return BlogTagResponseDto.from(saved, 0L);
+        try {
+            BlogTag saved = blogTagRepository.save(tag);
+            log.info("Created blog tag: id={}, slug={}", saved.getId(), saved.getSlug());
+            return BlogTagResponseDto.from(saved, 0L);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateResourceException("Таг с това име или slug вече съществува");
+        }
     }
 
     @Transactional
@@ -63,11 +67,12 @@ public class BlogTagService {
         String slug = resolveSlug(request.getSlug(), name, id);
         tag.setName(name);
         tag.setSlug(slug);
-        BlogTag saved = blogTagRepository.save(tag);
-        Map<Long, Long> countMap = new HashMap<>();
-        blogTagRepository.countPostsPerTag()
-                .forEach(row -> countMap.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue()));
-        return BlogTagResponseDto.from(saved, countMap.getOrDefault(saved.getId(), 0L));
+        try {
+            BlogTag saved = blogTagRepository.save(tag);
+            return BlogTagResponseDto.from(saved, blogTagRepository.countPostsByTagId(saved.getId()));
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateResourceException("Таг с това ime или slug вече съществува");
+        }
     }
 
     @Transactional

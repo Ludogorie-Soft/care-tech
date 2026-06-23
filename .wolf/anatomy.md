@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-22T11:53:47.265Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-23T05:59:09.725Z
 > Files: 553 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -48,7 +48,7 @@
 ## ../../care-tech-ui/src/pages/
 
 - `Blog.jsx` — formatDate (~2633 tok)
-- `BlogPostPage.jsx` — formatDate (~1801 tok)
+- `BlogPostPage.jsx` — formatDate (~1802 tok)
 - `Cart.jsx` — EURO_RATE (~16680 tok)
 - `Category.jsx` — Category (~5536 tok)
 - `ComingSoonPage.jsx` — ComingSoonPage (~385 tok)
@@ -61,11 +61,11 @@
 
 ## ../../care-tech-ui/src/pages/admin/Blog/
 
-- `BlogCategoryManager.jsx` — CategoryModal — renders form (~4108 tok)
+- `BlogCategoryManager.jsx` — CategoryModal — renders form (~4552 tok)
 - `BlogLayout.jsx` — formatDate — renders table (~5184 tok)
-- `BlogPostModal.jsx` — TagPicker — renders form (~7210 tok)
+- `BlogPostModal.jsx` — TagPicker — renders form (~7216 tok)
 - `BlogPostPreviewModal.jsx` — formatDate (~1529 tok)
-- `BlogTagManager.jsx` — TagModal — renders form (~3027 tok)
+- `BlogTagManager.jsx` — TagModal — renders form (~3398 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Customers/
 
@@ -323,7 +323,7 @@
 - `AdminController.java` — Get all orders with pagination and sorting (~5433 tok)
 - `AuthController.java` — RestController: AuthController (9 endpoints) (~1192 tok)
 - `BlogCategoryController.java` — RestController: BlogCategoryController (6 endpoints) (~750 tok)
-- `BlogPostController.java` — RestController: BlogPostController (9 endpoints) (~1416 tok)
+- `BlogPostController.java` — RestController: BlogPostController (9 endpoints) (~1487 tok)
 - `BlogTagController.java` — RestController: BlogTagController (4 endpoints) (~599 tok)
 - `CacheClearController.java` — POST /api/internal/cache/clear-all. @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')") + URL-level guard. (~264 tok)
 - `CartController.java` — RestController: CartController (6 endpoints) (~2208 tok)
@@ -432,7 +432,7 @@
 ## src/main/java/com/techstore/dto/response/
 
 - `BlogCategoryResponseDto.java` — BlogCategoryResponseDto: from (~358 tok)
-- `BlogPostResponseDto.java` — BlogPostResponseDto: from (~705 tok)
+- `BlogPostResponseDto.java` — BlogPostResponseDto: from (~685 tok)
 - `BlogPostSummaryDto.java` — BlogPostSummaryDto: from (~478 tok)
 - `BlogTagResponseDto.java` — BlogTagResponseDto: from (~144 tok)
 - `CartItemResponseDto.java` — Class: CartItemResponseDto (~143 tok)
@@ -596,8 +596,8 @@
 ## src/main/java/com/techstore/repository/
 
 - `BlogCategoryRepository.java` — Repository: BlogCategoryRepository (~167 tok)
-- `BlogPostRepository.java` — Repository: BlogPostRepository (~616 tok)
-- `BlogTagRepository.java` — Repository: BlogTagRepository (~220 tok)
+- `BlogPostRepository.java` — Repository: BlogPostRepository (~705 tok)
+- `BlogTagRepository.java` — Repository: BlogTagRepository (~270 tok)
 - `CartItemRepository.java` — Find users with abandoned carts: (~641 tok)
 - `CategoryRepository.java` — Repository: CategoryRepository (~316 tok)
 - `LeasingApplicationRepository.java` — Repository: LeasingApplicationRepository (~376 tok)
@@ -623,9 +623,9 @@
 - `AbandonedCartService.java` — Service: AbandonedCartService (~624 tok)
 - `AsbisApiService.java` — Extract categories from Asbis products (~9352 tok)
 - `AuthService.java` — Service: AuthService (~6388 tok)
-- `BlogCategoryService.java` — Service: BlogCategoryService (~1803 tok)
-- `BlogPostService.java` — Service: BlogPostService (~3676 tok)
-- `BlogTagService.java` — Service: BlogTagService (~1086 tok)
+- `BlogCategoryService.java` — Service: BlogCategoryService (~1917 tok)
+- `BlogPostService.java` — Service: BlogPostService (~3776 tok)
+- `BlogTagService.java` — Service: BlogTagService (~1138 tok)
 - `CartService.java` — Service: CartService (~1669 tok)
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~13424 tok)
 - `CategoryService.java` — Service: CategoryService (~4425 tok)
