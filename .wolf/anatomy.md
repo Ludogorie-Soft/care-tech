@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-23T09:00:36.495Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-23T10:40:20.228Z
 > Files: 560 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -618,7 +618,7 @@
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~512 tok)
 - `ProductRepository.java` — Cross-platform deduplication by SKU. (~1771 tok)
-- `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9020 tok)
+- `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9378 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
 - `SyncLogRepository.java` — Repository: SyncLogRepository (~214 tok)

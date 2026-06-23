@@ -1791,3 +1791,17 @@
 | 12:01 | Session end: 16 writes across 8 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx, OurClients.jsx) | 19 reads | ~79824 tok |
 | 12:02 | Session end: 16 writes across 8 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx, OurClients.jsx) | 19 reads | ~79824 tok |
 | 12:11 | Session end: 16 writes across 8 files (ProductSearchService.java, ParameterService.java, ProductService.java, CompareTray.jsx, OurClients.jsx) | 19 reads | ~79824 tok |
+
+## Session: 2026-06-23 13:07
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:35 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | modified getFilteredFacets() | ~1592 |
+| 13:35 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | added 1 import(s) | ~14 |
+| 13:35 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 2→1 lines | ~6 |
+| 13:37 | implement disjunctive faceting in getFilteredFacets | ProductSearchRepository.java | N separate SQL queries per parameter, each excludes own filter | ~200 tokens |
+| 13:37 | Session end: 3 writes across 1 files (ProductSearchRepository.java) | 2 reads | ~13325 tok |
+| 13:37 | Session end: 3 writes across 1 files (ProductSearchRepository.java) | 2 reads | ~13325 tok |
+| 13:40 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | added 1 import(s) | ~49 |
+| 13:40 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 2→2 lines | ~53 |
+| 13:40 | Session end: 5 writes across 1 files (ProductSearchRepository.java) | 2 reads | ~13435 tok |

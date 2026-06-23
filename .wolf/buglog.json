@@ -4412,6 +4412,18 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-23T08:55:56.339Z"
+    },
+    {
+      "id": "bug-272",
+      "timestamp": "2026-06-23T00:00:00Z",
+      "error_message": "Selecting a Socket filter hid all options from other filter groups (RAM, Cores, etc.)",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java",
+      "root_cause": "getFilteredFacets used a single SQL query with all active filters in the WHERE clause. This caused the result to contain only products matching ALL filters, so other parameters' options that had no products matching the active filter were absent. Frontend Filter.jsx then hid groups with 0 options.",
+      "fix": "Replaced single-query approach with disjunctive (independent) faceting: Step 1 loads all filterable parameters for the category. Step 2 runs a separate SQL query per parameter, applying all active filters EXCEPT that parameter's own filter. This ensures each parameter group always shows its full option set given the other active filters.",
+      "tags": ["facets", "filters", "disjunctive", "ProductSearchRepository", "UX"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-23T00:00:00Z"
     }
   ]
 }
