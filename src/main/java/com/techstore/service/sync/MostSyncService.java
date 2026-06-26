@@ -530,6 +530,21 @@ public class MostSyncService {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS,
                     allParametersData.size(), created, 0, 0, message, startTime);
 
+            // Auto-enable filtering for newly created parameters that have 2–50 options.
+            // is_filter is left NULL by default; this query marks them as filterable
+            // so they appear in the filter panel without requiring a manual admin action.
+            try {
+                int isFilterUpdated = entityManager.createNativeQuery(
+                        "UPDATE category_parameters SET is_filter = true " +
+                        "WHERE is_filter IS NULL AND parameter_id IN (" +
+                        "  SELECT parameter_id FROM parameter_options " +
+                        "  GROUP BY parameter_id HAVING COUNT(*) BETWEEN 2 AND 50)")
+                        .executeUpdate();
+                log.info("Auto-set is_filter=true for {} category_parameter entries", isFilterUpdated);
+            } catch (Exception e) {
+                log.error("Failed to auto-set is_filter after MOST parameters sync: {}", e.getMessage());
+            }
+
             log.info("=== Most Parameters Sync Completed ===");
             log.info("   Unique parameters: {}", allParametersData.size());
             log.info("   Created: {}, Reused: {}", created, reused);
@@ -681,6 +696,32 @@ public class MostSyncService {
                     totalProcessed, totalCreated, totalUpdated, skippedNoSku, skippedNoCategory,
                     skippedNoManufacturer, totalErrors, unmappedCategories.size());
 
+            // Catch-all: ensure category_parameters rows exist for every parameter
+            // that actually landed on a MOST product. REQUIRES_NEW per-product transactions
+            // do NOT update category_parameters, so some associations may be missing.
+            try {
+                int cpInserted = entityManager.createNativeQuery(
+                        "INSERT INTO category_parameters (category_id, parameter_id) " +
+                        "SELECT DISTINCT pr.category_id, pp.parameter_id " +
+                        "FROM product_parameters pp " +
+                        "JOIN products pr ON pr.id = pp.product_id " +
+                        "WHERE pr.platform = 'MOST' " +
+                        "ON CONFLICT (category_id, parameter_id) DO NOTHING")
+                        .executeUpdate();
+                log.info("MOST catch-all: inserted {} missing category_parameters rows", cpInserted);
+
+                // Auto-enable filtering for newly linked parameters
+                int isFilterUpdated = entityManager.createNativeQuery(
+                        "UPDATE category_parameters SET is_filter = true " +
+                        "WHERE is_filter IS NULL AND parameter_id IN (" +
+                        "  SELECT parameter_id FROM parameter_options " +
+                        "  GROUP BY parameter_id HAVING COUNT(*) BETWEEN 2 AND 50)")
+                        .executeUpdate();
+                log.info("MOST catch-all: auto-set is_filter=true for {} entries", isFilterUpdated);
+            } catch (Exception e) {
+                log.error("Failed MOST catch-all category_parameters sync: {}", e.getMessage());
+            }
+
             int deduplicated = productRepository.deduplicateCrossPlatformBySku();
             log.info("Cross-platform deduplication: hidden {} higher-priced duplicates", deduplicated);
 
@@ -829,6 +870,14 @@ public class MostSyncService {
                 if (optionMap == null) { notFoundCount++; continue; }
 
                 Long optionId = optionMap.get(normalizeName(parameterValue));
+                if (optionId == null) {
+                    // Fuzzy fallback: strip all whitespace (handles "16 GB" vs "16GB")
+                    String stripped = parameterValue.toLowerCase().replaceAll("\\s+", "");
+                    optionId = optionMap.entrySet().stream()
+                            .filter(e -> e.getKey().replaceAll("\\s+", "").equals(stripped))
+                            .map(Map.Entry::getValue)
+                            .findFirst().orElse(null);
+                }
                 if (optionId == null) { notFoundCount++; continue; }
 
                 if (!seenKeys.add(parameterId + ":" + optionId)) continue; // dedup

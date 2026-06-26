@@ -838,13 +838,21 @@ public class TekraSyncService {
             try {
                 entityManager.flush();
                 entityManager.createNativeQuery(
-                        "INSERT INTO category_parameters (category_id, parameter_id, is_filter) " +
-                        "SELECT DISTINCT pr.category_id, pp.parameter_id, false " +
+                        "INSERT INTO category_parameters (category_id, parameter_id) " +
+                        "SELECT DISTINCT pr.category_id, pp.parameter_id " +
                         "FROM product_parameters pp " +
                         "JOIN products pr ON pr.id = pp.product_id " +
                         "WHERE pr.platform = 'TEKRA' " +
                         "ON CONFLICT (category_id, parameter_id) DO NOTHING"
                 ).executeUpdate();
+
+                // Auto-enable filtering for newly linked parameters
+                entityManager.createNativeQuery(
+                        "UPDATE category_parameters SET is_filter = true " +
+                        "WHERE is_filter IS NULL AND parameter_id IN (" +
+                        "  SELECT parameter_id FROM parameter_options " +
+                        "  GROUP BY parameter_id HAVING COUNT(*) BETWEEN 2 AND 50)")
+                        .executeUpdate();
                 log.info("Tekra category_parameters synced from product_parameters");
             } catch (Exception e) {
                 log.error("Failed to sync Tekra category_parameters: {}", e.getMessage());

@@ -82,7 +82,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     Page<Product> findByMarkupPercentageGreaterThan(BigDecimal markup, Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE p.asbisCode IN :asbisCodes")
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category WHERE p.asbisCode IN :asbisCodes")
     List<Product> findByAsbisCodeIn(@Param("asbisCodes") Collection<String> asbisCodes);
 
     @Modifying

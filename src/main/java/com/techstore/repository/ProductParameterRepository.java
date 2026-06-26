@@ -25,7 +25,7 @@ public interface ProductParameterRepository extends JpaRepository<ProductParamet
             "  AND p.active      = true " +
             "  AND p.show_flag   = true " +
             "  AND p.status IN ('AVAILABLE','LIMITED_QUANTITY') " +
-            "  AND cp.is_filter  != false " +
+            "  AND cp.is_filter IS TRUE " +
             "ORDER BY COALESCE(param.filter_order, param.sort_order) ASC",
             nativeQuery = true)
     List<Object[]> findParameterOptionsByCategoryAndActiveProducts(@Param("categoryId") Long categoryId);

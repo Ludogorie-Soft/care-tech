@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-23T10:40:20.228Z
-> Files: 560 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-25T06:44:04.867Z
+> Files: 562 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -157,6 +157,7 @@
 - `parameters_202605130941.sql` (~43615 tok)
 - `pom.xml` (~1642 tok)
 - `README.md` — Project documentation (~1777 tok)
+- `sync-diagnostics.sql` — ============================================================= (~1278 tok)
 
 ## .claude/
 
@@ -616,8 +617,8 @@
 - `ParameterOptionRepository.java` — Repository: ParameterOptionRepository (~420 tok)
 - `ParameterRepository.java` — Repository: ParameterRepository (~1143 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
-- `ProductParameterRepository.java` — Repository: ProductParameterRepository (~512 tok)
-- `ProductRepository.java` — Cross-platform deduplication by SKU. (~1771 tok)
+- `ProductParameterRepository.java` — Repository: ProductParameterRepository (~478 tok)
+- `ProductRepository.java` — Cross-platform deduplication by SKU. (~1779 tok)
 - `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9378 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
@@ -665,10 +666,10 @@
 
 ## src/main/java/com/techstore/service/sync/
 
-- `AsbisSyncService.java` — AsbisSyncService (~13358 tok)
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~11702 tok)
-- `TekraSyncService.java` — Service: TekraSyncService (~22944 tok)
-- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~13944 tok)
+- `AsbisSyncService.java` — AsbisSyncService (~14027 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~12537 tok)
+- `TekraSyncService.java` — Service: TekraSyncService (~23065 tok)
+- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~14035 tok)
 
 ## src/main/java/com/techstore/util/
 
@@ -713,6 +714,7 @@
 - `V30__add_blog_tags.sql` — SQL: tables: blog_tags, blog_post_tags (~165 tok)
 - `V31__upgrade_blog_posts.sql` — Add new columns (~267 tok)
 - `V32__add_alias_to_categories.sql` — V32: Add alias_of_id to categories to support "virtual" categories that (~134 tok)
+- `V33__fix_sync_parameters_isfilter.sql` — Phase 1a: Remove junk MOST parameters created before the properties-map fix. (~521 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)

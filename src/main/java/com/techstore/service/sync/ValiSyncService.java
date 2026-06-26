@@ -533,6 +533,11 @@ public class ValiSyncService {
                     .filter(p -> p.getExternalId() != null)
                     .filter(p -> !currentValiExternalIds.contains(p.getExternalId()))
                     .filter(p -> !"ADMIN".equalsIgnoreCase(p.getLastModifiedBy()))
+                    // Protect parameters that have been adopted by other platforms —
+                    // deleting them would destroy ASBIS/MOST/TEKRA specs as well
+                    .filter(p -> p.getAsbisKey() == null)
+                    .filter(p -> p.getMostKey() == null)
+                    .filter(p -> p.getTekraKey() == null)
                     .collect(Collectors.toList());
 
             if (!orphaned.isEmpty()) {

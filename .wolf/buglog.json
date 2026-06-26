@@ -4420,10 +4420,96 @@
       "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java",
       "root_cause": "getFilteredFacets used a single SQL query with all active filters in the WHERE clause. This caused the result to contain only products matching ALL filters, so other parameters' options that had no products matching the active filter were absent. Frontend Filter.jsx then hid groups with 0 options.",
       "fix": "Replaced single-query approach with disjunctive (independent) faceting: Step 1 loads all filterable parameters for the category. Step 2 runs a separate SQL query per parameter, applying all active filters EXCEPT that parameter's own filter. This ensures each parameter group always shows its full option set given the other active filters.",
-      "tags": ["facets", "filters", "disjunctive", "ProductSearchRepository", "UX"],
+      "tags": [
+        "facets",
+        "filters",
+        "disjunctive",
+        "ProductSearchRepository",
+        "UX"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-23T00:00:00Z"
+    },
+    {
+      "id": "bug-273",
+      "timestamp": "2026-06-24T14:54:14.150Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-24T14:54:14.150Z"
+    },
+    {
+      "id": "bug-274",
+      "timestamp": "2026-06-24T14:54:34.264Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-24T14:54:34.264Z"
+    },
+    {
+      "id": "bug-275",
+      "timestamp": "2026-06-24T14:54:49.776Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 8→16 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-24T14:54:49.776Z"
+    },
+    {
+      "id": "bug-276",
+      "timestamp": "2026-06-25T06:43:51.443Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/repository/ProductRepository.java",
+      "root_cause": "Had \"SELECT p FROM Product p WHERE p.asbisCode IN :asb",
+      "fix": "Changed to \"SELECT p FROM Product p LEFT JOIN FETCH p.categor",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-25T06:43:51.443Z"
+    },
+    {
+      "id": "bug-277",
+      "timestamp": "2026-06-25T06:44:04.886Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/repository/ProductParameterRepository.java",
+      "root_cause": "Had \"  AND cp.is_filter  != false \"",
+      "fix": "Changed to \"  AND cp.is_filter IS TRUE \"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-25T06:44:04.886Z"
     }
   ]
 }

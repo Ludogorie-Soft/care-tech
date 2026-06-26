@@ -1805,3 +1805,35 @@
 | 13:40 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | added 1 import(s) | ~49 |
 | 13:40 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 2→2 lines | ~53 |
 | 13:40 | Session end: 5 writes across 1 files (ProductSearchRepository.java) | 2 reads | ~13435 tok |
+| 14:13 | Session end: 5 writes across 1 files (ProductSearchRepository.java) | 6 reads | ~63681 tok |
+
+## Session: 2026-06-24 14:31
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:54 | Created src/main/resources/db/migration/V33__fix_sync_parameters_isfilter.sql | — | ~521 |
+| 17:54 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 condition(s) | ~173 |
+| 17:54 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added error handling | ~331 |
+| 17:54 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | modified catch() | ~624 |
+| 17:54 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | added error handling | ~325 |
+| 17:54 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | modified catch() | ~591 |
+| 17:54 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | expanded (+8 lines) | ~262 |
+| 17:54 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | 6→11 lines | ~201 |
+| 17:55 | Session end: 8 writes across 5 files (V33__fix_sync_parameters_isfilter.sql, MostSyncService.java, AsbisSyncService.java, TekraSyncService.java, ValiSyncService.java) | 4 reads | ~51250 tok |
+| 17:55 | Session end: 8 writes across 5 files (V33__fix_sync_parameters_isfilter.sql, MostSyncService.java, AsbisSyncService.java, TekraSyncService.java, ValiSyncService.java) | 4 reads | ~51250 tok |
+| 17:56 | Created sync-diagnostics.sql | — | ~1278 |
+| 17:56 | Session end: 9 writes across 6 files (V33__fix_sync_parameters_isfilter.sql, MostSyncService.java, AsbisSyncService.java, TekraSyncService.java, ValiSyncService.java) | 4 reads | ~52619 tok |
+| 18:17 | Session end: 9 writes across 6 files (V33__fix_sync_parameters_isfilter.sql, MostSyncService.java, AsbisSyncService.java, TekraSyncService.java, ValiSyncService.java) | 4 reads | ~52619 tok |
+| 09:19 | Session end: 9 writes across 6 files (V33__fix_sync_parameters_isfilter.sql, MostSyncService.java, AsbisSyncService.java, TekraSyncService.java, ValiSyncService.java) | 4 reads | ~52619 tok |
+| 09:31 | Session end: 9 writes across 6 files (V33__fix_sync_parameters_isfilter.sql, MostSyncService.java, AsbisSyncService.java, TekraSyncService.java, ValiSyncService.java) | 5 reads | ~55222 tok |
+| 09:32 | Session end: 9 writes across 6 files (V33__fix_sync_parameters_isfilter.sql, MostSyncService.java, AsbisSyncService.java, TekraSyncService.java, ValiSyncService.java) | 5 reads | ~55222 tok |
+| 09:32 | Session end: 9 writes across 6 files (V33__fix_sync_parameters_isfilter.sql, MostSyncService.java, AsbisSyncService.java, TekraSyncService.java, ValiSyncService.java) | 5 reads | ~55222 tok |
+| 09:33 | Session end: 9 writes across 6 files (V33__fix_sync_parameters_isfilter.sql, MostSyncService.java, AsbisSyncService.java, TekraSyncService.java, ValiSyncService.java) | 5 reads | ~55222 tok |
+| 09:43 | Edited src/main/java/com/techstore/repository/ProductRepository.java | 2→2 lines | ~50 |
+| 09:44 | Edited src/main/java/com/techstore/repository/ProductParameterRepository.java | "  AND cp.is_filter  != fa" → "  AND cp.is_filter IS TRU" | ~12 |
+| 09:44 | Session end: 11 writes across 8 files (V33__fix_sync_parameters_isfilter.sql, MostSyncService.java, AsbisSyncService.java, TekraSyncService.java, ValiSyncService.java) | 11 reads | ~74592 tok |
+
+## Session: 2026-06-25 09:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
