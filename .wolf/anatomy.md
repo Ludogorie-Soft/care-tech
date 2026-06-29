@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-25T06:44:04.867Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-29T11:09:12.701Z
 > Files: 562 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -43,7 +43,7 @@
 ## ../../care-tech-ui/src/components/navbar/
 
 - `AuthDropDown.jsx` — AuthDropDown — renders form (~3716 tok)
-- `NavBar.jsx` — NavBar (~4388 tok)
+- `NavBar.jsx` — NavBar (~4387 tok)
 
 ## ../../care-tech-ui/src/components/products/
 
@@ -53,7 +53,7 @@
 ## ../../care-tech-ui/src/pages/
 
 - `Blog.jsx` — formatDate (~2633 tok)
-- `BlogPostPage.jsx` — formatDate (~1802 tok)
+- `BlogPostPage.jsx` — formatDate (~1830 tok)
 - `Cart.jsx` — EURO_RATE (~16680 tok)
 - `Category.jsx` — Category (~5536 tok)
 - `ComingSoonPage.jsx` — ComingSoonPage (~385 tok)
@@ -70,7 +70,7 @@
 - `BlogCategoryManager.jsx` — CategoryModal — renders form (~4552 tok)
 - `BlogLayout.jsx` — formatDate — renders table (~5184 tok)
 - `BlogPostModal.jsx` — TagPicker — renders form (~7216 tok)
-- `BlogPostPreviewModal.jsx` — formatDate (~1529 tok)
+- `BlogPostPreviewModal.jsx` — formatDate (~1562 tok)
 - `BlogTagManager.jsx` — TagModal — renders form (~3398 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Customers/
@@ -320,7 +320,7 @@
 - `SearchConfig.java` — Configuration: SearchConfig (~424 tok)
 - `SearchIndexManager.java` — Component: SearchIndexManager (~4470 tok)
 - `SecurityConfig.java` — Configuration: SecurityConfig (~2485 tok)
-- `ShippingConfig.java` — Изчислява цената на доставка (~379 tok)
+- `ShippingConfig.java` — Изчислява цената на доставка (~354 tok)
 - `SlugRegenerationRunner.java` — Component: SlugRegenerationRunner (~401 tok)
 - `SpeedyConfig.java` — Configuration: SpeedyConfig (~136 tok)
 - `TbiConfig.java` — AES-256-CTR encryption key provided by TBI for the BIVD merchant account. (~402 tok)

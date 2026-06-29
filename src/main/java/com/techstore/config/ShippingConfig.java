@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Getter
 public class ShippingConfig {
 
-    @Value("${shipping.cost.default:3.10}")
+    @Value("${shipping.cost.default:3.50}")
     private BigDecimal defaultShippingCost;
 
     @Value("${shipping.cost.free.threshold:150.00}")

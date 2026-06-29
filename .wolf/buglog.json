@@ -4510,6 +4510,150 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-25T06:44:04.886Z"
+    },
+    {
+      "id": "bug-278",
+      "timestamp": "2026-06-29T05:59:20.666Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/components/navbar/NavBar.jsx",
+      "root_cause": "Had \"md:hidden absolute z-[1] top-[58px] pb-2 ps-2 pe-",
+      "fix": "Changed to \"md:hidden absolute z-[1] top-full pb-2 ps-2 pe-[5",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T05:59:20.666Z"
+    },
+    {
+      "id": "bug-279",
+      "timestamp": "2026-06-29T07:35:49.268Z",
+      "error_message": "CSS fix: prose-p",
+      "file": "../../care-tech-ui/src/pages/BlogPostPage.jsx",
+      "root_cause": "prose-p: text-gray-700 prose-p:leading-relaxed → text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-p:indent-8",
+      "fix": "Changed prose-p: text-gray-700 prose-p:leading-relaxed → text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-p:indent-8",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T07:35:49.268Z"
+    },
+    {
+      "id": "bug-280",
+      "timestamp": "2026-06-29T07:46:10.101Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/admin/Blog/BlogPostPreviewModal.jsx",
+      "root_cause": "Had \"bg-white rounded-2xl shadow-2xl w-full max-w-3xl\"",
+      "fix": "Changed to \"bg-white text-gray-900 rounded-2xl shadow-2xl w-f",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T07:46:10.101Z"
+    },
+    {
+      "id": "bug-281",
+      "timestamp": "2026-06-29T07:53:44.455Z",
+      "error_message": "CSS fix: prose-p",
+      "file": "../../care-tech-ui/src/pages/admin/Blog/BlogPostPreviewModal.jsx",
+      "root_cause": "prose-p: text-gray-700 prose-p:leading-relaxed → text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-p:indent-8",
+      "fix": "Changed prose-p: text-gray-700 prose-p:leading-relaxed → text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-p:indent-8",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-29T07:55:38.969Z"
+    },
+    {
+      "id": "bug-282",
+      "timestamp": "2026-06-29T07:55:45.593Z",
+      "error_message": "CSS fix: prose-p, prose-blockquote",
+      "file": "../../care-tech-ui/src/pages/BlogPostPage.jsx",
+      "root_cause": "prose-p: text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-p:indent-8 → text-gray-700 prose-p:leading-relaxed; prose-blockquote: border-primary prose-blockquote:text-gray-600\" → border-primary prose-blockquote:text-gray-600",
+      "fix": "Changed prose-p: text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-p:indent-8 → text-gray-700 prose-p:leading-relaxed; prose-blockquote: border-primary prose-blockquote:text-gray-600\" → border-primary prose-blockquote:text-gray-600",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T07:55:45.593Z"
+    },
+    {
+      "id": "bug-283",
+      "timestamp": "2026-06-29T10:53:31.636Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/config/ShippingConfig.java",
+      "root_cause": "Had \"${shipping.cost.default:3.10}\"",
+      "fix": "Changed to \"${shipping.cost.default:3.50}\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T10:53:31.636Z"
+    },
+    {
+      "id": "bug-284",
+      "timestamp": "2026-06-29T10:53:41.318Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/Cart.jsx",
+      "root_cause": "Had `${(productsAfterWithVatEuro + 3.1).toFixed(2)} € ",
+      "fix": "Changed to `${(productsAfterWithVatEuro + 3.5).toFixed(2)} € ",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T10:53:41.318Z"
+    },
+    {
+      "id": "bug-285",
+      "timestamp": "2026-06-29T11:09:08.250Z",
+      "error_message": "CSS fix: __html",
+      "file": "../../care-tech-ui/src/pages/admin/Blog/BlogPostPreviewModal.jsx",
+      "root_cause": "__html: DOMPurify.sanitize(post.content, { USE_PROFILES: { html: true → DOMPurify.sanitize(post.content, { ADD_TAGS: ['style'], ADD_ATTR: ['style', 'class'], FORCE_BODY: true",
+      "fix": "Changed __html: DOMPurify.sanitize(post.content, { USE_PROFILES: { html: true → DOMPurify.sanitize(post.content, { ADD_TAGS: ['style'], ADD_ATTR: ['style', 'class'], FORCE_BODY: true",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T11:09:08.250Z"
+    },
+    {
+      "id": "bug-286",
+      "timestamp": "2026-06-29T11:09:12.722Z",
+      "error_message": "CSS fix: __html",
+      "file": "../../care-tech-ui/src/pages/BlogPostPage.jsx",
+      "root_cause": "__html: DOMPurify.sanitize(post.content, { USE_PROFILES: { html: true → DOMPurify.sanitize(post.content, { ADD_TAGS: ['style'], ADD_ATTR: ['style', 'class'], FORCE_BODY: true",
+      "fix": "Changed __html: DOMPurify.sanitize(post.content, { USE_PROFILES: { html: true → DOMPurify.sanitize(post.content, { ADD_TAGS: ['style'], ADD_ATTR: ['style', 'class'], FORCE_BODY: true",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T11:09:12.722Z"
     }
   ]
 }
