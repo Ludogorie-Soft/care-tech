@@ -49,6 +49,11 @@
 - [2026-05-29] When a controlled input's `useEffect` watches `value` and a programmatic setter (from a dropdown click handler) changes that value — the effect fires again and can re-open the dropdown. Always use a `useRef` skip flag when setting the input value programmatically.
 - [2026-05-29] SVG `<text fill={TBI_RED}>` is invisible when placed on a `TBI_RED` background. Always pass an explicit `color` prop (e.g. `"#fff"`) when rendering TbiLogo inside the orange header.
 
+- [2026-07-06] NEVER write native SQL queries with `p.primary_image_url` — the actual column name in the `products` table is `p.image_url`. The `findForPazaruvajFeedByCategory` query had it right; the other two Pazaruvaj queries were wrong. Always verify column names against the entity `@Column` annotation.
+- [2026-07-06] NEVER leave `spring.jpa.open-in-view=true` (the default) on a production app that has long-running I/O in controllers (e.g. image proxy). With open-in-view, a DB connection is held open for the entire HTTP request — a 138-second image proxy request blocks all 10 HikariCP connections. Always set `spring.jpa.open-in-view: false`.
+- [2026-07-06] ImageProxyController: NEVER use `connectTimeout=15000` + `readTimeout=30000` + 3 retries for external images — worst case is 138 seconds per image and exhausts the thread pool. Use 5s connect + 10s read + max 1 retry. Add a `Semaphore(5)` to cap concurrent outbound proxy requests.
+- [2026-07-06] axios baseURL в care-tech-ui е `${REACT_APP_API_URL}/api/` (trailing slash). Никога не добавяй `/api/` prefix в заявките — `api.get("/api/categories")` → двоен prefix. Правилно: `api.get("categories")`.
+
 ## Do-Not-Repeat (Tests)
 
 - [2026-05-29] NEVER modify `application.yml` to fix test failures — create `src/test/resources/application.properties` (for all tests) or `application-test.properties` (for @ActiveProfiles("test")) instead.
@@ -101,6 +106,19 @@
 - **ProductSearchService alias coverage:** `searchProducts` resolves `request.categories` (List<String>) via `resolveAliasCategories()`; `getAvailableParametersWithCountsForCategory` and `getFilteredFacets` resolve via `resolveAliasId()` before hitting the repository.
 - **ParameterService alias coverage:** `findByCategory` captures the category entity and uses `aliasOf.getId()` for both `findByCategoryIdOrderByOrderAsc` and `getCategoryParameterFilters` calls.
 - **Hidden-original guard:** `ProductService.resolveAliasId` checks `target.getShow() == false` — if the original category is hidden, return the alias ID (which has no own products) so the result is correctly empty.
+
+## Key Learnings
+
+- **Production server crash (2026-07-06):** Root cause — PostgreSQL container OOM-killed (Exit 255) by kernel during SYN flood on port 80. Recovery: `docker start techstore-postgres` (crash recovery OK, no data loss). Port 5432 was publicly exposed — external bots were scanning it (`Role "postgres" does not exist` errors). Close port 5432 from public in AWS Security Group.
+- **HikariCP exhaustion pattern:** ImageProxyController (no Semaphore) + open-in-view=true → concurrent image requests hold all DB connections → `Connection is not available, request timed out after 30000ms`. Fix: open-in-view=false + Semaphore(5) + reduced timeouts.
+- **Nginx hardening (2026-07-06):** Added rate limiting (`limit_req_zone` 20r/s API, 50r/s general), connection limit (`limit_conn 30`), bad bot blocking (empty UA, sqlmap, nikto, masscan, zgrab), scan path blocking (.env, .php, wp-admin), security headers. Config saved as `nginx.prod.conf` in project root.
+- **Pazaruvaj generate endpoint (2026-07-06):** Added `format=CSV` parameter + CSV builder in PazaruvajFeedService. Live feed keeps delivery info (required by Heureka format); on-demand generate uses `includeDelivery=false`. Frontend has XML/CSV format selector in generator section.
+
+- **Pazaruvaj.com интеграция (2026-07-03):** Pazaruvaj е собственост на Heureka Group и използва **Heureka XML feed формат**. Няма REST API — merchant-ът хоства XML URL, pazaruvaj го дърпа на ~12 часа. Credentials (PAZARUVAJ_USERNAME/PASSWORD) са само за admin панела на pazaruvaj.com.
+- **Pazaruvaj PRICE_VAT:** Цената е в **EUR с ДДС** = `finalPrice × 1.20`. Без конвертиране към BGN (България е в еврозоната). Полето `CATEGORYTEXT` изисква кирилица.
+- **PazaruvajFeedService архитектура:** Feed се кешира в `AtomicReference<String>`, обновява се на 30 сек след старт + на всеки 2 часа. `PazaruvajFeedConfig` (тип ALL/CATEGORY/PRODUCTS) се пази в паметта — нулира се при рестарт. На-demand генерирането (`/generate`) е винаги fresh, без кеш.
+- **Native SQL feed query:** Feed query-тата ползват native SQL с `PazaruvajProductProjection` интерфейс за да избегнат N+1 и EAGER loading на `productParameters`. Category query използва recursive CTE (`WITH RECURSIVE cat_tree`) за да включи всички подкатегории.
+- **Category tree в React:** `buildTree()` + `flattenTree()` изграждат плосък масив с `depth` поле от flat API response. Tree view: indentation по `depth * 18px` + `└` символ. При активно търсене — превключва към flat view с родителя вдясно.
 
 ## Decision Log
 

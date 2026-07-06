@@ -107,6 +107,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/og/**").permitAll()
                         .requestMatchers("/og/**").permitAll()
                         .requestMatchers("/api/sitemap.xml").permitAll()
+                        .requestMatchers("/api/pazaruvaj/feed.xml").permitAll()
+                        .requestMatchers("/api/pazaruvaj/status", "/api/pazaruvaj/refresh", "/api/pazaruvaj/generate", "/api/pazaruvaj/config").hasAnyRole("ADMIN", "SUPER_ADMIN")
 
                         // ── Blog: GET is public; view tracking is public; write ops via /api/admin/blog/** ──
                         .requestMatchers(HttpMethod.GET, "/api/blog/**").permitAll()

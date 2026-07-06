@@ -1,5 +1,6 @@
 package com.techstore.repository;
 
+import com.techstore.dto.pazaruvaj.PazaruvajProductProjection;
 import com.techstore.entity.Manufacturer;
 import com.techstore.entity.Product;
 import com.techstore.enums.Platform;
@@ -93,6 +94,87 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("SELECT p.id AS id, p.slug AS slug, p.updatedAt AS updatedAt FROM Product p WHERE p.show = true AND p.slug IS NOT NULL AND p.slug <> ''")
     List<SitemapEntry> findSitemapEntries();
+
+    @Query(value = """
+        WITH RECURSIVE cat_tree AS (
+            SELECT id FROM categories WHERE id = :categoryId
+            UNION ALL
+            SELECT c.id FROM categories c
+            INNER JOIN cat_tree ct ON c.parent_id = ct.id
+        )
+        SELECT
+            p.id                                                  AS id,
+            COALESCE(p.name_bg, p.name_en)                       AS productName,
+            p.slug                                                AS slug,
+            p.final_price                                         AS finalPrice,
+            p.image_url                                           AS primaryImageUrl,
+            p.barcode                                             AS barcode,
+            p.description_bg                                      AS descriptionBg,
+            COALESCE(m.name, '')                                  AS manufacturerName,
+            COALESCE(c.name_bg, c.name_en, '')                   AS categoryName,
+            COALESCE(cp.name_bg, cp.name_en, '')                 AS parentCategoryName
+        FROM products p
+        LEFT JOIN manufacturers m  ON m.id  = p.manufacturer_id
+        LEFT JOIN categories    c  ON c.id  = p.category_id
+        LEFT JOIN categories    cp ON cp.id = c.parent_id
+        WHERE p.active     = true
+          AND p.show_flag  = true
+          AND p.status    <> 'NOT_AVAILABLE'
+          AND p.final_price > 0
+          AND p.slug IS NOT NULL AND p.slug <> ''
+          AND p.image_url IS NOT NULL AND p.image_url <> ''
+          AND p.category_id IN (SELECT id FROM cat_tree)
+        """, nativeQuery = true)
+    List<PazaruvajProductProjection> findForPazaruvajFeedByCategory(@Param("categoryId") Long categoryId);
+
+    @Query(value = """
+        SELECT
+            p.id                                                  AS id,
+            COALESCE(p.name_bg, p.name_en)                       AS productName,
+            p.slug                                                AS slug,
+            p.final_price                                         AS finalPrice,
+            p.image_url                                           AS primaryImageUrl,
+            p.barcode                                             AS barcode,
+            p.description_bg                                      AS descriptionBg,
+            COALESCE(m.name, '')                                  AS manufacturerName,
+            COALESCE(c.name_bg, c.name_en, '')                   AS categoryName,
+            COALESCE(cp.name_bg, cp.name_en, '')                 AS parentCategoryName
+        FROM products p
+        LEFT JOIN manufacturers m  ON m.id  = p.manufacturer_id
+        LEFT JOIN categories    c  ON c.id  = p.category_id
+        LEFT JOIN categories    cp ON cp.id = c.parent_id
+        WHERE p.id IN (:productIds)
+          AND p.active    = true
+          AND p.show_flag = true
+          AND p.final_price > 0
+          AND p.slug IS NOT NULL AND p.slug <> ''
+        """, nativeQuery = true)
+    List<PazaruvajProductProjection> findForPazaruvajFeedByProductIds(@Param("productIds") List<Long> productIds);
+
+    @Query(value = """
+        SELECT
+            p.id                                                  AS id,
+            COALESCE(p.name_bg, p.name_en)                       AS productName,
+            p.slug                                                AS slug,
+            p.final_price                                         AS finalPrice,
+            p.image_url                                           AS primaryImageUrl,
+            p.barcode                                             AS barcode,
+            p.description_bg                                      AS descriptionBg,
+            COALESCE(m.name, '')                                  AS manufacturerName,
+            COALESCE(c.name_bg, c.name_en, '')                   AS categoryName,
+            COALESCE(cp.name_bg, cp.name_en, '')                 AS parentCategoryName
+        FROM products p
+        LEFT JOIN manufacturers m  ON m.id  = p.manufacturer_id
+        LEFT JOIN categories    c  ON c.id  = p.category_id
+        LEFT JOIN categories    cp ON cp.id = c.parent_id
+        WHERE p.active     = true
+          AND p.show_flag  = true
+          AND p.status    <> 'NOT_AVAILABLE'
+          AND p.final_price > 0
+          AND p.slug IS NOT NULL AND p.slug <> ''
+          AND p.image_url IS NOT NULL AND p.image_url <> ''
+        """, nativeQuery = true)
+    List<PazaruvajProductProjection> findAllForPazaruvajFeed();
 
     @Modifying
     @Query("UPDATE Product p SET p.show = false WHERE p.sku IN :skus AND p.platform = :platform")

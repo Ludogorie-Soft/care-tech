@@ -3,6 +3,27 @@
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
 
+## Сесия 2026-07-06
+
+| Час | Действие | Файлове | Резултат | ~Токени |
+|-----|----------|---------|----------|---------|
+| — | Server crash диагностика — PostgreSQL OOM killed (Exit 255), SYN flood порт 80, порт 5432 публично достъпен | kernel dmesg, docker logs | Идентифицирана причина, postgres рестартиран | ~300 |
+| — | Pazaruvaj SQL fix — `p.primary_image_url` → `p.image_url` | `ProductRepository.java` | Feed 500 грешка отстранена | ~100 |
+| — | ImageProxy hardening — Semaphore(5), timeouts 5s/10s, maxRetries 1; open-in-view=false; HikariCP pool 20 | `ImageProxyController.java`, `application.yml` | HikariPool exhaustion предотвратен | ~400 |
+| — | Pazaruvaj CSV export + `includeDelivery` параметър в XML builder | `PazaruvajFeedService.java`, `PazaruvajFeedController.java`, `PazaruvajLayout.jsx` | XML + CSV download от admin панела | ~500 |
+| — | Nginx hardening — rate limiting, bad bot blocking, security headers | `nginx.prod.conf` | Защита срещу атаки | ~300 |
+| — | Адреси → "Враца, ул. Баба Илийца" с Google Maps линк; ForUs карта раскоментирана | `Footer.jsx`, `Contact.jsx`, `ForUs.jsx`, `Policy.jsx`, `Cookies.jsx` | Единен адрес навсякъде | ~200 |
+| — | NavBar мобилен fix — `justify-end md:justify-start` | `NavBar.jsx` | Лого вляво, икони вдясно | ~100 |
+| — | axios URL fix — премахнат `/api/` prefix в PazaruvajLayout | `PazaruvajLayout.jsx` | 404 при category/product search отстранен | ~100 |
+
+## Сесия 2026-07-03 — Pazaruvaj.com интеграция
+
+| Час  | Действие | Файлове | Резултат | ~Токени |
+|------|----------|---------|----------|---------|
+| —    | Pazaruvaj XML feed — backend | `PazaruvajProductProjection`, `PazaruvajFeedService`, `PazaruvajFeedController`, `PazaruvajFeedConfig`, `ProductRepository` (+3 native queries), `SecurityConfig`, `application.yml` | GET /api/pazaruvaj/feed.xml (public); GET/PUT /api/pazaruvaj/config (admin); GET /api/pazaruvaj/status; POST /api/pazaruvaj/refresh; GET /api/pazaruvaj/generate | ~1200 |
+| —    | Pazaruvaj XML feed — frontend | `PazaruvajLayout.jsx`, `Sidebar.jsx`, `App.js` | Admin страница с: конфигурация на live feed (ALL/CATEGORY/PRODUCTS), статус карти, URL с copy бутон, download, force refresh, custom XML генератор с tree category selector и product picker | ~800 |
+| —    | Ценова корекция | `PazaruvajFeedService.java` | PRICE_VAT = finalPrice × 1.20 (EUR с ДДС) — без конвертиране към BGN | ~50 |
+
 | 2026-06-23 | Имплементирана функционалност за сравнение на продукти (изцяло frontend) | compareSlice.js, store.js, CompareButton.jsx, ProductCard.jsx, ProductPage.jsx, CompareTray.jsx, ComparePage.jsx, App.js, index.css | SUCCESS |
 
 | 2026-05-19 | Created reorganize_asbis_categories.sql — dissolves 43 Asbis roots into Vali tree, 3 new roots kept (Роботизирани решения, Дигитална сигнализация IDS, Мултиборд→Офис) | scripts/reorganize_asbis_categories.sql | created |
@@ -1874,3 +1895,167 @@
 | 14:09 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | inline fix | ~44 |
 | 14:09 | Session end: 16 writes across 5 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 7 reads | ~996 tok |
 | 14:09 | Session end: 16 writes across 5 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 7 reads | ~996 tok |
+| 14:30 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | added 1 condition(s) | ~119 |
+| 14:30 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | 10→10 lines | ~214 |
+| 14:30 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostPreviewModal.jsx | added 1 condition(s) | ~126 |
+| 14:30 | Edited ../../care-tech-ui/src/pages/admin/Blog/BlogPostPreviewModal.jsx | 12→12 lines | ~239 |
+| 14:30 | Session end: 20 writes across 5 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 7 reads | ~1694 tok |
+| 14:31 | Session end: 20 writes across 5 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 7 reads | ~1694 tok |
+| 14:33 | Edited ../../care-tech-ui/src/pages/ForUs.jsx | CSS: https, border | ~474 |
+| 14:33 | Session end: 21 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 9 reads | ~2168 tok |
+| 14:39 | Edited ../../care-tech-ui/src/pages/ForUs.jsx | inline fix | ~31 |
+| 14:39 | Session end: 22 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 9 reads | ~2199 tok |
+| 14:39 | Session end: 22 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 9 reads | ~2199 tok |
+| 14:41 | Edited ../../care-tech-ui/src/pages/ForUs.jsx | CSS: TODO | ~226 |
+| 14:41 | Session end: 23 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 9 reads | ~2425 tok |
+| 14:53 | Session end: 23 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 9 reads | ~2425 tok |
+| 15:00 | Edited ../../care-tech-ui/src/components/navbar/NavBar.jsx | expanded (+6 lines) | ~132 |
+| 15:00 | Session end: 24 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 9 reads | ~2557 tok |
+| 15:03 | Edited ../../care-tech-ui/src/components/navbar/NavBar.jsx | 21→21 lines | ~242 |
+| 15:03 | Session end: 25 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 10 reads | ~2799 tok |
+| 15:04 | Edited ../../care-tech-ui/src/components/navbar/NavBar.jsx | 22→22 lines | ~259 |
+| 15:04 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 10 reads | ~3058 tok |
+| 15:08 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 10 reads | ~3058 tok |
+| 07:19 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 07:21 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 07:22 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 07:22 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:05 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:05 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:07 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:08 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:08 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:10 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:10 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:11 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:11 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:16 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:16 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:21 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:22 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:24 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:25 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:26 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:26 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:29 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+| 15:32 | Session end: 26 writes across 6 files (NavBar.jsx, BlogPostPage.jsx, BlogPostPreviewModal.jsx, ShippingConfig.java, Cart.jsx) | 12 reads | ~3058 tok |
+
+## Session: 2026-07-03 13:38
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:00 | Created src/main/java/com/techstore/dto/pazaruvaj/PazaruvajProductProjection.java | — | ~109 |
+| 14:00 | Edited src/main/java/com/techstore/repository/ProductRepository.java | added 1 import(s) | ~59 |
+| 14:00 | Edited src/main/java/com/techstore/repository/ProductRepository.java | expanded (+25 lines) | ~432 |
+| 14:01 | Created src/main/java/com/techstore/service/PazaruvajFeedService.java | — | ~1916 |
+| 14:01 | Created src/main/java/com/techstore/controller/PazaruvajFeedController.java | — | ~545 |
+| 14:01 | Edited src/main/java/com/techstore/config/SecurityConfig.java | 1→3 lines | ~68 |
+| 14:01 | Edited src/main/resources/application.yml | 2→7 lines | ~68 |
+| 14:02 | Session end: 7 writes across 6 files (PazaruvajProductProjection.java, ProductRepository.java, PazaruvajFeedService.java, PazaruvajFeedController.java, SecurityConfig.java) | 10 reads | ~26049 tok |
+| 14:03 | Session end: 7 writes across 6 files (PazaruvajProductProjection.java, ProductRepository.java, PazaruvajFeedService.java, PazaruvajFeedController.java, SecurityConfig.java) | 11 reads | ~26049 tok |
+| 14:04 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | 2→5 lines | ~99 |
+| 14:04 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | modified getCachedFeed() | ~113 |
+| 14:05 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | 3→5 lines | ~84 |
+| 14:05 | Edited src/main/java/com/techstore/controller/PazaruvajFeedController.java | added 5 import(s) | ~206 |
+| 14:05 | Edited src/main/java/com/techstore/controller/PazaruvajFeedController.java | 1→4 lines | ~37 |
+| 14:05 | Edited src/main/java/com/techstore/controller/PazaruvajFeedController.java | modified refreshFeed() | ~324 |
+| 14:05 | Edited src/main/java/com/techstore/config/SecurityConfig.java | 2→2 lines | ~55 |
+| 14:10 | Created ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | — | ~2010 |
+| 14:10 | Edited ../../care-tech-ui/src/pages/admin/Dashboard/Sidebar.jsx | 11→12 lines | ~44 |
+| 14:10 | Edited ../../care-tech-ui/src/pages/admin/Dashboard/Sidebar.jsx | 6→11 lines | ~70 |
+| 14:10 | Edited ../../care-tech-ui/src/App.js | added 1 import(s) | ~36 |
+| 14:11 | Edited ../../care-tech-ui/src/App.js | 2→3 lines | ~42 |
+| 14:11 | Session end: 19 writes across 9 files (PazaruvajProductProjection.java, ProductRepository.java, PazaruvajFeedService.java, PazaruvajFeedController.java, SecurityConfig.java) | 13 reads | ~29234 tok |
+| 15:13 | Edited src/main/java/com/techstore/repository/ProductRepository.java | expanded (+56 lines) | ~869 |
+| 15:13 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | modified generateFeedForAll() | ~190 |
+| 15:13 | Edited src/main/java/com/techstore/controller/PazaruvajFeedController.java | added 3 import(s) | ~48 |
+| 15:13 | Edited src/main/java/com/techstore/controller/PazaruvajFeedController.java | added 2 condition(s) | ~547 |
+| 15:13 | Edited src/main/java/com/techstore/config/SecurityConfig.java | inline fix | ~41 |
+| 15:14 | Created ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | — | ~5216 |
+| 15:15 | Session end: 25 writes across 9 files (PazaruvajProductProjection.java, ProductRepository.java, PazaruvajFeedService.java, PazaruvajFeedController.java, SecurityConfig.java) | 19 reads | ~42848 tok |
+| 15:16 | Session end: 25 writes across 9 files (PazaruvajProductProjection.java, ProductRepository.java, PazaruvajFeedService.java, PazaruvajFeedController.java, SecurityConfig.java) | 19 reads | ~42848 tok |
+| 15:18 | Edited ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | added optional chaining | ~1376 |
+| 15:18 | Session end: 26 writes across 9 files (PazaruvajProductProjection.java, ProductRepository.java, PazaruvajFeedService.java, PazaruvajFeedController.java, SecurityConfig.java) | 20 reads | ~44224 tok |
+| 15:21 | Session end: 26 writes across 9 files (PazaruvajProductProjection.java, ProductRepository.java, PazaruvajFeedService.java, PazaruvajFeedController.java, SecurityConfig.java) | 21 reads | ~46434 tok |
+| 15:24 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | 2→2 lines | ~37 |
+| 15:24 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | 4→3 lines | ~38 |
+| 15:24 | Edited ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | 2→2 lines | ~79 |
+| 15:25 | Session end: 29 writes across 9 files (PazaruvajProductProjection.java, ProductRepository.java, PazaruvajFeedService.java, PazaruvajFeedController.java, SecurityConfig.java) | 21 reads | ~46594 tok |
+| 15:26 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | 2→1 lines | ~18 |
+| 15:26 | Edited ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | inline fix | ~37 |
+| 15:26 | Session end: 31 writes across 9 files (PazaruvajProductProjection.java, ProductRepository.java, PazaruvajFeedService.java, PazaruvajFeedController.java, SecurityConfig.java) | 21 reads | ~46650 tok |
+| 15:27 | Created src/main/java/com/techstore/dto/pazaruvaj/PazaruvajFeedConfig.java | — | ~143 |
+| 15:28 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | added 1 import(s) | ~57 |
+| 15:28 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | 5→9 lines | ~151 |
+| 15:28 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | modified getProductCount() | ~71 |
+| 15:28 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | modified refreshFeed() | ~349 |
+| 15:28 | Edited src/main/java/com/techstore/controller/PazaruvajFeedController.java | added 1 import(s) | ~29 |
+| 15:28 | Edited src/main/java/com/techstore/controller/PazaruvajFeedController.java | added 2 import(s) | ~97 |
+| 15:28 | Edited src/main/java/com/techstore/controller/PazaruvajFeedController.java | modified getConfig() | ~178 |
+| 15:28 | Edited src/main/java/com/techstore/config/SecurityConfig.java | inline fix | ~48 |
+| 15:29 | Edited ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | CSS: type, categoryId, products | ~743 |
+| 15:29 | Edited ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | CSS: hover, hover, disabled | ~689 |
+| 15:29 | Session end: 42 writes across 10 files (PazaruvajProductProjection.java, ProductRepository.java, PazaruvajFeedService.java, PazaruvajFeedController.java, SecurityConfig.java) | 21 reads | ~49252 tok |
+| 15:31 | Session end: 42 writes across 10 files (PazaruvajProductProjection.java, ProductRepository.java, PazaruvajFeedService.java, PazaruvajFeedController.java, SecurityConfig.java) | 21 reads | ~49252 tok |
+| 15:32 | Edited src/main/java/com/techstore/controller/PazaruvajFeedController.java | added 1 import(s) | ~114 |
+| 15:32 | Session end: 43 writes across 10 files (PazaruvajProductProjection.java, ProductRepository.java, PazaruvajFeedService.java, PazaruvajFeedController.java, SecurityConfig.java) | 22 reads | ~50970 tok |
+| 15:48 | Edited src/main/java/com/techstore/repository/ProductRepository.java | inline fix | ~21 |
+
+## Session: 2026-07-03 15:48
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 08:46 | Edited src/main/java/com/techstore/repository/ProductRepository.java | 48→48 lines | ~747 |
+| 08:46 | Edited src/main/java/com/techstore/repository/ProductRepository.java | inline fix | ~16 |
+| 08:46 | Session end: 2 writes across 1 files (ProductRepository.java) | 1 reads | ~817 tok |
+| 08:51 | Session end: 2 writes across 1 files (ProductRepository.java) | 1 reads | ~817 tok |
+| 08:55 | Edited ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | inline fix | ~3 |
+| 08:55 | Session end: 3 writes across 2 files (ProductRepository.java, PazaruvajLayout.jsx) | 2 reads | ~820 tok |
+| 08:57 | Session end: 3 writes across 2 files (ProductRepository.java, PazaruvajLayout.jsx) | 2 reads | ~820 tok |
+| 08:58 | Session end: 3 writes across 2 files (ProductRepository.java, PazaruvajLayout.jsx) | 2 reads | ~820 tok |
+| 08:58 | Session end: 3 writes across 2 files (ProductRepository.java, PazaruvajLayout.jsx) | 2 reads | ~820 tok |
+| 08:59 | Session end: 3 writes across 2 files (ProductRepository.java, PazaruvajLayout.jsx) | 2 reads | ~820 tok |
+| 09:01 | Edited ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | "/api/categories" → "categories" | ~14 |
+| 09:02 | Edited ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | "/api/products/search" → "products/search" | ~23 |
+| 09:02 | Session end: 5 writes across 2 files (ProductRepository.java, PazaruvajLayout.jsx) | 2 reads | ~857 tok |
+| 09:06 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | modified generateFeedForAll() | ~317 |
+| 09:06 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | 3→3 lines | ~43 |
+| 09:06 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | added 4 condition(s) | ~1073 |
+| 09:07 | Edited src/main/java/com/techstore/controller/PazaruvajFeedController.java | added 2 condition(s) | ~687 |
+| 09:07 | Edited ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | 6→7 lines | ~98 |
+| 09:07 | Edited ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | CSS: format | ~307 |
+| 09:07 | Edited ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | expanded (+17 lines) | ~353 |
+| 09:07 | Edited ../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx | inline fix | ~22 |
+| 09:07 | Session end: 13 writes across 4 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java) | 3 reads | ~6360 tok |
+| 09:17 | Session end: 13 writes across 4 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java) | 3 reads | ~6360 tok |
+| 09:17 | Session end: 13 writes across 4 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java) | 4 reads | ~6360 tok |
+| 09:20 | Edited ../../care-tech-ui/src/components/navbar/NavBar.jsx | "flex items-center gap-1.5" → "flex items-center gap-1.5" | ~30 |
+| 09:20 | Session end: 14 writes across 5 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 5 reads | ~6390 tok |
+| 09:25 | Session end: 14 writes across 5 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 5 reads | ~6390 tok |
+| 09:26 | Session end: 14 writes across 5 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 5 reads | ~6390 tok |
+| 09:30 | Session end: 14 writes across 5 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 5 reads | ~6390 tok |
+| 09:31 | Edited ../../care-tech-ui/src/components/Footer.jsx | CSS: https, hover | ~97 |
+| 09:31 | Edited ../../care-tech-ui/src/pages/Contact.jsx | CSS: https, hover | ~107 |
+| 09:31 | Edited ../../care-tech-ui/src/pages/ForUs.jsx | CSS: https, hover | ~119 |
+| 09:31 | Edited ../../care-tech-ui/src/pages/Policy.jsx | CSS: https, hover | ~111 |
+| 09:31 | Edited ../../care-tech-ui/src/pages/Cookies.jsx | inline fix | ~8 |
+| 09:31 | Session end: 19 writes across 10 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 7 reads | ~6832 tok |
+| 09:32 | Edited ../../care-tech-ui/src/components/Footer.jsx | inline fix | ~41 |
+| 09:32 | Edited ../../care-tech-ui/src/pages/Contact.jsx | inline fix | ~41 |
+| 09:32 | Edited ../../care-tech-ui/src/pages/ForUs.jsx | inline fix | ~41 |
+| 09:32 | Edited ../../care-tech-ui/src/pages/Policy.jsx | inline fix | ~41 |
+| 09:32 | Session end: 23 writes across 10 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 7 reads | ~6996 tok |
+| 09:33 | Session end: 23 writes across 10 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 7 reads | ~6996 tok |
+| 09:33 | Edited ../../care-tech-ui/src/pages/ForUs.jsx | 14→12 lines | ~198 |
+| 09:33 | Session end: 24 writes across 10 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 7 reads | ~7194 tok |
+| 09:38 | Session end: 24 writes across 10 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 7 reads | ~7194 tok |
+| 09:39 | Edited src/main/resources/application.yml | expanded (+6 lines) | ~143 |
+| 09:39 | Edited src/main/java/com/techstore/controller/ImageProxyController.java | added 1 import(s) | ~41 |
+| 09:40 | Edited src/main/java/com/techstore/controller/ImageProxyController.java | 1→4 lines | ~56 |
+| 09:40 | Edited src/main/java/com/techstore/controller/ImageProxyController.java | added 1 condition(s) | ~219 |
+| 09:40 | Edited src/main/java/com/techstore/controller/ImageProxyController.java | modified if() | ~67 |
+| 09:40 | Session end: 29 writes across 12 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 9 reads | ~12310 tok |
+| 09:42 | Session end: 29 writes across 12 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 9 reads | ~12310 tok |
+| 09:43 | Created nginx.prod.conf | — | ~1481 |
+| 09:43 | Session end: 30 writes across 13 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 10 reads | ~14472 tok |
+| 09:47 | Session end: 30 writes across 13 files (ProductRepository.java, PazaruvajLayout.jsx, PazaruvajFeedService.java, PazaruvajFeedController.java, NavBar.jsx) | 10 reads | ~14472 tok |

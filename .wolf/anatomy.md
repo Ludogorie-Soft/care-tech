@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-29T11:09:12.701Z
-> Files: 562 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-06T06:43:34.472Z
+> Files: 576 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -20,13 +20,14 @@
 
 ## ../../care-tech-ui/src/
 
-- `App.js` — Declares ScrollToTop (~2987 tok)
+- `App.js` — Declares ScrollToTop (~3109 tok)
 - `index.css` — Styles: 39 rules (~2126 tok)
 
 ## ../../care-tech-ui/src/components/
 
 - `Breadcrumbs.jsx` — Breadcrumbs (~504 tok)
 - `DateTimePicker.jsx` — MONTHS (~2516 tok)
+- `Footer.jsx` — categories (~3032 tok)
 - `TbiCheckoutModal.jsx` — TBI brand color (~5322 tok)
 
 ## ../../care-tech-ui/src/components/compare/
@@ -43,7 +44,7 @@
 ## ../../care-tech-ui/src/components/navbar/
 
 - `AuthDropDown.jsx` — AuthDropDown — renders form (~3716 tok)
-- `NavBar.jsx` — NavBar (~4387 tok)
+- `NavBar.jsx` — NavBar (~4457 tok)
 
 ## ../../care-tech-ui/src/components/products/
 
@@ -53,12 +54,16 @@
 ## ../../care-tech-ui/src/pages/
 
 - `Blog.jsx` — formatDate (~2633 tok)
-- `BlogPostPage.jsx` — formatDate (~1830 tok)
+- `BlogPostPage.jsx` — formatDate (~1953 tok)
 - `Cart.jsx` — EURO_RATE (~16680 tok)
 - `Category.jsx` — Category (~5536 tok)
 - `ComingSoonPage.jsx` — ComingSoonPage (~385 tok)
 - `ComparePage.jsx` — EURO_RATE — renders table (~3958 tok)
+- `Contact.jsx` — Contact — renders form (~2804 tok)
+- `Cookies.jsx` — Responsive Cookies / Cookie Policy component (~3474 tok)
+- `ForUs.jsx` — ForUs (~2823 tok)
 - `OurClients.jsx` — clients (~2724 tok)
+- `Policy.jsx` — sections (~4961 tok)
 - `ProductPage.jsx` — EURO_RATE (~10263 tok)
 
 ## ../../care-tech-ui/src/pages/admin/
@@ -70,7 +75,7 @@
 - `BlogCategoryManager.jsx` — CategoryModal — renders form (~4552 tok)
 - `BlogLayout.jsx` — formatDate — renders table (~5184 tok)
 - `BlogPostModal.jsx` — TagPicker — renders form (~7216 tok)
-- `BlogPostPreviewModal.jsx` — formatDate (~1562 tok)
+- `BlogPostPreviewModal.jsx` — formatDate (~1690 tok)
 - `BlogTagManager.jsx` — TagModal — renders form (~3398 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Customers/
@@ -82,7 +87,7 @@
 ## ../../care-tech-ui/src/pages/admin/Dashboard/
 
 - `DashboardLayout.jsx` — convertStatsToMetrics (~2511 tok)
-- `Sidebar.jsx` — Sidebar (~1231 tok)
+- `Sidebar.jsx` — Sidebar (~1269 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Leasing/
 
@@ -97,6 +102,10 @@
 
 - `OrderDetailPage.jsx` — OrderDetailPage (~5421 tok)
 - `useOrderUtils.js` — Exports useOrderUtils (~790 tok)
+
+## ../../care-tech-ui/src/pages/admin/Pazaruvaj/
+
+- `PazaruvajLayout.jsx` — TYPES (~6942 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Reviews/
 
@@ -153,6 +162,7 @@
 - `mvnw` — or more contributor license agreements.  See the NOTICE file (~3144 tok)
 - `mvnw.cmd` — Declares Directory (~2262 tok)
 - `nginx.conf` — Nginx configuration (~575 tok)
+- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~1481 tok)
 - `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
 - `parameters_202605130941.sql` (~43615 tok)
 - `pom.xml` (~1642 tok)
@@ -319,7 +329,7 @@
 - `S3Config.java` — Configuration: S3Config (~289 tok)
 - `SearchConfig.java` — Configuration: SearchConfig (~424 tok)
 - `SearchIndexManager.java` — Component: SearchIndexManager (~4470 tok)
-- `SecurityConfig.java` — Configuration: SecurityConfig (~2485 tok)
+- `SecurityConfig.java` — Configuration: SecurityConfig (~2554 tok)
 - `ShippingConfig.java` — Изчислява цената на доставка (~354 tok)
 - `SlugRegenerationRunner.java` — Component: SlugRegenerationRunner (~401 tok)
 - `SpeedyConfig.java` — Configuration: SpeedyConfig (~136 tok)
@@ -341,10 +351,12 @@
 - `CategoryReorganizationController.java` — CategoryReorganizationController (~979 tok)
 - `ContactController.java` — RestController: ContactController (2 endpoints) (~331 tok)
 - `FileUploadController.java` — RestController: FileUploadController (7 endpoints) (~831 tok)
-- `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1905 tok)
+- `ImageProxyController.java` — Max concurrent outbound requests to external image hosts (vali.bg etc.) (~2130 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
 - `OrderController.java` — Създаване на нова поръчка (~1745 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
+- `PazaruvajFeedController.java` — Public XML product feed consumed by pazaruvaj.com crawler (every ~12 h). (~1778 tok)
+- `PazaruvajFeedController.java` — Public XML product feed consumed by pazaruvaj.com crawler (every ~12 h). (~545 tok)
 - `ProductController.java` — Record to hold sort field and direction information (~3884 tok)
 - `ProductSearchController.java` — RestController: ProductSearchController (8 endpoints) (~1491 tok)
 - `ReviewController.java` — RestController: ReviewController (6 endpoints) (~709 tok)
@@ -392,6 +404,12 @@
 - `PriceRangeDTO.java` — PriceRangeDTO: getDefault, isValid, getFormattedMin, getFormattedMax + 3 more (~648 tok)
 - `RangeDTO.java` — RangeDTO: isValid, getFormattedRange, contains (~269 tok)
 - `SpecificationFilterValueDTO.java` — SpecificationFilterValueDTO: hasValues, hasTextValue, hasBooleanValue, hasNumericRange + 1 more (~367 tok)
+
+## src/main/java/com/techstore/dto/pazaruvaj/
+
+- `PazaruvajFeedConfig.java` — ALL | CATEGORY | PRODUCTS (~143 tok)
+- `PazaruvajProductProjection.java` — Native SQL projection for feed: id, productName, slug, finalPrice, primaryImageUrl, barcode, descriptionBg, manufacturerName, categoryName, parentCategoryName (~80 tok)
+- `PazaruvajProductProjection.java` — Class: PazaruvajProductProjection (~109 tok)
 
 ## src/main/java/com/techstore/dto/request/
 
@@ -618,7 +636,7 @@
 - `ParameterRepository.java` — Repository: ParameterRepository (~1143 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~478 tok)
-- `ProductRepository.java` — Cross-platform deduplication by SKU. (~1779 tok)
+- `ProductRepository.java` — Cross-platform deduplication by SKU. (~3007 tok)
 - `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9378 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
@@ -646,6 +664,8 @@
 - `MostApiService.java` — Test API connectivity (~3823 tok)
 - `OrderService.java` — Creates a new order (~5971 tok)
 - `ParameterService.java` — Service: ParameterService (~9601 tok)
+- `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3099 tok)
+- `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Service: alias-aware search. resolveAliasId() + resolveAliasCategories() applied in searchProducts, getAvailableParametersWithCountsForCategory, getFilteredFacets. (~2242 tok)
 - `ProductService.java` — Service: ProductService (~13303 tok)
@@ -685,7 +705,7 @@
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` (~2603 tok)
+- `application.yml` (~2710 tok)
 
 ## src/main/resources/db/
 

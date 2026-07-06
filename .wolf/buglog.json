@@ -4654,6 +4654,454 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-29T11:09:12.722Z"
+    },
+    {
+      "id": "bug-287",
+      "timestamp": "2026-06-29T11:30:11.767Z",
+      "error_message": "Missing guard clause",
+      "file": "../../care-tech-ui/src/pages/BlogPostPage.jsx",
+      "root_cause": "No early return/throw for edge case: !trimmed",
+      "fix": "Added guard clause: if (!trimmed)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T11:30:11.767Z"
+    },
+    {
+      "id": "bug-288",
+      "timestamp": "2026-06-29T11:30:19.897Z",
+      "error_message": "CSS fix: __html",
+      "file": "../../care-tech-ui/src/pages/BlogPostPage.jsx",
+      "root_cause": "__html: DOMPurify.sanitize(post.content, { ADD_TAGS: ['style'], ADD_ATTR: ['style', 'class'], FORCE_BODY: true → scopeStyles(DOMPurify.sanitize(post.content, { ADD_TAGS: ['style'], ADD_ATTR: ['style', 'class'], FORCE_BODY: true",
+      "fix": "Changed __html: DOMPurify.sanitize(post.content, { ADD_TAGS: ['style'], ADD_ATTR: ['style', 'class'], FORCE_BODY: true → scopeStyles(DOMPurify.sanitize(post.content, { ADD_TAGS: ['style'], ADD_ATTR: ['style', 'class'], FORCE_BODY: true",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T11:30:19.897Z"
+    },
+    {
+      "id": "bug-289",
+      "timestamp": "2026-06-29T11:30:25.823Z",
+      "error_message": "Missing guard clause",
+      "file": "../../care-tech-ui/src/pages/admin/Blog/BlogPostPreviewModal.jsx",
+      "root_cause": "No early return/throw for edge case: !trimmed",
+      "fix": "Added guard clause: if (!trimmed)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T11:30:25.823Z"
+    },
+    {
+      "id": "bug-290",
+      "timestamp": "2026-06-29T11:30:34.717Z",
+      "error_message": "CSS fix: __html",
+      "file": "../../care-tech-ui/src/pages/admin/Blog/BlogPostPreviewModal.jsx",
+      "root_cause": "__html: DOMPurify.sanitize(post.content, { ADD_TAGS: ['style'], ADD_ATTR: ['style', 'class'], FORCE_BODY: true → scopeStyles(DOMPurify.sanitize(post.content, { ADD_TAGS: ['style'], ADD_ATTR: ['style', 'class'], FORCE_BODY: true",
+      "fix": "Changed __html: DOMPurify.sanitize(post.content, { ADD_TAGS: ['style'], ADD_ATTR: ['style', 'class'], FORCE_BODY: true → scopeStyles(DOMPurify.sanitize(post.content, { ADD_TAGS: ['style'], ADD_ATTR: ['style', 'class'], FORCE_BODY: true",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T11:30:34.717Z"
+    },
+    {
+      "id": "bug-291",
+      "timestamp": "2026-06-29T11:33:07.701Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/pages/ForUs.jsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 18→31 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T11:33:07.701Z"
+    },
+    {
+      "id": "bug-292",
+      "timestamp": "2026-06-29T11:39:20.419Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/ForUs.jsx",
+      "root_cause": "Had \"Васил Кънчов\"",
+      "fix": "Changed to \"Мито Орозов\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-29T11:39:20.419Z"
+    },
+    {
+      "id": "bug-293",
+      "timestamp": "2026-06-29T12:03:14.867Z",
+      "error_message": "CSS fix: lg, md",
+      "file": "../../care-tech-ui/src/components/navbar/NavBar.jsx",
+      "root_cause": "lg: flex items-center gap-3\"> → flex items-center gap-5\">; md: flex items-center w-full\"> → flex items-center w-full max-w-[220px] xl:max-w-[300px]\">",
+      "fix": "Changed lg: flex items-center gap-3\"> → flex items-center gap-5\">; md: flex items-center w-full\"> → flex items-center w-full max-w-[220px] xl:max-w-[300px]\">",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-29T12:04:20.906Z"
+    },
+    {
+      "id": "bug-294",
+      "timestamp": "2026-07-03T11:04:55.962Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/PazaruvajFeedService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:04:55.962Z"
+    },
+    {
+      "id": "bug-295",
+      "timestamp": "2026-07-03T11:05:26.711Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/controller/PazaruvajFeedController.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:05:26.711Z"
+    },
+    {
+      "id": "bug-296",
+      "timestamp": "2026-07-03T11:05:32.115Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/config/SecurityConfig.java",
+      "root_cause": "Had \"/api/pazaruvaj/refresh\"",
+      "fix": "Changed to \"/api/pazaruvaj/status\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:05:32.115Z"
+    },
+    {
+      "id": "bug-297",
+      "timestamp": "2026-07-03T11:10:48.963Z",
+      "error_message": "CSS fix: name, icon, path",
+      "file": "../../care-tech-ui/src/pages/admin/Dashboard/Sidebar.jsx",
+      "root_cause": "name: \"Блог\", → \"Pazaruvaj\",; icon: <FiFileText className=\"w-5 h-5\" />, → <FiRss className=\"w-5 h-5\" />,; path: \"/admin/dashboard/blog\", → \"/admin/dashboard/pazaruvaj\",",
+      "fix": "Changed name: \"Блог\", → \"Pazaruvaj\",; icon: <FiFileText className=\"w-5 h-5\" />, → <FiRss className=\"w-5 h-5\" />,; path: \"/admin/dashboard/blog\", → \"/admin/dashboard/pazaruvaj\",",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T11:10:48.963Z"
+    },
+    {
+      "id": "bug-298",
+      "timestamp": "2026-07-03T12:13:40.931Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/config/SecurityConfig.java",
+      "root_cause": "Had \"ADMIN\"",
+      "fix": "Changed to \"/api/pazaruvaj/generate\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T12:13:40.931Z"
+    },
+    {
+      "id": "bug-299",
+      "timestamp": "2026-07-03T12:18:01.049Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T12:18:01.049Z"
+    },
+    {
+      "id": "bug-300",
+      "timestamp": "2026-07-03T12:24:42.247Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/service/PazaruvajFeedService.java",
+      "root_cause": "Had \"1.95583\"",
+      "fix": "Changed to \"1.20\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T12:24:42.247Z"
+    },
+    {
+      "id": "bug-301",
+      "timestamp": "2026-07-03T12:28:52.483Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/config/SecurityConfig.java",
+      "root_cause": "Had \"ADMIN\"",
+      "fix": "Changed to \"/api/pazaruvaj/config\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T12:28:52.483Z"
+    },
+    {
+      "id": "bug-302",
+      "timestamp": "2026-07-03T12:48:47.147Z",
+      "error_message": "Wrong reference: primary_image_url should be image_url",
+      "file": "src/main/java/com/techstore/repository/ProductRepository.java",
+      "root_cause": "Used \"primary_image_url\" instead of \"image_url\"",
+      "fix": "Changed primary_image_url → image_url",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-03T12:48:47.147Z"
+    },
+    {
+      "id": "bug-303",
+      "timestamp": "2026-07-06T05:55:31.127Z",
+      "error_message": "Wrong reference: api should be pazaruvaj",
+      "file": "../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx",
+      "root_cause": "Used \"api\" instead of \"pazaruvaj\"",
+      "fix": "Changed api → pazaruvaj",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T05:55:31.127Z"
+    },
+    {
+      "id": "bug-304",
+      "timestamp": "2026-07-06T06:01:54.376Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx",
+      "root_cause": "Had \"/api/categories\"",
+      "fix": "Changed to \"categories\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-06T06:02:11.975Z"
+    },
+    {
+      "id": "bug-305",
+      "timestamp": "2026-07-06T06:06:24.630Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/PazaruvajFeedService.java",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 16→31 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T06:06:24.630Z"
+    },
+    {
+      "id": "bug-306",
+      "timestamp": "2026-07-06T06:07:06.434Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/controller/PazaruvajFeedController.java",
+      "root_cause": "19 lines replaced/restructured",
+      "fix": "Rewrote 45→57 lines (19 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T06:07:06.434Z"
+    },
+    {
+      "id": "bug-307",
+      "timestamp": "2026-07-06T06:07:21.367Z",
+      "error_message": "CSS fix: type",
+      "file": "../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx",
+      "root_cause": "type: \"text/xml\" → mimeType",
+      "fix": "Changed type: \"text/xml\" → mimeType",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T06:07:21.367Z"
+    },
+    {
+      "id": "bug-308",
+      "timestamp": "2026-07-06T06:07:36.712Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/admin/Pazaruvaj/PazaruvajLayout.jsx",
+      "root_cause": "Had \"Генерирай и свали XML\"",
+      "fix": "Changed to `Генерирай и свали ${genFormat}`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T06:07:36.712Z"
+    },
+    {
+      "id": "bug-309",
+      "timestamp": "2026-07-06T06:20:30.534Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/components/navbar/NavBar.jsx",
+      "root_cause": "Had \"flex items-center gap-1.5 sm:gap-3 w-full h-full\"",
+      "fix": "Changed to \"flex items-center gap-1.5 sm:gap-3 w-full h-full ",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T06:20:30.534Z"
+    },
+    {
+      "id": "bug-310",
+      "timestamp": "2026-07-06T06:32:38.202Z",
+      "error_message": "CSS fix: https",
+      "file": "../../care-tech-ui/src/components/Footer.jsx",
+      "root_cause": "https: //maps.google.com/?q=43.21153538088453,23.548264476086306 → //www.google.com/maps?cid=5109341064085449696&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF&hl=en&gl=BG&source=embed",
+      "fix": "Changed https: //maps.google.com/?q=43.21153538088453,23.548264476086306 → //www.google.com/maps?cid=5109341064085449696&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF&hl=en&gl=BG&source=embed",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T06:32:38.202Z"
+    },
+    {
+      "id": "bug-311",
+      "timestamp": "2026-07-06T06:32:42.715Z",
+      "error_message": "CSS fix: https",
+      "file": "../../care-tech-ui/src/pages/Contact.jsx",
+      "root_cause": "https: //maps.google.com/?q=43.21153538088453,23.548264476086306 → //www.google.com/maps?cid=5109341064085449696&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF&hl=en&gl=BG&source=embed",
+      "fix": "Changed https: //maps.google.com/?q=43.21153538088453,23.548264476086306 → //www.google.com/maps?cid=5109341064085449696&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF&hl=en&gl=BG&source=embed",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T06:32:42.715Z"
+    },
+    {
+      "id": "bug-312",
+      "timestamp": "2026-07-06T06:32:46.692Z",
+      "error_message": "CSS fix: https",
+      "file": "../../care-tech-ui/src/pages/ForUs.jsx",
+      "root_cause": "https: //maps.google.com/?q=43.21153538088453,23.548264476086306 → //www.google.com/maps?cid=5109341064085449696&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF&hl=en&gl=BG&source=embed",
+      "fix": "Changed https: //maps.google.com/?q=43.21153538088453,23.548264476086306 → //www.google.com/maps?cid=5109341064085449696&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF&hl=en&gl=BG&source=embed",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T06:32:46.692Z"
+    },
+    {
+      "id": "bug-313",
+      "timestamp": "2026-07-06T06:32:51.538Z",
+      "error_message": "CSS fix: https",
+      "file": "../../care-tech-ui/src/pages/Policy.jsx",
+      "root_cause": "https: //maps.google.com/?q=43.21153538088453,23.548264476086306 → //www.google.com/maps?cid=5109341064085449696&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF&hl=en&gl=BG&source=embed",
+      "fix": "Changed https: //maps.google.com/?q=43.21153538088453,23.548264476086306 → //www.google.com/maps?cid=5109341064085449696&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF&hl=en&gl=BG&source=embed",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T06:32:51.538Z"
+    },
+    {
+      "id": "bug-314",
+      "timestamp": "2026-07-06T06:40:12.609Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/controller/ImageProxyController.java",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 14→21 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T06:40:12.609Z"
     }
   ]
 }

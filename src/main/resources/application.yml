@@ -53,9 +53,15 @@ spring:
         username: ${POSTGRES_USER}
         password: ${POSTGRES_PASSWORD}
         driver-class-name: org.postgresql.Driver
+        hikari:
+            maximum-pool-size: 20
+            connection-timeout: 30000
+            idle-timeout: 600000
+            max-lifetime: 1800000
 
     # JPA/Hibernate Configuration
     jpa:
+        open-in-view: false
         hibernate:
             ddl-auto: validate
         show-sql: false
@@ -315,6 +321,11 @@ tbi:
     encryption-key: ${TBI_ENCRYPTION_KEY:wXkG6YYmpIQ8LVcb1dg6n1ufdJCqi4M6ud0cIg4WruaBX6keTLPBRNm9Tdubri8A0X6nIOCR#T#sDo0!r#ec3yZILtXOYPaUMIHr0Li8ejxsbCHGTZqBkrJLl@ByY7rK}
     webhook-url: ${TBI_WEBHOOK_URL:https://caretech.bg/api/tbi/webhook}
     enabled: ${TBI_ENABLED:true}
+
+pazaruvaj:
+  delivery:
+    home-price: ${PAZARUVAJ_DELIVERY_HOME_PRICE:6.00}   # BGN — Speedy до адрес (по тарифа)
+    days: ${PAZARUVAJ_DELIVERY_DAYS:3}                  # дни за доставка
 
 speedy:
     base-url: https://api.speedy.bg/v1/
