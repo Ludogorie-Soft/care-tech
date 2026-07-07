@@ -14,6 +14,7 @@ import com.techstore.dto.request.PersonalOfferCreateDto;
 import com.techstore.dto.response.CartSummaryDto;
 import com.techstore.dto.response.PersonalOfferResponseDto;
 import com.techstore.service.*;
+import com.techstore.service.ImageMigrationService;
 import com.techstore.service.PersonalOfferService;
 import com.techstore.service.admin.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,6 +52,7 @@ public class AdminController {
     private final TbiLeasingService tbiLeasingService;
     private final CartService cartService;
     private final PersonalOfferService personalOfferService;
+    private final ImageMigrationService imageMigrationService;
 
     @GetMapping("/products/pageable")
     public ResponseEntity<Page<ProductResponseDTO>> getAllAdminProducts(
@@ -380,6 +382,17 @@ public class AdminController {
         int updated = productService.backfillMissingSlugs();
         log.info("Slug backfill completed: {} products updated", updated);
         return ResponseEntity.ok(Map.of("updated", updated));
+    }
+
+    @PostMapping("/images/migrate-to-s3")
+    public ResponseEntity<Map<String, String>> migrateImagesToS3() {
+        if (imageMigrationService.isMigrationRunning()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("status", "already_running", "message", "Migration is already in progress"));
+        }
+        imageMigrationService.migrateAllValiImagesToS3();
+        return ResponseEntity.accepted()
+                .body(Map.of("status", "started", "message", "Migration started in background. Check server logs for progress."));
     }
 
     // ============ TBI LEASING ENDPOINTS ============

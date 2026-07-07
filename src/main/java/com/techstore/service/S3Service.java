@@ -11,6 +11,9 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -158,6 +161,73 @@ public class S3Service {
         } catch (Exception e) {
             log.error("Error deleting warranty file from S3: {}", key, e);
         }
+    }
+
+    /**
+     * Downloads an image from a remote URL and uploads it to S3.
+     * Returns the S3 URL on success, or null if download/upload fails.
+     */
+    public String uploadImageFromUrl(String sourceUrl, String subfolder) {
+        if (sourceUrl == null || sourceUrl.isBlank()) return null;
+        // Already on S3 — nothing to do
+        if (sourceUrl.contains("amazonaws.com")) return sourceUrl;
+
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) new URL(sourceUrl).openConnection();
+            connection.setRequestMethod("GET");
+            connection.setInstanceFollowRedirects(true);  // follow 301/302 redirects
+            connection.setConnectTimeout(15000);
+            connection.setReadTimeout(30000);
+            connection.setRequestProperty("User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36");
+
+            int status = connection.getResponseCode();
+            if (status != 200) {
+                log.warn("Cannot download image from {} — HTTP {}", sourceUrl, status);
+                return null;
+            }
+
+            String contentType = connection.getContentType();
+            String safeContentType = (contentType != null) ? contentType : "image/jpeg";
+            String extension = getExtensionFromUrl(sourceUrl, contentType);
+            String key = subfolder + "/" + UUID.randomUUID() + "." + extension;
+
+            try (InputStream in = connection.getInputStream()) {
+                byte[] bytes = in.readAllBytes();
+                PutObjectRequest put = PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .contentType(safeContentType)
+                        .contentLength((long) bytes.length)
+                        .build();
+                s3Client.putObject(put, RequestBody.fromBytes(bytes));
+            }
+
+            String s3Url = String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, key);
+            log.debug("Migrated image {} → {}", sourceUrl, s3Url);
+            return s3Url;
+
+        } catch (Exception e) {
+            log.warn("Failed to upload image from URL {} to S3: {}", sourceUrl, e.getMessage());
+            return null;
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
+    }
+
+    private String getExtensionFromUrl(String url, String contentType) {
+        String lower = url.toLowerCase();
+        if (lower.endsWith(".png"))  return "png";
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "jpg";
+        if (lower.endsWith(".gif"))  return "gif";
+        if (lower.endsWith(".webp")) return "webp";
+        if (contentType != null) {
+            if (contentType.contains("png"))  return "png";
+            if (contentType.contains("gif"))  return "gif";
+            if (contentType.contains("webp")) return "webp";
+        }
+        return "jpg";
     }
 
     private void validateFile(MultipartFile file) {

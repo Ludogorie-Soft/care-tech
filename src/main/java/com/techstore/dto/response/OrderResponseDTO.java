@@ -22,6 +22,7 @@ public class OrderResponseDTO {
 
     private Long id;
     private String orderNumber;
+    private Long userId;
 
     // Customer information
     private String customerFirstName;

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-06T06:43:34.472Z
-> Files: 576 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-07T07:34:33.967Z
+> Files: 578 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -162,7 +162,7 @@
 - `mvnw` — or more contributor license agreements.  See the NOTICE file (~3144 tok)
 - `mvnw.cmd` — Declares Directory (~2262 tok)
 - `nginx.conf` — Nginx configuration (~575 tok)
-- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~1481 tok)
+- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~1916 tok)
 - `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
 - `parameters_202605130941.sql` (~43615 tok)
 - `pom.xml` (~1642 tok)
@@ -336,11 +336,11 @@
 - `TbiConfig.java` — AES-256-CTR encryption key provided by TBI for the BIVD merchant account. (~402 tok)
 - `TekraConfig.java` — import com.fasterxml.jackson.databind.DeserializationFeature; (~177 tok)
 - `WebClientConfig.java` — Configuration: WebClientConfig (~802 tok)
-- `WebConfig.java` — Configuration: WebConfig (~670 tok)
+- `WebConfig.java` — Configuration: WebConfig (~515 tok)
 
 ## src/main/java/com/techstore/controller/
 
-- `AdminController.java` — Get all orders with pagination and sorting (~5433 tok)
+- `AdminController.java` — Get all orders with pagination and sorting (~5621 tok)
 - `AuthController.java` — RestController: AuthController (9 endpoints) (~1192 tok)
 - `BlogCategoryController.java` — RestController: BlogCategoryController (6 endpoints) (~750 tok)
 - `BlogPostController.java` — RestController: BlogPostController (9 endpoints) (~1487 tok)
@@ -351,11 +351,11 @@
 - `CategoryReorganizationController.java` — CategoryReorganizationController (~979 tok)
 - `ContactController.java` — RestController: ContactController (2 endpoints) (~331 tok)
 - `FileUploadController.java` — RestController: FileUploadController (7 endpoints) (~831 tok)
-- `ImageProxyController.java` — Max concurrent outbound requests to external image hosts (vali.bg etc.) (~2130 tok)
+- `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1992 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
-- `OrderController.java` — Създаване на нова поръчка (~1745 tok)
+- `OrderController.java` — Създаване на нова поръчка (~1863 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
-- `PazaruvajFeedController.java` — Public XML product feed consumed by pazaruvaj.com crawler (every ~12 h). (~1778 tok)
+- `PazaruvajFeedController.java` — Public XML product feed consumed by pazaruvaj.com crawler (every ~12 h). (~1747 tok)
 - `PazaruvajFeedController.java` — Public XML product feed consumed by pazaruvaj.com crawler (every ~12 h). (~545 tok)
 - `ProductController.java` — Record to hold sort field and direction information (~3884 tok)
 - `ProductSearchController.java` — RestController: ProductSearchController (8 endpoints) (~1491 tok)
@@ -407,8 +407,9 @@
 
 ## src/main/java/com/techstore/dto/pazaruvaj/
 
+- `PazaruvajAttributeProjection.java` — Class: PazaruvajAttributeProjection (~45 tok)
 - `PazaruvajFeedConfig.java` — ALL | CATEGORY | PRODUCTS (~143 tok)
-- `PazaruvajProductProjection.java` — Native SQL projection for feed: id, productName, slug, finalPrice, primaryImageUrl, barcode, descriptionBg, manufacturerName, categoryName, parentCategoryName (~80 tok)
+- `PazaruvajProductProjection.java` — Class: PazaruvajProductProjection (~114 tok)
 - `PazaruvajProductProjection.java` — Class: PazaruvajProductProjection (~109 tok)
 
 ## src/main/java/com/techstore/dto/request/
@@ -475,7 +476,7 @@
 - `ManufacturerSummaryDto.java` — Class: ManufacturerSummaryDto (~93 tok)
 - `MarkupResponseDTO.java` — Class: MarkupResponseDTO (~185 tok)
 - `OrderItemResponseDTO.java` — OrderItemResponseDTO: getLineTotalWithTax, getTotalPrice (~254 tok)
-- `OrderResponseDTO.java` — OrderResponseDTO: getFullCustomerName, getFullShippingAddress (~760 tok)
+- `OrderResponseDTO.java` — OrderResponseDTO: getFullCustomerName, getFullShippingAddress (~727 tok)
 - `OrderStatisticsResponseDTO.java` — Class: OrderStatisticsResponseDTO (~408 tok)
 - `ParameterOptionResponseDto.java` — Class: ParameterOptionResponseDto (~149 tok)
 - `ParameterResponseDto.java` — Class: ParameterResponseDto (~135 tok)
@@ -636,7 +637,7 @@
 - `ParameterRepository.java` — Repository: ParameterRepository (~1143 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~478 tok)
-- `ProductRepository.java` — Cross-platform deduplication by SKU. (~3007 tok)
+- `ProductRepository.java` — Cross-platform deduplication by SKU. (~3297 tok)
 - `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9378 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
@@ -660,17 +661,18 @@
 - `CronJobService.java` — Service: CronJobService (~788 tok)
 - `EmailService.java` — Service for sending email notifications (~5028 tok)
 - `FileUploadService.java` — Service: FileUploadService (~7260 tok)
+- `ImageMigrationService.java` — Service: ImageMigrationService (~1434 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3823 tok)
-- `OrderService.java` — Creates a new order (~5971 tok)
+- `OrderService.java` — Creates a new order (~5993 tok)
 - `ParameterService.java` — Service: ParameterService (~9601 tok)
-- `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3099 tok)
+- `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3475 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Service: alias-aware search. resolveAliasId() + resolveAliasCategories() applied in searchProducts, getAvailableParametersWithCountsForCategory, getFilteredFacets. (~2242 tok)
 - `ProductService.java` — Service: ProductService (~13303 tok)
 - `ReviewService.java` — Service: ReviewService (~927 tok)
-- `S3Service.java` — Service: S3Service (~2218 tok)
+- `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
 - `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8490 tok)
@@ -689,7 +691,7 @@
 - `AsbisSyncService.java` — AsbisSyncService (~14027 tok)
 - `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~12537 tok)
 - `TekraSyncService.java` — Service: TekraSyncService (~23065 tok)
-- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~14035 tok)
+- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~14124 tok)
 
 ## src/main/java/com/techstore/util/
 
@@ -705,7 +707,7 @@
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` (~2710 tok)
+- `application.yml` (~2652 tok)
 
 ## src/main/resources/db/
 

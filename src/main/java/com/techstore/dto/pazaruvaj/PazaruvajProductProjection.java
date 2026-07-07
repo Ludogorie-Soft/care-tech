@@ -10,6 +10,7 @@ public interface PazaruvajProductProjection {
     String getPrimaryImageUrl();
     String getBarcode();
     String getDescriptionBg();
+    String getSku();
     String getManufacturerName();
     String getCategoryName();
     String getParentCategoryName();

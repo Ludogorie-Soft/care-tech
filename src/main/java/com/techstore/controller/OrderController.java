@@ -61,7 +61,7 @@ public class OrderController {
         User currentUser = securityHelper.getCurrentUser();
         OrderResponseDTO order = orderService.getOrderById(orderId);
 
-        if (!currentUser.isAdmin() && !order.getCustomerEmail().equals(currentUser.getEmail())) {
+        if (!currentUser.isAdmin() && !ownsOrder(currentUser, order)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -78,7 +78,7 @@ public class OrderController {
         User currentUser = securityHelper.getCurrentUser();
         OrderResponseDTO order = orderService.getOrderByNumber(orderNumber);
 
-        if (!currentUser.isAdmin() && !order.getCustomerEmail().equals(currentUser.getEmail())) {
+        if (!currentUser.isAdmin() && !ownsOrder(currentUser, order)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -107,7 +107,7 @@ public class OrderController {
         User currentUser = securityHelper.getCurrentUser();
         OrderResponseDTO order = orderService.getOrderById(orderId);
 
-        if (!currentUser.isAdmin() && !order.getCustomerEmail().equals(currentUser.getEmail())) {
+        if (!currentUser.isAdmin() && !ownsOrder(currentUser, order)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -117,7 +117,7 @@ public class OrderController {
 
         String key = order.getWarrantyFilePath();
         byte[] fileBytes = s3Service.downloadFileBytes(key);
-        String filename = key.substring(key.lastIndexOf('/') + 1);
+        String filename = key.contains("/") ? key.substring(key.lastIndexOf('/') + 1) : key;
         String extension = filename.contains(".") ? filename.substring(filename.lastIndexOf('.') + 1).toLowerCase() : "";
         String contentType = switch (extension) {
             case "pdf"  -> "application/pdf";
@@ -153,11 +153,24 @@ public class OrderController {
         User currentUser = securityHelper.getCurrentUser();
         OrderResponseDTO order = orderService.getOrderById(orderId);
 
-        if (!currentUser.isAdmin() && !order.getCustomerEmail().equals(currentUser.getEmail())) {
+        if (!currentUser.isAdmin() && !ownsOrder(currentUser, order)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         OrderResponseDTO cancelledOrder = orderService.cancelOrder(orderId, reason);
         return ResponseEntity.ok(cancelledOrder);
+    }
+
+    /**
+     * Checks whether the given user owns the order.
+     * Preferred: compare by userId (registered users).
+     * Fallback: compare by email (guest orders where userId is null).
+     */
+    private boolean ownsOrder(User currentUser, OrderResponseDTO order) {
+        if (order.getUserId() != null) {
+            return order.getUserId().equals(currentUser.getId());
+        }
+        return order.getCustomerEmail() != null
+                && order.getCustomerEmail().equals(currentUser.getEmail());
     }
 }

@@ -5102,6 +5102,294 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-06T06:40:12.609Z"
+    },
+    {
+      "id": "bug-315",
+      "timestamp": "2026-07-06T11:33:32.414Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/controller/ImageProxyController.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T11:33:32.414Z"
+    },
+    {
+      "id": "bug-316",
+      "timestamp": "2026-07-06T11:45:17.554Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/controller/ImageProxyController.java",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 6→4 lines (2 removed) | Also: try {; if (!PROXY_SEMAPHORE.tryAcquire(10, TimeUnit.SECON",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-06T11:45:27.369Z"
+    },
+    {
+      "id": "bug-317",
+      "timestamp": "2026-07-06T12:28:19.395Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/S3Service.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:28:19.395Z"
+    },
+    {
+      "id": "bug-318",
+      "timestamp": "2026-07-06T12:28:24.835Z",
+      "error_message": "Wrong reference: ValiApiService should be S3Service",
+      "file": "src/main/java/com/techstore/service/sync/ValiSyncService.java",
+      "root_cause": "Used \"ValiApiService\" instead of \"S3Service\"",
+      "fix": "Changed ValiApiService → S3Service",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:28:24.835Z"
+    },
+    {
+      "id": "bug-319",
+      "timestamp": "2026-07-06T12:28:46.377Z",
+      "error_message": "Missing guard clause",
+      "file": "src/main/java/com/techstore/service/sync/ValiSyncService.java",
+      "root_cause": "No early return/throw for edge case: extProduct.getImages(",
+      "fix": "Added guard clause: if (extProduct.getImages()",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:28:46.377Z"
+    },
+    {
+      "id": "bug-320",
+      "timestamp": "2026-07-06T12:29:43.382Z",
+      "error_message": "Wrong reference: PersonalOfferService should be ImageMigrationService",
+      "file": "src/main/java/com/techstore/controller/AdminController.java",
+      "root_cause": "Used \"PersonalOfferService\" instead of \"ImageMigrationService\"",
+      "fix": "Changed PersonalOfferService → ImageMigrationService",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:29:43.382Z"
+    },
+    {
+      "id": "bug-321",
+      "timestamp": "2026-07-06T12:38:09.264Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/S3Service.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:38:09.264Z"
+    },
+    {
+      "id": "bug-322",
+      "timestamp": "2026-07-06T12:38:31.473Z",
+      "error_message": "Wrong reference: S3Service should be ValiApiService",
+      "file": "src/main/java/com/techstore/service/sync/ValiSyncService.java",
+      "root_cause": "Used \"S3Service\" instead of \"ValiApiService\"",
+      "fix": "Changed S3Service → ValiApiService",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:38:31.473Z"
+    },
+    {
+      "id": "bug-323",
+      "timestamp": "2026-07-06T12:44:54.193Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/controller/ImageProxyController.java",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 12→3 lines (9 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:44:54.193Z"
+    },
+    {
+      "id": "bug-324",
+      "timestamp": "2026-07-06T12:57:49.132Z",
+      "error_message": "Wrong return value",
+      "file": "src/main/java/com/techstore/service/ImageMigrationService.java",
+      "root_cause": "Was returning: url != null && url.contains(\"vali.bg\");",
+      "fix": "Now returns: url != null && !url.contains(\"amazonaws.com\");",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:57:49.132Z"
+    },
+    {
+      "id": "bug-325",
+      "timestamp": "2026-07-06T12:57:52.802Z",
+      "error_message": "Wrong reference: isValiUrl should be isExternalUrl",
+      "file": "src/main/java/com/techstore/service/ImageMigrationService.java",
+      "root_cause": "Used \"isValiUrl\" instead of \"isExternalUrl\"",
+      "fix": "Changed isValiUrl → isExternalUrl",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-06T12:57:52.802Z"
+    },
+    {
+      "id": "bug-326",
+      "timestamp": "2026-07-07T07:16:12.194Z",
+      "error_message": "Wrong reference: CorsRegistry should be ResourceHandlerRegistry",
+      "file": "src/main/java/com/techstore/config/WebConfig.java",
+      "root_cause": "Used \"CorsRegistry\" instead of \"ResourceHandlerRegistry\"",
+      "fix": "Changed CorsRegistry → ResourceHandlerRegistry",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-07T07:16:12.194Z"
+    },
+    {
+      "id": "bug-327",
+      "timestamp": "2026-07-07T07:16:48.672Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/OrderService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-07T07:16:48.672Z"
+    },
+    {
+      "id": "bug-328",
+      "timestamp": "2026-07-07T07:17:47.393Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/resources/application.yml",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 3→3 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "yml"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-07T07:17:47.393Z"
+    },
+    {
+      "id": "bug-329",
+      "timestamp": "2026-07-07T07:31:36.184Z",
+      "error_message": "Wrong condition in logic",
+      "file": "nginx.prod.conf",
+      "root_cause": "Condition was: if ($bad_bot)",
+      "fix": "Changed to: if ($is_social_crawler)",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "conf"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-07T07:31:36.184Z"
+    },
+    {
+      "id": "bug-330",
+      "timestamp": "2026-07-07T07:32:12.744Z",
+      "error_message": "Wrong reference: PazaruvajProductProjection should be PazaruvajAttributeProjection",
+      "file": "src/main/java/com/techstore/repository/ProductRepository.java",
+      "root_cause": "Used \"PazaruvajProductProjection\" instead of \"PazaruvajAttributeProjection\"",
+      "fix": "Changed PazaruvajProductProjection → PazaruvajAttributeProjection",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-07T07:32:12.744Z"
+    },
+    {
+      "id": "bug-331",
+      "timestamp": "2026-07-07T07:32:38.442Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/PazaruvajFeedService.java",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 16→19 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-07T07:32:38.442Z"
+    },
+    {
+      "id": "bug-332",
+      "timestamp": "2026-07-07T07:33:12.982Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/PazaruvajFeedService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-07T07:33:12.982Z"
     }
   ]
 }

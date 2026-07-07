@@ -41,15 +41,14 @@ public class PazaruvajFeedController {
      * Public XML product feed consumed by pazaruvaj.com crawler (every ~12 h).
      * URL to register in the pazaruvaj.com merchant admin panel.
      */
-    @GetMapping(value = "/feed.xml", produces = "text/xml;charset=UTF-8")
+    @GetMapping(value = "/feed.xml")
     public ResponseEntity<String> getFeed() {
         String feed = pazaruvajFeedService.getCachedFeed();
 
         if (feed == null) {
-            // Feed not yet generated (app just started) — trigger generation and return 503
             log.warn("[Pazaruvaj] Feed requested before generation completed");
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .contentType(MediaType.TEXT_PLAIN)
+                    .header("Content-Type", "text/plain;charset=UTF-8")
                     .body("Feed is being generated. Please retry in a few minutes.");
         }
 

@@ -61,6 +61,10 @@
 
 ## Do-Not-Repeat (Security)
 
+- [2026-07-07] NEVER add real credential values as `${ENV_VAR:real_value}` defaults in application.yml — they end up in Git history. All secrets (MAIL_PASSWORD, ASBIS_PASSWORD, TBI_ENCRYPTION_KEY, SPEEDY_PASSWORD) must use `${ENV_VAR}` without fallback.
+- [2026-07-07] NEVER remove `addCorsMappings` override from WebConfig and leave `allowedOriginPatterns("*") + allowCredentials(true)` — this is a CORS misconfiguration. SecurityConfig's CorsConfigurationSource is the authoritative CORS config; WebConfig override is redundant and dangerous.
+- [2026-07-07] IDOR ownership check in OrderController must use userId (not email): `order.getUserId().equals(currentUser.getId())`. Email is mutable and guest-order fallback only. Pattern: check userId if non-null, fallback to email for guest orders.
+
 - [2026-06-04] NEVER leave `/api/cart/**` as `permitAll()` in SecurityConfig — this was an IDOR: any unauthenticated user could read/write any user's cart. Always use `authenticated()` at URL level + `SecurityHelper.hasAccessToResource(userId)` in the controller.
 - [2026-06-04] When adding new entities that store JSON in PostgreSQL, use `@JdbcTypeCode(SqlTypes.JSON)` + `columnDefinition = "jsonb"` on the field. Do NOT use plain `@Column` — Hibernate won't know how to serialize/deserialize the Java object.
 
@@ -114,7 +118,7 @@
 - **Nginx hardening (2026-07-06):** Added rate limiting (`limit_req_zone` 20r/s API, 50r/s general), connection limit (`limit_conn 30`), bad bot blocking (empty UA, sqlmap, nikto, masscan, zgrab), scan path blocking (.env, .php, wp-admin), security headers. Config saved as `nginx.prod.conf` in project root.
 - **Pazaruvaj generate endpoint (2026-07-06):** Added `format=CSV` parameter + CSV builder in PazaruvajFeedService. Live feed keeps delivery info (required by Heureka format); on-demand generate uses `includeDelivery=false`. Frontend has XML/CSV format selector in generator section.
 
-- **Pazaruvaj.com интеграция (2026-07-03):** Pazaruvaj е собственост на Heureka Group и използва **Heureka XML feed формат**. Няма REST API — merchant-ът хоства XML URL, pazaruvaj го дърпа на ~12 часа. Credentials (PAZARUVAJ_USERNAME/PASSWORD) са само за admin панела на pazaruvaj.com.
+- **Pazaruvaj.com интеграция (2026-07-03, коригирано 2026-07-07):** Pazaruvaj е собственост на Heureka Group, но НЕ използва Heureka XML формат. Ползва собствен формат: root `<Products>`, item `<Product>`, полета `Identifier`, `Name`, `ProductUrl`, `ImageUrl`, `Price`, `Category`, `Manufacturer`, `ProductNumber`, `EanCode`, `Description`, `DeliveryTime`, `DeliveryCost`. Разделител на категории: ` > `. Доставка: плосък `<DeliveryCost>6.00 EUR</DeliveryCost>`, не nested блокове. Няма REST API — merchant-ът хоства XML URL, pazaruvaj го дърпа ежедневно след 17:00.
 - **Pazaruvaj PRICE_VAT:** Цената е в **EUR с ДДС** = `finalPrice × 1.20`. Без конвертиране към BGN (България е в еврозоната). Полето `CATEGORYTEXT` изисква кирилица.
 - **PazaruvajFeedService архитектура:** Feed се кешира в `AtomicReference<String>`, обновява се на 30 сек след старт + на всеки 2 часа. `PazaruvajFeedConfig` (тип ALL/CATEGORY/PRODUCTS) се пази в паметта — нулира се при рестарт. На-demand генерирането (`/generate`) е винаги fresh, без кеш.
 - **Native SQL feed query:** Feed query-тата ползват native SQL с `PazaruvajProductProjection` интерфейс за да избегнат N+1 и EAGER loading на `productParameters`. Category query използва recursive CTE (`WITH RECURSIVE cat_tree`) за да включи всички подкатегории.

@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.concurrent.Semaphore;
 
 @Hidden
 @RestController
@@ -25,9 +24,6 @@ import java.util.concurrent.Semaphore;
 public class ImageProxyController {
 
     private final ProductService productService;
-
-    /** Max concurrent outbound requests to external image hosts (vali.bg etc.) */
-    private static final Semaphore PROXY_SEMAPHORE = new Semaphore(5, true);
 
     @GetMapping("/product/{productId}/primary")
     public void getPrimaryImage(@PathVariable Long productId, HttpServletResponse response) {
@@ -64,16 +60,9 @@ public class ImageProxyController {
     }
 
     private void proxyImage(String imageUrl, HttpServletResponse response) {
-        if (!PROXY_SEMAPHORE.tryAcquire()) {
-            log.warn("Proxy semaphore full, rejecting image request: {}", imageUrl);
-            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            return;
-        }
-
-        int maxRetries = 1;
+        int maxRetries = 0;
         int retryCount = 0;
 
-        try {
         while (retryCount <= maxRetries) {
             HttpURLConnection connection = null;
             try {
@@ -82,7 +71,7 @@ public class ImageProxyController {
                 connection.setRequestMethod("GET");
                 connection.setInstanceFollowRedirects(true);
 
-                connection.setConnectTimeout(5000);
+                connection.setConnectTimeout(4000);
                 connection.setReadTimeout(10000);
 
                 // Add headers to avoid being blocked
@@ -161,9 +150,6 @@ public class ImageProxyController {
                     connection.disconnect();
                 }
             }
-        }
-        } finally {
-            PROXY_SEMAPHORE.release();
         }
     }
 

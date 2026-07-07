@@ -1,5 +1,6 @@
 package com.techstore.repository;
 
+import com.techstore.dto.pazaruvaj.PazaruvajAttributeProjection;
 import com.techstore.dto.pazaruvaj.PazaruvajProductProjection;
 import com.techstore.entity.Manufacturer;
 import com.techstore.entity.Product;
@@ -110,6 +111,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             p.image_url                                           AS primaryImageUrl,
             p.barcode                                             AS barcode,
             p.description_bg                                      AS descriptionBg,
+            COALESCE(p.sku, '')                                   AS sku,
             COALESCE(m.name, '')                                  AS manufacturerName,
             COALESCE(c.name_bg, c.name_en, '')                   AS categoryName,
             COALESCE(cp.name_bg, cp.name_en, '')                 AS parentCategoryName
@@ -136,6 +138,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             p.image_url                                           AS primaryImageUrl,
             p.barcode                                             AS barcode,
             p.description_bg                                      AS descriptionBg,
+            COALESCE(p.sku, '')                                   AS sku,
             COALESCE(m.name, '')                                  AS manufacturerName,
             COALESCE(c.name_bg, c.name_en, '')                   AS categoryName,
             COALESCE(cp.name_bg, cp.name_en, '')                 AS parentCategoryName
@@ -160,6 +163,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             p.image_url                                           AS primaryImageUrl,
             p.barcode                                             AS barcode,
             p.description_bg                                      AS descriptionBg,
+            COALESCE(p.sku, '')                                   AS sku,
             COALESCE(m.name, '')                                  AS manufacturerName,
             COALESCE(c.name_bg, c.name_en, '')                   AS categoryName,
             COALESCE(cp.name_bg, cp.name_en, '')                 AS parentCategoryName
@@ -175,6 +179,21 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
           AND p.image_url IS NOT NULL AND p.image_url <> ''
         """, nativeQuery = true)
     List<PazaruvajProductProjection> findAllForPazaruvajFeed();
+
+    @Query(value = """
+        SELECT
+            pp.product_id                                         AS productId,
+            COALESCE(par.name_bg, par.name_en, '')               AS paramName,
+            COALESCE(po.name_bg, po.name_en, '')                 AS paramValue
+        FROM product_parameters pp
+        JOIN parameters        par ON par.id = pp.parameter_id
+        JOIN parameter_options po  ON po.id  = pp.parameter_option_id
+        WHERE pp.product_id IN (:productIds)
+          AND COALESCE(par.name_bg, par.name_en, '') <> ''
+          AND COALESCE(po.name_bg,  po.name_en,  '') <> ''
+        ORDER BY pp.product_id, par.name_bg
+        """, nativeQuery = true)
+    List<PazaruvajAttributeProjection> findAttributesForPazaruvajFeed(@Param("productIds") List<Long> productIds);
 
     @Modifying
     @Query("UPDATE Product p SET p.show = false WHERE p.sku IN :skus AND p.platform = :platform")

@@ -419,6 +419,7 @@ public class OrderService {
         return OrderResponseDTO.builder()
                 .id(order.getId())
                 .orderNumber(order.getOrderNumber())
+                .userId(order.getUser() != null ? order.getUser().getId() : null)
                 .customerFirstName(order.getCustomerFirstName())
                 .customerLastName(order.getCustomerLastName())
                 .customerEmail(order.getCustomerEmail())

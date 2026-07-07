@@ -1,6 +1,7 @@
 package com.techstore.service;
 
 import com.techstore.config.ShippingConfig;
+import com.techstore.dto.pazaruvaj.PazaruvajAttributeProjection;
 import com.techstore.dto.pazaruvaj.PazaruvajFeedConfig;
 import com.techstore.dto.pazaruvaj.PazaruvajProductProjection;
 import com.techstore.repository.ProductRepository;
@@ -16,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -77,17 +80,20 @@ public class PazaruvajFeedService {
 
     @Transactional(readOnly = true)
     public String generateFeedForAll() {
-        return buildXml(productRepository.findAllForPazaruvajFeed(), false);
+        List<PazaruvajProductProjection> products = productRepository.findAllForPazaruvajFeed();
+        return buildXml(products, loadAttributes(products), false);
     }
 
     @Transactional(readOnly = true)
     public String generateFeedForCategory(Long categoryId) {
-        return buildXml(productRepository.findForPazaruvajFeedByCategory(categoryId), false);
+        List<PazaruvajProductProjection> products = productRepository.findForPazaruvajFeedByCategory(categoryId);
+        return buildXml(products, loadAttributes(products), false);
     }
 
     @Transactional(readOnly = true)
     public String generateFeedForProducts(List<Long> productIds) {
-        return buildXml(productRepository.findForPazaruvajFeedByProductIds(productIds), false);
+        List<PazaruvajProductProjection> products = productRepository.findForPazaruvajFeedByProductIds(productIds);
+        return buildXml(products, loadAttributes(products), false);
     }
 
     @Transactional(readOnly = true)
@@ -131,7 +137,7 @@ public class PazaruvajFeedService {
 
         try {
             List<PazaruvajProductProjection> products = loadProductsForConfig(feedConfig.get());
-            String xml = buildXml(products, true);
+            String xml = buildXml(products, loadAttributes(products), true);
             cachedFeed.set(xml);
             lastRefreshedAt.set(java.time.LocalDateTime.now());
             productCount.set(products.size());
@@ -152,14 +158,26 @@ public class PazaruvajFeedService {
         };
     }
 
+    // ── Attribute loader ───────────────────────────────────────────────────────
+
+    private Map<Long, List<PazaruvajAttributeProjection>> loadAttributes(
+            List<PazaruvajProductProjection> products) {
+        if (products.isEmpty()) return Map.of();
+        List<Long> ids = products.stream().map(PazaruvajProductProjection::getId).toList();
+        return productRepository.findAttributesForPazaruvajFeed(ids)
+                .stream()
+                .collect(Collectors.groupingBy(PazaruvajAttributeProjection::getProductId));
+    }
+
     // ── XML builder ────────────────────────────────────────────────────────────
 
-    private String buildXml(List<PazaruvajProductProjection> products, boolean includeDelivery) {
-        BigDecimal officePrice = shippingConfig.getDefaultShippingCost();
-        String deliveryDaysStr = deliveryDays + " days";
+    private String buildXml(List<PazaruvajProductProjection> products,
+                             Map<Long, List<PazaruvajAttributeProjection>> attributesMap,
+                             boolean includeDelivery) {
+        String deliveryDaysStr = deliveryDays + " дни";
 
         StringBuilder sb = new StringBuilder(products.size() * 600);
-        sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<SHOP>\n");
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<Products>\n");
 
         for (PazaruvajProductProjection p : products) {
             if (p.getFinalPrice() == null || p.getFinalPrice().compareTo(BigDecimal.ZERO) <= 0) {
@@ -170,42 +188,55 @@ public class PazaruvajFeedService {
                     .multiply(VAT)
                     .setScale(2, RoundingMode.HALF_UP);
 
-            sb.append("  <SHOPITEM>\n");
-            appendTag(sb, "ITEM_ID",      String.valueOf(p.getId()));
-            appendCdata(sb, "PRODUCTNAME", truncate(p.getProductName(), 200));
-            appendTag(sb, "URL",          appUrl + "/product/" + p.getSlug());
+            sb.append("  <Product>\n");
+            appendTag(sb, "Identifier",  String.valueOf(p.getId()));
+            if (isNotBlank(p.getManufacturerName())) {
+                appendCdata(sb, "Manufacturer", p.getManufacturerName());
+            }
+            appendCdata(sb, "Name",      truncate(p.getProductName(), 200));
+            appendTag(sb, "ProductUrl",  appUrl + "/product/" + p.getSlug());
+            appendTag(sb, "Price", priceVat.toPlainString());
 
             if (isNotBlank(p.getPrimaryImageUrl())) {
-                appendTag(sb, "IMGURL", p.getPrimaryImageUrl());
+                appendTag(sb, "ImageUrl", p.getPrimaryImageUrl());
             }
-
-            appendTag(sb, "PRICE_VAT", priceVat.toPlainString());
 
             String categoryText = buildCategoryText(p.getParentCategoryName(), p.getCategoryName());
-            appendCdata(sb, "CATEGORYTEXT", categoryText);
+            appendCdata(sb, "Category", categoryText);
 
-            if (isNotBlank(p.getManufacturerName())) {
-                appendCdata(sb, "MANUFACTURER", p.getManufacturerName());
-            }
-
-            if (isValidEan(p.getBarcode())) {
-                appendTag(sb, "EAN", p.getBarcode());
+            if (isNotBlank(p.getSku())) {
+                appendCdata(sb, "ProductNumber", p.getSku());
             }
 
             if (isNotBlank(p.getDescriptionBg())) {
-                appendCdata(sb, "DESCRIPTION", truncate(p.getDescriptionBg(), 500));
+                appendCdata(sb, "Description", truncate(p.getDescriptionBg(), 500));
             }
 
             if (includeDelivery) {
-                appendTag(sb, "DELIVERY_DATE", deliveryDaysStr);
-                appendDelivery(sb, "Speedy до офис", officePrice.toPlainString());
-                appendDelivery(sb, "Speedy до адрес", homeDeliveryPrice.toPlainString());
+                appendTag(sb, "DeliveryTime", deliveryDaysStr);
+                appendTag(sb, "DeliveryCost", homeDeliveryPrice.toPlainString() + " EUR");
             }
 
-            sb.append("  </SHOPITEM>\n");
+            if (isValidEan(p.getBarcode())) {
+                appendTag(sb, "EanCode", p.getBarcode());
+            }
+
+            List<PazaruvajAttributeProjection> attrs = attributesMap.get(p.getId());
+            if (attrs != null && !attrs.isEmpty()) {
+                sb.append("    <Attributes>\n");
+                for (PazaruvajAttributeProjection attr : attrs) {
+                    sb.append("      <Attribute>\n");
+                    sb.append("        <Attribute_name><![CDATA[").append(attr.getParamName()).append("]]></Attribute_name>\n");
+                    sb.append("        <Attribute_value><![CDATA[").append(attr.getParamValue()).append("]]></Attribute_value>\n");
+                    sb.append("      </Attribute>\n");
+                }
+                sb.append("    </Attributes>\n");
+            }
+
+            sb.append("  </Product>\n");
         }
 
-        sb.append("</SHOP>");
+        sb.append("</Products>");
         return sb.toString();
     }
 
@@ -253,7 +284,7 @@ public class PazaruvajFeedService {
 
     private String buildCategoryText(String parent, String category) {
         if (isNotBlank(parent) && isNotBlank(category) && !parent.equals(category)) {
-            return parent + " | " + category;
+            return parent + " > " + category;
         }
         return isNotBlank(category) ? category : (isNotBlank(parent) ? parent : "");
     }
@@ -268,13 +299,6 @@ public class PazaruvajFeedService {
         sb.append("    <").append(tag).append("><![CDATA[")
           .append(value)
           .append("]]></").append(tag).append(">\n");
-    }
-
-    private void appendDelivery(StringBuilder sb, String id, String price) {
-        sb.append("    <DELIVERY>\n")
-          .append("      <DELIVERY_ID><![CDATA[").append(id).append("]]></DELIVERY_ID>\n")
-          .append("      <DELIVERY_PRICE>").append(price).append("</DELIVERY_PRICE>\n")
-          .append("    </DELIVERY>\n");
     }
 
     private String escapeXml(String value) {

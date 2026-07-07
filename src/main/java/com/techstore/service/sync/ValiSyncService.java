@@ -200,9 +200,6 @@ public class ValiSyncService {
 
                 entityManager.clear();
 
-                if (i % 200 == 0) {
-                    System.gc();
-                }
             }
 
             updateCategoryParentsOptimized(externalCategories, existingCategories);
@@ -1086,9 +1083,14 @@ public class ValiSyncService {
         return "ADMIN".equalsIgnoreCase(username.trim()) || "admin".equalsIgnoreCase(username.trim());
     }
 
-    private static void setImagesToProduct(Product product, ProductRequestDto extProduct) {
+    private void setImagesToProduct(Product product, ProductRequestDto extProduct) {
         if (extProduct.getImages() != null && !extProduct.getImages().isEmpty()) {
-            product.setPrimaryImageUrl(extProduct.getImages().get(0).getHref());
+            // Keep existing S3 URL if already migrated; otherwise store the vali.bg URL.
+            // ImageMigrationService handles the actual S3 upload as a separate background job.
+            String newPrimary = extProduct.getImages().get(0).getHref();
+            if (!isAlreadyOnS3(product.getPrimaryImageUrl())) {
+                product.setPrimaryImageUrl(newPrimary);
+            }
 
             List<String> additionalImages = extProduct.getImages().stream()
                     .skip(1)
@@ -1109,6 +1111,10 @@ public class ValiSyncService {
                 product.setAdditionalImages(new ArrayList<>());
             }
         }
+    }
+
+    private boolean isAlreadyOnS3(String url) {
+        return url != null && url.contains("amazonaws.com");
     }
 
     private static void setNamesToProduct(Product product, ProductRequestDto extProduct) {
