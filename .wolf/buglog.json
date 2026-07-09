@@ -5390,6 +5390,71 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-07T07:33:12.982Z"
+    },
+    {
+      "id": "bug-333",
+      "timestamp": "2026-07-09T11:56:58.517Z",
+      "error_message": "HttpMediaTypeNotAcceptableException: No acceptable representation for /api/pazaruvaj/feed.xml",
+      "file": "src/main/java/com/techstore/controller/PazaruvajFeedController.java",
+      "root_cause": "Pazaruvaj crawler sends HEAD request first. @GetMapping with produces=\"text/xml;charset=UTF-8\" causes Spring content negotiation to reject the request when Accept header does not exactly match.",
+      "fix": "Removed produces constraint from @GetMapping(\"/feed.xml\"). Content-Type is now set manually via ResponseEntity header.",
+      "tags": [
+        "pazaruvaj",
+        "content-negotiation",
+        "HEAD-request",
+        "HttpMediaTypeNotAcceptableException"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-09T11:56:58.518Z"
+    },
+    {
+      "id": "bug-334",
+      "timestamp": "2026-07-09T12:04:01.349Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/OrderService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-09T12:04:01.349Z"
+    },
+    {
+      "id": "bug-335",
+      "timestamp": "2026-07-09T12:14:31.068Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../care-tech-ui/src/redux/orderSlice.js",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-09T12:14:31.068Z"
+    },
+    {
+      "id": "bug-336",
+      "timestamp": "2026-07-09T12:32:18.049Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-09T12:32:18.049Z"
     }
   ]
 }

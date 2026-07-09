@@ -351,7 +351,18 @@ public class AdminController {
     }
 
     /**
-     * Update order status
+     * Full order edit — patch semantics, all fields optional.
+     */
+    @PutMapping("/orders/{orderId}")
+    public ResponseEntity<OrderResponseDTO> updateOrder(
+            @PathVariable Long orderId,
+            @Valid @RequestBody OrderUpdateRequestDTO request) {
+
+        return ResponseEntity.ok(orderService.updateOrder(orderId, request));
+    }
+
+    /**
+     * Quick status update — kept for backwards compatibility.
      */
     @PutMapping("/orders/{orderId}/status")
     public ResponseEntity<OrderResponseDTO> updateOrderStatus(

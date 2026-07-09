@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-07T07:34:33.967Z
-> Files: 578 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-09T12:37:12.525Z
+> Files: 582 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -100,8 +100,9 @@
 
 ## ../../care-tech-ui/src/pages/admin/Orders/
 
-- `OrderDetailPage.jsx` — OrderDetailPage (~5421 tok)
-- `useOrderUtils.js` — Exports useOrderUtils (~790 tok)
+- `EditOrderModal.jsx` — TABS — renders form (~6619 tok)
+- `OrderDetailPage.jsx` — OrderDetailPage (~5639 tok)
+- `useOrderUtils.js` — Exports useOrderUtils (~802 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Pazaruvaj/
 
@@ -129,7 +130,7 @@
 - `compareSlice.js` — Exports selectCompareItems, selectCompareCount, selectIsInCompare (~386 tok)
 - `leasingSlice.js` — 4 async thunks: fetchLeasingApplications, fetchLeasingById, fetchLeasingStatistics, registerLeasingApplication. registerError stores true (flag only, not backend payload). State: registerStatus, registeredUrl, registeredApplicationId. (~1100 tok)
 - `offersSlice.js` — API routes: GET, PUT, POST (10 endpoints) (~2807 tok)
-- `orderSlice.js` — orderSlice.js (~2806 tok)
+- `orderSlice.js` — orderSlice.js (~3037 tok)
 - `paramSlice.js` — API routes: GET, POST, PUT, PATCH, DELETE (15 endpoints) (~5217 tok)
 - `productSlice.js` — API routes: GET, POST, PUT, DELETE (12 endpoints) (~6019 tok)
 - `reviewsSlice.js` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~1554 tok)
@@ -164,6 +165,7 @@
 - `nginx.conf` — Nginx configuration (~575 tok)
 - `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~1916 tok)
 - `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
+- `ORDER_EDIT_PLAN.md` — План: Редактиране на поръчки от администратор (~577 tok)
 - `parameters_202605130941.sql` (~43615 tok)
 - `pom.xml` (~1642 tok)
 - `README.md` — Project documentation (~1777 tok)
@@ -340,7 +342,7 @@
 
 ## src/main/java/com/techstore/controller/
 
-- `AdminController.java` — Get all orders with pagination and sorting (~5621 tok)
+- `AdminController.java` — Get all orders with pagination and sorting (~5727 tok)
 - `AuthController.java` — RestController: AuthController (9 endpoints) (~1192 tok)
 - `BlogCategoryController.java` — RestController: BlogCategoryController (6 endpoints) (~750 tok)
 - `BlogPostController.java` — RestController: BlogPostController (9 endpoints) (~1487 tok)
@@ -434,7 +436,9 @@
 - `OrderCreateRequestDTO.java` — Admin-only: when set, overrides the product's current price (used for offer-to-order conversion). (~1011 tok)
 - `OrderFilterDTO.java` — Class: OrderFilterDTO (~232 tok)
 - `OrderItemCreateDTO.java` — Class: OrderItemCreateDTO (~116 tok)
+- `OrderItemUpdateDTO.java` — 0 = remove the item from the order. (~90 tok)
 - `OrderStatusUpdateDTO.java` — Class: OrderStatusUpdateDTO (~122 tok)
+- `OrderUpdateRequestDTO.java` — Admin-only DTO for full order editing. (~542 tok)
 - `ParameterOptionRequestDto.java` — Class: ParameterOptionRequestDto (~128 tok)
 - `ParameterOrderDto.java` — Class: ParameterOrderDto (~152 tok)
 - `ParameterRequestDto.java` — Class: ParameterRequestDto (~130 tok)
@@ -664,7 +668,7 @@
 - `ImageMigrationService.java` — Service: ImageMigrationService (~1434 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3823 tok)
-- `OrderService.java` — Creates a new order (~5993 tok)
+- `OrderService.java` — Creates a new order (~7410 tok)
 - `ParameterService.java` — Service: ParameterService (~9601 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3475 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)

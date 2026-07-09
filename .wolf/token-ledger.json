@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 12053550,
-    "total_reads": 6325,
-    "total_writes": 9336,
-    "total_sessions": 42,
-    "anatomy_hits": 2757,
-    "anatomy_misses": 2587,
-    "repeated_reads_blocked": 1884,
-    "estimated_savings_vs_bare_cli": 8500646
+    "total_tokens_estimated": 12397128,
+    "total_reads": 6457,
+    "total_writes": 9545,
+    "total_sessions": 43,
+    "anatomy_hits": 2823,
+    "anatomy_misses": 2614,
+    "repeated_reads_blocked": 1914,
+    "estimated_savings_vs_bare_cli": 8656959
   },
   "sessions": [
     {
@@ -94548,6 +94548,1996 @@
         "writes_count": 27,
         "repeated_reads_blocked": 6,
         "anatomy_lookups": 13
+      }
+    },
+    {
+      "id": "session-2026-07-07-1004",
+      "started": "2026-07-07T07:04:24.160Z",
+      "ended": "2026-07-09T11:57:06.261Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 2998,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/PazaruvajFeedController.java",
+          "tokens_estimated": 1778,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/pazaruvaj/PazaruvajProductProjection.java",
+          "tokens_estimated": 80,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 3066,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 2710,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/SecurityConfig.java",
+          "tokens_estimated": 2554,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1745,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 5621,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/UserController.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/FileUploadController.java",
+          "tokens_estimated": 831,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ImageMigrationService.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 5971,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 14147,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/FileUploadService.java",
+          "tokens_estimated": 7260,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/exception/GlobalExceptionHandler.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/util/SecurityHelper.java",
+          "tokens_estimated": 640,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/WebConfig.java",
+          "tokens_estimated": 670,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 760,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 1849,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/ProductParameter.java",
+          "tokens_estimated": 266,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/pazaruvaj/PazaruvajProductProjection.java",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 327,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 278,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 266,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 632,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 87,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 8,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/WebConfig.java",
+          "tokens_estimated": 4,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/WebConfig.java",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 79,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1996,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 18,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 220,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 55,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/pazaruvaj/PazaruvajAttributeProjection.java",
+          "tokens_estimated": 48,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 252,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 80,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 55,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 261,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 105,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 1024,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/PazaruvajFeedController.java",
+          "tokens_estimated": 180,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 52946,
+        "output_tokens_estimated": 6177,
+        "reads_count": 20,
+        "writes_count": 28,
+        "repeated_reads_blocked": 6,
+        "anatomy_lookups": 13
+      }
+    },
+    {
+      "id": "session-2026-07-07-1004",
+      "started": "2026-07-07T07:04:24.160Z",
+      "ended": "2026-07-09T11:57:49.596Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 2998,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/PazaruvajFeedController.java",
+          "tokens_estimated": 1778,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/pazaruvaj/PazaruvajProductProjection.java",
+          "tokens_estimated": 80,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 3066,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 2710,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/SecurityConfig.java",
+          "tokens_estimated": 2554,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1745,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 5621,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/UserController.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/FileUploadController.java",
+          "tokens_estimated": 831,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ImageMigrationService.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 5971,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 14147,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/FileUploadService.java",
+          "tokens_estimated": 7260,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/exception/GlobalExceptionHandler.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/util/SecurityHelper.java",
+          "tokens_estimated": 640,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/WebConfig.java",
+          "tokens_estimated": 670,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 760,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 1849,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/ProductParameter.java",
+          "tokens_estimated": 266,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/pazaruvaj/PazaruvajProductProjection.java",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 327,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 278,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 266,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 632,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 87,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 8,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/WebConfig.java",
+          "tokens_estimated": 4,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/WebConfig.java",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 79,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1996,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 18,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 220,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 55,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/pazaruvaj/PazaruvajAttributeProjection.java",
+          "tokens_estimated": 48,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 252,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 80,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 55,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 261,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 105,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 1024,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/PazaruvajFeedController.java",
+          "tokens_estimated": 180,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 52946,
+        "output_tokens_estimated": 6177,
+        "reads_count": 20,
+        "writes_count": 28,
+        "repeated_reads_blocked": 6,
+        "anatomy_lookups": 13
+      }
+    },
+    {
+      "id": "session-2026-07-07-1004",
+      "started": "2026-07-07T07:04:24.160Z",
+      "ended": "2026-07-09T12:00:25.178Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 2998,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/PazaruvajFeedController.java",
+          "tokens_estimated": 1778,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/pazaruvaj/PazaruvajProductProjection.java",
+          "tokens_estimated": 80,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 3066,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 2710,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/SecurityConfig.java",
+          "tokens_estimated": 2554,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1745,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 5621,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/UserController.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/FileUploadController.java",
+          "tokens_estimated": 831,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ImageMigrationService.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 5993,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 14147,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/FileUploadService.java",
+          "tokens_estimated": 7260,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/exception/GlobalExceptionHandler.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/util/SecurityHelper.java",
+          "tokens_estimated": 640,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/WebConfig.java",
+          "tokens_estimated": 670,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 760,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 1849,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/ProductParameter.java",
+          "tokens_estimated": 266,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/OrderStatusUpdateDTO.java",
+          "tokens_estimated": 122,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Order.java",
+          "tokens_estimated": 1750,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/admin/AdminService.java",
+          "tokens_estimated": 4391,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/UpdateOrderStatusModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/pazaruvaj/PazaruvajProductProjection.java",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 327,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 278,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 266,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 632,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 87,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 8,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/WebConfig.java",
+          "tokens_estimated": 4,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/WebConfig.java",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 79,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1996,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 18,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 220,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 55,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/pazaruvaj/PazaruvajAttributeProjection.java",
+          "tokens_estimated": 48,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 252,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 80,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 55,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 261,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 105,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 1024,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/PazaruvajFeedController.java",
+          "tokens_estimated": 180,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 59231,
+        "output_tokens_estimated": 6177,
+        "reads_count": 25,
+        "writes_count": 28,
+        "repeated_reads_blocked": 6,
+        "anatomy_lookups": 15
+      }
+    },
+    {
+      "id": "session-2026-07-07-1004",
+      "started": "2026-07-07T07:04:24.160Z",
+      "ended": "2026-07-09T12:05:42.576Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 2998,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/PazaruvajFeedController.java",
+          "tokens_estimated": 1778,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/pazaruvaj/PazaruvajProductProjection.java",
+          "tokens_estimated": 80,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 3066,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 2710,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/SecurityConfig.java",
+          "tokens_estimated": 2554,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1745,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 5621,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/UserController.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/FileUploadController.java",
+          "tokens_estimated": 831,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ImageMigrationService.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 5993,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 14147,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/FileUploadService.java",
+          "tokens_estimated": 7260,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/exception/GlobalExceptionHandler.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/util/SecurityHelper.java",
+          "tokens_estimated": 640,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/WebConfig.java",
+          "tokens_estimated": 670,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 760,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 1849,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/ProductParameter.java",
+          "tokens_estimated": 266,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/OrderStatusUpdateDTO.java",
+          "tokens_estimated": 122,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Order.java",
+          "tokens_estimated": 1750,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/admin/AdminService.java",
+          "tokens_estimated": 4391,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/UpdateOrderStatusModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/pazaruvaj/PazaruvajProductProjection.java",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 327,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 278,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 266,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 632,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 87,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 8,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/WebConfig.java",
+          "tokens_estimated": 4,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/config/WebConfig.java",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 79,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1996,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 18,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 34,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/application.yml",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 220,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 55,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/pazaruvaj/PazaruvajAttributeProjection.java",
+          "tokens_estimated": 48,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 252,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 80,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 55,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 261,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 105,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 1024,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/PazaruvajFeedController.java",
+          "tokens_estimated": 180,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/ORDER_EDIT_PLAN.md",
+          "tokens_estimated": 653,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/OrderUpdateRequestDTO.java",
+          "tokens_estimated": 505,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/ORDER_EDIT_PLAN.md",
+          "tokens_estimated": 28,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 62,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 1190,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/ORDER_EDIT_PLAN.md",
+          "tokens_estimated": 95,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 224,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 26,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 10,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/ORDER_EDIT_PLAN.md",
+          "tokens_estimated": 105,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 59231,
+        "output_tokens_estimated": 9075,
+        "reads_count": 25,
+        "writes_count": 38,
+        "repeated_reads_blocked": 7,
+        "anatomy_lookups": 15
+      }
+    },
+    {
+      "id": "session-2026-07-09-1507",
+      "started": "2026-07-09T12:07:37.468Z",
+      "ended": "2026-07-09T12:16:46.639Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/UpdateOrderStatusModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 132,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 4422,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 230,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/ORDER_EDIT_PLAN.md",
+          "tokens_estimated": 217,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 5318,
+        "reads_count": 4,
+        "writes_count": 8,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-07-09-1507",
+      "started": "2026-07-09T12:07:37.468Z",
+      "ended": "2026-07-09T12:21:32.926Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/UpdateOrderStatusModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 5727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 7085,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 132,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 4422,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 230,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/ORDER_EDIT_PLAN.md",
+          "tokens_estimated": 217,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 15,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 316,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 281,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 86,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 12812,
+        "output_tokens_estimated": 6016,
+        "reads_count": 7,
+        "writes_count": 12,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-07-09-1507",
+      "started": "2026-07-09T12:07:37.468Z",
+      "ended": "2026-07-09T12:27:43.847Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/UpdateOrderStatusModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 5727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 7085,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/CustomFilterDropdown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/listener/OrderEventListener.java",
+          "tokens_estimated": 700,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 132,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 4422,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 230,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/ORDER_EDIT_PLAN.md",
+          "tokens_estimated": 217,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 15,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 316,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 281,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 134,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 75,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 13512,
+        "output_tokens_estimated": 6225,
+        "reads_count": 9,
+        "writes_count": 14,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-07-09-1507",
+      "started": "2026-07-09T12:07:37.468Z",
+      "ended": "2026-07-09T12:33:37.751Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/UpdateOrderStatusModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 5727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 7118,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/CustomFilterDropdown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/listener/OrderEventListener.java",
+          "tokens_estimated": 700,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/OrderUpdateRequestDTO.java",
+          "tokens_estimated": 472,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 132,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 4422,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 230,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/ORDER_EDIT_PLAN.md",
+          "tokens_estimated": 217,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 15,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 316,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 281,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 134,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 75,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/OrderItemUpdateDTO.java",
+          "tokens_estimated": 96,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/OrderUpdateRequestDTO.java",
+          "tokens_estimated": 65,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/OrderUpdateRequestDTO.java",
+          "tokens_estimated": 110,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 406,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 77,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 20,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 92,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 108,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 75,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 99,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 1922,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 14017,
+        "output_tokens_estimated": 9295,
+        "reads_count": 10,
+        "writes_count": 25,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-07-09-1507",
+      "started": "2026-07-09T12:07:37.468Z",
+      "ended": "2026-07-09T12:37:53.448Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/UpdateOrderStatusModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 5727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 7410,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/CustomFilterDropdown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/listener/OrderEventListener.java",
+          "tokens_estimated": 700,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/OrderUpdateRequestDTO.java",
+          "tokens_estimated": 472,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/OrderItemUpdateDTO.java",
+          "tokens_estimated": 90,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/useOrderUtils.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 132,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/orderSlice.js",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 4422,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 35,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 230,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/ORDER_EDIT_PLAN.md",
+          "tokens_estimated": 217,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 15,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 316,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 281,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 134,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 75,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/OrderItemUpdateDTO.java",
+          "tokens_estimated": 96,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/OrderUpdateRequestDTO.java",
+          "tokens_estimated": 65,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/OrderUpdateRequestDTO.java",
+          "tokens_estimated": 110,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 406,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 77,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 20,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 92,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 108,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 75,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 99,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 1922,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 114,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+          "tokens_estimated": 529,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Orders/useOrderUtils.js",
+          "tokens_estimated": 86,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 14399,
+        "output_tokens_estimated": 10024,
+        "reads_count": 12,
+        "writes_count": 28,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 4
       }
     }
   ],

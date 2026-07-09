@@ -2,7 +2,9 @@ package com.techstore.service;
 
 import com.techstore.config.ShippingConfig;
 import com.techstore.dto.request.OrderCreateRequestDTO;
+import com.techstore.dto.request.OrderItemUpdateDTO;
 import com.techstore.dto.request.OrderStatusUpdateDTO;
+import com.techstore.dto.request.OrderUpdateRequestDTO;
 import com.techstore.dto.request.UserRequestDTO;
 import com.techstore.dto.response.OrderItemResponseDTO;
 import com.techstore.dto.response.OrderResponseDTO;
@@ -369,6 +371,101 @@ public class OrderService {
     }
 
     /**
+     * Full admin edit of an order — patch semantics (null = keep existing value).
+     */
+    @Transactional
+    public OrderResponseDTO updateOrder(Long orderId, OrderUpdateRequestDTO request) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        // ── Status ────────────────────────────────────────────────────────────
+        OrderStatus previousStatus = order.getStatus();
+        boolean autoSetPaid = false;
+        if (request.getStatus() != null && request.getStatus() != previousStatus) {
+            order.setStatus(request.getStatus());
+
+            if (request.getStatus() == OrderStatus.SHIPPED && order.getShippedAt() == null) {
+                order.setShippedAt(LocalDateTime.now());
+            }
+            if (request.getStatus() == OrderStatus.DELIVERED && order.getDeliveredAt() == null) {
+                order.setDeliveredAt(LocalDateTime.now());
+                order.setPaymentStatus(PaymentStatus.PAID);
+                autoSetPaid = true;
+            }
+        }
+
+        // Explicit paymentStatus only applies when not auto-set by DELIVERED transition
+        if (request.getPaymentStatus() != null && !autoSetPaid) {
+            order.setPaymentStatus(request.getPaymentStatus());
+        }
+        if (request.getPaymentMethod() != null) {
+            order.setPaymentMethod(request.getPaymentMethod());
+        }
+        if (request.getTrackingNumber() != null) {
+            order.setTrackingNumber(request.getTrackingNumber().isBlank() ? null : request.getTrackingNumber().trim());
+        }
+        if (request.getAdminNotes() != null) {
+            order.setAdminNotes(request.getAdminNotes().isBlank() ? null : request.getAdminNotes().trim());
+        }
+
+        // ── Customer info ─────────────────────────────────────────────────────
+        if (request.getCustomerFirstName() != null) order.setCustomerFirstName(request.getCustomerFirstName().trim());
+        if (request.getCustomerLastName()  != null) order.setCustomerLastName(request.getCustomerLastName().trim());
+        if (request.getCustomerEmail()     != null) order.setCustomerEmail(request.getCustomerEmail().trim());
+        if (request.getCustomerPhone()     != null) order.setCustomerPhone(request.getCustomerPhone().trim());
+        if (request.getCustomerCompany()   != null) order.setCustomerCompany(request.getCustomerCompany().isBlank() ? null : request.getCustomerCompany().trim());
+        if (request.getCustomerVatNumber() != null) order.setCustomerVatNumber(request.getCustomerVatNumber().isBlank() ? null : request.getCustomerVatNumber().trim());
+
+        // ── Shipping address ──────────────────────────────────────────────────
+        if (request.getShippingAddress()    != null) order.setShippingAddress(request.getShippingAddress().trim());
+        if (request.getShippingCity()       != null) order.setShippingCity(request.getShippingCity().trim());
+        if (request.getShippingPostalCode() != null) order.setShippingPostalCode(request.getShippingPostalCode().isBlank() ? null : request.getShippingPostalCode().trim());
+        if (request.getShippingCountry()    != null) order.setShippingCountry(request.getShippingCountry().trim());
+        if (request.getShippingCost()       != null) {
+            order.setShippingCost(request.getShippingCost());
+            order.calculateTotals();
+        }
+
+        // ── Invoice ───────────────────────────────────────────────────────────
+        if (request.getInvoiceNumber() != null) order.setInvoiceNumber(request.getInvoiceNumber().isBlank() ? null : request.getInvoiceNumber().trim());
+        if (request.getInvoiceDate()   != null) order.setInvoiceDate(request.getInvoiceDate());
+
+        // ── Order items ───────────────────────────────────────────────────────
+        if (request.getItems() != null) {
+            for (OrderItemUpdateDTO itemUpdate : request.getItems()) {
+                OrderItem orderItem = order.getOrderItems().stream()
+                        .filter(oi -> oi.getId().equals(itemUpdate.getOrderItemId()))
+                        .findFirst()
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Order item not found: " + itemUpdate.getOrderItemId()));
+
+                if (itemUpdate.getQuantity() == 0) {
+                    order.removeOrderItem(orderItem);
+                } else {
+                    orderItem.setQuantity(itemUpdate.getQuantity());
+                    orderItem.calculateLineTotals();
+                }
+            }
+
+            if (order.getOrderItems().isEmpty()) {
+                throw new BusinessLogicException("Order must contain at least one item");
+            }
+
+            order.calculateTotals();
+        }
+
+        order = orderRepository.save(order);
+
+        // Fire status-changed event only when status actually changed
+        if (request.getStatus() != null && request.getStatus() != previousStatus) {
+            eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, previousStatus, order.getStatus()));
+        }
+
+        log.info("[Order {}] Updated by admin", order.getOrderNumber());
+        return mapToResponseDTO(order);
+    }
+
+    /**
      * Cancel order
      */
     @Transactional
@@ -461,7 +558,6 @@ public class OrderService {
                 .insuranceOffer(order.getInsuranceOffer())
                 .installmentOffer(order.getInstallmentOffer())
                 .termsAgreed(order.getTermsAgreed())
-                .shippingCost(order.getShippingCost())
                 .warrantyFilePath(order.getWarrantyFilePath())
                 .build();
     }
