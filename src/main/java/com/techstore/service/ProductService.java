@@ -865,20 +865,21 @@ public class ProductService {
     }
 
     private void updateProductParameters(Product product, List<ProductParameterCreateDTO> newParameters) {
-        if (newParameters == null || newParameters.isEmpty()) {
-            // Ако няма нови параметри, изтриваме всички стари
-            productParameterRepository.deleteAllByProductId(product.getId());
+        // ВАЖНО: Никога не заменяй Hibernate-managed колекция с orphanRemoval=true чрез setter.
+        // Това тихомълком маркира транзакцията като rollback-only. Винаги мутирай съществуващата колекция.
+        if (product.getProductParameters() == null) {
             product.setProductParameters(new HashSet<>());
+        }
+
+        if (newParameters == null || newParameters.isEmpty()) {
+            product.getProductParameters().clear();
             return;
         }
 
         // Валидиране на новите параметри
         validateProductParameters(newParameters);
 
-        // 1. Изтриване на всички стари параметри на продукта (оптимизирано)
-        productParameterRepository.deleteAllByProductId(product.getId());
-
-        // 2. Създаване и добавяне на новите параметри
+        // 1. Изграждане на новото множество от параметри
         Set<ProductParameter> newProductParameters = new HashSet<>();
 
         for (ProductParameterCreateDTO paramDto : newParameters) {
@@ -889,7 +890,6 @@ public class ProductService {
                 ParameterOption option = parameterOptionRepository.findById(optionId)
                         .orElseThrow(() -> new BusinessLogicException("ParameterOption not found with id: " + optionId));
 
-                // Проверка дали опцията принадлежи към параметъра
                 if (!option.getParameter().getId().equals(parameter.getId())) {
                     throw new ValidationException(
                             String.format("Parameter option %d does not belong to parameter %d",
@@ -904,8 +904,9 @@ public class ProductService {
             }
         }
 
-        // 3. Задаване на новата колекция
-        product.setProductParameters(newProductParameters);
+        // 2. Мутираме управляваната от Hibernate колекция вместо да я заменяме
+        product.getProductParameters().clear();
+        product.getProductParameters().addAll(newProductParameters);
     }
 
     private void updateProductFieldsByUpdate(Product p, ProductCreateRequestDTO dto) {

@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-09T12:37:12.525Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-20T06:41:47.613Z
 > Files: 582 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -674,12 +674,12 @@
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Service: alias-aware search. resolveAliasId() + resolveAliasCategories() applied in searchProducts, getAvailableParametersWithCountsForCategory, getFilteredFacets. (~2242 tok)
-- `ProductService.java` — Service: ProductService (~13303 tok)
+- `ProductService.java` — Service: ProductService (~13319 tok)
 - `ReviewService.java` — Service: ReviewService (~927 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
-- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8490 tok)
+- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8519 tok)
 - `TbiLeasingService.java` — TBI Fusion Pay integration: registerApplication (AES encrypt → TBI API), processStatusWebhook, getStatistics, admin queries (~350 tok)
 - `TekraApiService.java` — Get categories using JSON parsing (categories return JSON) (~4698 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)

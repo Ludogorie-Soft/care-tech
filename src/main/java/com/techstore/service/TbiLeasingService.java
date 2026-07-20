@@ -447,17 +447,20 @@ public class TbiLeasingService {
 
     // ── Admin queries ─────────────────────────────────────────────────────────
 
+    @Transactional(readOnly = true)
     public Page<LeasingApplicationResponseDto> getAllApplications(Pageable pageable) {
         return repository.findAllByOrderByCreatedAtDesc(pageable)
                 .map(LeasingApplicationResponseDto::from);
     }
 
+    @Transactional(readOnly = true)
     public Page<LeasingApplicationResponseDto> getApplicationsByStatus(String status, Pageable pageable) {
         List<String> statuses = STATUS_GROUPS.getOrDefault(status, List.of(status));
         return repository.findByStatusInOrderByCreatedAtDesc(statuses, pageable)
                 .map(LeasingApplicationResponseDto::from);
     }
 
+    @Transactional(readOnly = true)
     public LeasingApplicationResponseDto getApplicationById(Long id) {
         return repository.findById(id)
                 .map(LeasingApplicationResponseDto::from)

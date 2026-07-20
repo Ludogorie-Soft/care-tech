@@ -5455,6 +5455,18 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-09T12:32:18.049Z"
+    },
+    {
+      "id": "bug-337",
+      "timestamp": "2026-07-20T00:00:00Z",
+      "error_message": "Admin product edit does nothing - form submits but no changes are saved",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "updateProductParameters() called productParameterRepository.deleteAllByProductId() (JPQL bulk delete, bypasses Hibernate 1st-level cache) and then product.setProductParameters(newSet) (replaces Hibernate-managed collection with orphanRemoval=true). This silently marks the transaction rollback-only at flush - no exception thrown, no data saved.",
+      "fix": "Removed deleteAllByProductId() calls. Replaced product.setProductParameters(newSet) with product.getProductParameters().clear() + product.getProductParameters().addAll(newItems) - mutating the managed collection so orphanRemoval is handled correctly by Hibernate.",
+      "tags": ["hibernate", "orphanRemoval", "transaction-rollback", "product-edit", "admin"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-20T00:00:00Z"
     }
   ]
 }

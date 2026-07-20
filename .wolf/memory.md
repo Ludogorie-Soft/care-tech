@@ -2212,3 +2212,20 @@
 | 15:37 | Edited ../../care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx | 38→39 lines | ~529 |
 | 15:37 | Edited ../../care-tech-ui/src/pages/admin/Orders/useOrderUtils.js | 9→10 lines | ~86 |
 | 15:37 | Session end: 28 writes across 8 files (orderSlice.js, EditOrderModal.jsx, OrderDetailPage.jsx, ORDER_EDIT_PLAN.md, OrderService.java) | 12 reads | ~24423 tok |
+
+## Session: 2026-07-20 09:24
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 09:27 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | modified getAllApplications() | ~252 |
+| 09:27 | Fixed 500 on /api/admin/leasing/all — LazyInitializationException | TbiLeasingService.java | Added @Transactional(readOnly=true) to getAllApplications, getApplicationsByStatus, getApplicationById | ~200 |
+| 09:27 | Session end: 1 writes across 1 files (TbiLeasingService.java) | 9 reads | ~21614 tok |
+| 09:35 | Session end: 1 writes across 1 files (TbiLeasingService.java) | 9 reads | ~21614 tok |
+
+## Session: 2026-07-20 09:36
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 09:41 | Edited src/main/java/com/techstore/service/ProductService.java | added 1 condition(s) | ~594 |
+
+| 09:00 | Fix product edit silent rollback — orphanRemoval + setProductParameters(newSet) → clear()+addAll() | ProductService.java | FIXED | ~800 || 09:42 | Session end: 1 writes across 1 files (ProductService.java) | 11 reads | ~19864 tok |
