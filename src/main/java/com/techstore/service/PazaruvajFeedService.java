@@ -194,7 +194,7 @@ public class PazaruvajFeedService {
                 appendCdata(sb, "Manufacturer", p.getManufacturerName());
             }
             appendCdata(sb, "Name",      truncate(p.getProductName(), 200));
-            appendTag(sb, "ProductUrl",  appUrl + "/product/" + p.getSlug());
+            appendTag(sb, "ProductUrl",  appUrl + "/product/" + p.getSlug() + "/" + p.getId());
             appendTag(sb, "Price", priceVat.toPlainString());
 
             if (isNotBlank(p.getPrimaryImageUrl())) {
@@ -259,7 +259,7 @@ public class PazaruvajFeedService {
 
             sb.append(p.getId()).append(",")
               .append(csvEscape(truncate(p.getProductName(), 200))).append(",")
-              .append(csvEscape(appUrl + "/product/" + p.getSlug())).append(",")
+              .append(csvEscape(appUrl + "/product/" + p.getSlug() + "/" + p.getId())).append(",")
               .append(csvEscape(p.getPrimaryImageUrl())).append(",")
               .append(priceVat.toPlainString()).append(",")
               .append(csvEscape(categoryText)).append(",")

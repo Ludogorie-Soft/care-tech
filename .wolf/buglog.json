@@ -5463,10 +5463,49 @@
       "file": "src/main/java/com/techstore/service/ProductService.java",
       "root_cause": "updateProductParameters() called productParameterRepository.deleteAllByProductId() (JPQL bulk delete, bypasses Hibernate 1st-level cache) and then product.setProductParameters(newSet) (replaces Hibernate-managed collection with orphanRemoval=true). This silently marks the transaction rollback-only at flush - no exception thrown, no data saved.",
       "fix": "Removed deleteAllByProductId() calls. Replaced product.setProductParameters(newSet) with product.getProductParameters().clear() + product.getProductParameters().addAll(newItems) - mutating the managed collection so orphanRemoval is handled correctly by Hibernate.",
-      "tags": ["hibernate", "orphanRemoval", "transaction-rollback", "product-edit", "admin"],
+      "tags": [
+        "hibernate",
+        "orphanRemoval",
+        "transaction-rollback",
+        "product-edit",
+        "admin"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-20T00:00:00Z"
+    },
+    {
+      "id": "bug-338",
+      "timestamp": "2026-07-20T08:58:50.113Z",
+      "error_message": "Wrong reference: append should be p",
+      "file": "src/main/java/com/techstore/service/PazaruvajFeedService.java",
+      "root_cause": "Used \"append\" instead of \"p\"",
+      "fix": "Changed append → p",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-20T08:58:50.114Z"
+    },
+    {
+      "id": "bug-251",
+      "timestamp": "2026-07-20T11:53:00.000Z",
+      "error_message": "Грешка в URL на продукта — Pazaruvaj отхвърля feed-а с причина: Грешка в URL на продукта",
+      "file": "src/main/java/com/techstore/service/PazaruvajFeedService.java",
+      "root_cause": "ProductUrl в XML feed-а се генерира като appUrl + /product/ + slug, но React Router route-ът изисква /product/:productSlug/:productId — липсва ID в края на URL-а",
+      "fix": "Добавен p.getId() в края на URL-а: appUrl + /product/ + p.getSlug() + / + p.getId() — и в buildXml (ред ~197), и в buildCsv (ред ~262)",
+      "tags": [
+        "pazaruvaj",
+        "feed",
+        "product-url",
+        "routing"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-20T11:53:00.000Z"
     }
   ]
 }

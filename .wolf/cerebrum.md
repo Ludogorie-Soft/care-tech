@@ -51,6 +51,8 @@
 - [2026-05-29] When a controlled input's `useEffect` watches `value` and a programmatic setter (from a dropdown click handler) changes that value — the effect fires again and can re-open the dropdown. Always use a `useRef` skip flag when setting the input value programmatically.
 - [2026-05-29] SVG `<text fill={TBI_RED}>` is invisible when placed on a `TBI_RED` background. Always pass an explicit `color` prop (e.g. `"#fff"`) when rendering TbiLogo inside the orange header.
 
+- [2026-07-20] NEVER generate Pazaruvaj (or any) product URL with only the slug: `appUrl + "/product/" + slug`. The React Router route is `/product/:productSlug/:productId` — always append the ID: `appUrl + "/product/" + slug + "/" + id`. Missing ID → 404 on all product links → feed rejection.
+
 - [2026-07-06] NEVER write native SQL queries with `p.primary_image_url` — the actual column name in the `products` table is `p.image_url`. The `findForPazaruvajFeedByCategory` query had it right; the other two Pazaruvaj queries were wrong. Always verify column names against the entity `@Column` annotation.
 - [2026-07-06] NEVER leave `spring.jpa.open-in-view=true` (the default) on a production app that has long-running I/O in controllers (e.g. image proxy). With open-in-view, a DB connection is held open for the entire HTTP request — a 138-second image proxy request blocks all 10 HikariCP connections. Always set `spring.jpa.open-in-view: false`.
 - [2026-07-06] ImageProxyController: NEVER use `connectTimeout=15000` + `readTimeout=30000` + 3 retries for external images — worst case is 138 seconds per image and exhausts the thread pool. Use 5s connect + 10s read + max 1 retry. Add a `Semaphore(5)` to cap concurrent outbound proxy requests.

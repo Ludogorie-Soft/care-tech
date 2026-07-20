@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-20T06:41:47.613Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-20T08:58:50.095Z
 > Files: 582 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -670,7 +670,7 @@
 - `MostApiService.java` — Test API connectivity (~3823 tok)
 - `OrderService.java` — Creates a new order (~7410 tok)
 - `ParameterService.java` — Service: ParameterService (~9601 tok)
-- `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3475 tok)
+- `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3484 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Service: alias-aware search. resolveAliasId() + resolveAliasCategories() applied in searchProducts, getAvailableParametersWithCountsForCategory, getFilteredFacets. (~2242 tok)
