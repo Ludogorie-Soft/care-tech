@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-20T08:58:50.095Z
-> Files: 582 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-20T12:10:00.508Z
+> Files: 588 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -275,6 +275,8 @@
 - `_34.nvd` (~41799 tok)
 - `_34.nvm` (~37 tok)
 - `_34.si` (~142 tok)
+- `categories_202607201226.sql` — PostgreSQL дамп на таблица categories — 511 реда INSERT без explicit id; колони: tekra_id,tekra_slug,asbis_id,asbis_code,external_id,name_en,name_bg,slug,... (~49000 tok)
+- `scripts/mismatched_products_analysis.md` — Анализ на грешно категоризирани продукти: 487 несъответствия в 16 групи + карта category_id→name + SQL за корекции (~8000 tok)
 - `segments_j` (~85 tok)
 
 ## scripts/
@@ -294,6 +296,9 @@
 - `21_fix_laptop_category_remaining.sql` — ============================================================ (~462 tok)
 - `22_hide_products_without_images.sql` — ============================================================ (~185 tok)
 - `23_add_gaming_periphery_aliases_in_komp_periferiya.sql` — ============================================================================= (~1015 tok)
+- `24_fix_miscategorized_products.sql` — ============================================================ (~3552 tok)
+- `25_fix_remaining_cat37_mismatches.sql` — ============================================================ (~435 tok)
+- `26_fix_cat37_comprehensive.sql` — ============================================================ (~1591 tok)
 - `3_reorder_top_categories.sql` — Пренарежда главните категории (sort_order) вкл. 3-те нови Asbis roots (~1086 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
 - `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)
@@ -302,6 +307,7 @@
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
 - `8_asbis_filters.sql` — Auto-select Asbis is_filter=true по option_count 2-50, с blacklist на packaging/global параметри (~600 tok)
 - `9_hide_empty_categories.sql` — Итеративно скрива категории без видими продукти (show=false); работи рекурсивно нагоре (leaf → parent) (~500 tok)
+- `mismatched_products_analysis.md` — Анализ на грешно категоризирани продукти (~13125 tok)
 
 ## src/
 
@@ -693,7 +699,7 @@
 ## src/main/java/com/techstore/service/sync/
 
 - `AsbisSyncService.java` — AsbisSyncService (~14027 tok)
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~12537 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~14501 tok)
 - `TekraSyncService.java` — Service: TekraSyncService (~23065 tok)
 - `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~14124 tok)
 

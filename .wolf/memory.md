@@ -12,6 +12,12 @@
 | — | ImageProxy hardening — Semaphore(5), timeouts 5s/10s, maxRetries 1; open-in-view=false; HikariCP pool 20 | `ImageProxyController.java`, `application.yml` | HikariPool exhaustion предотвратен | ~400 |
 | — | Pazaruvaj CSV export + `includeDelivery` параметър в XML builder | `PazaruvajFeedService.java`, `PazaruvajFeedController.java`, `PazaruvajLayout.jsx` | XML + CSV download от admin панела | ~500 |
 | — | Nginx hardening — rate limiting, bad bot blocking, security headers | `nginx.prod.conf` | Защита срещу атаки | ~300 |
+
+## Сесия 2026-07-20
+
+| Час | Действие | Файлове | Резултат | ~Токени |
+|-----|----------|---------|----------|---------|
+| 12:30 | Анализ на грешно категоризирани продукти от дамп — 22521 продукта, 299 категории, 487 несъответствия в 16 групи | `products_202607201221.sql`, `categories_202607201226.sql` | Генериран markdown доклад с пълна таблица и SQL корекции | ~18000 |
 | — | Адреси → "Враца, ул. Баба Илийца" с Google Maps линк; ForUs карта раскоментирана | `Footer.jsx`, `Contact.jsx`, `ForUs.jsx`, `Policy.jsx`, `Cookies.jsx` | Единен адрес навсякъде | ~200 |
 | — | NavBar мобилен fix — `justify-end md:justify-start` | `NavBar.jsx` | Лого вляво, икони вдясно | ~100 |
 | — | axios URL fix — премахнат `/api/` prefix в PazaruvajLayout | `PazaruvajLayout.jsx` | 404 при category/product search отстранен | ~100 |
@@ -2242,3 +2248,55 @@
 | 11:59 | Session end: 2 writes across 1 files (PazaruvajFeedService.java) | 6 reads | ~5215 tok |
 | 12:06 | Session end: 2 writes across 1 files (PazaruvajFeedService.java) | 6 reads | ~5215 tok |
 | 12:10 | Session end: 2 writes across 1 files (PazaruvajFeedService.java) | 6 reads | ~8699 tok |
+| 12:27 | Session end: 2 writes across 1 files (PazaruvajFeedService.java) | 6 reads | ~8699 tok |
+
+## Session: 2026-07-20 12:27
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:57 | Анализ на грешно категоризирани продукти от SQL дамп | scripts/mismatched_products_analysis.md | 487 несъответствия намерени в 15 групи | ~145k |
+| 13:51 | Edited scripts/mismatched_products_analysis.md | 5→5 lines | ~38 |
+| 13:53 | Edited scripts/mismatched_products_analysis.md | expanded (+323 lines) | ~3802 |
+| 14:35 | Дълбок анализ на категории 298, 380, 402, 325, 443, 86, 181, 199, 406 — добавен §5 | scripts/mismatched_products_analysis.md | 391 нови несъответствия, общ брой ~878 | ~85k |
+| 13:54 | Session end: 2 writes across 1 files (mismatched_products_analysis.md) | 6 reads | ~23702 tok |
+| 13:56 | Created scripts/24_fix_miscategorized_products.sql | — | ~3548 |
+| 13:57 | Създаден скрипт 24 за корекция на ~878 грешно категоризирани продукта | scripts/24_fix_miscategorized_products.sql | готов за изпълнение | ~3k |
+| 13:57 | Session end: 3 writes across 2 files (mismatched_products_analysis.md, 24_fix_miscategorized_products.sql) | 6 reads | ~27503 tok |
+| 13:58 | Edited scripts/24_fix_miscategorized_products.sql | 3→5 lines | ~54 |
+| 13:58 | Edited scripts/24_fix_miscategorized_products.sql | 3→5 lines | ~44 |
+| 13:58 | Session end: 5 writes across 2 files (mismatched_products_analysis.md, 24_fix_miscategorized_products.sql) | 7 reads | ~31156 tok |
+| 14:21 | Created scripts/25_fix_remaining_cat37_mismatches.sql | — | ~393 |
+| 14:21 | Session end: 6 writes across 3 files (mismatched_products_analysis.md, 24_fix_miscategorized_products.sql, 25_fix_remaining_cat37_mismatches.sql) | 7 reads | ~31577 tok |
+| 14:26 | Edited scripts/25_fix_remaining_cat37_mismatches.sql | expanded (+8 lines) | ~249 |
+| 14:26 | Session end: 7 writes across 3 files (mismatched_products_analysis.md, 24_fix_miscategorized_products.sql, 25_fix_remaining_cat37_mismatches.sql) | 8 reads | ~32236 tok |
+| 14:29 | Created scripts/26_fix_cat37_comprehensive.sql | — | ~1591 |
+| 14:30 | Session end: 8 writes across 4 files (mismatched_products_analysis.md, 24_fix_miscategorized_products.sql, 25_fix_remaining_cat37_mismatches.sql, 26_fix_cat37_comprehensive.sql) | 8 reads | ~33940 tok |
+| 14:33 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | expanded (+42 lines) | ~815 |
+| 14:33 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 import(s) | ~13 |
+| 14:33 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 2 condition(s) | ~239 |
+| 14:33 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 2→1 lines | ~6 |
+| 14:33 | Открита root cause: MOST sync reset-ва category_id при всеки sync; добавена override логика в MostSyncService | MostSyncService.java | fix в кода, не в SQL | ~3k |
+| 14:33 | Session end: 12 writes across 5 files (mismatched_products_analysis.md, 24_fix_miscategorized_products.sql, 25_fix_remaining_cat37_mismatches.sql, 26_fix_cat37_comprehensive.sql, MostSyncService.java) | 9 reads | ~47627 tok |
+| 14:34 | Session end: 12 writes across 5 files (mismatched_products_analysis.md, 24_fix_miscategorized_products.sql, 25_fix_remaining_cat37_mismatches.sql, 26_fix_cat37_comprehensive.sql, MostSyncService.java) | 9 reads | ~47627 tok |
+| 14:39 | Session end: 12 writes across 5 files (mismatched_products_analysis.md, 24_fix_miscategorized_products.sql, 25_fix_remaining_cat37_mismatches.sql, 26_fix_cat37_comprehensive.sql, MostSyncService.java) | 9 reads | ~47627 tok |
+| 14:41 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 2→3 lines | ~70 |
+
+## Session: 2026-07-20 14:43
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:57 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 4→8 lines | ~186 |
+| 14:58 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 2 condition(s) | ~206 |
+| 14:58 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 2→3 lines | ~60 |
+| 14:58 | Session end: 3 writes across 1 files (MostSyncService.java) | 2 reads | ~16235 tok |
+| 15:00 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 11→12 lines | ~240 |
+| 15:01 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 8→10 lines | ~232 |
+| 15:01 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 4→7 lines | ~144 |
+| 15:01 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 2→3 lines | ~60 |
+| 15:01 | Session end: 7 writes across 1 files (MostSyncService.java) | 2 reads | ~16959 tok |
+| 15:08 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | expanded (+24 lines) | ~1446 |
+| 15:09 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 condition(s) | ~324 |
+| 15:09 | Session end: 9 writes across 1 files (MostSyncService.java) | 11 reads | ~19642 tok |
+| 15:10 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 condition(s) | ~303 |
+| 15:10 | Session end: 10 writes across 1 files (MostSyncService.java) | 11 reads | ~19966 tok |
+| 15:23 | Session end: 10 writes across 1 files (MostSyncService.java) | 12 reads | ~20151 tok |

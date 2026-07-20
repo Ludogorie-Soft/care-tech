@@ -5506,6 +5506,102 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-20T11:53:00.000Z"
+    },
+    {
+      "id": "bug-340",
+      "timestamp": "2026-07-20T10:53:16.326Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "scripts/mismatched_products_analysis.md",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-20T10:53:16.326Z"
+    },
+    {
+      "id": "bug-341",
+      "timestamp": "2026-07-20T11:33:13.664Z",
+      "error_message": "Wrong condition in logic",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Condition was: if (categoryId == null)",
+      "fix": "Changed to: if (\"Лаптопи\".equals(targetCategoryName)",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-20T11:33:13.664Z"
+    },
+    {
+      "id": "bug-342",
+      "timestamp": "2026-07-20T11:41:26.922Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Had \"folio\"",
+      "fix": "Changed to \"case\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-20T11:41:26.922Z"
+    },
+    {
+      "id": "bug-343",
+      "timestamp": "2026-07-20T11:58:13.738Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Had \"sleeve\"",
+      "fix": "Changed to \"t210\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-20T11:58:13.738Z"
+    },
+    {
+      "id": "bug-344",
+      "timestamp": "2026-07-20T12:08:55.167Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "8 lines replaced/restructured",
+      "fix": "Rewrote 50→74 lines (8 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-20T12:08:55.167Z"
+    },
+    {
+      "id": "bug-345",
+      "timestamp": "2026-07-20T12:10:00.527Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-20T12:10:00.527Z"
     }
   ]
 }

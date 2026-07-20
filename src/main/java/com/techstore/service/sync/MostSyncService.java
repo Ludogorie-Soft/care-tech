@@ -63,6 +63,85 @@ public class MostSyncService {
     private static final String USD_TO_BGN_RATE = "1.80";
     private static final String EUR_TO_BGN_RATE = "1.95583";
 
+    // Products whose MOST category maps to "Лаптопи" but whose name reveals they are accessories.
+    // Checked in order — first match wins.
+    private static final List<String[]> LAPTOP_CATEGORY_NAME_OVERRIDES;
+
+    static {
+        // Each entry: { namePattern (lowercase), targetCategoryNameBg }
+        // Order matters — first match wins. More specific patterns come before general ones.
+        List<String[]> overrides = new ArrayList<>();
+
+        // ── Tablets → Таблети ───────────────────────────────────────────────
+        // Must come first — LENOVO TAB / REALME PAD are NOTEBOOK-mapped but are tablets
+        overrides.add(new String[]{"lenovo tab",     "Таблети"});
+        overrides.add(new String[]{"realme pad",     "Таблети"});
+        overrides.add(new String[]{"samsung tab",    "Таблети"});
+        overrides.add(new String[]{"tablet",         "Таблети"});
+
+        // ── Bags / backpacks / sleeves → Чанти за лаптопи ──────────────────
+        overrides.add(new String[]{"backpack",       "Чанти за лаптопи"});
+        overrides.add(new String[]{"bagpack",        "Чанти за лаптопи"});
+        overrides.add(new String[]{"back pack",      "Чанти за лаптопи"});
+        overrides.add(new String[]{" bp",            "Чанти за лаптопи"});
+        overrides.add(new String[]{"carry case",     "Чанти за лаптопи"});
+        overrides.add(new String[]{"carry bag",      "Чанти за лаптопи"});
+        overrides.add(new String[]{"laptop bag",     "Чанти за лаптопи"});
+        overrides.add(new String[]{"notebook bag",   "Чанти за лаптопи"});
+        overrides.add(new String[]{"shoulder bag",   "Чанти за лаптопи"});
+        overrides.add(new String[]{"sling bag",      "Чанти за лаптопи"});
+        overrides.add(new String[]{"slng bag",       "Чанти за лаптопи"});
+        overrides.add(new String[]{"shoulder",       "Чанти за лаптопи"});
+        overrides.add(new String[]{"sling",          "Чанти за лаптопи"});
+        overrides.add(new String[]{" bag",           "Чанти за лаптопи"});
+        overrides.add(new String[]{"t210",           "Чанти за лаптопи"});
+        overrides.add(new String[]{"sleeve",         "Чанти за лаптопи"});
+        overrides.add(new String[]{"rolltop",        "Чанти за лаптопи"});
+        overrides.add(new String[]{"чанта",          "Чанти за лаптопи"});
+        overrides.add(new String[]{"раница",         "Чанти за лаптопи"});
+
+        // ── Covers / cases / docks / skins / accessories → Аксесоари ───────
+        overrides.add(new String[]{"cover",          "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"tricover",       "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"versasleave",    "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"versasleeve",    "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"magsmart",       "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"protective case","Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"portfolio case", "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"case",           "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"folio",          "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"simpro",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"protect film",   "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"screen protector","Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"docking",        "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"dock station",   "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"hybrid dock",    "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"dock",           "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"dongle",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"skin",           "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"disney",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"pocket",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"iconia",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"yoga pen",       "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"stylus",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"stand",          "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"hub",            "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"starter kit",    "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"стикер",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"калъф",          "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"кейс",           "Аксесоари за лаптопи/таблети"});
+
+        // ── Chargers / adapters → Зарядни за лаптопи ────────────────────────
+        // "adap" covers: adapter, adaptr, adapte, adapt — all truncations/misspellings
+        overrides.add(new String[]{"charger",        "Зарядни за лаптопи"});
+        overrides.add(new String[]{"charging",       "Зарядни за лаптопи"});
+        overrides.add(new String[]{"adap",           "Зарядни за лаптопи"});
+        overrides.add(new String[]{"зарядно",        "Зарядни за лаптопи"});
+        overrides.add(new String[]{"адаптер",        "Зарядни за лаптопи"});
+
+        LAPTOP_CATEGORY_NAME_OVERRIDES = Collections.unmodifiableList(overrides);
+    }
+
     private static final Map<String, String> MOST_CATEGORY_MAPPING;
 
     static {
@@ -764,6 +843,19 @@ public class MostSyncService {
             return 0;
         }
 
+        // For products mapped to "Лаптопи", check if the name reveals an accessory type
+        // and override to the correct category (bags, covers, chargers, etc.)
+        if ("Лаптопи".equals(targetCategoryName)) {
+            String nameLower = name.toLowerCase();
+            for (String[] override : LAPTOP_CATEGORY_NAME_OVERRIDES) {
+                if (nameLower.contains(override[0])) {
+                    log.debug("Overriding category for '{}': Лаптопи → {} (matched '{}')", sku, override[1], override[0]);
+                    targetCategoryName = override[1];
+                    break;
+                }
+            }
+        }
+
         Long categoryId = categoryIdsByName.get(targetCategoryName.toLowerCase().trim());
         if (categoryId == null) {
             log.warn("Category '{}' not found in DB for product {}", targetCategoryName, sku);
@@ -831,7 +923,32 @@ public class MostSyncService {
         product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
         product.calculateFinalPrice();
         boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
-        product.setShow(inStock && hasValidPrice);
+
+        // Warranty / service products are never shown regardless of stock
+        String nameLowerForHide = name.toLowerCase();
+        boolean isWarranty = nameLowerForHide.contains("warranty")
+                || nameLowerForHide.contains(" warr")
+                || nameLowerForHide.contains("carry-in war");
+
+        boolean hasImage = product.getPrimaryImageUrl() != null
+                && !product.getPrimaryImageUrl().isBlank();
+
+        if (isWarranty) {
+            product.setShow(false);
+            product.setStatus(ProductStatus.NOT_AVAILABLE);
+        } else if (!hasImage) {
+            // Products without an image are never shown
+            product.setShow(false);
+        } else if (isNew) {
+            // New products: auto-show only if in stock and has valid price
+            product.setShow(inStock && hasValidPrice);
+        } else {
+            // Existing products: sync can only HIDE (out of stock / no price).
+            // Never force-show a product that was manually hidden (e.g. no image).
+            if (!inStock || !hasValidPrice) {
+                product.setShow(false);
+            }
+        }
 
         product = productRepository.save(product);
 
