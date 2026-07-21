@@ -928,7 +928,15 @@ public class MostSyncService {
         String nameLowerForHide = name.toLowerCase();
         boolean isWarranty = nameLowerForHide.contains("warranty")
                 || nameLowerForHide.contains(" warr")
-                || nameLowerForHide.contains("carry-in war");
+                || nameLowerForHide.contains("carry-in war")
+                || nameLowerForHide.contains("nbd onsite")
+                || nameLowerForHide.contains("nbd ")
+                || nameLowerForHide.contains("prosupport")
+                || nameLowerForHide.contains("care pack")
+                || nameLowerForHide.contains("carepack")
+                || nameLowerForHide.contains("service plan")
+                || nameLowerForHide.contains("hw sup")
+                || nameLowerForHide.contains("гаранция");
 
         boolean hasImage = product.getPrimaryImageUrl() != null
                 && !product.getPrimaryImageUrl().isBlank();

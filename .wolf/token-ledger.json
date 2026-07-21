@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 12979466,
-    "total_reads": 6648,
-    "total_writes": 9664,
+    "total_tokens_estimated": 13046238,
+    "total_reads": 6674,
+    "total_writes": 9685,
     "total_sessions": 48,
-    "anatomy_hits": 2914,
-    "anatomy_misses": 2688,
-    "repeated_reads_blocked": 2105,
-    "estimated_savings_vs_bare_cli": 10300088
+    "anatomy_hits": 2920,
+    "anatomy_misses": 2708,
+    "repeated_reads_blocked": 2123,
+    "estimated_savings_vs_bare_cli": 10534996
   },
   "sessions": [
     {
@@ -98718,6 +98718,301 @@
         "writes_count": 10,
         "repeated_reads_blocked": 8,
         "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-07-20-1443",
+      "started": "2026-07-20T11:43:07.867Z",
+      "ended": "2026-07-20T12:39:39.454Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 14501,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/sync/MostSyncController.java",
+          "tokens_estimated": 2222,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.01.51.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.02.04.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.02.11.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.02.28.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.02.36.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.02.43.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.02.56.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.03.06.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.03.15.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/categories_202607201226.sql",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/mismatched_products_analysis.md",
+          "tokens_estimated": 13125,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 199,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 221,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 64,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 257,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 249,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 154,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 64,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 1549,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 347,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 324,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 29848,
+        "output_tokens_estimated": 3428,
+        "reads_count": 13,
+        "writes_count": 10,
+        "repeated_reads_blocked": 9,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-07-20-1443",
+      "started": "2026-07-20T11:43:07.867Z",
+      "ended": "2026-07-21T07:31:25.107Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 14501,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/sync/MostSyncController.java",
+          "tokens_estimated": 2222,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.01.51.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.02.04.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.02.11.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.02.28.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.02.36.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.02.43.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.02.56.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.03.06.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/Screenshot 2026-07-20 at 15.03.15.png",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/categories_202607201226.sql",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/mismatched_products_analysis.md",
+          "tokens_estimated": 13125,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 199,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 221,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 64,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 257,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 249,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 154,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 64,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 1549,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 347,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 324,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 220,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 29848,
+        "output_tokens_estimated": 3648,
+        "reads_count": 13,
+        "writes_count": 11,
+        "repeated_reads_blocked": 9,
+        "anatomy_lookups": 3
       }
     }
   ],

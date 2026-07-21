@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-20T12:10:00.508Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-21T07:31:18.162Z
 > Files: 588 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -699,7 +699,7 @@
 ## src/main/java/com/techstore/service/sync/
 
 - `AsbisSyncService.java` — AsbisSyncService (~14027 tok)
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~14501 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~14623 tok)
 - `TekraSyncService.java` — Service: TekraSyncService (~23065 tok)
 - `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~14124 tok)
 
