@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-21T07:31:18.162Z
-> Files: 588 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-21T10:25:28.194Z
+> Files: 590 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -49,6 +49,7 @@
 ## ../../care-tech-ui/src/components/products/
 
 - `CompareButton.jsx` — Reusable compare toggle button. (~695 tok)
+- `ImageDisplaying.jsx` — NextArrow (~3614 tok)
 - `ProductCard.jsx` — ProductCard (~3407 tok)
 
 ## ../../care-tech-ui/src/pages/
@@ -56,7 +57,7 @@
 - `Blog.jsx` — formatDate (~2633 tok)
 - `BlogPostPage.jsx` — formatDate (~1953 tok)
 - `Cart.jsx` — EURO_RATE (~16680 tok)
-- `Category.jsx` — Category (~5536 tok)
+- `Category.jsx` — Category (~7097 tok)
 - `ComingSoonPage.jsx` — ComingSoonPage (~385 tok)
 - `ComparePage.jsx` — EURO_RATE — renders table (~3958 tok)
 - `Contact.jsx` — Contact — renders form (~2804 tok)
@@ -64,7 +65,7 @@
 - `ForUs.jsx` — ForUs (~2823 tok)
 - `OurClients.jsx` — clients (~2724 tok)
 - `Policy.jsx` — sections (~4961 tok)
-- `ProductPage.jsx` — EURO_RATE (~10263 tok)
+- `ProductPage.jsx` — EURO_RATE (~10268 tok)
 
 ## ../../care-tech-ui/src/pages/admin/
 
@@ -163,7 +164,7 @@
 - `mvnw` — or more contributor license agreements.  See the NOTICE file (~3144 tok)
 - `mvnw.cmd` — Declares Directory (~2262 tok)
 - `nginx.conf` — Nginx configuration (~575 tok)
-- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~1916 tok)
+- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~1915 tok)
 - `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
 - `ORDER_EDIT_PLAN.md` — План: Редактиране на поръчки от администратор (~577 tok)
 - `parameters_202605130941.sql` (~43615 tok)
@@ -361,6 +362,7 @@
 - `FileUploadController.java` — RestController: FileUploadController (7 endpoints) (~831 tok)
 - `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1992 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
+- `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~1659 tok)
 - `OrderController.java` — Създаване на нова поръчка (~1863 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
 - `PazaruvajFeedController.java` — Public XML product feed consumed by pazaruvaj.com crawler (every ~12 h). (~1747 tok)

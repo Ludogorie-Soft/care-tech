@@ -5602,6 +5602,166 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-20T12:10:00.527Z"
+    },
+    {
+      "id": "bug-346",
+      "timestamp": "2026-07-21T09:58:18.087Z",
+      "error_message": "Wrong reference: useSearchParams should be setSearchParams",
+      "file": "../../care-tech-ui/src/pages/Category.jsx",
+      "root_cause": "Used \"useSearchParams\" instead of \"setSearchParams\"",
+      "fix": "Changed useSearchParams → setSearchParams",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-21T09:58:18.087Z"
+    },
+    {
+      "id": "bug-347",
+      "timestamp": "2026-07-21T09:58:34.814Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../care-tech-ui/src/pages/Category.jsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-21T09:58:34.814Z"
+    },
+    {
+      "id": "bug-348",
+      "timestamp": "2026-07-21T09:59:10.052Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-21T09:59:10.052Z"
+    },
+    {
+      "id": "bug-349",
+      "timestamp": "2026-07-21T10:01:52.372Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../care-tech-ui/src/components/products/ImageDisplaying.jsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-21T10:01:52.372Z"
+    },
+    {
+      "id": "bug-350",
+      "timestamp": "2026-07-21T10:02:22.877Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "18 lines replaced/restructured",
+      "fix": "Rewrote 20→3 lines (18 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-21T10:02:22.877Z"
+    },
+    {
+      "id": "bug-351",
+      "timestamp": "2026-07-21T10:08:34.302Z",
+      "error_message": "Missing guard clause",
+      "file": "../../care-tech-ui/src/components/products/ImageDisplaying.jsx",
+      "root_cause": "No early return/throw for edge case: navigator.share",
+      "fix": "Added guard clause: if (navigator.share)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-21T10:08:34.302Z"
+    },
+    {
+      "id": "bug-352",
+      "timestamp": "2026-07-21T10:08:46.144Z",
+      "error_message": "CSS fix: hover",
+      "file": "../../care-tech-ui/src/components/products/ImageDisplaying.jsx",
+      "root_cause": "hover: shadow-md transition-shadow z-10\" → bg-gray-50 flex items-center gap-2\"",
+      "fix": "Changed hover: shadow-md transition-shadow z-10\" → bg-gray-50 flex items-center gap-2\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-21T10:08:46.144Z"
+    },
+    {
+      "id": "bug-353",
+      "timestamp": "2026-07-21T10:09:09.643Z",
+      "error_message": "Missing guard clause",
+      "file": "../../care-tech-ui/src/pages/Category.jsx",
+      "root_cause": "No early return/throw for edge case: navigator.share",
+      "fix": "Added guard clause: if (navigator.share)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-21T10:09:09.643Z"
+    },
+    {
+      "id": "bug-354",
+      "timestamp": "2026-07-21T10:09:24.486Z",
+      "error_message": "CSS fix: hover",
+      "file": "../../care-tech-ui/src/pages/Category.jsx",
+      "root_cause": "hover: border-primary hover:text-primary transition-colors\" → bg-gray-50 flex items-center gap-2\"",
+      "fix": "Changed hover: border-primary hover:text-primary transition-colors\" → bg-gray-50 flex items-center gap-2\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-21T10:09:24.486Z"
+    },
+    {
+      "id": "bug-355",
+      "timestamp": "2026-07-21T10:22:46.840Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/controller/OgMetaController.java",
+      "root_cause": "Had \"${app.site-url:https://caretech.bg}\"",
+      "fix": "Changed to \"${app.url:https://caretech.bg}\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-21T10:22:46.840Z"
     }
   ]
 }
