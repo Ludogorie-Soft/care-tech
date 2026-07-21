@@ -160,8 +160,8 @@ server:
 # LOGGING CONFIGURATION
 logging:
     level:
-        root: WARN
-        com.techstore: WARN
+        root: INFO
+        com.techstore: INFO
 #        org.flywaydb: DEBUG
         org.hibernate.SQL: WARN
         org.hibernate.type.descriptor.sql: WARN

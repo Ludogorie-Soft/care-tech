@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-21T10:25:28.194Z
-> Files: 590 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-21T10:56:05.903Z
+> Files: 591 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -57,7 +57,7 @@
 - `Blog.jsx` — formatDate (~2633 tok)
 - `BlogPostPage.jsx` — formatDate (~1953 tok)
 - `Cart.jsx` — EURO_RATE (~16680 tok)
-- `Category.jsx` — Category (~7097 tok)
+- `Category.jsx` — Category (~6600 tok)
 - `ComingSoonPage.jsx` — ComingSoonPage (~385 tok)
 - `ComparePage.jsx` — EURO_RATE — renders table (~3958 tok)
 - `Contact.jsx` — Contact — renders form (~2804 tok)
@@ -164,7 +164,7 @@
 - `mvnw` — or more contributor license agreements.  See the NOTICE file (~3144 tok)
 - `mvnw.cmd` — Declares Directory (~2262 tok)
 - `nginx.conf` — Nginx configuration (~575 tok)
-- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~1915 tok)
+- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~1867 tok)
 - `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
 - `ORDER_EDIT_PLAN.md` — План: Редактиране на поръчки от администратор (~577 tok)
 - `parameters_202605130941.sql` (~43615 tok)
@@ -362,7 +362,8 @@
 - `FileUploadController.java` — RestController: FileUploadController (7 endpoints) (~831 tok)
 - `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1992 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
-- `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~1659 tok)
+- `OgMetaController.java` — GET /api/og/product/{id} + /api/og/category/{id}: OG meta HTML за соц. медии ботове. Ползва ProductRepository, CategoryRepository, app.url. Meta refresh за браузъри. (~200 tok)
+- `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~1379 tok)
 - `OrderController.java` — Създаване на нова поръчка (~1863 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
 - `PazaruvajFeedController.java` — Public XML product feed consumed by pazaruvaj.com crawler (every ~12 h). (~1747 tok)
@@ -667,7 +668,7 @@
 - `BlogCategoryService.java` — Service: BlogCategoryService (~1917 tok)
 - `BlogPostService.java` — Service: BlogPostService (~3776 tok)
 - `BlogTagService.java` — Service: BlogTagService (~1138 tok)
-- `CartService.java` — Service: CartService (~1669 tok)
+- `CartService.java` — Service: CartService (~1567 tok)
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~13424 tok)
 - `CategoryService.java` — Service: CategoryService (~4425 tok)
 - `CronJobService.java` — Service: CronJobService (~788 tok)
@@ -683,7 +684,7 @@
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Service: alias-aware search. resolveAliasId() + resolveAliasCategories() applied in searchProducts, getAvailableParametersWithCountsForCategory, getFilteredFacets. (~2242 tok)
 - `ProductService.java` — Service: ProductService (~13319 tok)
-- `ReviewService.java` — Service: ReviewService (~927 tok)
+- `ReviewService.java` — Service: ReviewService (~946 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)

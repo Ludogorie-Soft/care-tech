@@ -2365,3 +2365,37 @@
 | 13:25 | Created nginx.prod.conf | — | ~1915 |
 | 13:25 | Session end: 35 writes across 5 files (Category.jsx, ProductPage.jsx, ImageDisplaying.jsx, OgMetaController.java, nginx.prod.conf) | 10 reads | ~19813 tok |
 | 13:26 | Session end: 35 writes across 5 files (Category.jsx, ProductPage.jsx, ImageDisplaying.jsx, OgMetaController.java, nginx.prod.conf) | 10 reads | ~19813 tok |
+| 13:38 | Session end: 35 writes across 5 files (Category.jsx, ProductPage.jsx, ImageDisplaying.jsx, OgMetaController.java, nginx.prod.conf) | 11 reads | ~20298 tok |
+| 13:40 | Edited src/main/resources/application.yml | 14→14 lines | ~166 |
+| 13:40 | Session end: 36 writes across 6 files (Category.jsx, ProductPage.jsx, ImageDisplaying.jsx, OgMetaController.java, nginx.prod.conf) | 11 reads | ~20464 tok |
+| 13:40 | Session end: 36 writes across 6 files (Category.jsx, ProductPage.jsx, ImageDisplaying.jsx, OgMetaController.java, nginx.prod.conf) | 11 reads | ~20464 tok |
+| 13:43 | Edited src/main/java/com/techstore/controller/OgMetaController.java | removed 20 lines | ~22 |
+| 13:43 | Edited src/main/java/com/techstore/controller/OgMetaController.java | 4→2 lines | ~24 |
+| 13:43 | Edited src/main/java/com/techstore/controller/OgMetaController.java | 2→1 lines | ~15 |
+| 13:43 | Edited nginx.prod.conf | 13→9 lines | ~117 |
+| 13:43 | Session end: 40 writes across 6 files (Category.jsx, ProductPage.jsx, ImageDisplaying.jsx, OgMetaController.java, nginx.prod.conf) | 11 reads | ~20654 tok |
+| 13:44 | Edited ../../care-tech-ui/src/pages/Category.jsx | — | ~0 |
+| 13:44 | Edited ../../care-tech-ui/src/pages/Category.jsx | removed 25 lines | ~20 |
+| 13:45 | Session end: 42 writes across 6 files (Category.jsx, ProductPage.jsx, ImageDisplaying.jsx, OgMetaController.java, nginx.prod.conf) | 11 reads | ~20674 tok |
+| 13:45 | Session end: 42 writes across 6 files (Category.jsx, ProductPage.jsx, ImageDisplaying.jsx, OgMetaController.java, nginx.prod.conf) | 11 reads | ~20674 tok |
+
+## Сесия 2026-07-21
+
+| Час | Действие | Файлове | Резултат | ~Токени |
+|-----|----------|---------|----------|---------|
+| 13:00 | Одит за share бутон | Category.jsx, ProductPage.jsx | Липсва изцяло — добавен план | ~500 |
+| 13:10 | Shareable filter URL + share бутон в Category | Category.jsx | URL sync state→params + dropdown (Сподели / Копирай линк) | ~300 |
+| 13:15 | Share бутон в ProductPage | ProductPage.jsx | Добавен до CompareButton | ~100 |
+| 13:20 | Преместен share бутон в ImageDisplaying | ImageDisplaying.jsx, ProductPage.jsx | bottom-5 left-5, симетрично с Любими | ~200 |
+| 13:30 | Dropdown с Web Share API + clipboard fallback | ImageDisplaying.jsx, Category.jsx | navigator.share на Mac/mobile, директен copy на Windows | ~300 |
+| 13:45 | Социални медии в share dropdown (продукти) | ImageDisplaying.jsx | Facebook, WhatsApp, Viber иконки добавени | ~200 |
+| 14:00 | OG meta за социални медии | OgMetaController.java (нов), nginx.prod.conf | Spring Boot връща OG HTML за ботове; nginx fix — само $is_social_crawler се пренасочва | ~800 |
+| 14:10 | Logging нива | application.yml | root + com.techstore: WARN→INFO | ~50 |
+| 14:15 | Премахнати соц. медии от Category share dropdown | Category.jsx | Остават само Сподели + Копирай линк в категории | ~100 |
+| 13:51 | Session end: 42 writes across 6 files (Category.jsx, ProductPage.jsx, ImageDisplaying.jsx, OgMetaController.java, nginx.prod.conf) | 11 reads | ~20674 tok |
+| 13:52 | Edited src/main/java/com/techstore/service/CartService.java | modified getCartSummary() | ~29 |
+| 13:53 | Session end: 43 writes across 7 files (Category.jsx, ProductPage.jsx, ImageDisplaying.jsx, OgMetaController.java, nginx.prod.conf) | 12 reads | ~22374 tok |
+| 13:56 | Edited src/main/java/com/techstore/service/ReviewService.java | modified getApprovedReviewsForProduct() | ~32 |
+| 13:56 | Edited src/main/java/com/techstore/service/ReviewService.java | modified getReviewsForAdmin() | ~34 |
+| 13:56 | Session end: 45 writes across 8 files (Category.jsx, ProductPage.jsx, ImageDisplaying.jsx, OgMetaController.java, nginx.prod.conf) | 27 reads | ~57671 tok |
+| 13:57 | Session end: 45 writes across 8 files (Category.jsx, ProductPage.jsx, ImageDisplaying.jsx, OgMetaController.java, nginx.prod.conf) | 27 reads | ~57671 tok |

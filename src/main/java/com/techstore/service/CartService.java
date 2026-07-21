@@ -31,6 +31,7 @@ public class CartService {
     private final ProductRepository productRepository;
     private final ParameterMapper parameterMapper;
 
+    @Transactional(readOnly = true)
     public CartSummaryDto getCartSummary(Long userId, String language) {
         List<CartItem> cartItems = cartItemRepository.findByUserIdOrderByCreatedAtAsc(userId);
 

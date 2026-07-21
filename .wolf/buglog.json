@@ -5762,6 +5762,43 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-21T10:22:46.840Z"
+    },
+    {
+      "id": "bug-356",
+      "timestamp": "2026-07-21T14:00:00.000Z",
+      "error_message": "LazyInitializationException: Could not initialize proxy [Product#18203] - no session at CartService.convertProductToResponseDTO",
+      "file": "src/main/java/com/techstore/service/CartService.java",
+      "root_cause": "getCartSummary() нямаше @Transactional. С open-in-view=false сесията се затваря след findByUserIdOrderByCreatedAtAsc(), след което product.getNameEn() вика lazy прокси без активна сесия.",
+      "fix": "Добавен @Transactional(readOnly = true) на getCartSummary()",
+      "tags": [
+        "LazyInitializationException",
+        "transactional",
+        "open-in-view",
+        "cart",
+        "admin"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-21T14:00:00.000Z"
+    },
+    {
+      "id": "bug-357",
+      "timestamp": "2026-07-21T14:30:00.000Z",
+      "error_message": "Потенциален LazyInitializationException в ReviewService.getApprovedReviewsForProduct и getReviewsForAdmin — ReviewResponseDto.from() достъпва review.getProduct() и review.getUser() (LAZY)",
+      "file": "src/main/java/com/techstore/service/ReviewService.java",
+      "root_cause": "Двата read метода нямаха @Transactional. След open-in-view=false сесията се затваря след repository call-а, а ReviewResponseDto.from() достъпва LAZY associations.",
+      "fix": "Добавен @Transactional(readOnly = true) на getApprovedReviewsForProduct() и getReviewsForAdmin()",
+      "tags": [
+        "LazyInitializationException",
+        "transactional",
+        "open-in-view",
+        "reviews"
+      ],
+      "related_bugs": [
+        "bug-356"
+      ],
+      "occurrences": 0,
+      "last_seen": "2026-07-21T14:30:00.000Z"
     }
   ]
 }

@@ -135,3 +135,16 @@
 - [2026-05-18] V13 (set Vali is_filter from scraped data) moved to `scripts/` folder. Reason: on a fresh server the DB is empty at startup — Flyway would run V13 before any Vali sync data exists, so it would match 0 rows. The script must be run manually after `POST /api/sync/vali/parameters`.
 - [2026-05-29] TBI leasing uses Option B architecture: create `LEASING_PENDING` order at application time (not after TBI approval). This avoids the problem of admin not knowing the customer's shipping address after approval — address is collected before the TBI iframe opens.
 - [2026-06-23] Category alias implemented via `alias_of_id` column (not SQL duplication, not many-to-many). Resolution is done in the service layer — transparent to the frontend and repository layer. SQL script 23 creates aliases for "Геймърска периферия" subcategories under "Компютърна периферия" with slug prefix `kp-`.
+
+## Key Learnings (2026-07-21)
+
+- **Shareable filter URL (Category.jsx):** Filter state вече се sync-ва към URL params с `setSearchParams(params, { replace: true })` при всяка промяна. Четенето от URL вече съществуваше (`parseFiltersFromURL`). Формат: `?param_5=101,102&manufacturers=12&minPrice=500`.
+- **Share бутон — Web Share API pattern:** `navigator.share` се поддържа на Mac Safari и мобилни. На Windows десктоп не се поддържа → fallback към `clipboard.writeText`. Показваме dropdown само когато `navigator.share` е налично; на Windows директно копираме.
+- **Share бутон в ImageDisplaying:** Позициониран `absolute bottom-5 left-5`, симетрично с Любими (`bottom-5 right-5`). Получава `url` prop от ProductPage. Dropdown с: Сподели (native), Facebook, WhatsApp, Viber, Копирай линк.
+- **OG meta за React SPA:** React не изпълнява JS за социални медии ботове → OG тагове не се виждат. Решение: Nginx детектира `$is_social_crawler` (User-Agent map) и пренасочва само ботовете към `OgMetaController` в Spring Boot. Контролерът връща минимален HTML с OG тагове + `<meta http-equiv="refresh">` за браузъри.
+- **nginx $is_social_crawler bug:** Старият конфиг ползваше `$do_og = 1` (винаги true) → пренасочваше ВСИЧКИ потребители към `/api/og/`. Правилно е: `if ($is_social_crawler) { rewrite ... }` без допълнителна променлива.
+- **OgMetaController:** `app.url` от `application.yml` (стойност: `https://www.caretech.bg`). `buildImageUrl()` — ако stored URL е абсолютен го ползва директно, иначе proxy URL. HTML escape задължителен за OG стойности.
+
+## Do-Not-Repeat
+
+- [2026-07-21] NEVER използвай `$do_og = 1` (или подобна винаги-true променлива) в nginx за OG routing — пренасочва всички потребители. Винаги проверявай `$is_social_crawler` директно в `if` блока.

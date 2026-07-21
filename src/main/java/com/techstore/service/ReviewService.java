@@ -48,6 +48,7 @@ public class ReviewService {
         return ReviewResponseDto.from(reviewRepository.save(review));
     }
 
+    @Transactional(readOnly = true)
     public List<ReviewResponseDto> getApprovedReviewsForProduct(Long productId) {
         return reviewRepository
                 .findByProductIdAndStatusOrderByCreatedAtDesc(productId, ReviewStatus.APPROVED)
@@ -56,6 +57,7 @@ public class ReviewService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public Page<ReviewResponseDto> getReviewsForAdmin(String status, Pageable pageable) {
         if (status != null && !status.isBlank()) {
             ReviewStatus reviewStatus = ReviewStatus.valueOf(status.toUpperCase());
