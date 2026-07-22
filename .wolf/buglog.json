@@ -5799,6 +5799,22 @@
       ],
       "occurrences": 0,
       "last_seen": "2026-07-21T14:30:00.000Z"
+    },
+    {
+      "id": "bug-358",
+      "timestamp": "2026-07-22T12:58:28.131Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/AsbisApiService.java",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 11→13 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-22T12:58:28.131Z"
     }
   ]
 }

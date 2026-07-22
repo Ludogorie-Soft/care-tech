@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T12:23:12.663Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T12:58:28.110Z
 > Files: 592 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -664,7 +664,7 @@
 ## src/main/java/com/techstore/service/
 
 - `AbandonedCartService.java` — Service: AbandonedCartService (~624 tok)
-- `AsbisApiService.java` — Extract categories from Asbis products (~8739 tok)
+- `AsbisApiService.java` — Extract categories from Asbis products (~8797 tok)
 - `AuthService.java` — Service: AuthService (~6388 tok)
 - `BlogCategoryService.java` — Service: BlogCategoryService (~1917 tok)
 - `BlogPostService.java` — Service: BlogPostService (~3776 tok)

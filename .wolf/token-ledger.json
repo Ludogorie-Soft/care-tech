@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 13456950,
-    "total_reads": 6919,
-    "total_writes": 10562,
+    "total_tokens_estimated": 13467397,
+    "total_reads": 6922,
+    "total_writes": 10566,
     "total_sessions": 50,
-    "anatomy_hits": 3021,
-    "anatomy_misses": 2840,
+    "anatomy_hits": 3023,
+    "anatomy_misses": 2841,
     "repeated_reads_blocked": 2263,
-    "estimated_savings_vs_bare_cli": 10617952
+    "estimated_savings_vs_bare_cli": 10618352
   },
   "sessions": [
     {
@@ -105441,6 +105441,61 @@
         "output_tokens_estimated": 617,
         "reads_count": 3,
         "writes_count": 3,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-07-22-1514",
+      "started": "2026-07-22T12:14:47.372Z",
+      "ended": "2026-07-22T12:58:32.831Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/asbis/AsbisProductDto.java",
+          "tokens_estimated": 241,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/AsbisApiService.java",
+          "tokens_estimated": 9352,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/MEMORY.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/AsbisApiService.java",
+          "tokens_estimated": 303,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/asbis_price_field.md",
+          "tokens_estimated": 232,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/MEMORY.md",
+          "tokens_estimated": 82,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/AsbisApiService.java",
+          "tokens_estimated": 237,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 9593,
+        "output_tokens_estimated": 854,
+        "reads_count": 3,
+        "writes_count": 4,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 2
       }

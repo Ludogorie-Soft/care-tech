@@ -469,12 +469,14 @@ public class AsbisApiService {
             }
             data.put("productcode", productCode.trim());
 
-            // RETAIL_PRICE = suggested retail price (used as the product price)
+            // RETAIL_PRICE = suggested retail price (VAT-inclusive).
+            // Divide by 1.20 to get pre-VAT price — priceClient is always stored without VAT.
             String retailStr = getElementText(element, "RETAIL_PRICE");
             if (retailStr != null && !retailStr.trim().isEmpty()) {
                 try {
-                    BigDecimal price = new BigDecimal(retailStr.trim().replaceAll("[^0-9.]", ""));
-                    data.put("price", price);
+                    BigDecimal retailPrice = new BigDecimal(retailStr.trim().replaceAll("[^0-9.]", ""));
+                    BigDecimal priceExVat = retailPrice.divide(new BigDecimal("1.20"), 2, java.math.RoundingMode.HALF_UP);
+                    data.put("price", priceExVat);
                 } catch (Exception e) {
                     log.debug("Could not parse RETAIL_PRICE for product {}: {}", productCode, retailStr);
                     data.put("price", null);
