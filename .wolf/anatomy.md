@@ -1,12 +1,13 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-21T10:56:05.903Z
-> Files: 591 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T12:23:12.663Z
+> Files: 592 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
+- `asbis_price_field.md` (~203 tok)
 - `euro_rate_convention.md` — Declares EURO_RATE (~194 tok)
-- `MEMORY.md` — Memory Index (~307 tok)
+- `MEMORY.md` — Memory Index (~339 tok)
 - `personal_offer_flow.md` — Declares stored (~373 tok)
 - `project_most_api.md` (~136 tok)
 - `session_2026_06_03.md` — Backend (`tech-store-api`) (~574 tok)
@@ -663,7 +664,7 @@
 ## src/main/java/com/techstore/service/
 
 - `AbandonedCartService.java` — Service: AbandonedCartService (~624 tok)
-- `AsbisApiService.java` — Extract categories from Asbis products (~9352 tok)
+- `AsbisApiService.java` — Extract categories from Asbis products (~8739 tok)
 - `AuthService.java` — Service: AuthService (~6388 tok)
 - `BlogCategoryService.java` — Service: BlogCategoryService (~1917 tok)
 - `BlogPostService.java` — Service: BlogPostService (~3776 tok)

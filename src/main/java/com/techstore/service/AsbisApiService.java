@@ -469,25 +469,25 @@ public class AsbisApiService {
             }
             data.put("productcode", productCode.trim());
 
-            // MY_PRICE = dealer/client price
-            String priceStr = getElementText(element, "MY_PRICE");
-            if (priceStr != null && !priceStr.trim().isEmpty()) {
+            // RETAIL_PRICE = suggested retail price (used as the product price)
+            String retailStr = getElementText(element, "RETAIL_PRICE");
+            if (retailStr != null && !retailStr.trim().isEmpty()) {
                 try {
-                    BigDecimal price = new BigDecimal(priceStr.trim().replaceAll("[^0-9.]", ""));
+                    BigDecimal price = new BigDecimal(retailStr.trim().replaceAll("[^0-9.]", ""));
                     data.put("price", price);
                 } catch (Exception e) {
-                    log.debug("Could not parse MY_PRICE for product {}: {}", productCode, priceStr);
+                    log.debug("Could not parse RETAIL_PRICE for product {}: {}", productCode, retailStr);
                     data.put("price", null);
                 }
             }
 
-            // RETAIL_PRICE = suggested retail price
-            String retailStr = getElementText(element, "RETAIL_PRICE");
-            if (retailStr != null && !retailStr.trim().isEmpty()) {
+            // MY_PRICE = dealer/client price (kept for reference)
+            String myPriceStr = getElementText(element, "MY_PRICE");
+            if (myPriceStr != null && !myPriceStr.trim().isEmpty()) {
                 try {
-                    data.put("retailprice", new BigDecimal(retailStr.trim().replaceAll("[^0-9.]", "")));
+                    data.put("myprice", new BigDecimal(myPriceStr.trim().replaceAll("[^0-9.]", "")));
                 } catch (Exception e) {
-                    data.put("retailprice", null);
+                    data.put("myprice", null);
                 }
             }
 
