@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-22T12:58:28.110Z
-> Files: 592 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-24T08:58:26.270Z
+> Files: 593 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -28,7 +28,7 @@
 
 - `Breadcrumbs.jsx` — Breadcrumbs (~504 tok)
 - `DateTimePicker.jsx` — MONTHS (~2516 tok)
-- `Footer.jsx` — categories (~3032 tok)
+- `Footer.jsx` — categories (~3235 tok)
 - `TbiCheckoutModal.jsx` — TBI brand color (~5322 tok)
 
 ## ../../care-tech-ui/src/components/compare/
@@ -158,7 +158,7 @@
 - `COMPARE_PLAN.md` — План: Функционалност за Сравнение на Продукти (~1975 tok)
 - `database_backup_script.txt` (~121 tok)
 - `docker-compose.dev.yml` — Docker Compose: 4 services (~361 tok)
-- `docker-compose.yml` — Docker Compose services (~485 tok)
+- `docker-compose.yml` — Docker Compose services (~497 tok)
 - `Dockerfile` — Docker container definition (~324 tok)
 - `How_To_Run_In_AWS.md` — Tech Store API (~536 tok)
 - `init-databases.sh` (~35 tok)
@@ -169,7 +169,7 @@
 - `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
 - `ORDER_EDIT_PLAN.md` — План: Редактиране на поръчки от администратор (~577 tok)
 - `parameters_202605130941.sql` (~43615 tok)
-- `pom.xml` (~1642 tok)
+- `pom.xml` (~1688 tok)
 - `README.md` — Project documentation (~1777 tok)
 - `sync-diagnostics.sql` — ============================================================= (~1278 tok)
 
@@ -722,6 +722,7 @@
 
 - `.DS_Store` (~1640 tok)
 - `application.yml` (~2652 tok)
+- `logback-spring.xml` (~264 tok)
 
 ## src/main/resources/db/
 

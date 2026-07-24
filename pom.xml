@@ -164,6 +164,12 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Slack Logging -->
+		<dependency>
+			<groupId>com.github.maricn</groupId>
+			<artifactId>logback-slack-appender</artifactId>
+			<version>1.6.1</version>
+		</dependency>
 		<!-- HTTP Client -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

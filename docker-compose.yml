@@ -32,6 +32,7 @@ services:
       - .env
     environment:
       - JAVA_OPTS=${JAVA_OPTS}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
     volumes:
       - uploads_data:/app/uploads
       - /tmp/lucene:/tmp/lucene:rw
