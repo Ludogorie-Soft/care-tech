@@ -35,6 +35,8 @@
 
 ## Do-Not-Repeat
 
+- [2026-07-24] NEVER do `collection.clear() + collection.addAll()` in Hibernate without `entityManager.flush()` between them when there is a unique constraint on the table. Hibernate batches the operations and sends INSERTs before DELETEs in the same flush, violating the constraint. Fix: inject `@PersistenceContext EntityManager` and call `entityManager.flush()` after `clear()`.
+
 - [2026-07-20] NEVER leave admin query methods in `TbiLeasingService` (or any service with `open-in-view=false`) without `@Transactional(readOnly = true)` when the entity has LAZY associations. Without it, the Hibernate session closes after the repository call and `Page.map()` triggers `LazyInitializationException` when accessing `e.getOrder()`. Fix: add `@Transactional(readOnly = true)` to `getAllApplications`, `getApplicationsByStatus`, `getApplicationById`.
 
 - [2026-05-20] NEVER use `restTemplate.getForObject(url, String.class)` за Asbis XML файлове — Spring декодира като ISO-8859-1 и разваля UTF-8 Кирилица. Винаги използвай `byte[].class` + `new String(bytes, StandardCharsets.UTF_8)`.

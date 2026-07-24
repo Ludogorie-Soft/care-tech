@@ -16,6 +16,8 @@ import com.techstore.exception.ValidationException;
 import com.techstore.mapper.ManufacturerMapper;
 import com.techstore.mapper.ParameterMapper;
 import com.techstore.repository.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -50,6 +52,9 @@ public class ProductService {
     private final ManufacturerMapper manufacturerMapper;
     private final ProductParameterRepository productParameterRepository;
     private final CacheManager cacheManager;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private static final int MAX_IMAGES_PER_PRODUCT = 20;
     private static final int MAX_PARAMETERS_PER_PRODUCT = 100;
@@ -904,8 +909,11 @@ public class ProductService {
             }
         }
 
-        // 2. Мутираме управляваната от Hibernate колекция вместо да я заменяме
+        // 2. Мутираме управляваната от Hibernate колекция вместо да я заменяме.
+        // Flush след clear() е задължителен — принуждава Hibernate да изпрати DELETE-ите
+        // към БД преди INSERT-ите, иначе unique constraint се нарушава.
         product.getProductParameters().clear();
+        entityManager.flush();
         product.getProductParameters().addAll(newProductParameters);
     }
 

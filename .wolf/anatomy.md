@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-24T08:58:26.270Z
-> Files: 593 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-24T09:57:59.368Z
+> Files: 594 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -66,7 +66,7 @@
 - `ForUs.jsx` — ForUs (~2823 tok)
 - `OurClients.jsx` — clients (~2724 tok)
 - `Policy.jsx` — sections (~4961 tok)
-- `ProductPage.jsx` — EURO_RATE (~10268 tok)
+- `ProductPage.jsx` — EURO_RATE (~10312 tok)
 
 ## ../../care-tech-ui/src/pages/admin/
 
@@ -109,6 +109,10 @@
 ## ../../care-tech-ui/src/pages/admin/Pazaruvaj/
 
 - `PazaruvajLayout.jsx` — TYPES (~6942 tok)
+
+## ../../care-tech-ui/src/pages/admin/Products/
+
+- `ProductForm.jsx` — SearchSelect (~10755 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Reviews/
 
@@ -684,7 +688,7 @@
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Service: alias-aware search. resolveAliasId() + resolveAliasCategories() applied in searchProducts, getAvailableParametersWithCountsForCategory, getFilteredFacets. (~2242 tok)
-- `ProductService.java` — Service: ProductService (~13319 tok)
+- `ProductService.java` — Service: ProductService (~13412 tok)
 - `ReviewService.java` — Service: ReviewService (~946 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)

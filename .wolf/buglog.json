@@ -5895,6 +5895,74 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-23T07:15:22.718Z"
+    },
+    {
+      "id": "bug-364",
+      "timestamp": "2026-07-24T00:00:00Z",
+      "error_message": "duplicate key value violates unique constraint uq_product_parameters_unique during product update",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "Hibernate batches clear() + addAll() in one flush — INSERTs reach PostgreSQL before DELETEs, violating unique constraint on (product_id, parameter_id, parameter_option_id). The clear()+addAll() fix from bug-337 was correct but missing an explicit flush between the two steps.",
+      "fix": "Added EntityManager (via @PersistenceContext) to ProductService. In updateProductParameters(), called entityManager.flush() after product.getProductParameters().clear() and before addAll(), forcing Hibernate to send DELETEs to DB before INSERTs.",
+      "tags": [
+        "hibernate",
+        "flush",
+        "unique-constraint",
+        "product-edit",
+        "orphanRemoval"
+      ],
+      "related_bugs": [
+        "bug-337"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-07-24T00:00:00Z"
+    },
+    {
+      "id": "bug-365",
+      "timestamp": "2026-07-24T09:56:08.107Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/pages/admin/Products/ProductForm.jsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 6→4 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-24T09:56:08.107Z"
+    },
+    {
+      "id": "bug-366",
+      "timestamp": "2026-07-24T09:57:50.229Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 6→6 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-24T09:57:50.229Z"
+    },
+    {
+      "id": "bug-367",
+      "timestamp": "2026-07-24T09:57:59.386Z",
+      "error_message": "CSS fix: __html",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "__html: item.descriptionBg → activeDesc",
+      "fix": "Changed __html: item.descriptionBg → activeDesc",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-24T09:57:59.386Z"
     }
   ]
 }
