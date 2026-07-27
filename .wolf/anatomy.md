@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-24T09:57:59.368Z
-> Files: 594 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-27T08:35:58.484Z
+> Files: 595 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -17,18 +17,19 @@
 
 ## ../../care-tech-ui/public/
 
+- `index.html` — Care Tech – Продажба и ремонт на лаптопи (~1853 tok)
 - `leasing-complete.html` — TBI Complete (~184 tok)
 
 ## ../../care-tech-ui/src/
 
-- `App.js` — Declares ScrollToTop (~3109 tok)
+- `App.js` — Declares ScrollToTop (~3149 tok)
 - `index.css` — Styles: 39 rules (~2126 tok)
 
 ## ../../care-tech-ui/src/components/
 
 - `Breadcrumbs.jsx` — Breadcrumbs (~504 tok)
 - `DateTimePicker.jsx` — MONTHS (~2516 tok)
-- `Footer.jsx` — categories (~3235 tok)
+- `Footer.jsx` — categories (~2764 tok)
 - `TbiCheckoutModal.jsx` — TBI brand color (~5322 tok)
 
 ## ../../care-tech-ui/src/components/compare/
@@ -38,7 +39,7 @@
 ## ../../care-tech-ui/src/components/home/
 
 - `AdImageSectionTwo.jsx` — slides (~993 tok)
-- `OurPartnersSection.jsx` — PrevArrow (~1619 tok)
+- `OurPartnersSection.jsx` — PrevArrow (~1621 tok)
 - `PromoProductsSection.jsx` — PromoProductsSection (~2722 tok)
 - `ReviewsSlider.jsx` — PrevArrow (~1554 tok)
 

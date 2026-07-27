@@ -5963,6 +5963,86 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-24T09:57:59.386Z"
+    },
+    {
+      "id": "bug-368",
+      "timestamp": "2026-07-27T07:31:30.872Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/components/home/OurPartnersSection.jsx",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 40→18 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-27T07:31:30.872Z"
+    },
+    {
+      "id": "bug-369",
+      "timestamp": "2026-07-27T07:59:22.698Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/public/index.html",
+      "root_cause": "Had \"root\"",
+      "fix": "Changed to \"app-loading\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-27T08:03:29.992Z"
+    },
+    {
+      "id": "bug-370",
+      "timestamp": "2026-07-27T08:02:15.785Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/public/index.html",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 6→10 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-27T08:02:15.785Z"
+    },
+    {
+      "id": "bug-371",
+      "timestamp": "2026-07-27T08:18:08.397Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/public/index.html",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 6→5 lines (2 removed) | Also: <div style=\"width:100%;background:#000;padding:8px; <div style=\"color:rgba(255,255,255,0.4);font-size:",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-07-27T08:20:22.520Z"
+    },
+    {
+      "id": "bug-372",
+      "timestamp": "2026-07-27T08:30:22.761Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/public/index.html",
+      "root_cause": "Had \"background: transparent; text-align: center; padd",
+      "fix": "Changed to \"padding-top:12px;\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-27T08:30:22.761Z"
     }
   ]
 }
