@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-27T08:35:58.484Z
-> Files: 595 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-28T06:58:59.472Z
+> Files: 596 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -17,13 +17,17 @@
 
 ## ../../care-tech-ui/public/
 
-- `index.html` — Care Tech – Продажба и ремонт на лаптопи (~1853 tok)
+- `index.html` — Care Tech – SEO мета, GA, FB Pixel, Pazaruvaj backlink (статичен, crawler-visible) + тъмен bottom bar с copyright (~1900 tok)
 - `leasing-complete.html` — TBI Complete (~184 tok)
 
 ## ../../care-tech-ui/src/
 
 - `App.js` — Declares ScrollToTop (~3149 tok)
 - `index.css` — Styles: 39 rules (~2126 tok)
+
+## ../../care-tech-ui/src/api/
+
+- `axiosConfigs.js` — Exports setupRequestInterceptor, setAuthToken (~230 tok)
 
 ## ../../care-tech-ui/src/components/
 
@@ -149,7 +153,7 @@
 - `partners.js` — Exports partners (~425 tok)
 - `slugify.js` — Exports slugify (~217 tok)
 - `tokenRefresh.js` — Exports setupTokenRefresh (~568 tok)
-- `utils.js` — Exports SITE_URL, specificationsMap, ORDER_FORMS, getStatusBadge + 4 more (~488 tok)
+- `utils.js` — Exports SITE_URL, specificationsMap, ORDER_FORMS, getStatusBadge + 4 more (~490 tok)
 
 ## ./
 
@@ -170,7 +174,7 @@
 - `mvnw` — or more contributor license agreements.  See the NOTICE file (~3144 tok)
 - `mvnw.cmd` — Declares Directory (~2262 tok)
 - `nginx.conf` — Nginx configuration (~575 tok)
-- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~1867 tok)
+- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~2171 tok)
 - `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
 - `ORDER_EDIT_PLAN.md` — План: Редактиране на поръчки от администратор (~577 tok)
 - `parameters_202605130941.sql` (~43615 tok)

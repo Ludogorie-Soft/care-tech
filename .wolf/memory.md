@@ -15,6 +15,17 @@
 | — | Pazaruvaj CSV export + `includeDelivery` параметър в XML builder | `PazaruvajFeedService.java`, `PazaruvajFeedController.java`, `PazaruvajLayout.jsx` | XML + CSV download от admin панела | ~500 |
 | — | Nginx hardening — rate limiting, bad bot blocking, security headers | `nginx.prod.conf` | Защита срещу атаки | ~300 |
 
+## Сесия 2026-07-27
+
+| Час | Действие | Файлове | Резултат | ~Токени |
+|-----|----------|---------|----------|---------|
+| — | Slack logback appender — добавена зависимост + logback-spring.xml + docker-compose env | `pom.xml`, `logback-spring.xml`, `docker-compose.yml` | WARN+ логове към Slack | ~300 |
+| — | Product edit bug fix — `entityManager.flush()` след `clear()` в updateProductParameters | `ProductService.java` | Duplicate key грешка при смяна на статус отстранена | ~200 |
+| — | Description полета не задължителни + BG/EN fallback логика в ProductPage | `ProductForm.jsx`, `ProductPage.jsx` | Само валидни описания се показват | ~200 |
+| — | Pazaruvaj backlink в `index.html` (static, видим за crawler) с бял overlay (#app-loading) | `public/index.html`, `App.js`, `Footer.jsx` | Crawler вижда линка, потребителят не вижда flash | ~500 |
+| — | Fix Pazaruvaj центриране — wrapper `<div style="margin:0">` около техния код | `public/index.html` | Pazaruvaj вляво, copyright вдясно | ~100 |
+| — | Тъмен background (#071018) на bottom bar + цвят #FFF за Pazaruvaj текст и copyright | `public/index.html` | Визуално съответствие с footer | ~100 |
+
 ## Сесия 2026-07-20
 
 | Час | Действие | Файлове | Резултат | ~Токени |
@@ -2554,3 +2565,31 @@
 | 11:36 | Session end: 1 writes across 1 files (index.html) | 0 reads | ~213 tok |
 | 11:38 | Session end: 1 writes across 1 files (index.html) | 0 reads | ~213 tok |
 | 11:38 | Session end: 1 writes across 1 files (index.html) | 0 reads | ~213 tok |
+| 11:44 | Edited ../../care-tech-ui/public/index.html | 14→14 lines | ~326 |
+| 11:44 | Session end: 2 writes across 1 files (index.html) | 0 reads | ~562 tok |
+| 11:46 | Edited ../../care-tech-ui/public/index.html | 6→5 lines | ~123 |
+| 11:46 | Session end: 3 writes across 1 files (index.html) | 0 reads | ~694 tok |
+| 11:47 | Edited ../../care-tech-ui/public/index.html | 5→6 lines | ~188 |
+| 11:47 | Session end: 4 writes across 1 files (index.html) | 0 reads | ~895 tok |
+| 11:56 | Session end: 4 writes across 1 files (index.html) | 0 reads | ~895 tok |
+
+## Session: 2026-07-28 09:04
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 09:14 | Edited ../../care-tech-ui/src/utils/utils.js | "https://caretech.bg" → "https://www.caretech.bg" | ~23 |
+| 09:15 | Edited nginx.prod.conf | expanded (+11 lines) | ~135 |
+| 09:15 | Session end: 2 writes across 2 files (utils.js, nginx.prod.conf) | 7 reads | ~3494 tok |
+| 09:19 | Session end: 2 writes across 2 files (utils.js, nginx.prod.conf) | 7 reads | ~3494 tok |
+| 09:21 | Session end: 2 writes across 2 files (utils.js, nginx.prod.conf) | 7 reads | ~3494 tok |
+| 09:22 | Session end: 2 writes across 2 files (utils.js, nginx.prod.conf) | 7 reads | ~3494 tok |
+| 09:41 | Session end: 2 writes across 2 files (utils.js, nginx.prod.conf) | 7 reads | ~3494 tok |
+| 09:43 | Session end: 2 writes across 2 files (utils.js, nginx.prod.conf) | 7 reads | ~3494 tok |
+| 09:46 | Edited ../../care-tech-ui/src/utils/utils.js | "https://caretech.bg" → "https://www.caretech.bg" | ~23 |
+| 09:46 | Session end: 3 writes across 2 files (utils.js, nginx.prod.conf) | 7 reads | ~3517 tok |
+| 09:49 | Session end: 3 writes across 2 files (utils.js, nginx.prod.conf) | 7 reads | ~3517 tok |
+| 09:56 | Edited nginx.prod.conf | expanded (+14 lines) | ~259 |
+| 09:56 | Session end: 4 writes across 2 files (utils.js, nginx.prod.conf) | 7 reads | ~3795 tok |
+| 09:58 | Edited ../../care-tech-ui/src/api/axiosConfigs.js | "https://caretech.bg" → "https://www.caretech.bg" | ~21 |
+| 09:59 | Session end: 5 writes across 3 files (utils.js, nginx.prod.conf, axiosConfigs.js) | 8 reads | ~3816 tok |
+| 10:07 | Session end: 5 writes across 3 files (utils.js, nginx.prod.conf, axiosConfigs.js) | 8 reads | ~3816 tok |
