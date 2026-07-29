@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-28T06:58:59.472Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-07-29T06:25:07.792Z
 > Files: 596 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -71,7 +71,7 @@
 - `ForUs.jsx` — ForUs (~2823 tok)
 - `OurClients.jsx` — clients (~2724 tok)
 - `Policy.jsx` — sections (~4961 tok)
-- `ProductPage.jsx` — EURO_RATE (~10312 tok)
+- `ProductPage.jsx` — EURO_RATE (~10324 tok)
 
 ## ../../care-tech-ui/src/pages/admin/
 
