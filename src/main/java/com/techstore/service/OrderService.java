@@ -359,6 +359,12 @@ public class OrderService {
             order.setPaymentStatus(PaymentStatus.PAID); // Auto-mark as paid when delivered
         }
 
+        if (request.getStatus() == OrderStatus.CANCELLED
+                && order.getPaymentStatus() != PaymentStatus.PAID
+                && order.getPaymentStatus() != PaymentStatus.REFUNDED) {
+            order.setPaymentStatus(PaymentStatus.CANCELLED);
+        }
+
         order = orderRepository.save(order);
 
         log.info("Order {} status updated from {} to {}",
@@ -392,9 +398,16 @@ public class OrderService {
                 order.setPaymentStatus(PaymentStatus.PAID);
                 autoSetPaid = true;
             }
+
+            if (request.getStatus() == OrderStatus.CANCELLED
+                    && order.getPaymentStatus() != PaymentStatus.PAID
+                    && order.getPaymentStatus() != PaymentStatus.REFUNDED) {
+                order.setPaymentStatus(PaymentStatus.CANCELLED);
+                autoSetPaid = true; // reuse flag to prevent override below
+            }
         }
 
-        // Explicit paymentStatus only applies when not auto-set by DELIVERED transition
+        // Explicit paymentStatus only applies when not auto-set by DELIVERED/CANCELLED transition
         if (request.getPaymentStatus() != null && !autoSetPaid) {
             order.setPaymentStatus(request.getPaymentStatus());
         }
@@ -483,6 +496,10 @@ public class OrderService {
 
         OrderStatus previousStatus = order.getStatus();
         order.setStatus(OrderStatus.CANCELLED);
+        if (order.getPaymentStatus() != PaymentStatus.PAID
+                && order.getPaymentStatus() != PaymentStatus.REFUNDED) {
+            order.setPaymentStatus(PaymentStatus.CANCELLED);
+        }
         String cancellationNote = "Cancellation reason: " + reason + " (at: " + LocalDateTime.now() + ")";
         order.setAdminNotes(order.getAdminNotes() != null ?
                 order.getAdminNotes() + "\n" + cancellationNote : cancellationNote);

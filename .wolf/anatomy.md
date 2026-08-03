@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-07-29T06:25:07.792Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-03T08:25:12.824Z
 > Files: 596 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -71,7 +71,7 @@
 - `ForUs.jsx` — ForUs (~2823 tok)
 - `OurClients.jsx` — clients (~2724 tok)
 - `Policy.jsx` — sections (~4961 tok)
-- `ProductPage.jsx` — EURO_RATE (~10324 tok)
+- `ProductPage.jsx` — EURO_RATE (~10247 tok)
 
 ## ../../care-tech-ui/src/pages/admin/
 
@@ -107,7 +107,7 @@
 
 ## ../../care-tech-ui/src/pages/admin/Orders/
 
-- `EditOrderModal.jsx` — TABS — renders form (~6619 tok)
+- `EditOrderModal.jsx` — TABS — renders form (~6632 tok)
 - `OrderDetailPage.jsx` — OrderDetailPage (~5639 tok)
 - `useOrderUtils.js` — Exports useOrderUtils (~802 tok)
 
@@ -588,7 +588,7 @@
 - `Parameter.java` — Entity: Parameter (~544 tok)
 - `ParameterOption.java` — Entity: ParameterOption (~260 tok)
 - `PersonalOffer.java` — Entity: PersonalOffer (~665 tok)
-- `Product.java` — Entity: Product (~2886 tok)
+- `Product.java` — Entity: Product (~2705 tok)
 - `ProductFlag.java` — Entity: ProductFlag (~231 tok)
 - `ProductParameter.java` — Entity: ProductParameter (~266 tok)
 - `Review.java` — Entity: Review (~219 tok)
@@ -604,9 +604,9 @@
 - `BlogPostStatus.java` — Class: BlogPostStatus (~27 tok)
 - `OrderStatus.java` — Class: OrderStatus (~54 tok)
 - `PaymentMethod.java` — PaymentMethod: getDisplayName (~133 tok)
-- `PaymentStatus.java` — Class: PaymentStatus (~37 tok)
+- `PaymentStatus.java` — Class: PaymentStatus (~38 tok)
 - `Platform.java` — Platform/Source of data integration (~339 tok)
-- `ProductStatus.java` — ProductStatus: fromCode, getCode, getNameBg, getNameEn (~281 tok)
+- `ProductStatus.java` — ProductStatus: fromCode, getCode, getNameBg, getNameEn (~271 tok)
 - `ReviewStatus.java` — Class: ReviewStatus (~27 tok)
 - `ShippingMethod.java` — Class: ShippingMethod (~31 tok)
 
@@ -660,8 +660,8 @@
 - `ParameterRepository.java` — Repository: ParameterRepository (~1143 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~478 tok)
-- `ProductRepository.java` — Cross-platform deduplication by SKU. (~3297 tok)
-- `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9378 tok)
+- `ProductRepository.java` — Cross-platform deduplication by SKU. (~3347 tok)
+- `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9344 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
 - `SyncLogRepository.java` — Repository: SyncLogRepository (~214 tok)
@@ -687,7 +687,7 @@
 - `ImageMigrationService.java` — Service: ImageMigrationService (~1434 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3823 tok)
-- `OrderService.java` — Creates a new order (~7410 tok)
+- `OrderService.java` — Creates a new order (~7636 tok)
 - `ParameterService.java` — Service: ParameterService (~9601 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3484 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
@@ -703,7 +703,7 @@
 - `TekraApiService.java` — Get categories using JSON parsing (categories return JSON) (~4698 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
 - `UserService.java` — Service: UserService (~6466 tok)
-- `ValiApiService.java` — Get categories (no pagination available) (~9746 tok)
+- `ValiApiService.java` — Get categories (no pagination available) (~9170 tok)
 
 ## src/main/java/com/techstore/service/admin/
 
@@ -714,7 +714,7 @@
 - `AsbisSyncService.java` — AsbisSyncService (~14027 tok)
 - `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~14623 tok)
 - `TekraSyncService.java` — Service: TekraSyncService (~23065 tok)
-- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~14124 tok)
+- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15057 tok)
 
 ## src/main/java/com/techstore/util/
 

@@ -211,6 +211,10 @@ public class ValiApiService {
                     .bodyToMono(new ParameterizedTypeReference<List<ProductRequestDto>>() {})
                     .timeout(Duration.ofMillis(timeout))
                     .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
+                    .onErrorResume(DataBufferLimitException.class, ex -> {
+                        log.error("Response too large for category {} (exceeds 50MB buffer): {}", categoryId, ex.getMessage());
+                        return Mono.just(List.of());
+                    })
                     .onErrorResume(WebClientResponseException.class, ex -> {
                         log.warn("Error fetching products for category {}: {} - {}",
                                 categoryId, ex.getStatusCode(), ex.getResponseBodyAsString());

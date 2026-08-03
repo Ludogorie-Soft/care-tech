@@ -6107,6 +6107,118 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-29T06:25:07.811Z"
+    },
+    {
+      "id": "bug-377",
+      "timestamp": "2026-08-03T07:32:41.760Z",
+      "error_message": "Wrong reference: getProductsByCategory should be getProductsByCategoryPaginated",
+      "file": "src/main/java/com/techstore/service/sync/ValiSyncService.java",
+      "root_cause": "Used \"getProductsByCategory\" instead of \"getProductsByCategoryPaginated\"",
+      "fix": "Changed getProductsByCategory → getProductsByCategoryPaginated",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-03T07:34:33.649Z"
+    },
+    {
+      "id": "bug-378",
+      "timestamp": "2026-08-03T07:43:44.402Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/sync/ValiSyncService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-03T07:43:44.402Z"
+    },
+    {
+      "id": "bug-379",
+      "timestamp": "2026-08-03T07:48:08.157Z",
+      "error_message": "CSS fix: availability",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "availability: item?.status === 1 ? \"https://schema.org/InStock\" : \"https://schema.org/OutOfStock\", → item?.status === 1",
+      "fix": "Changed availability: item?.status === 1 ? \"https://schema.org/InStock\" : \"https://schema.org/OutOfStock\", → item?.status === 1",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-03T07:48:08.157Z"
+    },
+    {
+      "id": "bug-380",
+      "timestamp": "2026-08-03T07:54:15.456Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/repository/ProductRepository.java",
+      "root_cause": "Had \"SELECT p FROM Product p WHERE p.active = true AND",
+      "fix": "Changed to \"SELECT p FROM Product p WHERE p.active = true AND",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-03T07:54:15.456Z"
+    },
+    {
+      "id": "bug-381",
+      "timestamp": "2026-08-03T07:54:21.932Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java",
+      "root_cause": "Had 'AVAILABLE'",
+      "fix": "Changed to 'NOT_AVAILABLE'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-03T07:54:21.932Z"
+    },
+    {
+      "id": "bug-382",
+      "timestamp": "2026-08-03T08:01:18.925Z",
+      "error_message": "CSS fix: value",
+      "file": "../../care-tech-ui/src/pages/admin/Orders/EditOrderModal.jsx",
+      "root_cause": "value: \"REFUNDED\", label: \"Възстановено\" → \"CANCELLED\", label: \"Отменено\"",
+      "fix": "Changed value: \"REFUNDED\", label: \"Възстановено\" → \"CANCELLED\", label: \"Отменено\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-03T08:01:18.925Z"
+    },
+    {
+      "id": "bug-383",
+      "timestamp": "2026-08-03T08:25:12.843Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/sync/ValiSyncService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-03T08:25:12.843Z"
     }
   ]
 }

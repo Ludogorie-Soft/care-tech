@@ -1,5 +1,6 @@
 package com.techstore.service.sync;
 
+import com.techstore.dto.external.FlagDto;
 import com.techstore.dto.external.ImageDto;
 import com.techstore.dto.request.*;
 import com.techstore.entity.*;
@@ -875,6 +876,17 @@ public class ValiSyncService {
                 .stream()
                 .collect(Collectors.toMap(Product::getExternalId, p -> p));
 
+        // Fallback: products that exist in DB by referenceNumber but have no externalId yet
+        Set<String> unmatchedRefNums = products.stream()
+                .filter(p -> !existingProductsMap.containsKey(p.getId()) && p.getReferenceNumber() != null)
+                .map(ProductRequestDto::getReferenceNumber)
+                .collect(Collectors.toSet());
+        Map<String, Product> existingByRefNum = unmatchedRefNums.isEmpty()
+                ? Collections.emptyMap()
+                : productRepository.findByReferenceNumberIn(unmatchedRefNums)
+                        .stream()
+                        .collect(Collectors.toMap(Product::getReferenceNumber, p -> p));
+
         List<Product> productsToSave = new ArrayList<>();
 
         for (ProductRequestDto extProduct : products) {
@@ -891,6 +903,17 @@ public class ValiSyncService {
 
                 if (existingProductsMap.containsKey(extProduct.getId())) {
                     product = existingProductsMap.get(extProduct.getId());
+                    updateProductFieldsFromExternal(product, extProduct, manufacturer, category,
+                            globalParametersCache, globalOptionsCache);
+                    updated++;
+                } else if (existingByRefNum.containsKey(extProduct.getReferenceNumber())) {
+                    product = existingByRefNum.get(extProduct.getReferenceNumber());
+                    // Backfill externalId so future syncs find it correctly
+                    if (product.getExternalId() == null) {
+                        product.setExternalId(extProduct.getId());
+                        log.info("Backfilling externalId={} for product referenceNumber={}",
+                                extProduct.getId(), extProduct.getReferenceNumber());
+                    }
                     updateProductFieldsFromExternal(product, extProduct, manufacturer, category,
                             globalParametersCache, globalOptionsCache);
                     updated++;
@@ -969,7 +992,9 @@ public class ValiSyncService {
             }
         }
 
-        product.setStatus(ProductStatus.fromCode(extProduct.getStatus()));
+        setFlagsToProduct(product, extProduct);
+        ProductStatus resolvedStatus = ProductStatus.fromCode(extProduct.getStatus());
+        product.setStatus(resolvedStatus);
         product.setPriceClient(extProduct.getPriceClient());
         product.setPricePartner(extProduct.getPricePartner());
         product.setPricePromo(extProduct.getPricePromo());
@@ -977,7 +1002,7 @@ public class ValiSyncService {
         product.calculateFinalPrice();
 
         boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
-        product.setShow(Boolean.TRUE.equals(extProduct.getShow()) && hasValidPrice);
+        product.setShow(Boolean.TRUE.equals(extProduct.getShow()) && hasValidPrice && resolvedStatus != ProductStatus.NOT_AVAILABLE);
     }
 
     private void setParametersToProduct(Product product, ProductRequestDto extProduct,
@@ -1113,6 +1138,55 @@ public class ValiSyncService {
         }
     }
 
+    private void setFlagsToProduct(Product product, ProductRequestDto extProduct) {
+        Set<ProductFlag> currentFlags = product.getProductFlags();
+        if (currentFlags == null) {
+            currentFlags = new HashSet<>();
+            product.setProductFlags(currentFlags);
+        }
+
+        List<FlagDto> apiFlags = extProduct.getFlags();
+        if (apiFlags == null || apiFlags.isEmpty()) {
+            currentFlags.clear();
+            return;
+        }
+
+        Map<Long, FlagDto> apiFlagsById = apiFlags.stream()
+                .filter(f -> f.getId() != null)
+                .collect(Collectors.toMap(FlagDto::getId, f -> f, (a, b) -> a));
+
+        // Remove flags no longer present in API
+        currentFlags.removeIf(pf -> !apiFlagsById.containsKey(pf.getExternalId()));
+
+        Map<Long, ProductFlag> existingById = currentFlags.stream()
+                .collect(Collectors.toMap(ProductFlag::getExternalId, pf -> pf));
+
+        for (FlagDto flagDto : apiFlags) {
+            if (flagDto.getId() == null) continue;
+
+            ProductFlag existing = existingById.get(flagDto.getId());
+            if (existing != null) {
+                existing.setImageUrl(flagDto.getImage());
+                applyFlagNames(existing, flagDto);
+            } else {
+                ProductFlag pf = new ProductFlag();
+                pf.setProduct(product);
+                pf.setExternalId(flagDto.getId());
+                pf.setImageUrl(flagDto.getImage());
+                applyFlagNames(pf, flagDto);
+                currentFlags.add(pf);
+            }
+        }
+    }
+
+    private void applyFlagNames(ProductFlag flag, FlagDto flagDto) {
+        if (flagDto.getName() == null) return;
+        flagDto.getName().forEach(n -> {
+            if ("bg".equals(n.getLanguageCode())) flag.setNameBg(n.getText());
+            else if ("en".equals(n.getLanguageCode())) flag.setNameEn(n.getText());
+        });
+    }
+
     private boolean isAlreadyOnS3(String url) {
         return url != null && url.contains("amazonaws.com");
     }
@@ -1130,9 +1204,6 @@ public class ValiSyncService {
     }
 
     private static void setDescriptionToProduct(Product product, ProductRequestDto extProduct) {
-        product.setDescriptionBg(null);
-        product.setDescriptionEn(null);
-
         if (extProduct.getDescription() == null || extProduct.getDescription().isEmpty()) {
             return;
         }

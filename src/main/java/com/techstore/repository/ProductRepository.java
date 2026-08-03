@@ -29,6 +29,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     List<Product> findByExternalIdIn(Collection<Long> externalIds);
 
+    List<Product> findByReferenceNumberIn(Collection<String> referenceNumbers);
+
     Page<Product> findByActiveTrue(Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.active = true AND p.show = true AND p.category.id = :categoryId AND p.status <> com.techstore.enums.ProductStatus.NOT_AVAILABLE AND p.finalPrice > 0")
@@ -37,7 +39,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT p FROM Product p WHERE p.active = true AND p.show = true AND p.manufacturer.id = :brandId AND p.status <> com.techstore.enums.ProductStatus.NOT_AVAILABLE AND p.finalPrice > 0")
     Page<Product> findActiveByManufacturerExcludingNotAvailable(@Param("brandId") Long brandId, Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE p.active = true AND p.show = true AND p.id != :productId AND " +
+    @Query("SELECT p FROM Product p WHERE p.active = true AND p.show = true AND p.id != :productId AND p.status <> com.techstore.enums.ProductStatus.NOT_AVAILABLE AND " +
             "(p.category.id = :categoryId OR p.manufacturer.id = :manufacturerId)")
     List<Product> findRelatedProducts(@Param("productId") Long productId,
                                       @Param("categoryId") Long categoryId,
@@ -149,6 +151,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
         WHERE p.id IN (:productIds)
           AND p.active    = true
           AND p.show_flag = true
+          AND p.status   <> 'NOT_AVAILABLE'
           AND p.final_price > 0
           AND p.slug IS NOT NULL AND p.slug <> ''
         """, nativeQuery = true)

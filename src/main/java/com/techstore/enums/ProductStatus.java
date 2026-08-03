@@ -17,13 +17,16 @@ public enum ProductStatus {
         this.nameEn = nameEn;
     }
 
-    public static ProductStatus fromCode(int code) {
+    public static ProductStatus fromCode(Integer code) {
+        if (code == null) {
+            return NOT_AVAILABLE;
+        }
         for (ProductStatus status : values()) {
             if (status.code == code) {
                 return status;
             }
         }
-        throw new IllegalArgumentException("Unknown status code: " + code);
+        return NOT_AVAILABLE;
     }
 
     public int getCode() { return code; }
