@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T06:41:46.542Z
-> Files: 600 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T09:45:39.909Z
+> Files: 601 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -57,7 +57,7 @@
 
 - `CompareButton.jsx` — Reusable compare toggle button. (~695 tok)
 - `ImageDisplaying.jsx` — NextArrow (~3614 tok)
-- `ProductCard.jsx` — ProductCard (~3407 tok)
+- `ProductCard.jsx` — ProductCard (~3525 tok)
 
 ## ../../care-tech-ui/src/pages/
 
@@ -312,6 +312,7 @@
 - `24_fix_miscategorized_products.sql` — ============================================================ (~3552 tok)
 - `25_fix_remaining_cat37_mismatches.sql` — ============================================================ (~435 tok)
 - `26_fix_cat37_comprehensive.sql` — ============================================================ (~1591 tok)
+- `27_hide_accidental_asbis_categories_20260806.sql` — ============================================================ (~258 tok)
 - `3_reorder_top_categories.sql` — Пренарежда главните категории (sort_order) вкл. 3-те нови Asbis roots (~1086 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
 - `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)

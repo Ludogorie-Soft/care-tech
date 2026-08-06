@@ -2797,3 +2797,13 @@
 | 09:41 | Session end: 13 writes across 7 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java, ProductRepository.java) | 4 reads | ~39374 tok |
 | 09:42 | Session end: 13 writes across 7 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java, ProductRepository.java) | 4 reads | ~39374 tok |
 | 09:49 | Session end: 13 writes across 7 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java, ProductRepository.java) | 4 reads | ~39374 tok |
+
+## Session: 2026-08-06 11:47
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:01 | Edited ../../care-tech-ui/src/components/products/ProductCard.jsx | added 2 condition(s) | ~205 |
+| 12:02 | Session end: 1 writes across 1 files (ProductCard.jsx) | 2 reads | ~205 tok |
+| 12:45 | Created scripts/27_hide_accidental_asbis_categories_20260806.sql | — | ~258 |
+| 12:45 | Session end: 2 writes across 2 files (ProductCard.jsx, 27_hide_accidental_asbis_categories_20260806.sql) | 3 reads | ~481 tok |
+| 12:47 | Session end: 2 writes across 2 files (ProductCard.jsx, 27_hide_accidental_asbis_categories_20260806.sql) | 3 reads | ~481 tok |
