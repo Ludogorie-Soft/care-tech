@@ -6635,6 +6635,54 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-06T06:41:46.562Z"
+    },
+    {
+      "id": "bug-409",
+      "timestamp": "2026-08-06T10:14:40.373Z",
+      "error_message": "CSS fix: sm",
+      "file": "../../care-tech-ui/src/components/products/ProductCard.jsx",
+      "root_cause": "sm: p-4 bg-white/5 rounded-lg hover:shadow-primary cursor-pointer hover:shadow-md shadow-lg flex flex-col transition duration-500 relative h-full w-full max-w-full overflow-hidden\" → p-4 bg-white/5 rounded-lg hover:shadow-primary cursor-pointer hover:shadow-md shadow-lg flex flex-col transition duration-500 relative h-full w-full max-w-full overflow-hidden text-inherit no-underline\"",
+      "fix": "Changed sm: p-4 bg-white/5 rounded-lg hover:shadow-primary cursor-pointer hover:shadow-md shadow-lg flex flex-col transition duration-500 relative h-full w-full max-w-full overflow-hidden\" → p-4 bg-white/5 rounded-lg hover:shadow-primary cursor-pointer hover:shadow-md shadow-lg flex flex-col transition duration-500 relative h-full w-full max-w-full overflow-hidden text-inherit no-underline\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-06T10:14:40.373Z"
+    },
+    {
+      "id": "bug-410",
+      "timestamp": "2026-08-06T10:14:50.058Z",
+      "error_message": "Wrong reference: article should be Link",
+      "file": "../../care-tech-ui/src/components/products/ProductCard.jsx",
+      "root_cause": "Used \"article\" instead of \"Link\"",
+      "fix": "Changed article → Link",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-06T10:14:50.058Z"
+    },
+    {
+      "id": "bug-411",
+      "timestamp": "2026-08-06T10:19:44.920Z",
+      "error_message": "CSS fix: hover",
+      "file": "../../care-tech-ui/src/components/navbar/NavDropDown.jsx",
+      "root_cause": "hover: bg-red-700 ` → bg-red-700 text-inherit no-underline\"",
+      "fix": "Changed hover: bg-red-700 ` → bg-red-700 text-inherit no-underline\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-06T10:19:44.920Z"
     }
   ]
 }

@@ -14,6 +14,11 @@
 | 06:20 | AVAILABLE-only филтриране навсякъде | ProductRepository.java, ProductSearchRepository.java, ParameterRepository.java | Всички 10+ заявки: status = AVAILABLE (не <> NOT_AVAILABLE) | ~5000 |
 | 06:30 | Slack: само CRITICAL грешки | logback-spring.xml, CronJobService.java, Markers.java, CriticalMarkerFilter.java | MarkerFilter (custom) — само cron sync failures → Slack | ~3000 |
 | 07:00 | Mark unseen products за Tekra + Most | ProductRepository.java, TekraSyncService.java, MostSyncService.java | markNotAvailableByPlatformSkuNotIn — деактивира делистнати продукти. Asbis вече покрит. Build ОК. | ~4000 |
+| 12:50 | Middle-click / Ctrl+Click → нов таб за ProductCard | ProductCard.jsx | onAuxClick (button=1) + onClick (ctrlKey/metaKey) → window.open. Бутони вече ползват stopPropagation. | ~2000 |
+| 13:00 | Скриване на случайно добавени Asbis категории | scripts/27_hide_accidental_asbis_categories_20260806.sql | 430 нови ASBIS категории от sync на 2026-08-06 (13 с show=true видими на фронтенда) → UPDATE show=false | ~3000 |
+| 13:30 | Дясно копче → "Отвори в нов раздел" за ProductCard и NavDropDown | ProductCard.jsx, NavDropDown.jsx | article→Link; motion.li→MotionLink за leaf категории и ПРОМОЦИИ; useNavigate премахнат | ~4000 |
+| 13:50 | Fix: CustomCheckbox иконка не реагира на клик | CustomCheckbox.jsx | Двоен тогъл (div onClick + label bubble) → премахнат onClick от div | ~500 |
+| 14:00 | Build проверка + cleanup | NavDropDown.jsx | Поправен import/first ESLint грешка (MotionLink след imports); премахнат useNavigate | ~1000 |
 
 ## Сесия 2026-07-06
 
@@ -2807,3 +2812,21 @@
 | 12:45 | Created scripts/27_hide_accidental_asbis_categories_20260806.sql | — | ~258 |
 | 12:45 | Session end: 2 writes across 2 files (ProductCard.jsx, 27_hide_accidental_asbis_categories_20260806.sql) | 3 reads | ~481 tok |
 | 12:47 | Session end: 2 writes across 2 files (ProductCard.jsx, 27_hide_accidental_asbis_categories_20260806.sql) | 3 reads | ~481 tok |
+| 13:05 | Session end: 2 writes across 2 files (ProductCard.jsx, 27_hide_accidental_asbis_categories_20260806.sql) | 3 reads | ~481 tok |
+| 13:14 | Edited ../../care-tech-ui/src/components/products/ProductCard.jsx | 2→2 lines | ~32 |
+| 13:14 | Edited ../../care-tech-ui/src/components/products/ProductCard.jsx | reduced (-18 lines) | ~87 |
+| 13:14 | Edited ../../care-tech-ui/src/components/products/ProductCard.jsx | 3→3 lines | ~6 |
+| 13:17 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | 2→4 lines | ~42 |
+| 13:19 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | 73→77 lines | ~930 |
+| 13:20 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | inline fix | ~12 |
+| 13:21 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | inline fix | ~16 |
+| 13:21 | Session end: 9 writes across 3 files (ProductCard.jsx, 27_hide_accidental_asbis_categories_20260806.sql, NavDropDown.jsx) | 4 reads | ~1606 tok |
+| 13:23 | Edited ../../care-tech-ui/src/components/CustomCheckbox.jsx | 6→5 lines | ~57 |
+| 13:24 | Session end: 10 writes across 4 files (ProductCard.jsx, 27_hide_accidental_asbis_categories_20260806.sql, NavDropDown.jsx, CustomCheckbox.jsx) | 6 reads | ~1663 tok |
+| 13:27 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | 10→10 lines | ~130 |
+| 13:29 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | inline fix | ~12 |
+| 13:30 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | inline fix | ~16 |
+| 13:30 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | inline fix | ~12 |
+| 13:30 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | 3→2 lines | ~18 |
+| 13:32 | Session end: 15 writes across 4 files (ProductCard.jsx, 27_hide_accidental_asbis_categories_20260806.sql, NavDropDown.jsx, CustomCheckbox.jsx) | 6 reads | ~1851 tok |
+| 13:42 | Session end: 15 writes across 4 files (ProductCard.jsx, 27_hide_accidental_asbis_categories_20260806.sql, NavDropDown.jsx, CustomCheckbox.jsx) | 6 reads | ~1851 tok |

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T09:45:39.909Z
-> Files: 601 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T10:30:26.005Z
+> Files: 603 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -33,6 +33,7 @@
 ## ../../care-tech-ui/src/components/
 
 - `Breadcrumbs.jsx` — Breadcrumbs (~504 tok)
+- `CustomCheckbox.jsx` — CustomCheckbox (~258 tok)
 - `DateTimePicker.jsx` — MONTHS (~2516 tok)
 - `Footer.jsx` — categories (~2764 tok)
 - `TbiCheckoutModal.jsx` — TBI brand color (~5322 tok)
@@ -52,12 +53,13 @@
 
 - `AuthDropDown.jsx` — AuthDropDown — renders form (~3716 tok)
 - `NavBar.jsx` — NavBar (~4457 tok)
+- `NavDropDown.jsx` — MotionLink (~4210 tok)
 
 ## ../../care-tech-ui/src/components/products/
 
 - `CompareButton.jsx` — Reusable compare toggle button. (~695 tok)
 - `ImageDisplaying.jsx` — NextArrow (~3614 tok)
-- `ProductCard.jsx` — ProductCard (~3525 tok)
+- `ProductCard.jsx` — ProductCard (~3408 tok)
 
 ## ../../care-tech-ui/src/pages/
 
@@ -312,7 +314,7 @@
 - `24_fix_miscategorized_products.sql` — ============================================================ (~3552 tok)
 - `25_fix_remaining_cat37_mismatches.sql` — ============================================================ (~435 tok)
 - `26_fix_cat37_comprehensive.sql` — ============================================================ (~1591 tok)
-- `27_hide_accidental_asbis_categories_20260806.sql` — ============================================================ (~258 tok)
+- `27_hide_accidental_asbis_categories_20260806.sql` — Скрива 430 Asbis категории, създадени неволно на 2026-08-06; 13 с show=true бяха видими на фронтенда (~258 tok)
 - `3_reorder_top_categories.sql` — Пренарежда главните категории (sort_order) вкл. 3-те нови Asbis roots (~1086 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
 - `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)
