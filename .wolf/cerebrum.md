@@ -46,6 +46,10 @@
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
 <!-- Format: [YYYY-MM-DD] Description of what went wrong and what to do instead. -->
 
+- [2026-08-06] NEVER use `ch.qos.logback.classic.filter.MarkerFilter` in logback XML — this class does NOT exist in the logback version used by this project (Spring Boot 3.x with logback-classic). Instead, create a custom `Filter<ILoggingEvent>` subclass that checks `event.getMarkerList()`. See `CriticalMarkerFilter.java`.
+
+- [2026-08-06] ProductStatus convention: ONLY `AVAILABLE` products should be shown on the site. `LIMITED_QUANTITY`, `ON_ROUTE`, `ON_DEMAND` are NOT shown. All repository queries must use `status = AVAILABLE` (not `status <> NOT_AVAILABLE`). This applies to: ProductRepository, ProductSearchRepository, ParameterRepository, and any future queries.
+
 - [2026-05-18] Do NOT put data-dependent SQL in Flyway migrations (db/migration/). Scripts that require pre-existing synced data (e.g. setting filters after Vali sync) belong in `scripts/`. Flyway runs on empty DB at startup — data isn't there yet.
 - [2026-05-18] PostgreSQL `UPDATE ... FROM` cannot reference the update target table inside a JOIN in the FROM clause. Use comma-separated tables and move the join condition to WHERE: `FROM p, c WHERE cp.category_id = c.id` instead of `FROM p JOIN c ON c.id = cp.category_id`.
 
@@ -150,3 +154,38 @@
 ## Do-Not-Repeat
 
 - [2026-07-21] NEVER използвай `$do_og = 1` (или подобна винаги-true променлива) в nginx за OG routing — пренасочва всички потребители. Винаги проверявай `$is_social_crawler` директно в `if` блока.
+
+## Key Learnings (2026-08-05)
+
+- **Admin ProductForm category loading:** Uses `fetchAllCategoriesAdmin` thunk (`GET /api/admin/categories/all`) to load ALL categories including hidden ones. Public `fetchCategories` returns only `show=true`. The endpoint is in `AdminController` under `/api/admin/**` (URL-level security from SecurityConfig).
+- **Auto-activate category on product assign:** `ProductService.resolveAndActivateCategory(categoryId)` — checks `category.getShow() == false` and sets `show=true` + saves. Called in both `updateProductFieldsFromRest` (create) and `updateProductFieldsByUpdate` (update). Logs the activation with category name.
+- **OG meta за социални медии:** `OgMetaController` при `/api/og/product/{id}` — задължителни тагове: `og:image`, `og:image:secure_url` (HTTPS копие), `og:image:alt`, `twitter:image:alt`. Nginx rewrite трябва да има `/?$` в края за optional trailing slash. Тестване: `curl -A "facebookexternalhit/1.1" https://www.caretech.bg/product/slug/123`.
+- **nginx rewrite trailing slash:** Без `/?$` в края на regex, URL-и като `/product/slug/123/` (с trailing slash) не matching-ват и ботовете получават React SPA вместо OG HTML.
+- **Facebook crawler следва meta-refresh:** `facebookexternalhit` следва `<meta http-equiv="refresh">` → попада на React SPA → чете generic `og:url = https://www.caretech.bg/` от index.html → показва лого на сайта вместо продуктова снимка. Viber НЕ следва meta-refresh. Решение: JS redirect вместо meta-refresh.
+- **nginx sub_filter за OG fix без Spring Boot rebuild:** Когато Spring Boot не може да се rebuild-не, nginx може да трансформира response body-то чрез `sub_filter`. Изисква `proxy_set_header Accept-Encoding ""` (disable gzip). Три замени: (1) `'0; url='` → `''`; (2) `'http-equiv="refresh"'` → `'name="js-redir"'`; (3) `</head>` → `<script>...window.location.replace...</script></head>`. Добавя се като отделен `location /api/og` ПРЕДИ общия `location /api`.
+- **OG bypass dual-mode map:** `map "$cookie___og:$arg_og_bypass" $og_bypass` — приема `cookie __og=1` (нов Spring Boot) ИЛИ `?og_bypass=1` query param (стар Spring Boot). Backward compatible при deploy.
+- **Facebook Sharing Debugger — Response Code 206:** Когато debugger-ът показва code 206 и следва `og:url Meta Tag` към homepage — означава че ботът е прочел React SPA (огледан по meta-refresh) и е взел нейния `og:url`. Fix: премахни meta-refresh от OG страниците.
+- **Docker deployment mystery:** Потребителят build-ва и push-ва Docker image 3 пъти, но EC2 продължава да изпълнява стария JAR. Возможни причини: Docker Hub cache, container не се рестартира правилно, или грешен image tag. Диагностика: `docker inspect techstore-api --format='{{.Created}}'` — сравни с времето на последния push.
+
+## Key Learnings (2026-08-03 — Vali sync review)
+
+- **Vali API `/full` endpoint is the ONLY source of complete product data.** Pagination params on the by-category endpoint are silently ignored by Vali. The paginated global `/products?page=X` endpoint returns only basic fields (no descriptions, flags, parameters).
+- **Vali `largeResponseWebClient`** already has a 50MB buffer + 5-min timeout. Largest observed category response is ~2.9MB — no need to switch endpoints for size.
+- **ValiSyncService flag sync** was wired in DTOs and entity but was never called from `updateProductFieldsFromExternal`. Always verify sync pipelines end-to-end: DTO → mapping method → entity → save.
+- **ProductStatus search filter:** Search repository was using `p.status IN ('AVAILABLE', 'LIMITED_QUANTITY')` — this incorrectly excluded ON_ROUTE (3) and ON_DEMAND (4). Correct filter is `p.status <> 'NOT_AVAILABLE'` to match browse behaviour.
+- **Vali `show` flag logic:** Product should only be shown if `extProduct.show == true AND finalPrice > 0 AND status != NOT_AVAILABLE`. All three conditions must be checked together when setting `product.setShow()`.
+- **Slack webhook disable:** Comment out `SLACK_WEBHOOK_URL` in `.env` with `#` — logback reads it via `${SLACK_WEBHOOK_URL}` and silently skips the appender when null/empty.
+
+## Do-Not-Repeat
+
+- [2026-08-05] NEVER include the "Производител" pseudo-parameter (added by `fetchCategoryParameters` in paramSlice) in product create/update payload. The `make` object has no `id` field → `parameterId` becomes `NaN` → JSON serializes as `null` → `@NotNull` backend validation fails. Fix: filter `state.param.options` by `p.id != null` in ProductForm, and add `!isNaN(id) && id > 0` guard in `buildParametersFromSelection`.
+
+- [2026-08-05] NEVER use `GET /api/categories` (public endpoint) in admin product forms — it returns only `show=true` categories via `findByShowTrue()`. Admin product forms need ALL categories. Use `GET /api/admin/categories/all` → `categoryService.getAllCategoriesForAdmin()` → `findAll()`.
+
+- [2026-08-05] NEVER use `<meta http-equiv="refresh">` in OG meta pages served to social media bots. Facebook's crawler (`facebookexternalhit`) FOLLOWS meta-refresh redirects, lands on React SPA, reads generic homepage OG tags, and shows wrong preview. Fix: use `<script>window.location.replace('...');</script>` — social crawlers do not execute JS, browsers do. If Spring Boot can't be rebuilt, use nginx `sub_filter` to replace meta-refresh with JS redirect at the proxy layer.
+
+- [2026-08-05] `nginx.prod.conf` in project root was emptied (0 bytes) during a session — content was lost. Always verify file size after saving. The deployed EC2 nginx config was unaffected (already deployed), but the local file needed to be recreated from memory.
+
+- [2026-08-03] NEVER look up existing products only by `externalId` in Vali sync without a referenceNumber fallback. Products created before `externalId` was populated (NULL in DB) won't be found → INSERT fails on `products_reference_number_key` unique constraint. Fix: after externalId lookup, batch-query unmatched ref numbers via `findByReferenceNumberIn()`, update those products, and backfill `externalId` for future syncs.
+- [2026-08-03] `ProductStatus.fromCode(int)` must accept `Integer` (nullable) and return `NOT_AVAILABLE` for null/unknown codes, not throw. Vali API may omit the status field.
+- [2026-08-03] When cancelling an order, always auto-set `paymentStatus = CANCELLED` unless it is already `PAID` or `REFUNDED`. Apply this in all three cancel paths: `updateOrderStatus`, `updateOrder`, `cancelOrder`.

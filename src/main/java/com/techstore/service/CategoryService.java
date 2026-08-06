@@ -45,6 +45,19 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
+    public List<CategoryResponseDTO> getAllCategoriesForAdmin() {
+        log.debug("Fetching all categories for admin (including hidden)");
+
+        return ExceptionHelper.wrapDatabaseOperation(() ->
+                        categoryRepository.findAll()
+                                .stream()
+                                .map(this::convertToResponseDTO)
+                                .toList(),
+                "fetch all categories for admin"
+        );
+    }
+
+    @Transactional(readOnly = true)
     public Page<CategoryResponseDTO> getAllCategories(Pageable pageable) {
         log.debug("Fetching paginated categories - Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
 

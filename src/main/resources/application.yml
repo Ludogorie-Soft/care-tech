@@ -184,6 +184,7 @@ logging:
             max-history: 30
             total-size-cap: 300MB
 
+
 # Application Specific Configuration
 app:
     name: CareTech

@@ -4,6 +4,7 @@ import com.techstore.service.sync.AsbisSyncService;
 import com.techstore.service.sync.MostSyncService;
 import com.techstore.service.sync.TekraSyncService;
 import com.techstore.service.sync.ValiSyncService;
+import com.techstore.util.Markers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -34,7 +35,7 @@ public class CronJobService {
             log.info("Vali products sync completed at {}", LocalDateTime.now());
 
         } catch (Exception e) {
-            log.error("CRITICAL: Scheduled Vali synchronization failed", e);
+            log.error(Markers.CRITICAL, "Scheduled Vali synchronization failed", e);
         }
 
         // --- Tekra ---
@@ -46,7 +47,7 @@ public class CronJobService {
             log.info("Tekra products sync completed at {}", LocalDateTime.now());
 
         } catch (Exception e) {
-            log.error("CRITICAL: Scheduled Tekra synchronization failed", e);
+            log.error(Markers.CRITICAL, "Scheduled Tekra synchronization failed", e);
         }
 
         // --- Most ---
@@ -61,7 +62,7 @@ public class CronJobService {
             log.info("Most products sync completed at {}", LocalDateTime.now());
 
         } catch (Exception e) {
-            log.error("CRITICAL: Scheduled Most synchronization failed", e);
+            log.error(Markers.CRITICAL, "Scheduled Most synchronization failed", e);
         }
 
         // --- Asbis ---
@@ -76,7 +77,7 @@ public class CronJobService {
             log.info("Asbis price/availability sync completed at {}", LocalDateTime.now());
 
         } catch (Exception e) {
-            log.error("CRITICAL: Scheduled Asbis synchronization failed", e);
+            log.error(Markers.CRITICAL, "Scheduled Asbis synchronization failed", e);
         }
 
         log.info("Scheduled synchronization finished at {}", LocalDateTime.now());

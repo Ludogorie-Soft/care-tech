@@ -5,6 +5,15 @@
 
 | 15:45 | Analyzed products_202607201526.sql for miscategorized products | products_202607201526.sql, categories_202607201527.sql | Found 20 remaining mismatches in cat37 MOST: 14 LENOVO TAB tablets, 3 LENOVO YOGA BOOK 9, 3 ACER warranties | ~8000 |
 
+## Сесия 2026-08-06
+
+| Час | Действие | Файлове | Резултат | ~Токени |
+|-----|----------|---------|---------|---------|
+| 06:00 | Диагностика: Vali sync не ъпдейтва статус | ValiSyncService.java, CronJobService.java | Root cause: silent error handling + итерира non-VALI категории | ~6000 |
+| 06:15 | Добавен seenExternalIds tracking + markUnseenAsUnavailable() | ValiSyncService.java | Продукти, изчезнали от Vali API → NOT_AVAILABLE + show=false | ~8000 |
+| 06:20 | AVAILABLE-only филтриране навсякъде | ProductRepository.java, ProductSearchRepository.java, ParameterRepository.java | Всички 10+ заявки: status = AVAILABLE (не <> NOT_AVAILABLE) | ~5000 |
+| 06:30 | Slack: само CRITICAL грешки | logback-spring.xml, CronJobService.java, Markers.java, CriticalMarkerFilter.java | MarkerFilter (custom) — само cron sync failures → Slack | ~3000 |
+
 ## Сесия 2026-07-06
 
 | Час | Действие | Файлове | Резултат | ~Токени |
@@ -14,6 +23,16 @@
 | — | ImageProxy hardening — Semaphore(5), timeouts 5s/10s, maxRetries 1; open-in-view=false; HikariCP pool 20 | `ImageProxyController.java`, `application.yml` | HikariPool exhaustion предотвратен | ~400 |
 | — | Pazaruvaj CSV export + `includeDelivery` параметър в XML builder | `PazaruvajFeedService.java`, `PazaruvajFeedController.java`, `PazaruvajLayout.jsx` | XML + CSV download от admin панела | ~500 |
 | — | Nginx hardening — rate limiting, bad bot blocking, security headers | `nginx.prod.conf` | Защита срещу атаки | ~300 |
+
+## Сесия 2026-08-05 (продължение)
+
+| Час | Действие | Файлове | Резултат | ~Токени |
+|-----|----------|---------|----------|---------|
+| 08:36 | Bug fix — "Parameter ID is required" при създаване на продукт от admin | `ProductForm.jsx`, `paramSlice.js` | Псевдо-параметърът "Производител" (без `id`) се включваше в payload с `parameterId: null` → validation fail | ~400 |
+| — | Fix — категории в admin ProductForm зареждаха само visible (show=true) | `CategoryService.java`, `AdminController.java`, `categorySlice.js`, `ProductForm.jsx` | Нов endpoint `GET /api/admin/categories/all` + `fetchAllCategoriesAdmin` thunk | ~300 |
+| — | Feature — auto-активиране на скрита категория при assign на продукт | `ProductService.java` | `resolveAndActivateCategory()` — ако category.show=false, сетва show=true и save-ва | ~200 |
+| — | SEO/OG meta — Facebook диагностика и fix | `OgMetaController.java`, `nginx.prod.conf` | Facebook следва meta-refresh → React SPA → generic OG. Fix 1: JS redirect в OgMetaController. Fix 2: nginx sub_filter трансформира meta-refresh → JS redirect на proxy ниво. Viber работи. Facebook работи след nginx deploy. | ~3000 |
+| — | nginx.prod.conf пресъздаден (беше 0 bytes) + добавен `location /api/og` с `sub_filter` | `nginx.prod.conf` | Файлът беше изпразнен; пресъздаден с пълно съдържание + sub_filter fix за Facebook OG | ~500 |
 
 ## Сесия 2026-07-27
 
@@ -2644,3 +2663,129 @@
 | 11:25 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | added 2 condition(s) | ~822 |
 | 11:25 | Fix duplicate key on Vali sync — fallback referenceNumber lookup + externalId backfill | ValiSyncService.java, ProductRepository.java | build passes | ~400 |
 | 11:25 | Session end: 2 writes across 2 files (ProductRepository.java, ValiSyncService.java) | 1 reads | ~15616 tok |
+| 11:36 | Session end: 2 writes across 2 files (ProductRepository.java, ValiSyncService.java) | 1 reads | ~15616 tok |
+| 11:36 | Session end: 2 writes across 2 files (ProductRepository.java, ValiSyncService.java) | 1 reads | ~15616 tok |
+| 12:00 | Session end: 2 writes across 2 files (ProductRepository.java, ValiSyncService.java) | 1 reads | ~15616 tok |
+
+## Session: 2026-08-05 12:41
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:01 | Edited ../../care-tech-ui/src/pages/admin/Products/ProductForm.jsx | 1→3 lines | ~33 |
+| 13:01 | Edited ../../care-tech-ui/src/pages/admin/Products/ProductForm.jsx | 8→11 lines | ~127 |
+| 13:01 | Session end: 2 writes across 1 files (ProductForm.jsx) | 6 reads | ~263 tok |
+| 13:02 | Session end: 2 writes across 1 files (ProductForm.jsx) | 6 reads | ~263 tok |
+| 13:06 | Edited src/main/java/com/techstore/service/CategoryService.java | modified getAllCategoriesForAdmin() | ~165 |
+| 13:06 | Edited src/main/java/com/techstore/controller/CategoryController.java | modified getAllCategories() | ~143 |
+| 13:07 | Edited src/main/java/com/techstore/controller/CategoryController.java | modified getAllCategoriesForAdmin() | ~102 |
+| 13:07 | Edited src/main/java/com/techstore/controller/AdminController.java | modified getAllCategoriesForAdmin() | ~89 |
+| 13:07 | Edited src/main/java/com/techstore/controller/CategoryController.java | — | ~0 |
+| 13:07 | Edited ../../care-tech-ui/src/redux/categorySlice.js | added error handling | ~104 |
+| 13:07 | Edited ../../care-tech-ui/src/redux/categorySlice.js | expanded (+14 lines) | ~166 |
+| 13:08 | Edited ../../care-tech-ui/src/pages/admin/Products/ProductForm.jsx | inline fix | ~21 |
+| 13:08 | Edited ../../care-tech-ui/src/pages/admin/Products/ProductForm.jsx | fetchCategories() → fetchAllCategoriesAdmin() | ~42 |
+| 13:08 | Session end: 11 writes across 5 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 12 reads | ~15008 tok |
+| 13:09 | Session end: 11 writes across 5 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 12 reads | ~15008 tok |
+| 13:10 | Edited src/main/java/com/techstore/service/ProductService.java | added 1 condition(s) | ~194 |
+| 13:10 | Edited src/main/java/com/techstore/service/ProductService.java | findCategoryByIdOrThrow() → resolveAndActivateCategory() | ~126 |
+| 13:10 | Edited src/main/java/com/techstore/service/ProductService.java | findCategoryByIdOrThrow() → resolveAndActivateCategory() | ~126 |
+| 13:10 | Session end: 14 writes across 6 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 13 reads | ~28897 tok |
+| 13:11 | Session end: 14 writes across 6 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 13 reads | ~28897 tok |
+| 13:24 | Session end: 14 writes across 6 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 15 reads | ~31068 tok |
+| 13:28 | Created nginx.prod.conf | — | ~2275 |
+| 13:28 | Edited src/main/java/com/techstore/controller/OgMetaController.java | modified ogHtml() | ~604 |
+| 13:28 | Edited src/main/java/com/techstore/controller/OgMetaController.java | modified getNameBg() | ~52 |
+| 13:29 | Session end: 17 writes across 8 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 15 reads | ~34208 tok |
+| 13:37 | Session end: 17 writes across 8 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 16 reads | ~34569 tok |
+| 13:40 | Session end: 17 writes across 8 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 16 reads | ~34569 tok |
+| 13:42 | Session end: 17 writes across 8 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 16 reads | ~34569 tok |
+| 13:52 | Edited src/main/java/com/techstore/controller/OgMetaController.java | added 1 import(s) | ~76 |
+| 13:52 | Edited src/main/java/com/techstore/controller/OgMetaController.java | modified Bots() | ~169 |
+| 13:52 | Edited src/main/java/com/techstore/controller/OgMetaController.java | modified getNameBg() | ~97 |
+| 13:52 | Edited src/main/java/com/techstore/controller/OgMetaController.java | 1→4 lines | ~78 |
+| 13:53 | Edited nginx.prod.conf | reduced (-17 lines) | ~82 |
+| 13:53 | Edited nginx.prod.conf | modified if() | ~31 |
+| 13:53 | Edited nginx.prod.conf | modified if() | ~423 |
+| 13:54 | Session end: 24 writes across 8 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 16 reads | ~37553 tok |
+| 14:04 | Session end: 24 writes across 8 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 16 reads | ~37553 tok |
+| 14:05 | Session end: 24 writes across 8 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 16 reads | ~37553 tok |
+| 14:07 | Session end: 24 writes across 8 files (ProductForm.jsx, CategoryService.java, CategoryController.java, AdminController.java, categorySlice.js) | 16 reads | ~37553 tok |
+| 14:11 | Edited nginx.prod.conf | 7→10 lines | ~138 |
+
+## Session: 2026-08-05 14:12
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:35 | Edited src/main/java/com/techstore/controller/OgMetaController.java | 6→7 lines | ~91 |
+| 14:35 | Session end: 1 writes across 1 files (OgMetaController.java) | 1 reads | ~2113 tok |
+| 14:45 | Session end: 1 writes across 1 files (OgMetaController.java) | 1 reads | ~2113 tok |
+| 14:47 | Session end: 1 writes across 1 files (OgMetaController.java) | 1 reads | ~2113 tok |
+| 14:48 | Session end: 1 writes across 1 files (OgMetaController.java) | 1 reads | ~2113 tok |
+| 14:49 | Session end: 1 writes across 1 files (OgMetaController.java) | 1 reads | ~2113 tok |
+| 14:50 | Session end: 1 writes across 1 files (OgMetaController.java) | 1 reads | ~2113 tok |
+| 14:51 | Session end: 1 writes across 1 files (OgMetaController.java) | 1 reads | ~2113 tok |
+| 14:53 | Session end: 1 writes across 1 files (OgMetaController.java) | 1 reads | ~2113 tok |
+| 14:59 | Session end: 1 writes across 1 files (OgMetaController.java) | 1 reads | ~2113 tok |
+| 15:00 | Session end: 1 writes across 1 files (OgMetaController.java) | 1 reads | ~2113 tok |
+| 15:02 | Session end: 1 writes across 1 files (OgMetaController.java) | 4 reads | ~2534 tok |
+| 15:10 | Created nginx.prod.conf | — | ~2441 |
+| 15:11 | Session end: 2 writes across 2 files (OgMetaController.java, nginx.prod.conf) | 5 reads | ~7357 tok |
+| 15:14 | Session end: 2 writes across 2 files (OgMetaController.java, nginx.prod.conf) | 5 reads | ~7357 tok |
+| 15:24 | Session end: 2 writes across 2 files (OgMetaController.java, nginx.prod.conf) | 5 reads | ~7357 tok |
+| 15:25 | Session end: 2 writes across 2 files (OgMetaController.java, nginx.prod.conf) | 5 reads | ~7357 tok |
+| 15:28 | Session end: 2 writes across 2 files (OgMetaController.java, nginx.prod.conf) | 5 reads | ~7357 tok |
+| 15:35 | Session end: 2 writes across 2 files (OgMetaController.java, nginx.prod.conf) | 5 reads | ~7357 tok |
+| 15:42 | Edited nginx.prod.conf | expanded (+11 lines) | ~142 |
+
+## Session: 2026-08-06 08:15
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 08:23 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/vali_sync_status_bug.md | — | ~536 |
+| 08:24 | Edited ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/MEMORY.md | 1→2 lines | ~70 |
+| 08:24 | Session end: 2 writes across 2 files (vali_sync_status_bug.md, MEMORY.md) | 9 reads | ~29594 tok |
+| 08:28 | Edited src/main/java/com/techstore/repository/ProductRepository.java | 3→5 lines | ~79 |
+| 08:29 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | modified for() | ~1168 |
+| 08:29 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | modified syncProductsByCategory() | ~360 |
+| 08:29 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | modified processProductsChunk() | ~238 |
+| 08:30 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | added 1 import(s) | ~30 |
+| 08:32 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | added 2 condition(s) | ~475 |
+
+## Сесия 2026-08-06
+| 08:30 | Анализ на Vali sync статус проблем от CSV доказателство | products_202608060817.csv, ValiSyncService.java, CronJobService.java, ValiApiService.java | 3 root causes: silent error handling, non-VALI categories in loop, Hibernate dirty check | ~6000 |
+| 08:45 | Fix: markUnseenAsUnavailable + VALI-only category filter + seenExternalIds Set | ValiSyncService.java, ProductRepository.java | Added findByPlatformAndExternalIdNotNull, markUnseenAsUnavailable(), seenExternalIds tracking | ~3000 |
+| 08:33 | Session end: 8 writes across 4 files (vali_sync_status_bug.md, MEMORY.md, ProductRepository.java, ValiSyncService.java) | 10 reads | ~36176 tok |
+| 08:34 | Session end: 8 writes across 4 files (vali_sync_status_bug.md, MEMORY.md, ProductRepository.java, ValiSyncService.java) | 10 reads | ~36176 tok |
+| 08:36 | Session end: 8 writes across 4 files (vali_sync_status_bug.md, MEMORY.md, ProductRepository.java, ValiSyncService.java) | 10 reads | ~36176 tok |
+| 08:40 | Session end: 8 writes across 4 files (vali_sync_status_bug.md, MEMORY.md, ProductRepository.java, ValiSyncService.java) | 10 reads | ~36176 tok |
+| 08:41 | Session end: 8 writes across 4 files (vali_sync_status_bug.md, MEMORY.md, ProductRepository.java, ValiSyncService.java) | 10 reads | ~36176 tok |
+| 08:45 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | inline fix | ~35 |
+| 08:45 | Session end: 9 writes across 4 files (vali_sync_status_bug.md, MEMORY.md, ProductRepository.java, ValiSyncService.java) | 13 reads | ~51107 tok |
+| 08:48 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | "NOT_AVAILABLE" → "AVAILABLE" | ~6 |
+| 08:48 | Edited src/main/java/com/techstore/repository/ProductRepository.java | inline fix | ~15 |
+| 08:48 | Edited src/main/java/com/techstore/repository/ProductRepository.java | "NOT_AVAILABLE" → "AVAILABLE" | ~11 |
+| 08:49 | Edited src/main/java/com/techstore/repository/ProductRepository.java | "NOT_AVAILABLE" → "AVAILABLE" | ~11 |
+| 08:49 | Edited src/main/java/com/techstore/repository/ParameterRepository.java | inline fix | ~17 |
+| 08:49 | Session end: 14 writes across 6 files (vali_sync_status_bug.md, MEMORY.md, ProductRepository.java, ValiSyncService.java, ProductSearchRepository.java) | 15 reads | ~61659 tok |
+| 08:52 | Edited src/main/resources/logback-spring.xml | 6→8 lines | ~88 |
+| 08:52 | Session end: 15 writes across 7 files (vali_sync_status_bug.md, MEMORY.md, ProductRepository.java, ValiSyncService.java, ProductSearchRepository.java) | 16 reads | ~62017 tok |
+
+## Session: 2026-08-06 08:55
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 08:56 | Created src/main/java/com/techstore/util/Markers.java | — | ~60 |
+| 08:57 | Edited src/main/resources/logback-spring.xml | 8→8 lines | ~90 |
+| 08:57 | Edited src/main/java/com/techstore/service/CronJobService.java | added 1 import(s) | ~112 |
+| 08:57 | Edited src/main/java/com/techstore/service/CronJobService.java | "CRITICAL: Scheduled Vali " → "Scheduled Vali synchroniz" | ~23 |
+| 08:57 | Edited src/main/java/com/techstore/service/CronJobService.java | "CRITICAL: Scheduled Tekra" → "Scheduled Tekra synchroni" | ~23 |
+| 08:57 | Edited src/main/java/com/techstore/service/CronJobService.java | "CRITICAL: Scheduled Most " → "Scheduled Most synchroniz" | ~23 |
+| 08:57 | Edited src/main/java/com/techstore/service/CronJobService.java | "CRITICAL: Scheduled Asbis" → "Scheduled Asbis synchroni" | ~23 |
+| 08:57 | Session end: 7 writes across 3 files (Markers.java, logback-spring.xml, CronJobService.java) | 1 reads | ~1166 tok |
+| 09:01 | Session end: 7 writes across 3 files (Markers.java, logback-spring.xml, CronJobService.java) | 1 reads | ~1166 tok |
+| 09:04 | Created src/main/java/com/techstore/util/CriticalMarkerFilter.java | — | ~142 |
+| 09:04 | Edited src/main/resources/logback-spring.xml | 5→1 lines | ~18 |
+| 09:04 | Session end: 9 writes across 4 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java) | 1 reads | ~1337 tok |
+| 09:15 | Session end: 9 writes across 4 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java) | 1 reads | ~1337 tok |
+| 09:15 | Session end: 9 writes across 4 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java) | 1 reads | ~1337 tok |
+| 09:20 | Session end: 9 writes across 4 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java) | 1 reads | ~1337 tok |

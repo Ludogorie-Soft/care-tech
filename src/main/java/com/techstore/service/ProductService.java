@@ -751,6 +751,17 @@ public class ProductService {
         return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
     }
 
+    private Category resolveAndActivateCategory(Long categoryId) {
+        Category category = findCategoryByIdOrThrow(categoryId);
+        if (Boolean.FALSE.equals(category.getShow())) {
+            log.info("Auto-activating hidden category '{}' (id: {}) because a product was assigned to it",
+                    category.getNameBg() != null ? category.getNameBg() : category.getNameEn(), categoryId);
+            category.setShow(true);
+            categoryRepository.save(category);
+        }
+        return category;
+    }
+
     /**
      * If the category is an alias, returns the ID of the target category.
      * If the target category is hidden, returns the alias ID (no products served).
@@ -849,7 +860,7 @@ public class ProductService {
         p.setDescriptionBg(dto.getDescriptionBg());
         p.setModel(dto.getModel());
         p.setBarcode(dto.getBarcode());
-        p.setCategory(findCategoryByIdOrThrow(dto.getCategoryId()));
+        p.setCategory(resolveAndActivateCategory(dto.getCategoryId()));
         p.setManufacturer(findManufacturerByIdOrThrow(dto.getManufacturerId()));
         p.setStatus(ProductStatus.fromCode(dto.getStatus()));
         p.setPriceClient(dto.getPriceClient());
@@ -925,7 +936,7 @@ public class ProductService {
         p.setDescriptionBg(dto.getDescriptionBg());
         p.setModel(dto.getModel());
         p.setBarcode(dto.getBarcode());
-        p.setCategory(findCategoryByIdOrThrow(dto.getCategoryId()));
+        p.setCategory(resolveAndActivateCategory(dto.getCategoryId()));
         p.setManufacturer(findManufacturerByIdOrThrow(dto.getManufacturerId()));
         p.setStatus(ProductStatus.fromCode(dto.getStatus()));
         p.setPriceClient(dto.getPriceClient());

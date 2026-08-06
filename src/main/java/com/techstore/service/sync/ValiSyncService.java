@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 import static com.techstore.util.LogHelper.LOG_STATUS_FAILED;
 import static com.techstore.util.LogHelper.LOG_STATUS_SUCCESS;
@@ -762,12 +763,16 @@ public class ValiSyncService {
             List<Category> categories = categoryRepository.findAll();
             log.info("Found {} categories to process", categories.size());
 
+            // Tracks every Vali product externalId seen in the API response this run.
+            // Used at the end to detect products no longer returned by the API.
+            Set<Long> seenExternalIds = new HashSet<>();
+
             int categoryCounter = 0;
 
             for (Category category : categories) {
                 categoryCounter++;
 
-                if (category.getExternalId() == null) {
+                if (category.getExternalId() == null || category.getPlatform() != Platform.VALI) {
                     continue;
                 }
 
@@ -776,7 +781,8 @@ public class ValiSyncService {
                             category,
                             manufacturersMap,
                             globalParametersCache,
-                            globalOptionsCache
+                            globalOptionsCache,
+                            seenExternalIds
                     );
 
                     totalProcessed += result.processed;
@@ -791,15 +797,20 @@ public class ValiSyncService {
                 }
             }
 
+            // Mark VALI products absent from API as NOT_AVAILABLE
+            long markedUnavailable = markUnseenAsUnavailable(seenExternalIds);
+
             int deduplicated = productRepository.deduplicateCrossPlatformBySku();
             log.info("Cross-platform deduplication: hidden {} higher-priced duplicates", deduplicated);
 
+            String note = String.format("MarkedUnavailable: %d%s",
+                    markedUnavailable, errors > 0 ? ", Errors: " + errors : "");
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, created, updated, errors,
-                    errors > 0 ? String.format("Completed with %d errors", errors) : null, startTime);
+                    note, startTime);
 
             log.info("=== Products Sync Completed ===");
-            log.info("   Total: {}, Created: {}, Updated: {}, Deduplicated: {}, Errors: {}",
-                    totalProcessed, created, updated, deduplicated, errors);
+            log.info("   Total: {}, Created: {}, Updated: {}, MarkedUnavailable: {}, Deduplicated: {}, Errors: {}",
+                    totalProcessed, created, updated, markedUnavailable, deduplicated, errors);
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, totalProcessed, created, updated, errors,
@@ -812,7 +823,8 @@ public class ValiSyncService {
     private CategorySyncResult syncProductsByCategory(Category category,
                                                       Map<Long, Manufacturer> manufacturersMap,
                                                       Map<Long, Parameter> globalParametersCache,
-                                                      Map<String, ParameterOption> globalOptionsCache) {
+                                                      Map<String, ParameterOption> globalOptionsCache,
+                                                      Set<Long> seenExternalIds) {
         long totalProcessed = 0, created = 0, updated = 0, errors = 0;
 
         try {
@@ -833,7 +845,8 @@ public class ValiSyncService {
                             manufacturersMap,
                             category,
                             globalParametersCache,
-                            globalOptionsCache
+                            globalOptionsCache,
+                            seenExternalIds
                     );
 
                     totalProcessed += result.processed;
@@ -865,12 +878,17 @@ public class ValiSyncService {
                                              Map<Long, Manufacturer> manufacturersMap,
                                              Category category,
                                              Map<Long, Parameter> globalParametersCache,
-                                             Map<String, ParameterOption> globalOptionsCache) {
+                                             Map<String, ParameterOption> globalOptionsCache,
+                                             Set<Long> seenExternalIds) {
         long processed = 0, created = 0, updated = 0, errors = 0;
 
         Set<Long> externalProductIdsInChunk = products.stream()
                 .map(ProductRequestDto::getId)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
+
+        // Register every product returned by the API as "seen" this sync run
+        seenExternalIds.addAll(externalProductIdsInChunk);
 
         Map<Long, Product> existingProductsMap = productRepository.findByExternalIdIn(externalProductIdsInChunk)
                 .stream()
@@ -1002,7 +1020,7 @@ public class ValiSyncService {
         product.calculateFinalPrice();
 
         boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
-        product.setShow(Boolean.TRUE.equals(extProduct.getShow()) && hasValidPrice && resolvedStatus != ProductStatus.NOT_AVAILABLE);
+        product.setShow(Boolean.TRUE.equals(extProduct.getShow()) && hasValidPrice && resolvedStatus == ProductStatus.AVAILABLE);
     }
 
     private void setParametersToProduct(Product product, ProductRequestDto extProduct,
@@ -1216,6 +1234,49 @@ public class ValiSyncService {
                 product.setDescriptionEn(desc.getText());
             }
         });
+    }
+
+    /**
+     * After a full products sync, finds all VALI products (with a known externalId) that were
+     * NOT returned by the Vali API and marks them NOT_AVAILABLE + hidden.
+     * Skips the operation entirely if seenExternalIds is empty as a safety guard
+     * (would otherwise mark every product unavailable on a total API failure).
+     *
+     * @return number of products marked NOT_AVAILABLE
+     */
+    @Transactional
+    public long markUnseenAsUnavailable(Set<Long> seenExternalIds) {
+        if (seenExternalIds.isEmpty()) {
+            log.warn("seenExternalIds is empty — skipping markUnseenAsUnavailable to avoid mass status reset");
+            return 0;
+        }
+
+        List<Product> allValiProducts = productRepository.findByPlatformAndExternalIdNotNull(Platform.VALI);
+
+        List<Product> toMark = allValiProducts.stream()
+                .filter(p -> !seenExternalIds.contains(p.getExternalId()))
+                .filter(p -> p.getStatus() != ProductStatus.NOT_AVAILABLE || Boolean.TRUE.equals(p.getShow()))
+                .toList();
+
+        if (toMark.isEmpty()) {
+            return 0;
+        }
+
+        toMark.forEach(p -> {
+            p.setStatus(ProductStatus.NOT_AVAILABLE);
+            p.setShow(false);
+        });
+
+        productRepository.saveAll(toMark);
+        entityManager.flush();
+        entityManager.clear();
+
+        log.info("Marked {} VALI products as NOT_AVAILABLE (absent from Vali API)", toMark.size());
+        toMark.stream().limit(10).forEach(p ->
+                log.info("  → NOT_AVAILABLE: [{}] {} (externalId={})",
+                        p.getReferenceNumber(), p.getNameBg(), p.getExternalId()));
+
+        return toMark.size();
     }
 
     private <T> List<List<T>> partitionList(List<T> list, int partitionSize) {

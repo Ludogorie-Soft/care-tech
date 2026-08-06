@@ -119,6 +119,11 @@ public class AdminController {
         return ResponseEntity.ok(products);
     }
 
+    @GetMapping("/categories/all")
+    public ResponseEntity<List<CategoryResponseDTO>> getAllCategoriesForAdmin() {
+        return ResponseEntity.ok(categoryService.getAllCategoriesForAdmin());
+    }
+
     @GetMapping("/categories/with-markup")
     public ResponseEntity<List<CategoryResponseDTO>> getCategoriesWithMarkupProducts() {
         List<CategoryResponseDTO> categories = categoryService.findCategoriesWithMarkupProducts();

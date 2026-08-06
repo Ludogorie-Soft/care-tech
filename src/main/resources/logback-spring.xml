@@ -14,9 +14,7 @@
     </appender>
 
     <appender name="SLACK_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>WARN</level>
-        </filter>
+        <filter class="com.techstore.util.CriticalMarkerFilter"/>
         <appender-ref ref="SLACK"/>
     </appender>
 

@@ -6,6 +6,7 @@ import com.techstore.repository.CategoryRepository;
 import com.techstore.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +19,13 @@ import java.util.Optional;
  * Returns minimal HTML with Open Graph meta tags for social media crawlers
  * (Facebook, WhatsApp, Viber, Telegram, etc.).
  *
- * Nginx routes requests from known bot User-Agents to these endpoints.
- * Regular browsers are never sent here — they always get the React SPA.
- * A <meta http-equiv="refresh"> acts as a safety fallback for any browser
- * that does land here.
+ * Strategy: nginx routes ALL /product/ and /category/ requests here (not just known bots).
+ * - Bots (no cookie): read OG tags and stop — goal achieved.
+ * - Browsers (no cookie): get OG HTML + Set-Cookie(__og=1, 30 min) + instant meta-refresh
+ *   back to the same URL. On the second request they have the cookie, nginx serves React directly.
+ * - Browsers (has cookie): never reach here — nginx proxies straight to React.
+ *
+ * This approach works for ANY messenger/bot regardless of User-Agent.
  */
 @RestController
 @RequestMapping("/api/og")
@@ -52,7 +56,11 @@ public class OgMetaController {
         String title = p.getNameBg() != null ? p.getNameBg() + " | Caretech" : "Caretech";
         String description = buildProductDescription(p);
 
-        return ResponseEntity.ok(ogHtml(title, description, image, productUrl, "product", productUrl));
+        String imageAlt = p.getNameBg() != null ? p.getNameBg() : p.getNameEn();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, "__og=1; Max-Age=1800; Path=/; SameSite=Lax")
+                .contentType(MediaType.TEXT_HTML)
+                .body(ogHtml(title, description, image, productUrl, "product", productUrl, imageAlt));
     }
 
     // ── Category ───────────────────────────────────────────────────────────────
@@ -71,7 +79,10 @@ public class OgMetaController {
         String description = "Разгледайте продуктите от категория " + c.getNameBg()
                 + ". Онлайн магазин за технологични продукти с най-добри цени.";
 
-        return ResponseEntity.ok(ogHtml(title, description, siteUrl + "/logo.png", categoryUrl, "website", categoryUrl));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, "__og=1; Max-Age=1800; Path=/; SameSite=Lax")
+                .contentType(MediaType.TEXT_HTML)
+                .body(ogHtml(title, description, siteUrl + "/logo.png", categoryUrl, "website", categoryUrl));
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────
@@ -107,10 +118,16 @@ public class OgMetaController {
 
     private String ogHtml(String title, String description, String image,
                            String url, String type, String canonical) {
+        return ogHtml(title, description, image, url, type, canonical, null);
+    }
+
+    private String ogHtml(String title, String description, String image,
+                           String url, String type, String canonical, String imageAlt) {
         String t = escape(title);
         String d = escape(description);
         String i = escape(image);
         String u = escape(url);
+        String alt = escape(imageAlt != null ? imageAlt : title);
         return """
                 <!DOCTYPE html>
                 <html lang="bg">
@@ -121,26 +138,30 @@ public class OgMetaController {
                   <link rel="canonical" href="%s">
 
                   <!-- Open Graph -->
-                  <meta property="og:type"        content="%s">
-                  <meta property="og:title"       content="%s">
-                  <meta property="og:description" content="%s">
-                  <meta property="og:image"       content="%s">
-                  <meta property="og:url"         content="%s">
-                  <meta property="og:site_name"   content="Caretech">
-                  <meta property="og:locale"      content="bg_BG">
+                  <meta property="og:type"              content="%s">
+                  <meta property="og:title"             content="%s">
+                  <meta property="og:description"       content="%s">
+                  <meta property="og:image"             content="%s">
+                  <meta property="og:image:secure_url"  content="%s">
+                  <meta property="og:image:alt"         content="%s">
+                  <meta property="og:url"               content="%s">
+                  <meta property="og:site_name"         content="Caretech">
+                  <meta property="og:locale"            content="bg_BG">
 
                   <!-- Twitter Card -->
                   <meta name="twitter:card"        content="summary_large_image">
                   <meta name="twitter:title"       content="%s">
                   <meta name="twitter:description" content="%s">
                   <meta name="twitter:image"       content="%s">
+                  <meta name="twitter:image:alt"   content="%s">
 
-                  <!-- Redirect browsers immediately — bots ignore this -->
-                  <meta http-equiv="refresh" content="0; url=%s">
                 </head>
-                <body></body>
+                <body>
+                  <!-- JS redirect: browsers follow this, social crawlers do not execute JS -->
+                  <script>window.location.replace('%s');</script>
+                </body>
                 </html>
-                """.formatted(t, d, u, type, t, d, i, u, t, d, i, u);
+                """.formatted(t, d, u, type, t, d, i, i, alt, u, t, d, i, alt, u);
     }
 
     private String redirect(String url) {

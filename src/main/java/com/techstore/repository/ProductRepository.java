@@ -33,13 +33,13 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     Page<Product> findByActiveTrue(Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE p.active = true AND p.show = true AND p.category.id = :categoryId AND p.status <> com.techstore.enums.ProductStatus.NOT_AVAILABLE AND p.finalPrice > 0")
+    @Query("SELECT p FROM Product p WHERE p.active = true AND p.show = true AND p.category.id = :categoryId AND p.status = com.techstore.enums.ProductStatus.AVAILABLE AND p.finalPrice > 0")
     Page<Product> findActiveByCategoryExcludingNotAvailable(@Param("categoryId") Long categoryId, Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE p.active = true AND p.show = true AND p.manufacturer.id = :brandId AND p.status <> com.techstore.enums.ProductStatus.NOT_AVAILABLE AND p.finalPrice > 0")
+    @Query("SELECT p FROM Product p WHERE p.active = true AND p.show = true AND p.manufacturer.id = :brandId AND p.status = com.techstore.enums.ProductStatus.AVAILABLE AND p.finalPrice > 0")
     Page<Product> findActiveByManufacturerExcludingNotAvailable(@Param("brandId") Long brandId, Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE p.active = true AND p.show = true AND p.id != :productId AND p.status <> com.techstore.enums.ProductStatus.NOT_AVAILABLE AND " +
+    @Query("SELECT p FROM Product p WHERE p.active = true AND p.show = true AND p.id != :productId AND p.status = com.techstore.enums.ProductStatus.AVAILABLE AND " +
             "(p.category.id = :categoryId OR p.manufacturer.id = :manufacturerId)")
     List<Product> findRelatedProducts(@Param("productId") Long productId,
                                       @Param("categoryId") Long categoryId,
@@ -123,7 +123,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
         LEFT JOIN categories    cp ON cp.id = c.parent_id
         WHERE p.active     = true
           AND p.show_flag  = true
-          AND p.status    <> 'NOT_AVAILABLE'
+          AND p.status     = 'AVAILABLE'
           AND p.final_price > 0
           AND p.slug IS NOT NULL AND p.slug <> ''
           AND p.image_url IS NOT NULL AND p.image_url <> ''
@@ -151,7 +151,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
         WHERE p.id IN (:productIds)
           AND p.active    = true
           AND p.show_flag = true
-          AND p.status   <> 'NOT_AVAILABLE'
+          AND p.status    = 'AVAILABLE'
           AND p.final_price > 0
           AND p.slug IS NOT NULL AND p.slug <> ''
         """, nativeQuery = true)
@@ -176,7 +176,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
         LEFT JOIN categories    cp ON cp.id = c.parent_id
         WHERE p.active     = true
           AND p.show_flag  = true
-          AND p.status    <> 'NOT_AVAILABLE'
+          AND p.status     = 'AVAILABLE'
           AND p.final_price > 0
           AND p.slug IS NOT NULL AND p.slug <> ''
           AND p.image_url IS NOT NULL AND p.image_url <> ''
@@ -201,6 +201,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Modifying
     @Query("UPDATE Product p SET p.show = false WHERE p.sku IN :skus AND p.platform = :platform")
     int hideBySkuInAndPlatform(@Param("skus") Collection<String> skus, @Param("platform") Platform platform);
+
+    List<Product> findByPlatformAndExternalIdNotNull(Platform platform);
 
     /**
      * Cross-platform deduplication by SKU.

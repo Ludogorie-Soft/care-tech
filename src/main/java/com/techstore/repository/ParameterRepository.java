@@ -28,7 +28,7 @@ public interface ParameterRepository extends JpaRepository<Parameter, Long> {
             "AND EXISTS (" +
             "  SELECT 1 FROM Product prod " +
             "  WHERE prod.category.id = c.id " +
-            "  AND prod.status != com.techstore.enums.ProductStatus.NOT_AVAILABLE " +
+            "  AND prod.status = com.techstore.enums.ProductStatus.AVAILABLE" +
             "  AND prod.active = true" +
             ") " +
             "ORDER BY p.order ASC")

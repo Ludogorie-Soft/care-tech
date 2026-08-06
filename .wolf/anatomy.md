@@ -1,19 +1,20 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-03T08:25:12.824Z
-> Files: 596 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T06:04:32.086Z
+> Files: 600 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
 - `asbis_price_field.md` (~203 tok)
 - `euro_rate_convention.md` — Declares EURO_RATE (~194 tok)
-- `MEMORY.md` — Memory Index (~339 tok)
+- `MEMORY.md` — Memory Index (~373 tok)
 - `personal_offer_flow.md` — Declares stored (~373 tok)
 - `project_most_api.md` (~136 tok)
 - `session_2026_06_03.md` — Backend (`tech-store-api`) (~574 tok)
 - `speedy_autocomplete_pattern.md` (~297 tok)
 - `tbi_leasing_integration.md` — Status: Backend + Frontend COMPLETE (2026-06-03 — updated credentials + modal fix) (~881 tok)
 - `user_role_and_workflow.md` (~279 tok)
+- `vali_sync_status_bug.md` (~502 tok)
 
 ## ../../care-tech-ui/public/
 
@@ -117,7 +118,7 @@
 
 ## ../../care-tech-ui/src/pages/admin/Products/
 
-- `ProductForm.jsx` — SearchSelect (~10755 tok)
+- `ProductForm.jsx` — SearchSelect (~10798 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Reviews/
 
@@ -138,6 +139,7 @@
 ## ../../care-tech-ui/src/redux/
 
 - `blogSlice.js` — ── Public thunks ────────────────────────────────────────────────────────────── (~4239 tok)
+- `categorySlice.js` — API routes: GET, POST, PUT, DELETE (5 endpoints) (~1296 tok)
 - `compareSlice.js` — Exports selectCompareItems, selectCompareCount, selectIsInCompare (~386 tok)
 - `leasingSlice.js` — 4 async thunks: fetchLeasingApplications, fetchLeasingById, fetchLeasingStatistics, registerLeasingApplication. registerError stores true (flag only, not backend payload). State: registerStatus, registeredUrl, registeredApplicationId. (~1100 tok)
 - `offersSlice.js` — API routes: GET, PUT, POST (10 endpoints) (~2807 tok)
@@ -174,7 +176,7 @@
 - `mvnw` — or more contributor license agreements.  See the NOTICE file (~3144 tok)
 - `mvnw.cmd` — Declares Directory (~2262 tok)
 - `nginx.conf` — Nginx configuration (~575 tok)
-- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~2171 tok)
+- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~2560 tok)
 - `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
 - `ORDER_EDIT_PLAN.md` — План: Редактиране на поръчки от администратор (~577 tok)
 - `parameters_202605130941.sql` (~43615 tok)
@@ -359,20 +361,20 @@
 
 ## src/main/java/com/techstore/controller/
 
-- `AdminController.java` — Get all orders with pagination and sorting (~5727 tok)
+- `AdminController.java` — Get all orders with pagination and sorting (~5781 tok)
 - `AuthController.java` — RestController: AuthController (9 endpoints) (~1192 tok)
 - `BlogCategoryController.java` — RestController: BlogCategoryController (6 endpoints) (~750 tok)
 - `BlogPostController.java` — RestController: BlogPostController (9 endpoints) (~1487 tok)
 - `BlogTagController.java` — RestController: BlogTagController (4 endpoints) (~599 tok)
 - `CacheClearController.java` — POST /api/internal/cache/clear-all. @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')") + URL-level guard. (~264 tok)
 - `CartController.java` — RestController: CartController (6 endpoints) (~2208 tok)
-- `CategoryController.java` — RestController: CategoryController (5 endpoints) (~854 tok)
+- `CategoryController.java` — RestController: CategoryController (5 endpoints) (~799 tok)
 - `CategoryReorganizationController.java` — CategoryReorganizationController (~979 tok)
 - `ContactController.java` — RestController: ContactController (2 endpoints) (~331 tok)
 - `FileUploadController.java` — RestController: FileUploadController (7 endpoints) (~831 tok)
 - `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1992 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
-- `OgMetaController.java` — GET /api/og/product/{id} + /api/og/category/{id}: OG meta HTML за соц. медии ботове. Ползва ProductRepository, CategoryRepository, app.url. Meta refresh за браузъри. (~200 tok)
+- `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~2016 tok)
 - `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~1379 tok)
 - `OrderController.java` — Създаване на нова поръчка (~1863 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
@@ -657,11 +659,11 @@
 - `OrderItemRepository.java` — Repository: OrderItemRepository (~87 tok)
 - `OrderRepository.java` — Repository: OrderRepository (~1414 tok)
 - `ParameterOptionRepository.java` — Repository: ParameterOptionRepository (~420 tok)
-- `ParameterRepository.java` — Repository: ParameterRepository (~1143 tok)
+- `ParameterRepository.java` — Repository: ParameterRepository. findParametersForAvailableProductsByCategory uses status = AVAILABLE (not <> NOT_AVAILABLE) (~1065 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~478 tok)
-- `ProductRepository.java` — Cross-platform deduplication by SKU. (~3347 tok)
-- `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9344 tok)
+- `ProductRepository.java` — Cross-platform deduplication by SKU. All active-product queries filter status = AVAILABLE (not <> NOT_AVAILABLE). findByPlatformAndExternalIdNotNull added for Vali unseen check. (~3360 tok)
+- `ProductSearchRepository.java` — Full-text + LIKE search. All 7 SQL queries filter status = 'AVAILABLE' (not <> 'NOT_AVAILABLE'). (~9335 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
 - `SyncLogRepository.java` — Repository: SyncLogRepository (~214 tok)
@@ -680,8 +682,8 @@
 - `BlogTagService.java` — Service: BlogTagService (~1138 tok)
 - `CartService.java` — Service: CartService (~1567 tok)
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~13424 tok)
-- `CategoryService.java` — Service: CategoryService (~4425 tok)
-- `CronJobService.java` — Service: CronJobService (~788 tok)
+- `CategoryService.java` — Service: CategoryService (~4270 tok)
+- `CronJobService.java` — Nightly cron (1am). Sync Vali→Tekra→Most→Asbis. Failures logged with Markers.CRITICAL (→ Slack). (~806 tok)
 - `EmailService.java` — Service for sending email notifications (~5028 tok)
 - `FileUploadService.java` — Service: FileUploadService (~7260 tok)
 - `ImageMigrationService.java` — Service: ImageMigrationService (~1434 tok)
@@ -693,7 +695,7 @@
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Service: alias-aware search. resolveAliasId() + resolveAliasCategories() applied in searchProducts, getAvailableParametersWithCountsForCategory, getFilteredFacets. (~2242 tok)
-- `ProductService.java` — Service: ProductService (~13412 tok)
+- `ProductService.java` — Service: ProductService (~13555 tok)
 - `ReviewService.java` — Service: ReviewService (~946 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
@@ -714,14 +716,16 @@
 - `AsbisSyncService.java` — AsbisSyncService (~14027 tok)
 - `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~14623 tok)
 - `TekraSyncService.java` — Service: TekraSyncService (~23065 tok)
-- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15057 tok)
+- `ValiSyncService.java` — VERSION 4.3. Syncs only VALI categories. Tracks seenExternalIds → markUnseenAsUnavailable() marks absent products NOT_AVAILABLE+show=false. show flag set only when status=AVAILABLE. (~15774 tok)
 
 ## src/main/java/com/techstore/util/
 
+- `CriticalMarkerFilter.java` — Custom logback filter: ACCEPT only if event has marker "CRITICAL", else DENY. Used by SLACK_ASYNC appender. (~142 tok)
 - `ExceptionHelper.java` — Wraps database operations and converts common exceptions to business exceptions (~1811 tok)
 - `FilterUtils.java` — FilterUtils: calculatePriceRange, calculateNumericRange, createFilterOptions (~861 tok)
 - `JwtUtil.java` — Component: JwtUtil (~1188 tok)
 - `LogHelper.java` — Service: LogHelper (~398 tok)
+- `Markers.java` — SLF4J marker constants. Markers.CRITICAL = MarkerFactory.getMarker("CRITICAL"). Use with log.error(Markers.CRITICAL, ...) to route to Slack. (~60 tok)
 - `SecurityHelper.java` — Component: SecurityHelper (~640 tok)
 - `SlugUtils.java` — SlugUtils: generateSlug (~624 tok)
 - `SyncHelper.java` — Find category by hierarchical path (e.g., "zahranvaniya-i-baterii/za-postoyanno-naprezhenie") (~2631 tok)
@@ -731,7 +735,7 @@
 
 - `.DS_Store` (~1640 tok)
 - `application.yml` (~2652 tok)
-- `logback-spring.xml` (~264 tok)
+- `logback-spring.xml` (~249 tok)
 
 ## src/main/resources/db/
 
