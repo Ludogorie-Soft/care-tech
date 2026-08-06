@@ -202,6 +202,11 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("UPDATE Product p SET p.show = false WHERE p.sku IN :skus AND p.platform = :platform")
     int hideBySkuInAndPlatform(@Param("skus") Collection<String> skus, @Param("platform") Platform platform);
 
+    @Modifying
+    @Query("UPDATE Product p SET p.show = false, p.status = com.techstore.enums.ProductStatus.NOT_AVAILABLE " +
+           "WHERE p.platform = :platform AND p.sku IS NOT NULL AND p.sku NOT IN :knownSkus")
+    int markNotAvailableByPlatformSkuNotIn(@Param("platform") Platform platform, @Param("knownSkus") Collection<String> knownSkus);
+
     List<Product> findByPlatformAndExternalIdNotNull(Platform platform);
 
     /**

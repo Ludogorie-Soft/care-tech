@@ -736,8 +736,13 @@ public class MostSyncService {
             long totalProcessed = 0, totalCreated = 0, totalUpdated = 0, totalErrors = 0;
             long skippedNoCategory = 0, skippedNoManufacturer = 0, skippedNoSku = 0;
             Set<String> unmappedCategories = new LinkedHashSet<>();
+            Set<String> seenSkus = new HashSet<>();
 
             for (Map<String, Object> mostProduct : allProducts) {
+                String mostSku = (String) mostProduct.get("partNumber");
+                if (mostSku != null && !mostSku.isBlank()) {
+                    seenSkus.add(mostSku);
+                }
                 try {
                     // Each product runs in its own REQUIRES_NEW transaction.
                     // One failure rolls back only that product — not the entire sync.
@@ -770,10 +775,19 @@ public class MostSyncService {
                         unmappedCategories.size(), unmappedCategories);
             }
 
+            // Mark products absent from Most API as NOT_AVAILABLE
+            int markedUnavailable = 0;
+            if (!seenSkus.isEmpty()) {
+                markedUnavailable = productRepository.markNotAvailableByPlatformSkuNotIn(Platform.MOST, seenSkus);
+                log.info("Marked {} MOST products as NOT_AVAILABLE (absent from Most API)", markedUnavailable);
+            } else {
+                log.warn("seenSkus is empty — skipping mark-unseen to prevent mass status reset");
+            }
+
             String message = String.format(
-                    "Total: %d, Created: %d, Updated: %d, Skipped (No SKU): %d, Skipped (No Category): %d, Skipped (No Manufacturer): %d, Errors: %d, Unmapped: %d",
+                    "Total: %d, Created: %d, Updated: %d, Skipped (No SKU): %d, Skipped (No Category): %d, Skipped (No Manufacturer): %d, Errors: %d, Unmapped: %d, MarkedUnavailable: %d",
                     totalProcessed, totalCreated, totalUpdated, skippedNoSku, skippedNoCategory,
-                    skippedNoManufacturer, totalErrors, unmappedCategories.size());
+                    skippedNoManufacturer, totalErrors, unmappedCategories.size(), markedUnavailable);
 
             // Catch-all: ensure category_parameters rows exist for every parameter
             // that actually landed on a MOST product. REQUIRES_NEW per-product transactions

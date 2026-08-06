@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T06:04:32.086Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T06:41:46.542Z
 > Files: 600 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -662,7 +662,7 @@
 - `ParameterRepository.java` — Repository: ParameterRepository. findParametersForAvailableProductsByCategory uses status = AVAILABLE (not <> NOT_AVAILABLE) (~1065 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~478 tok)
-- `ProductRepository.java` — Cross-platform deduplication by SKU. All active-product queries filter status = AVAILABLE (not <> NOT_AVAILABLE). findByPlatformAndExternalIdNotNull added for Vali unseen check. (~3360 tok)
+- `ProductRepository.java` — Cross-platform deduplication by SKU. All active queries: status = AVAILABLE. findByPlatformAndExternalIdNotNull (Vali). markNotAvailableByPlatformSkuNotIn (Tekra/Most). hideAsbisProductsNotIn (Asbis). (~3454 tok)
 - `ProductSearchRepository.java` — Full-text + LIKE search. All 7 SQL queries filter status = 'AVAILABLE' (not <> 'NOT_AVAILABLE'). (~9335 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
@@ -714,8 +714,8 @@
 ## src/main/java/com/techstore/service/sync/
 
 - `AsbisSyncService.java` — AsbisSyncService (~14027 tok)
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~14623 tok)
-- `TekraSyncService.java` — Service: TekraSyncService (~23065 tok)
+- `MostSyncService.java` — VERSION 3.0. Collects seenSkus (partNumber) → markNotAvailableByPlatformSkuNotIn(MOST) after loop. MarkedUnavailable в sync log. (~14836 tok)
+- `TekraSyncService.java` — processedSkus already collected → markNotAvailableByPlatformSkuNotIn(TEKRA) before dedup. MarkedUnavailable в sync log. (~23217 tok)
 - `ValiSyncService.java` — VERSION 4.3. Syncs only VALI categories. Tracks seenExternalIds → markUnseenAsUnavailable() marks absent products NOT_AVAILABLE+show=false. show flag set only when status=AVAILABLE. (~15774 tok)
 
 ## src/main/java/com/techstore/util/

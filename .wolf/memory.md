@@ -13,6 +13,7 @@
 | 06:15 | Добавен seenExternalIds tracking + markUnseenAsUnavailable() | ValiSyncService.java | Продукти, изчезнали от Vali API → NOT_AVAILABLE + show=false | ~8000 |
 | 06:20 | AVAILABLE-only филтриране навсякъде | ProductRepository.java, ProductSearchRepository.java, ParameterRepository.java | Всички 10+ заявки: status = AVAILABLE (не <> NOT_AVAILABLE) | ~5000 |
 | 06:30 | Slack: само CRITICAL грешки | logback-spring.xml, CronJobService.java, Markers.java, CriticalMarkerFilter.java | MarkerFilter (custom) — само cron sync failures → Slack | ~3000 |
+| 07:00 | Mark unseen products за Tekra + Most | ProductRepository.java, TekraSyncService.java, MostSyncService.java | markNotAvailableByPlatformSkuNotIn — деактивира делистнати продукти. Asbis вече покрит. Build ОК. | ~4000 |
 
 ## Сесия 2026-07-06
 
@@ -2789,3 +2790,10 @@
 | 09:15 | Session end: 9 writes across 4 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java) | 1 reads | ~1337 tok |
 | 09:15 | Session end: 9 writes across 4 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java) | 1 reads | ~1337 tok |
 | 09:20 | Session end: 9 writes across 4 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java) | 1 reads | ~1337 tok |
+| 09:41 | Edited src/main/java/com/techstore/repository/ProductRepository.java | 3→8 lines | ~154 |
+| 09:41 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | added 1 condition(s) | ~263 |
+| 09:41 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 condition(s) | ~215 |
+| 09:41 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 condition(s) | ~251 |
+| 09:41 | Session end: 13 writes across 7 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java, ProductRepository.java) | 4 reads | ~39374 tok |
+| 09:42 | Session end: 13 writes across 7 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java, ProductRepository.java) | 4 reads | ~39374 tok |
+| 09:49 | Session end: 13 writes across 7 files (Markers.java, logback-spring.xml, CronJobService.java, CriticalMarkerFilter.java, ProductRepository.java) | 4 reads | ~39374 tok |

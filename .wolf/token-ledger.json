@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 16108843,
-    "total_reads": 8118,
-    "total_writes": 12463,
+    "total_tokens_estimated": 16226965,
+    "total_reads": 8130,
+    "total_writes": 12502,
     "total_sessions": 60,
-    "anatomy_hits": 3616,
+    "anatomy_hits": 3625,
     "anatomy_misses": 3325,
-    "repeated_reads_blocked": 2975,
-    "estimated_savings_vs_bare_cli": 13302015
+    "repeated_reads_blocked": 2990,
+    "estimated_savings_vs_bare_cli": 13568448
   },
   "sessions": [
     {
@@ -124665,6 +124665,324 @@
         "writes_count": 9,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-08-06-0855",
+      "started": "2026-08-06T05:55:44.258Z",
+      "ended": "2026-08-06T06:41:53.957Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 788,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/TekraSyncService.java",
+          "tokens_estimated": 23065,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+          "tokens_estimated": 14027,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/util/Markers.java",
+          "tokens_estimated": 64,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/logback-spring.xml",
+          "tokens_estimated": 96,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 120,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 25,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 25,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/util/CriticalMarkerFilter.java",
+          "tokens_estimated": 152,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/logback-spring.xml",
+          "tokens_estimated": 19,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 165,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/TekraSyncService.java",
+          "tokens_estimated": 282,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 230,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 268,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 37880,
+        "output_tokens_estimated": 1494,
+        "reads_count": 4,
+        "writes_count": 13,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-08-06-0855",
+      "started": "2026-08-06T05:55:44.258Z",
+      "ended": "2026-08-06T06:42:19.478Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 788,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/TekraSyncService.java",
+          "tokens_estimated": 23065,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+          "tokens_estimated": 14027,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/util/Markers.java",
+          "tokens_estimated": 64,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/logback-spring.xml",
+          "tokens_estimated": 96,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 120,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 25,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 25,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/util/CriticalMarkerFilter.java",
+          "tokens_estimated": 152,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/logback-spring.xml",
+          "tokens_estimated": 19,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 165,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/TekraSyncService.java",
+          "tokens_estimated": 282,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 230,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 268,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 37880,
+        "output_tokens_estimated": 1494,
+        "reads_count": 4,
+        "writes_count": 13,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-08-06-0855",
+      "started": "2026-08-06T05:55:44.258Z",
+      "ended": "2026-08-06T06:49:33.001Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 788,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/TekraSyncService.java",
+          "tokens_estimated": 23065,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+          "tokens_estimated": 14027,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/util/Markers.java",
+          "tokens_estimated": 64,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/logback-spring.xml",
+          "tokens_estimated": 96,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 120,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 25,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 25,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/util/CriticalMarkerFilter.java",
+          "tokens_estimated": 152,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/logback-spring.xml",
+          "tokens_estimated": 19,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 165,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/TekraSyncService.java",
+          "tokens_estimated": 282,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 230,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/MostSyncService.java",
+          "tokens_estimated": 268,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 37880,
+        "output_tokens_estimated": 1494,
+        "reads_count": 4,
+        "writes_count": 13,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 3
       }
     }
   ],

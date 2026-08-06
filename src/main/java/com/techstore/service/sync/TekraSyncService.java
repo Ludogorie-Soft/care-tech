@@ -870,10 +870,19 @@ public class TekraSyncService {
             log.info("Analog: {}", analogCount);
             log.info("Undetermined: {}", undeterminedCount);
 
+            // Mark products absent from Tekra API as NOT_AVAILABLE
+            int markedUnavailable = 0;
+            if (!processedSkus.isEmpty()) {
+                markedUnavailable = productRepository.markNotAvailableByPlatformSkuNotIn(Platform.TEKRA, processedSkus);
+                log.info("Marked {} TEKRA products as NOT_AVAILABLE (absent from Tekra API)", markedUnavailable);
+            } else {
+                log.warn("processedSkus is empty — skipping mark-unseen to prevent mass status reset");
+            }
+
             String message = String.format(
-                    "Total: %d, Created: %d, Updated: %d, Digital: %d, Analog: %d, Skipped: %d, Errors: %d",
+                    "Total: %d, Created: %d, Updated: %d, Digital: %d, Analog: %d, Skipped: %d, Errors: %d, MarkedUnavailable: %d",
                     totalProcessed, totalCreated, totalUpdated, digitalCount, analogCount,
-                    skippedNoCategory + skippedNoManufacturer, totalErrors
+                    skippedNoCategory + skippedNoManufacturer, totalErrors, markedUnavailable
             );
 
             int deduplicated = productRepository.deduplicateCrossPlatformBySku();
