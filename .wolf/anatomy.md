@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-06T10:30:26.005Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-10T06:46:13.364Z
 > Files: 603 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -52,7 +52,7 @@
 ## ../../care-tech-ui/src/components/navbar/
 
 - `AuthDropDown.jsx` — AuthDropDown — renders form (~3716 tok)
-- `NavBar.jsx` — NavBar (~4457 tok)
+- `NavBar.jsx` — NavBar (~4458 tok)
 - `NavDropDown.jsx` — MotionLink (~4210 tok)
 
 ## ../../care-tech-ui/src/components/products/
@@ -178,7 +178,7 @@
 - `mvnw` — or more contributor license agreements.  See the NOTICE file (~3144 tok)
 - `mvnw.cmd` — Declares Directory (~2262 tok)
 - `nginx.conf` — Nginx configuration (~575 tok)
-- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~2560 tok)
+- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~2666 tok)
 - `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
 - `ORDER_EDIT_PLAN.md` — План: Редактиране на поръчки от администратор (~577 tok)
 - `parameters_202605130941.sql` (~43615 tok)
@@ -377,7 +377,7 @@
 - `FileUploadController.java` — RestController: FileUploadController (7 endpoints) (~831 tok)
 - `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1992 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
-- `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~2016 tok)
+- `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~2282 tok)
 - `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~1379 tok)
 - `OrderController.java` — Създаване на нова поръчка (~1863 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
@@ -691,7 +691,7 @@
 - `FileUploadService.java` — Service: FileUploadService (~7260 tok)
 - `ImageMigrationService.java` — Service: ImageMigrationService (~1434 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
-- `MostApiService.java` — Test API connectivity (~3823 tok)
+- `MostApiService.java` — Test API connectivity (~3806 tok)
 - `OrderService.java` — Creates a new order (~7636 tok)
 - `ParameterService.java` — Service: ParameterService (~9601 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3484 tok)

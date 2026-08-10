@@ -4,6 +4,7 @@ import com.techstore.entity.Category;
 import com.techstore.entity.Product;
 import com.techstore.repository.CategoryRepository;
 import com.techstore.repository.ProductRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -43,8 +44,10 @@ public class OgMetaController {
     // ── Product ────────────────────────────────────────────────────────────────
 
     @GetMapping(value = "/product/{id}", produces = MediaType.TEXT_HTML_VALUE)
-    public ResponseEntity<String> productOg(@PathVariable Long id) {
+    public ResponseEntity<String> productOg(@PathVariable Long id, HttpServletRequest request) {
         Optional<Product> opt = productRepository.findById(id);
+
+        boolean googlebot = isGooglebot(request.getHeader(HttpHeaders.USER_AGENT));
 
         if (opt.isEmpty()) {
             return ResponseEntity.ok(redirect(siteUrl));
@@ -55,19 +58,22 @@ public class OgMetaController {
         String image = buildImageUrl(p.getPrimaryImageUrl(), p.getId());
         String title = p.getNameBg() != null ? p.getNameBg() + " | Caretech" : "Caretech";
         String description = buildProductDescription(p);
-
         String imageAlt = p.getNameBg() != null ? p.getNameBg() : p.getNameEn();
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, "__og=1; Max-Age=1800; Path=/; SameSite=Lax")
-                .contentType(MediaType.TEXT_HTML)
-                .body(ogHtml(title, description, image, productUrl, "product", productUrl, imageAlt));
+
+        var builder = ResponseEntity.ok().contentType(MediaType.TEXT_HTML);
+        if (!googlebot) {
+            builder = builder.header(HttpHeaders.SET_COOKIE, "__og=1; Max-Age=1800; Path=/; SameSite=Lax");
+        }
+        return builder.body(ogHtml(title, description, image, productUrl, "product", productUrl, imageAlt, !googlebot));
     }
 
     // ── Category ───────────────────────────────────────────────────────────────
 
     @GetMapping(value = "/category/{id}", produces = MediaType.TEXT_HTML_VALUE)
-    public ResponseEntity<String> categoryOg(@PathVariable Long id) {
+    public ResponseEntity<String> categoryOg(@PathVariable Long id, HttpServletRequest request) {
         Optional<Category> opt = categoryRepository.findById(id);
+
+        boolean googlebot = isGooglebot(request.getHeader(HttpHeaders.USER_AGENT));
 
         if (opt.isEmpty()) {
             return ResponseEntity.ok(redirect(siteUrl));
@@ -79,10 +85,11 @@ public class OgMetaController {
         String description = "Разгледайте продуктите от категория " + c.getNameBg()
                 + ". Онлайн магазин за технологични продукти с най-добри цени.";
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, "__og=1; Max-Age=1800; Path=/; SameSite=Lax")
-                .contentType(MediaType.TEXT_HTML)
-                .body(ogHtml(title, description, siteUrl + "/logo.png", categoryUrl, "website", categoryUrl));
+        var builder = ResponseEntity.ok().contentType(MediaType.TEXT_HTML);
+        if (!googlebot) {
+            builder = builder.header(HttpHeaders.SET_COOKIE, "__og=1; Max-Age=1800; Path=/; SameSite=Lax");
+        }
+        return builder.body(ogHtml(title, description, siteUrl + "/logo.png", categoryUrl, "website", categoryUrl, null, !googlebot));
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────
@@ -116,18 +123,31 @@ public class OgMetaController {
         return s.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
+    private boolean isGooglebot(String userAgent) {
+        return userAgent != null && userAgent.toLowerCase().contains("googlebot");
+    }
+
     private String ogHtml(String title, String description, String image,
                            String url, String type, String canonical) {
-        return ogHtml(title, description, image, url, type, canonical, null);
+        return ogHtml(title, description, image, url, type, canonical, null, true);
     }
 
     private String ogHtml(String title, String description, String image,
                            String url, String type, String canonical, String imageAlt) {
+        return ogHtml(title, description, image, url, type, canonical, imageAlt, true);
+    }
+
+    private String ogHtml(String title, String description, String image,
+                           String url, String type, String canonical, String imageAlt,
+                           boolean includeJsRedirect) {
         String t = escape(title);
         String d = escape(description);
         String i = escape(image);
         String u = escape(url);
         String alt = escape(imageAlt != null ? imageAlt : title);
+        String body = includeJsRedirect
+                ? "  <!-- JS redirect: browsers follow this, social crawlers do not execute JS -->\n  <script>window.location.replace('" + u + "');</script>"
+                : "  <!-- Googlebot: no redirect, canonical is authoritative -->";
         return """
                 <!DOCTYPE html>
                 <html lang="bg">
@@ -157,11 +177,10 @@ public class OgMetaController {
 
                 </head>
                 <body>
-                  <!-- JS redirect: browsers follow this, social crawlers do not execute JS -->
-                  <script>window.location.replace('%s');</script>
+                %s
                 </body>
                 </html>
-                """.formatted(t, d, u, type, t, d, i, i, alt, u, t, d, i, alt, u);
+                """.formatted(t, d, u, type, t, d, i, i, alt, u, t, d, i, alt, body);
     }
 
     private String redirect(String url) {

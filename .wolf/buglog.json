@@ -6683,6 +6683,38 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-06T10:19:44.920Z"
+    },
+    {
+      "id": "bug-412",
+      "timestamp": "2026-08-10T06:14:53.048Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/service/MostApiService.java",
+      "root_cause": "Had \"${most.api.url:https://most.traveldatabank.biz/Pr",
+      "fix": "Changed to \"${most.api.url}\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-10T06:15:23.380Z"
+    },
+    {
+      "id": "bug-413",
+      "timestamp": "2026-08-10T06:26:53.645Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/components/navbar/NavBar.jsx",
+      "root_cause": "Had \"w-full sticky top-0 z-10 bg-background shadow-sm\"",
+      "fix": "Changed to \"w-full sticky top-0 z-[200] bg-background shadow-",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-10T06:26:53.645Z"
     }
   ]
 }

@@ -24,7 +24,7 @@ public class MostApiService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${most.api.url:https://most.traveldatabank.biz/ProductXML}")
+    @Value("${most.api.url:https://portal.mostbg.com/api/product/xml/all?currency=EUR}")
     private String apiUrl;
 
     @Value("${most.api.enabled:false}")
@@ -152,12 +152,11 @@ public class MostApiService {
             product.put("ean", getElementText(productElement, "EAN"));
             product.put("warrantyMonths", getElementText(productElement, "warrantyInMonths"));
 
-            // Availability — new API uses <product_status> text instead of quantity
+            // Availability — only "В наличност" counts as in stock; everything else is unavailable
             String productStatus = getElementText(productElement, "product_status");
             product.put("product_status", productStatus);
-            boolean inStock = productStatus != null && !productStatus.trim().isEmpty()
-                    && !productStatus.toLowerCase().contains("изчерп")
-                    && !productStatus.toLowerCase().contains("недост");
+            boolean inStock = "В наличност".equalsIgnoreCase(
+                    productStatus != null ? productStatus.trim() : "");
             product.put("inStock", inStock);
 
             // Pricing
