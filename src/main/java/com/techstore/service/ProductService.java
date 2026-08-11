@@ -285,6 +285,11 @@ public class ProductService {
         validateProductId(id);
         validateLanguage(lang);
         Product product = findProductByIdOrThrow(id);
+        if (product.getStatus() != ProductStatus.AVAILABLE
+                || !Boolean.TRUE.equals(product.getActive())
+                || !Boolean.TRUE.equals(product.getShow())) {
+            throw new ResourceNotFoundException("Product not found with id: " + id);
+        }
         return convertToResponseDTO(product, lang);
     }
 

@@ -5,6 +5,20 @@
 
 | 15:45 | Analyzed products_202607201526.sql for miscategorized products | products_202607201526.sql, categories_202607201527.sql | Found 20 remaining mismatches in cat37 MOST: 14 LENOVO TAB tablets, 3 LENOVO YOGA BOOK 9, 3 ACER warranties | ~8000 |
 
+## Сесия 2026-08-11
+
+| Час | Действие | Файлове | Резултат | ~Токени |
+|-----|----------|---------|---------|---------|
+| — | adminNotes security audit + Variant B — отделен OrderUserResponseDTO без adminNotes за user endpoints | OrderUserResponseDTO.java (нов), OrderService.java, OrderController.java | adminNotes вече не се сериализира към потребители; AdminController използва пълния OrderResponseDTO | ~5000 |
+| — | ReturnPolicyPage.jsx — пълна страница с 14 секции (акордеон + sidebar), точно съответстваща на Policy.jsx pattern | ReturnPolicyPage.jsx | Страницата замени placeholder-а с пълното правно съдържание | ~3000 |
+| — | 403 nginx диагностика — определен като bfcache инцидент | nginx.prod.conf | Без промени по кода; потребителят изчака | ~1000 |
+| — | Одит + fix: подредба по цена не работи в Category.jsx | productSlice.js (fetchProducts), Category.jsx (handleClearAll) | fetchProducts сменен от GET /api/products/category/{id} (JPA sort) към GET /api/products/categories/{id}/products (SQL ORDER BY). Дублираният dispatch в handleClearAll премахнат. | ~8000 |
+| — | Одит: неналични продукти показват ли се на потребители | Всички controller/service/repository файлове | Намерени 5 пропуска: getProductById, sitemap, favorites, cart add, cart summary | ~6000 |
+| — | Fix: getProductById хвърля 404 за не-AVAILABLE/inactive/hidden продукти | ProductService.java | OG endpoint се оправя автоматично (catch блок → fallback) | ~1000 |
+| — | Fix: sitemap изключва неналични продукти | ProductRepository.java (findSitemapEntries) | Добавени active=true + status=AVAILABLE в JPQL | ~500 |
+| — | Fix: любими показват само налични продукти | UserFavoriteRepository.java (findByUserIdWithProducts) | Добавени active=true + status=AVAILABLE в JPQL | ~500 |
+| — | Fix: блокиране добавяне на неналичен продукт в количката + филтриране на неналични при зареждане | CartService.java (addToCart, getCartSummary) | Импортиран ProductStatus + BusinessLogicException; addToCart: throws при не-AVAILABLE; getCartSummary: filter на stream | ~1000 |
+
 ## Сесия 2026-08-06
 
 | Час | Действие | Файлове | Резултат | ~Токени |
@@ -2859,3 +2873,52 @@
 | 09:46 | Edited nginx.prod.conf | added 2 condition(s) | ~433 |
 | 09:46 | Session end: 9 writes across 4 files (MostApiService.java, NavBar.jsx, OgMetaController.java, nginx.prod.conf) | 11 reads | ~43924 tok |
 | 09:47 | Session end: 9 writes across 4 files (MostApiService.java, NavBar.jsx, OgMetaController.java, nginx.prod.conf) | 11 reads | ~43924 tok |
+
+## Session: 2026-08-10 17:36
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:39 | Created src/main/java/com/techstore/dto/response/OrderUserResponseDTO.java | — | ~711 |
+| 17:40 | Edited src/main/java/com/techstore/service/OrderService.java | added 1 import(s) | ~60 |
+| 17:40 | Edited src/main/java/com/techstore/service/OrderService.java | modified getOrderById() | ~420 |
+| 17:40 | Edited src/main/java/com/techstore/service/OrderService.java | modified mapToUserResponseDTO() | ~796 |
+| 17:40 | Edited src/main/java/com/techstore/controller/OrderController.java | added 1 import(s) | ~68 |
+| 17:40 | Edited src/main/java/com/techstore/controller/OrderController.java | modified getOrderById() | ~441 |
+| 17:41 | Edited src/main/java/com/techstore/controller/OrderController.java | modified ownsOrder() | ~139 |
+| 17:41 | Edited src/main/java/com/techstore/service/OrderService.java | modified cancelOrderForUser() | ~106 |
+| 17:42 | Edited src/main/java/com/techstore/controller/OrderController.java | modified cancelOrder() | ~179 |
+| 17:43 | Edited src/main/java/com/techstore/controller/OrderController.java | modified createOrder() | ~184 |
+| 17:43 | Edited src/main/java/com/techstore/controller/OrderController.java | getOrderById() → getOrderByIdForUser() | ~93 |
+| 17:43 | Edited src/main/java/com/techstore/controller/OrderController.java | 2→1 lines | ~15 |
+| 17:43 | Edited src/main/java/com/techstore/controller/OrderController.java | — | ~0 |
+| 17:44 | Edited src/main/java/com/techstore/controller/OrderController.java | added 1 import(s) | ~29 |
+| 17:45 | Създаден OrderUserResponseDTO без adminNotes; OrderController вече връща user DTO за всички потребителски ендпойнти | OrderUserResponseDTO.java, OrderService.java, OrderController.java | adminNotes скрити от потребители на API ниво | ~400 |
+| 17:45 | Session end: 14 writes across 3 files (OrderUserResponseDTO.java, OrderService.java, OrderController.java) | 6 reads | ~13729 tok |
+| 17:46 | Session end: 14 writes across 3 files (OrderUserResponseDTO.java, OrderService.java, OrderController.java) | 6 reads | ~13729 tok |
+| 12:47 | Created ../../care-tech-ui/src/pages/ReturnPolicyPage.jsx | — | ~4896 |
+| 17:52 | ReturnPolicyPage.jsx заменен с пълно accordion+sidebar съдържание (13 секции) | care-tech-ui/src/pages/ReturnPolicyPage.jsx | готово | ~350 |
+| 12:47 | Session end: 15 writes across 4 files (OrderUserResponseDTO.java, OrderService.java, OrderController.java, ReturnPolicyPage.jsx) | 8 reads | ~18625 tok |
+| 12:48 | Session end: 15 writes across 4 files (OrderUserResponseDTO.java, OrderService.java, OrderController.java, ReturnPolicyPage.jsx) | 8 reads | ~18625 tok |
+| 12:51 | Session end: 15 writes across 4 files (OrderUserResponseDTO.java, OrderService.java, OrderController.java, ReturnPolicyPage.jsx) | 10 reads | ~21291 tok |
+| 12:56 | Session end: 15 writes across 4 files (OrderUserResponseDTO.java, OrderService.java, OrderController.java, ReturnPolicyPage.jsx) | 10 reads | ~21291 tok |
+| 15:51 | Session end: 15 writes across 4 files (OrderUserResponseDTO.java, OrderService.java, OrderController.java, ReturnPolicyPage.jsx) | 10 reads | ~21291 tok |
+| 15:53 | Session end: 15 writes across 4 files (OrderUserResponseDTO.java, OrderService.java, OrderController.java, ReturnPolicyPage.jsx) | 10 reads | ~21291 tok |
+
+## Session: 2026-08-11 16:01
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:14 | Edited ../../care-tech-ui/src/redux/productSlice.js | modified replace() | ~800 |
+| 16:15 | Edited ../../care-tech-ui/src/pages/Category.jsx | modified if() | ~83 |
+| 16:19 | Fix price sorting: fetchProducts → search endpoint (SQL ORDER BY) | care-tech-ui/src/redux/productSlice.js, Category.jsx | done | ~4k |
+| 16:19 | Session end: 2 writes across 2 files (productSlice.js, Category.jsx) | 12 reads | ~34844 tok |
+| 16:20 | Session end: 2 writes across 2 files (productSlice.js, Category.jsx) | 12 reads | ~34844 tok |
+| 16:24 | Session end: 2 writes across 2 files (productSlice.js, Category.jsx) | 21 reads | ~47307 tok |
+| 16:28 | Edited src/main/java/com/techstore/service/ProductService.java | added 1 condition(s) | ~165 |
+| 16:28 | Edited src/main/java/com/techstore/repository/ProductRepository.java | 2→2 lines | ~73 |
+| 16:28 | Edited src/main/java/com/techstore/repository/UserFavoriteRepository.java | 3→3 lines | ~82 |
+| 16:31 | Edited src/main/java/com/techstore/service/CartService.java | added 2 import(s) | ~42 |
+| 16:32 | Edited src/main/java/com/techstore/service/CartService.java | added 1 condition(s) | ~156 |
+| 16:32 | Edited src/main/java/com/techstore/service/CartService.java | modified getCartSummary() | ~292 |
+| 16:32 | Session end: 8 writes across 6 files (productSlice.js, Category.jsx, ProductService.java, ProductRepository.java, UserFavoriteRepository.java) | 23 reads | ~51318 tok |
+| 16:39 | Session end: 8 writes across 6 files (productSlice.js, Category.jsx, ProductService.java, ProductRepository.java, UserFavoriteRepository.java) | 23 reads | ~51318 tok |

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 public interface UserFavoriteRepository extends JpaRepository<UserFavorite, Long> {
 
     @Query("SELECT uf FROM UserFavorite uf JOIN FETCH uf.product p " +
-            "WHERE uf.user.id = :userId AND p.show = true")
+            "WHERE uf.user.id = :userId AND p.active = true AND p.show = true AND p.status = com.techstore.enums.ProductStatus.AVAILABLE")
     Page<UserFavorite> findByUserIdWithProducts(@Param("userId") Long userId, Pageable pageable);
 
     boolean existsByUserIdAndProductId(Long userId, Long productId);

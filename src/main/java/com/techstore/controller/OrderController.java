@@ -1,8 +1,8 @@
 package com.techstore.controller;
 
 import com.techstore.dto.request.OrderCreateRequestDTO;
-import com.techstore.dto.request.OrderStatusUpdateDTO;
 import com.techstore.dto.response.OrderResponseDTO;
+import com.techstore.dto.response.OrderUserResponseDTO;
 import com.techstore.entity.User;
 import com.techstore.service.OrderService;
 import com.techstore.service.S3Service;
@@ -40,14 +40,15 @@ public class OrderController {
      * Създаване на нова поръчка
      */
     @PostMapping
-    public ResponseEntity<OrderResponseDTO> createOrder(
+    public ResponseEntity<OrderUserResponseDTO> createOrder(
             @Valid @RequestBody OrderCreateRequestDTO request) {
         // Security: strip admin-only fields — this endpoint is permitAll (guest checkout)
         if (request.getItems() != null) {
             request.getItems().forEach(item -> item.setCustomPriceEuro(null));
         }
         request.setSkipCartClear(false);
-        OrderResponseDTO order = orderService.createOrder(request);
+        OrderResponseDTO created = orderService.createOrder(request);
+        OrderUserResponseDTO order = orderService.getOrderByIdForUser(created.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
@@ -55,11 +56,11 @@ public class OrderController {
      * Взема поръчка по ID
      */
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderResponseDTO> getOrderById(
+    public ResponseEntity<OrderUserResponseDTO> getOrderById(
             @PathVariable Long orderId) {
 
         User currentUser = securityHelper.getCurrentUser();
-        OrderResponseDTO order = orderService.getOrderById(orderId);
+        OrderUserResponseDTO order = orderService.getOrderByIdForUser(orderId);
 
         if (!currentUser.isAdmin() && !ownsOrder(currentUser, order)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -72,11 +73,11 @@ public class OrderController {
      * Взема поръчка по номер
      */
     @GetMapping("/number/{orderNumber}")
-    public ResponseEntity<OrderResponseDTO> getOrderByNumber(
+    public ResponseEntity<OrderUserResponseDTO> getOrderByNumber(
             @PathVariable String orderNumber) {
 
         User currentUser = securityHelper.getCurrentUser();
-        OrderResponseDTO order = orderService.getOrderByNumber(orderNumber);
+        OrderUserResponseDTO order = orderService.getOrderByNumberForUser(orderNumber);
 
         if (!currentUser.isAdmin() && !ownsOrder(currentUser, order)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -89,13 +90,13 @@ public class OrderController {
      * Взема поръчките на текущия потребител
      */
     @GetMapping("/my-orders")
-    public ResponseEntity<Page<OrderResponseDTO>> getMyOrders(
+    public ResponseEntity<Page<OrderUserResponseDTO>> getMyOrders(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         User currentUser = securityHelper.getCurrentUser();
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<OrderResponseDTO> orders = orderService.getUserOrders(currentUser.getId(), pageable);
+        Page<OrderUserResponseDTO> orders = orderService.getUserOrders(currentUser.getId(), pageable);
         return ResponseEntity.ok(orders);
     }
 
@@ -105,7 +106,7 @@ public class OrderController {
     @GetMapping("/{orderId}/warranty/download")
     public ResponseEntity<byte[]> downloadWarrantyFile(@PathVariable Long orderId) {
         User currentUser = securityHelper.getCurrentUser();
-        OrderResponseDTO order = orderService.getOrderById(orderId);
+        OrderUserResponseDTO order = orderService.getOrderByIdForUser(orderId);
 
         if (!currentUser.isAdmin() && !ownsOrder(currentUser, order)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -146,18 +147,18 @@ public class OrderController {
      * Отказва поръчка
      */
     @PostMapping("/{orderId}/cancel")
-    public ResponseEntity<OrderResponseDTO> cancelOrder(
+    public ResponseEntity<OrderUserResponseDTO> cancelOrder(
             @PathVariable Long orderId,
             @RequestParam String reason) {
 
         User currentUser = securityHelper.getCurrentUser();
-        OrderResponseDTO order = orderService.getOrderById(orderId);
+        OrderUserResponseDTO order = orderService.getOrderByIdForUser(orderId);
 
         if (!currentUser.isAdmin() && !ownsOrder(currentUser, order)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        OrderResponseDTO cancelledOrder = orderService.cancelOrder(orderId, reason);
+        OrderUserResponseDTO cancelledOrder = orderService.cancelOrderForUser(orderId, reason);
         return ResponseEntity.ok(cancelledOrder);
     }
 
@@ -166,7 +167,7 @@ public class OrderController {
      * Preferred: compare by userId (registered users).
      * Fallback: compare by email (guest orders where userId is null).
      */
-    private boolean ownsOrder(User currentUser, OrderResponseDTO order) {
+    private boolean ownsOrder(User currentUser, OrderUserResponseDTO order) {
         if (order.getUserId() != null) {
             return order.getUserId().equals(currentUser.getId());
         }

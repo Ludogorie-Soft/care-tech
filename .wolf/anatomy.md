@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-10T06:46:13.364Z
-> Files: 603 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-11T13:32:17.635Z
+> Files: 605 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -66,7 +66,7 @@
 - `Blog.jsx` — formatDate (~2633 tok)
 - `BlogPostPage.jsx` — formatDate (~1953 tok)
 - `Cart.jsx` — EURO_RATE (~16680 tok)
-- `Category.jsx` — Category (~6600 tok)
+- `Category.jsx` — Category (~6560 tok)
 - `ComingSoonPage.jsx` — ComingSoonPage (~385 tok)
 - `ComparePage.jsx` — EURO_RATE — renders table (~3958 tok)
 - `Contact.jsx` — Contact — renders form (~2804 tok)
@@ -75,6 +75,7 @@
 - `OurClients.jsx` — clients (~2724 tok)
 - `Policy.jsx` — sections (~4961 tok)
 - `ProductPage.jsx` — EURO_RATE (~10247 tok)
+- `ReturnPolicyPage.jsx` — sections (~4896 tok)
 
 ## ../../care-tech-ui/src/pages/admin/
 
@@ -147,7 +148,7 @@
 - `offersSlice.js` — API routes: GET, PUT, POST (10 endpoints) (~2807 tok)
 - `orderSlice.js` — orderSlice.js (~3037 tok)
 - `paramSlice.js` — API routes: GET, POST, PUT, PATCH, DELETE (15 endpoints) (~5217 tok)
-- `productSlice.js` — API routes: GET, POST, PUT, DELETE (12 endpoints) (~6019 tok)
+- `productSlice.js` — API routes: GET, POST, PUT (11 endpoints) (~6680 tok)
 - `reviewsSlice.js` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~1554 tok)
 - `store.js` — Exports store, persistor (~702 tok)
 
@@ -379,7 +380,7 @@
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
 - `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~2282 tok)
 - `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~1379 tok)
-- `OrderController.java` — Създаване на нова поръчка (~1863 tok)
+- `OrderController.java` — Създаване на нова поръчка (~1909 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
 - `PazaruvajFeedController.java` — Public XML product feed consumed by pazaruvaj.com crawler (every ~12 h). (~1747 tok)
 - `PazaruvajFeedController.java` — Public XML product feed consumed by pazaruvaj.com crawler (every ~12 h). (~545 tok)
@@ -506,6 +507,7 @@
 - `OrderItemResponseDTO.java` — OrderItemResponseDTO: getLineTotalWithTax, getTotalPrice (~254 tok)
 - `OrderResponseDTO.java` — OrderResponseDTO: getFullCustomerName, getFullShippingAddress (~727 tok)
 - `OrderStatisticsResponseDTO.java` — Class: OrderStatisticsResponseDTO (~408 tok)
+- `OrderUserResponseDTO.java` — OrderUserResponseDTO: getFullCustomerName, getFullShippingAddress (~711 tok)
 - `ParameterOptionResponseDto.java` — Class: ParameterOptionResponseDto (~149 tok)
 - `ParameterResponseDto.java` — Class: ParameterResponseDto (~135 tok)
 - `PersonalOfferResponseDto.java` — PersonalOfferResponseDto: from (~412 tok)
@@ -665,14 +667,14 @@
 - `ParameterRepository.java` — Repository: ParameterRepository. findParametersForAvailableProductsByCategory uses status = AVAILABLE (not <> NOT_AVAILABLE) (~1065 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~478 tok)
-- `ProductRepository.java` — Cross-platform deduplication by SKU. All active queries: status = AVAILABLE. findByPlatformAndExternalIdNotNull (Vali). markNotAvailableByPlatformSkuNotIn (Tekra/Most). hideAsbisProductsNotIn (Asbis). (~3454 tok)
+- `ProductRepository.java` — Cross-platform deduplication by SKU. (~3475 tok)
 - `ProductSearchRepository.java` — Full-text + LIKE search. All 7 SQL queries filter status = 'AVAILABLE' (not <> 'NOT_AVAILABLE'). (~9335 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
 - `SyncLogRepository.java` — Repository: SyncLogRepository (~214 tok)
 - `UserAddressRepository.java` — Repository: UserAddressRepository (~261 tok)
 - `UserCompanyRepository.java` — Repository: UserCompanyRepository (~261 tok)
-- `UserFavoriteRepository.java` — Repository: UserFavoriteRepository (~284 tok)
+- `UserFavoriteRepository.java` — Repository: UserFavoriteRepository (~286 tok)
 - `UserRepository.java` — Repository: UserRepository (~252 tok)
 
 ## src/main/java/com/techstore/service/
@@ -683,7 +685,7 @@
 - `BlogCategoryService.java` — Service: BlogCategoryService (~1917 tok)
 - `BlogPostService.java` — Service: BlogPostService (~3776 tok)
 - `BlogTagService.java` — Service: BlogTagService (~1138 tok)
-- `CartService.java` — Service: CartService (~1567 tok)
+- `CartService.java` — Service: CartService (~1754 tok)
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~13424 tok)
 - `CategoryService.java` — Service: CategoryService (~4270 tok)
 - `CronJobService.java` — Nightly cron (1am). Sync Vali→Tekra→Most→Asbis. Failures logged with Markers.CRITICAL (→ Slack). (~806 tok)
@@ -692,13 +694,13 @@
 - `ImageMigrationService.java` — Service: ImageMigrationService (~1434 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Test API connectivity (~3806 tok)
-- `OrderService.java` — Creates a new order (~7636 tok)
+- `OrderService.java` — Creates a new order (~8683 tok)
 - `ParameterService.java` — Service: ParameterService (~9601 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3484 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Service: alias-aware search. resolveAliasId() + resolveAliasCategories() applied in searchProducts, getAvailableParametersWithCountsForCategory, getFilteredFacets. (~2242 tok)
-- `ProductService.java` — Service: ProductService (~13555 tok)
+- `ProductService.java` — Service: ProductService (~13628 tok)
 - `ReviewService.java` — Service: ReviewService (~946 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)

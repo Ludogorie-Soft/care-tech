@@ -6715,6 +6715,175 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-10T06:26:53.645Z"
+    },
+    {
+      "id": "bug-414",
+      "timestamp": "2026-08-10T14:40:15.012Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/OrderService.java",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 25→39 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-10T14:40:15.012Z"
+    },
+    {
+      "id": "bug-415",
+      "timestamp": "2026-08-10T14:40:36.104Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/OrderService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-10T14:40:36.104Z"
+    },
+    {
+      "id": "bug-416",
+      "timestamp": "2026-08-10T14:43:47.385Z",
+      "error_message": "Wrong reference: OrderResponseDTO should be OrderUserResponseDTO",
+      "file": "src/main/java/com/techstore/controller/OrderController.java",
+      "root_cause": "Used \"OrderResponseDTO\" instead of \"OrderUserResponseDTO\"",
+      "fix": "Changed OrderResponseDTO → OrderUserResponseDTO",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-10T14:44:53.485Z"
+    },
+    {
+      "id": "bug-417",
+      "timestamp": "2026-08-11T13:14:42.521Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/redux/productSlice.js",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-11T13:14:42.521Z"
+    },
+    {
+      "id": "bug-418",
+      "timestamp": "2026-08-11T13:15:41.112Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/pages/Category.jsx",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 19→11 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-11T13:15:41.112Z"
+    },
+    {
+      "id": "bug-419",
+      "timestamp": "2026-08-11T00:00:00.000Z",
+      "error_message": "Price sorting doesn't work on category product listing page",
+      "file": "care-tech-ui/src/redux/productSlice.js",
+      "root_cause": "fetchProducts (no-filter path) used JPA Sort.by('finalPrice') via Pageable with @Query JPQL, which may silently ignore the sort. filterProducts (filter-active path) used raw SQL ORDER BY p.final_price — reliable. Dual code paths created inconsistent sort behavior.",
+      "fix": "Switched fetchProducts to hit GET /api/products/categories/{id}/products (ProductSearchController.searchByCategory) which routes through ProductSearchService → ProductSearchRepository → raw SQL ORDER BY. Response is now mapped same as filterProducts. Also removed redundant explicit dispatch(fetchProducts) from handleClearAll — useEffect handles the refetch when isFilterActive changes.",
+      "tags": [
+        "sorting",
+        "frontend",
+        "redux",
+        "product-listing",
+        "category",
+        "jpa",
+        "sql"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-11T00:00:00.000Z"
+    },
+    {
+      "id": "bug-420",
+      "timestamp": "2026-08-11T13:28:42.305Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/repository/ProductRepository.java",
+      "root_cause": "Had \"SELECT p.id AS id, p.slug AS slug, p.updatedAt AS",
+      "fix": "Changed to \"SELECT p.id AS id, p.slug AS slug, p.updatedAt AS",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-11T13:28:42.305Z"
+    },
+    {
+      "id": "bug-421",
+      "timestamp": "2026-08-11T13:28:58.723Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/repository/UserFavoriteRepository.java",
+      "root_cause": "Had \"WHERE uf.user.id = :userId AND p.show = true\"",
+      "fix": "Changed to \"WHERE uf.user.id = :userId AND p.active = true AN",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-11T13:28:58.723Z"
+    },
+    {
+      "id": "bug-422",
+      "timestamp": "2026-08-11T13:32:17.654Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/CartService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-11T13:32:17.654Z"
+    },
+    {
+      "id": "bug-420",
+      "timestamp": "2026-08-11T00:00:00.000Z",
+      "error_message": "Unavailable products (status != AVAILABLE) shown on public site in 5 locations",
+      "file": "ProductService.java, ProductRepository.java, UserFavoriteRepository.java, CartService.java",
+      "root_cause": "getProductById had no status check. findSitemapEntries filtered only by show=true. findByUserIdWithProducts filtered only by show=true. addToCart had no status validation. getCartSummary streamed all cart items including unavailable ones.",
+      "fix": "1) ProductService.getProductById: throws ResourceNotFoundException if status!=AVAILABLE OR active=false OR show=false. 2) ProductRepository.findSitemapEntries: added active=true AND status=AVAILABLE. 3) UserFavoriteRepository.findByUserIdWithProducts: added active=true AND status=AVAILABLE. 4) CartService.addToCart: throws BusinessLogicException if not AVAILABLE. 5) CartService.getCartSummary: stream filtered to AVAILABLE+active+show. OgController fixed automatically via exception catch->fallback.",
+      "tags": [
+        "availability",
+        "status",
+        "product-detail",
+        "sitemap",
+        "favorites",
+        "cart"
+      ],
+      "related_bugs": [
+        "bug-419"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-11T00:00:00.000Z"
     }
   ]
 }

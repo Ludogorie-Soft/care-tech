@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 16807783,
-    "total_reads": 8282,
-    "total_writes": 12619,
-    "total_sessions": 62,
-    "anatomy_hits": 3695,
-    "anatomy_misses": 3387,
-    "repeated_reads_blocked": 3031,
-    "estimated_savings_vs_bare_cli": 13587568
+    "total_tokens_estimated": 17213837,
+    "total_reads": 8457,
+    "total_writes": 12759,
+    "total_sessions": 64,
+    "anatomy_hits": 3771,
+    "anatomy_misses": 3458,
+    "repeated_reads_blocked": 3161,
+    "estimated_savings_vs_bare_cli": 13868434
   },
   "sessions": [
     {
@@ -126951,6 +126951,2009 @@
         "writes_count": 9,
         "repeated_reads_blocked": 1,
         "anatomy_lookups": 7
+      }
+    },
+    {
+      "id": "session-2026-08-10-1736",
+      "started": "2026-08-10T14:36:02.724Z",
+      "ended": "2026-08-10T14:37:39.698Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Order.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1863,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 2590,
+        "output_tokens_estimated": 0,
+        "reads_count": 5,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-08-10-1736",
+      "started": "2026-08-10T14:36:02.724Z",
+      "ended": "2026-08-10T14:45:50.274Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Order.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1895,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 7636,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderUserResponseDTO.java",
+          "tokens_estimated": 761,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 65,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 450,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 853,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 472,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 114,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 197,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 99,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 31,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 10258,
+        "output_tokens_estimated": 3471,
+        "reads_count": 6,
+        "writes_count": 14,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-08-10-1736",
+      "started": "2026-08-10T14:36:02.724Z",
+      "ended": "2026-08-10T14:46:13.637Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Order.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1895,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 7636,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderUserResponseDTO.java",
+          "tokens_estimated": 761,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 65,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 450,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 853,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 472,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 114,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 197,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 99,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 31,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 10258,
+        "output_tokens_estimated": 3471,
+        "reads_count": 6,
+        "writes_count": 14,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-08-10-1736",
+      "started": "2026-08-10T14:36:02.724Z",
+      "ended": "2026-08-11T09:47:25.031Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Order.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1895,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 7636,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Policy.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ReturnPolicyPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderUserResponseDTO.java",
+          "tokens_estimated": 761,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 65,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 450,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 853,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 472,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 114,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 197,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 99,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ReturnPolicyPage.jsx",
+          "tokens_estimated": 4896,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 10258,
+        "output_tokens_estimated": 8367,
+        "reads_count": 8,
+        "writes_count": 15,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-08-10-1736",
+      "started": "2026-08-10T14:36:02.724Z",
+      "ended": "2026-08-11T09:48:36.659Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Order.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1895,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 7636,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Policy.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ReturnPolicyPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderUserResponseDTO.java",
+          "tokens_estimated": 761,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 65,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 450,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 853,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 472,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 114,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 197,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 99,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ReturnPolicyPage.jsx",
+          "tokens_estimated": 4896,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 10258,
+        "output_tokens_estimated": 8367,
+        "reads_count": 8,
+        "writes_count": 15,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-08-10-1736",
+      "started": "2026-08-10T14:36:02.724Z",
+      "ended": "2026-08-11T09:51:31.133Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Order.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1895,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 7636,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Policy.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ReturnPolicyPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.conf",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 2666,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderUserResponseDTO.java",
+          "tokens_estimated": 761,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 65,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 450,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 853,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 472,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 114,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 197,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 99,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ReturnPolicyPage.jsx",
+          "tokens_estimated": 4896,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 12924,
+        "output_tokens_estimated": 8367,
+        "reads_count": 10,
+        "writes_count": 15,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-08-10-1736",
+      "started": "2026-08-10T14:36:02.724Z",
+      "ended": "2026-08-11T09:56:39.339Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Order.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1895,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 7636,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Policy.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ReturnPolicyPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.conf",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 2666,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderUserResponseDTO.java",
+          "tokens_estimated": 761,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 65,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 450,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 853,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 472,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 114,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 197,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 99,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ReturnPolicyPage.jsx",
+          "tokens_estimated": 4896,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 12924,
+        "output_tokens_estimated": 8367,
+        "reads_count": 10,
+        "writes_count": 15,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-08-10-1736",
+      "started": "2026-08-10T14:36:02.724Z",
+      "ended": "2026-08-11T12:51:20.941Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Order.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1895,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 7636,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Policy.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ReturnPolicyPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.conf",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 2666,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderUserResponseDTO.java",
+          "tokens_estimated": 761,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 65,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 450,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 853,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 472,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 114,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 197,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 99,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ReturnPolicyPage.jsx",
+          "tokens_estimated": 4896,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 12924,
+        "output_tokens_estimated": 8367,
+        "reads_count": 10,
+        "writes_count": 15,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-08-10-1736",
+      "started": "2026-08-10T14:36:02.724Z",
+      "ended": "2026-08-11T12:53:48.513Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Order.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderResponseDTO.java",
+          "tokens_estimated": 727,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 1895,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/profile/OrderDetails.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 7636,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Policy.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ReturnPolicyPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.conf",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 2666,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/response/OrderUserResponseDTO.java",
+          "tokens_estimated": 761,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 65,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 450,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 853,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 472,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 149,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/OrderService.java",
+          "tokens_estimated": 114,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 197,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 99,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 16,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OrderController.java",
+          "tokens_estimated": 31,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ReturnPolicyPage.jsx",
+          "tokens_estimated": 4896,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 12924,
+        "output_tokens_estimated": 8367,
+        "reads_count": 10,
+        "writes_count": 15,
+        "repeated_reads_blocked": 5,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-08-11-1601",
+      "started": "2026-08-11T13:01:22.804Z",
+      "ended": "2026-08-11T13:09:45.194Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Category.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductService.java",
+          "tokens_estimated": 13555,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 3454,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/ProductController.java",
+          "tokens_estimated": 3884,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/productSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/products/ProductCard.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/CustomDropdown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductSearchRepository.java",
+          "tokens_estimated": 9335,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/api/axiosConfigs.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/ProductSearchController.java",
+          "tokens_estimated": 1491,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductSearchService.java",
+          "tokens_estimated": 2242,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 33961,
+        "output_tokens_estimated": 0,
+        "reads_count": 11,
+        "writes_count": 0,
+        "repeated_reads_blocked": 10,
+        "anatomy_lookups": 6
+      }
+    },
+    {
+      "id": "session-2026-08-11-1601",
+      "started": "2026-08-11T13:01:22.804Z",
+      "ended": "2026-08-11T13:19:14.147Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Category.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductService.java",
+          "tokens_estimated": 13555,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 3454,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/ProductController.java",
+          "tokens_estimated": 3884,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/productSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/products/ProductCard.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/CustomDropdown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductSearchRepository.java",
+          "tokens_estimated": 9335,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/api/axiosConfigs.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/ProductSearchController.java",
+          "tokens_estimated": 1491,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductSearchService.java",
+          "tokens_estimated": 2242,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/.wolf/memory.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/productSlice.js",
+          "tokens_estimated": 800,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Category.jsx",
+          "tokens_estimated": 83,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 33961,
+        "output_tokens_estimated": 883,
+        "reads_count": 12,
+        "writes_count": 2,
+        "repeated_reads_blocked": 13,
+        "anatomy_lookups": 6
+      }
+    },
+    {
+      "id": "session-2026-08-11-1601",
+      "started": "2026-08-11T13:01:22.804Z",
+      "ended": "2026-08-11T13:20:47.969Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Category.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductService.java",
+          "tokens_estimated": 13555,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 3454,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/ProductController.java",
+          "tokens_estimated": 3884,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/productSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/products/ProductCard.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/CustomDropdown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductSearchRepository.java",
+          "tokens_estimated": 9335,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/api/axiosConfigs.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/ProductSearchController.java",
+          "tokens_estimated": 1491,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductSearchService.java",
+          "tokens_estimated": 2242,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/.wolf/memory.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/productSlice.js",
+          "tokens_estimated": 800,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Category.jsx",
+          "tokens_estimated": 83,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 33961,
+        "output_tokens_estimated": 883,
+        "reads_count": 12,
+        "writes_count": 2,
+        "repeated_reads_blocked": 13,
+        "anatomy_lookups": 6
+      }
+    },
+    {
+      "id": "session-2026-08-11-1601",
+      "started": "2026-08-11T13:01:22.804Z",
+      "ended": "2026-08-11T13:24:25.044Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Category.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductService.java",
+          "tokens_estimated": 13555,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 3454,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/ProductController.java",
+          "tokens_estimated": 3884,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/productSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/products/ProductCard.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/CustomDropdown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductSearchRepository.java",
+          "tokens_estimated": 9335,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/api/axiosConfigs.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/ProductSearchController.java",
+          "tokens_estimated": 1491,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductSearchService.java",
+          "tokens_estimated": 2242,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/.wolf/memory.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Product.java",
+          "tokens_estimated": 2705,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/enums/ProductStatus.java",
+          "tokens_estimated": 271,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/UserFavoriteController.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/CartController.java",
+          "tokens_estimated": 2208,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OgController.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CartService.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/UserFavoriteService.java",
+          "tokens_estimated": 3795,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 3484,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/productSlice.js",
+          "tokens_estimated": 800,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Category.jsx",
+          "tokens_estimated": 83,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 46424,
+        "output_tokens_estimated": 883,
+        "reads_count": 21,
+        "writes_count": 2,
+        "repeated_reads_blocked": 14,
+        "anatomy_lookups": 11
+      }
+    },
+    {
+      "id": "session-2026-08-11-1601",
+      "started": "2026-08-11T13:01:22.804Z",
+      "ended": "2026-08-11T13:32:49.494Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Category.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductService.java",
+          "tokens_estimated": 13555,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 3454,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/ProductController.java",
+          "tokens_estimated": 3884,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/productSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/products/ProductCard.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/CustomDropdown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductSearchRepository.java",
+          "tokens_estimated": 9335,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/api/axiosConfigs.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/ProductSearchController.java",
+          "tokens_estimated": 1491,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductSearchService.java",
+          "tokens_estimated": 2242,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/.wolf/memory.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Product.java",
+          "tokens_estimated": 2705,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/enums/ProductStatus.java",
+          "tokens_estimated": 271,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/UserFavoriteController.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/CartController.java",
+          "tokens_estimated": 2208,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OgController.java",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CartService.java",
+          "tokens_estimated": 1567,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/UserFavoriteService.java",
+          "tokens_estimated": 3795,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 3484,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/SitemapController.java",
+          "tokens_estimated": 1292,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/UserFavoriteRepository.java",
+          "tokens_estimated": 284,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/productSlice.js",
+          "tokens_estimated": 800,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Category.jsx",
+          "tokens_estimated": 83,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductService.java",
+          "tokens_estimated": 177,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 78,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/UserFavoriteRepository.java",
+          "tokens_estimated": 88,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CartService.java",
+          "tokens_estimated": 44,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CartService.java",
+          "tokens_estimated": 168,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CartService.java",
+          "tokens_estimated": 313,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 49567,
+        "output_tokens_estimated": 1751,
+        "reads_count": 23,
+        "writes_count": 8,
+        "repeated_reads_blocked": 20,
+        "anatomy_lookups": 13
+      }
+    },
+    {
+      "id": "session-2026-08-11-1601",
+      "started": "2026-08-11T13:01:22.804Z",
+      "ended": "2026-08-11T13:39:04.942Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Category.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductService.java",
+          "tokens_estimated": 13555,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 3454,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/ProductController.java",
+          "tokens_estimated": 3884,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/productSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/products/ProductCard.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/components/CustomDropdown.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductSearchRepository.java",
+          "tokens_estimated": 9335,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/api/axiosConfigs.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/ProductSearchController.java",
+          "tokens_estimated": 1491,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductSearchService.java",
+          "tokens_estimated": 2242,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/.wolf/memory.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Product.java",
+          "tokens_estimated": 2705,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/enums/ProductStatus.java",
+          "tokens_estimated": 271,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/UserFavoriteController.java",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/CartController.java",
+          "tokens_estimated": 2208,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/OgController.java",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CartService.java",
+          "tokens_estimated": 1567,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/UserFavoriteService.java",
+          "tokens_estimated": 3795,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/PazaruvajFeedService.java",
+          "tokens_estimated": 3484,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/ProductPage.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/SitemapController.java",
+          "tokens_estimated": 1292,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/UserFavoriteRepository.java",
+          "tokens_estimated": 284,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/productSlice.js",
+          "tokens_estimated": 800,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/Category.jsx",
+          "tokens_estimated": 83,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductService.java",
+          "tokens_estimated": 177,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/ProductRepository.java",
+          "tokens_estimated": 78,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/repository/UserFavoriteRepository.java",
+          "tokens_estimated": 88,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CartService.java",
+          "tokens_estimated": 44,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CartService.java",
+          "tokens_estimated": 168,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CartService.java",
+          "tokens_estimated": 313,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 49567,
+        "output_tokens_estimated": 1751,
+        "reads_count": 23,
+        "writes_count": 8,
+        "repeated_reads_blocked": 20,
+        "anatomy_lookups": 13
       }
     }
   ],

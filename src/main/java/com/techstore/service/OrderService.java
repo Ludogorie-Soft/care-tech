@@ -9,6 +9,7 @@ import com.techstore.dto.request.UserRequestDTO;
 import com.techstore.dto.response.OrderItemResponseDTO;
 import com.techstore.dto.response.OrderResponseDTO;
 import com.techstore.dto.response.OrderStatisticsResponseDTO;
+import com.techstore.dto.response.OrderUserResponseDTO;
 import com.techstore.entity.Order;
 import com.techstore.entity.OrderItem;
 import com.techstore.entity.Product;
@@ -204,6 +205,13 @@ public class OrderService {
         return mapToResponseDTO(order);
     }
 
+    @Transactional(readOnly = true)
+    public OrderUserResponseDTO getOrderByIdForUser(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        return mapToUserResponseDTO(order);
+    }
+
     /**
      * Get order by order number
      */
@@ -214,13 +222,20 @@ public class OrderService {
         return mapToResponseDTO(order);
     }
 
+    @Transactional(readOnly = true)
+    public OrderUserResponseDTO getOrderByNumberForUser(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        return mapToUserResponseDTO(order);
+    }
+
     /**
      * Get user's orders
      */
     @Transactional(readOnly = true)
-    public Page<OrderResponseDTO> getUserOrders(Long userId, Pageable pageable) {
+    public Page<OrderUserResponseDTO> getUserOrders(Long userId, Pageable pageable) {
         Page<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
-        return orders.map(this::mapToResponseDTO);
+        return orders.map(this::mapToUserResponseDTO);
     }
 
     /**
@@ -579,6 +594,60 @@ public class OrderService {
                 .build();
     }
 
+    private OrderUserResponseDTO mapToUserResponseDTO(Order order) {
+        List<OrderItemResponseDTO> items = order.getOrderItems().stream()
+                .map(this::mapItemToResponseDTO)
+                .collect(Collectors.toList());
+
+        return OrderUserResponseDTO.builder()
+                .id(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .userId(order.getUser() != null ? order.getUser().getId() : null)
+                .customerFirstName(order.getCustomerFirstName())
+                .customerLastName(order.getCustomerLastName())
+                .customerEmail(order.getCustomerEmail())
+                .customerPhone(order.getCustomerPhone())
+                .customerCompany(order.getCustomerCompany())
+                .customerVatNumber(order.getCustomerVatNumber())
+                .status(order.getStatus())
+                .paymentStatus(order.getPaymentStatus())
+                .paymentMethod(order.getPaymentMethod())
+                .shippingMethod(order.getShippingMethod())
+                .subtotal(order.getSubtotal())
+                .taxAmount(order.getTaxAmount())
+                .shippingCost(order.getShippingCost())
+                .discountAmount(order.getDiscountAmount())
+                .total(order.getTotal())
+                .shippingAddress(order.getShippingAddress())
+                .shippingCity(order.getShippingCity())
+                .shippingPostalCode(order.getShippingPostalCode())
+                .shippingCountry(order.getShippingCountry())
+                .billingAddress(order.getBillingAddress())
+                .billingCity(order.getBillingCity())
+                .billingPostalCode(order.getBillingPostalCode())
+                .billingCountry(order.getBillingCountry())
+                .shippingSpeedySiteId(order.getShippingSpeedySiteId())
+                .shippingSpeedyOfficeId(order.getShippingSpeedyOfficeId())
+                .shippingSpeedySiteName(order.getShippingSpeedySiteName())
+                .shippingSpeedyOfficeName(order.getShippingSpeedyOfficeName())
+                .items(items)
+                .customerNotes(order.getCustomerNotes())
+                // adminNotes intentionally excluded
+                .trackingNumber(order.getTrackingNumber())
+                .shippedAt(order.getShippedAt())
+                .deliveredAt(order.getDeliveredAt())
+                .invoiceNumber(order.getInvoiceNumber())
+                .invoiceDate(order.getInvoiceDate())
+                .createdAt(order.getCreatedAt())
+                .updatedAt(order.getUpdatedAt())
+                .isToSpeedyOffice(order.getIsToSpeedyOffice())
+                .insuranceOffer(order.getInsuranceOffer())
+                .installmentOffer(order.getInstallmentOffer())
+                .termsAgreed(order.getTermsAgreed())
+                .warrantyFilePath(order.getWarrantyFilePath())
+                .build();
+    }
+
     private OrderItemResponseDTO mapItemToResponseDTO(OrderItem item) {
         return OrderItemResponseDTO.builder()
                 .id(item.getId())
@@ -594,6 +663,14 @@ public class OrderService {
                 .lineTax(item.getLineTax())
                 .discountAmount(item.getDiscountAmount())
                 .build();
+    }
+
+    @Transactional
+    public OrderUserResponseDTO cancelOrderForUser(Long orderId, String reason) {
+        cancelOrder(orderId, reason);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        return mapToUserResponseDTO(order);
     }
 
     @Transactional

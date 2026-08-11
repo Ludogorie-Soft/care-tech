@@ -197,3 +197,24 @@
 - [2026-08-06] NEVER place `const X = ...` declarations between `import` statements — ESLint `import/first` rule treats any code before an import as "import in body of module" and fails the build. Always declare module-level constants AFTER all imports.
 
 - [2026-08-06] NEVER add `onClick` to a child element inside a `<label>` that wraps a hidden `<input type="checkbox">`. Clicking the child fires the onClick once, then the event bubbles to `<label>` which toggles the checkbox again — double-toggle = no visible change. The `<label>` wrapper already handles all clicks on its children. Pattern in `CustomCheckbox.jsx`: remove `onClick` from the icon `<div>`, let `<label>` manage the toggle.
+
+- [2026-08-11] **CORRECTION — ProductStatus filter:** Earlier entry (2026-08-03) said the correct filter is `p.status <> 'NOT_AVAILABLE'`. THIS IS WRONG. User explicitly confirmed: **ONLY `status = AVAILABLE` (status Наличен) should be shown anywhere on the site.** `LIMITED_QUANTITY`, `ON_ROUTE`, `ON_DEMAND` are NOT shown. Always use `status = AVAILABLE`, never `<> NOT_AVAILABLE` or `IN ('AVAILABLE', 'LIMITED_QUANTITY')`.
+
+- [2026-08-11] **Product availability — full checklist of places that MUST filter `status = AVAILABLE`:**
+  - `ProductRepository.findActiveByCategoryExcludingNotAvailable` ✅ (has `AND p.status = AVAILABLE`)
+  - `ProductRepository.findActiveByManufacturerExcludingNotAvailable` ✅
+  - `ProductRepository.findRelatedProducts` ✅
+  - `ProductRepository.findSitemapEntries` ✅ (fixed 2026-08-11)
+  - `ProductSearchRepository.searchProducts` ✅ (`WHERE p.status = 'AVAILABLE'`)
+  - `ProductSearchRepository.searchProductsFuzzy` ✅
+  - `ProductSearchRepository.getAvailableParametersWithCountsForCategory` ✅
+  - `ProductSearchRepository.getFilteredFacets` ✅
+  - `ProductService.getProductById` ✅ (runtime check added 2026-08-11 — throws 404 if not AVAILABLE/active/show)
+  - `UserFavoriteRepository.findByUserIdWithProducts` ✅ (fixed 2026-08-11)
+  - `CartService.addToCart` ✅ (throws BusinessLogicException if not AVAILABLE — fixed 2026-08-11)
+  - `CartService.getCartSummary` ✅ (filters unavailable items from stream — fixed 2026-08-11)
+  - **Still NOT filtered (admin-only or intentional):** `ProductRepository.findByActiveTrue` (used in `getAllProducts` — admin endpoint)
+
+- [2026-08-11] **Price sorting in Category.jsx:** `fetchProducts` (no-filter path) previously used `GET /api/products/category/{id}` → JPA `Sort.by("finalPrice")` with `@Query` JPQL — sort was unreliable. Fixed: now uses `GET /api/products/categories/{id}/products` → `ProductSearchController.searchByCategory` → `ProductSearchRepository` → raw SQL `ORDER BY p.final_price`. Both filter-active and no-filter paths now use the same SQL sort infrastructure. `handleClearAll` no longer explicitly dispatches `fetchProducts` — the `isFilterActive` useEffect handles the refetch.
+
+- [2026-08-11] **`fetchProducts` response format:** Now maps `ProductSearchResponse` (same as `filterProducts`) — the content array contains objects with `finalPrice`, `discount`, `primaryImageUrl`, `nameEn`/`nameBg`, `category`, `manufacturer`, `specifications` mapped from `ProductSearchResult`. The Redux state shape is identical for both paths.
