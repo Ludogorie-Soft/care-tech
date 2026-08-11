@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-11T13:32:17.635Z
-> Files: 605 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-11T14:39:52.305Z
+> Files: 606 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -54,6 +54,7 @@
 - `AuthDropDown.jsx` — AuthDropDown — renders form (~3716 tok)
 - `NavBar.jsx` — NavBar (~4458 tok)
 - `NavDropDown.jsx` — MotionLink (~4210 tok)
+- `SearchBar.jsx` — SearchBar — renders form (~2255 tok)
 
 ## ../../care-tech-ui/src/components/products/
 
