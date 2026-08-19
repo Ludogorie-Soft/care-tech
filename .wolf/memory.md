@@ -5,6 +5,17 @@
 
 | 15:45 | Analyzed products_202607201526.sql for miscategorized products | products_202607201526.sql, categories_202607201527.sql | Found 20 remaining mismatches in cat37 MOST: 14 LENOVO TAB tablets, 3 LENOVO YOGA BOOK 9, 3 ACER warranties | ~8000 |
 
+## Сесия 2026-08-19
+
+| 10:30 | Одит на Видеонаблюдение — пълна структура, намерени ~350 грешно наредени продукта | products_202608191035.csv, categories_202608191048.csv | Одитирани всички платформи | ~15000 |
+| 10:45 | Създаден script 28 — диагностичен одит (READ-only) | scripts/28_videosurveillance_audit_diagnostic.sql | Готов | ~3000 |
+| 10:50 | Създаден script 29 — нови категории под Видеонаблюдение | scripts/29_videosurveillance_create_missing_categories.sql | Коригиран: show_flag, WHERE NOT EXISTS | ~4000 |
+| 10:55 | Създаден script 30 — поправка на MOST/VALI/TEKRA в surveillance | scripts/30_fix_most_products_wrong_cats.sql | Коригиран: show_flag | ~3500 |
+| 11:00 | Създаден script 31 — преместване на surveillance от грешни категории | scripts/31_move_surveillance_products_from_other_cats.sql | Коригиран: show_flag (не show) | ~5000 |
+| 11:05 | Корекция: show → show_flag във всички скриптове след забележка от потребителя | scripts/29,30,31 | Потвърдено от Category.java entity | ~2000 |
+| 15:00 | Tekra slug одит → scripts 34,35,36 | scripts/34,35,36_*.sql, TekraApiService.java | 3 грешни slug, 7 липсващи path/slug поправени; листови категории нулирани; NVR→962, Comelit→964; backoff 60s | ~25000 |
+| 16:10 | Fix: NavDropDown.jsx хардкодиран si.id===233 selfChild линк → /category/list/ | care-tech-ui/src/components/navbar/NavDropDown.jsx:154 | "NDAA, NIS2 подкатегория на себе си" + infinite loader поправени | ~3000 |
+
 ## Сесия 2026-08-11
 
 | Час | Действие | Файлове | Резултат | ~Токени |
@@ -2928,3 +2939,106 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-08-19 10:28
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:44 | Created scripts/28_videosurveillance_audit_diagnostic.sql | — | ~2299 |
+| 10:45 | Created scripts/29_fix_most_products_in_wrong_surveillance_cats.sql | — | ~1757 |
+| 10:46 | Created scripts/30_add_missing_videosurveillance_subcategories.sql | — | ~2677 |
+| 10:46 | Видеонаблюдение категории одит: 3 диагностични/fix скрипта (28, 29, 30) | scripts/28*, 29*, 30* | created | ~2100 tok |
+| 10:47 | Session end: 3 writes across 3 files (28_videosurveillance_audit_diagnostic.sql, 29_fix_most_products_in_wrong_surveillance_cats.sql, 30_add_missing_videosurveillance_subcategories.sql) | 1 reads | ~7213 tok |
+| 10:55 | Created scripts/29_videosurveillance_create_missing_categories.sql | — | ~2256 |
+| 10:56 | Created scripts/30_fix_most_products_wrong_cats.sql | — | ~1766 |
+| 10:58 | Created scripts/31_move_surveillance_products_from_other_cats.sql | — | ~3311 |
+| 10:58 | Пълен одит на Видеонаблюдение: 4 скрипта (28-31), 350+ продукта за преместване | scripts/28-31*.sql, categories_202608191048.csv | created | ~3000 tok |
+| 10:58 | Session end: 6 writes across 6 files (28_videosurveillance_audit_diagnostic.sql, 29_fix_most_products_in_wrong_surveillance_cats.sql, 30_add_missing_videosurveillance_subcategories.sql, 29_videosurveillance_create_missing_categories.sql, 30_fix_most_products_wrong_cats.sql) | 1 reads | ~15070 tok |
+| 11:02 | Created scripts/29_videosurveillance_create_missing_categories.sql | — | ~2327 |
+| 11:03 | Created scripts/30_fix_most_products_wrong_cats.sql | — | ~1590 |
+| 11:05 | Created scripts/31_move_surveillance_products_from_other_cats.sql | — | ~3602 |
+
+## Session: 2026-08-19 11:07
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:10 | Edited scripts/31_move_surveillance_products_from_other_cats.sql | 15→15 lines | ~123 |
+| 11:10 | Session end: 1 writes across 1 files (31_move_surveillance_products_from_other_cats.sql) | 0 reads | ~132 tok |
+| 11:11 | Session end: 1 writes across 1 files (31_move_surveillance_products_from_other_cats.sql) | 0 reads | ~132 tok |
+
+## Session: 2026-08-19 11:29
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:30 | Product category audit complete — 36 misplacements found across 4 platforms | categories_202608191112.csv, products_202608191112.csv | Groups: 10 SSDs in cat235→17, 6 NAS in cat235→71/361, 1 desktop HDD→16, 1 cage→18, 2 adapters→246, 10 clocks in cat156→220, 6 switches in cat963→109/110 | ~8500 |
+| 11:35 | Created scripts/32_full_audit_fix_misplaced_products.sql | — | ~1898 |
+| 11:25 | Пълен одит на всички продукти — script 32 поправя 36 продукта + показва cat 220/361 | scripts/32_full_audit_fix_misplaced_products.sql | Готов | ~14000 |
+| 11:35 | Session end: 1 writes across 1 files (32_full_audit_fix_misplaced_products.sql) | 0 reads | ~2033 tok |
+| 11:36 | Session end: 1 writes across 1 files (32_full_audit_fix_misplaced_products.sql) | 0 reads | ~2033 tok |
+| 11:39 | Edited ../../care-tech-ui/src/pages/Policy.jsx | 7→5 lines | ~111 |
+| 11:39 | Session end: 2 writes across 2 files (32_full_audit_fix_misplaced_products.sql, Policy.jsx) | 1 reads | ~2144 tok |
+| 11:41 | Edited ../../care-tech-ui/src/pages/OurServices.jsx | CSS: https, hover | ~71 |
+| 11:41 | Session end: 3 writes across 3 files (32_full_audit_fix_misplaced_products.sql, Policy.jsx, OurServices.jsx) | 2 reads | ~2215 tok |
+| 11:42 | Edited ../../care-tech-ui/src/pages/OurServices.jsx | "Инсталация и настройка | " → "Инсталация и настройка" | ~13 |
+| 11:42 | Edited ../../care-tech-ui/src/pages/OurServices.jsx | expanded (+15 lines) | ~387 |
+| 11:43 | Edited ../../care-tech-ui/src/pages/OurServices.jsx | CSS: href, https | ~44 |
+| 11:43 | Session end: 6 writes across 3 files (32_full_audit_fix_misplaced_products.sql, Policy.jsx, OurServices.jsx) | 2 reads | ~2659 tok |
+| 11:46 | Edited ../../care-tech-ui/src/pages/CategoryList.jsx | added optional chaining | ~208 |
+| 11:47 | Edited ../../care-tech-ui/src/pages/CategoryList.jsx | 16→20 lines | ~282 |
+| 11:47 | Session end: 8 writes across 4 files (32_full_audit_fix_misplaced_products.sql, Policy.jsx, OurServices.jsx, CategoryList.jsx) | 7 reads | ~9118 tok |
+| 11:49 | Edited ../../care-tech-ui/src/pages/Category.jsx | added optional chaining | ~160 |
+| 11:49 | Session end: 9 writes across 5 files (32_full_audit_fix_misplaced_products.sql, Policy.jsx, OurServices.jsx, CategoryList.jsx, Category.jsx) | 8 reads | ~9278 tok |
+| 11:52 | Edited src/main/java/com/techstore/repository/CategoryRepository.java | 2→4 lines | ~42 |
+| 11:52 | Edited src/main/java/com/techstore/service/ProductSearchService.java | added error handling | ~332 |
+| 11:52 | Session end: 11 writes across 7 files (32_full_audit_fix_misplaced_products.sql, Policy.jsx, OurServices.jsx, CategoryList.jsx, Category.jsx) | 10 reads | ~12236 tok |
+| 11:56 | Session end: 11 writes across 7 files (32_full_audit_fix_misplaced_products.sql, Policy.jsx, OurServices.jsx, CategoryList.jsx, Category.jsx) | 10 reads | ~12236 tok |
+| 12:12 | Анализ на категорийната структура за Видеонаблюдение (root=230): текущо дърво, сравнение с Текра референс, 223 грешно наредени TEKRA продукта | categories_202608191158.csv, products_202608191159.csv | completed | ~8000 |
+| 12:23 | Created scripts/33_fix_surveillance_category_paths_and_products.sql | — | ~3690 |
+| 12:23 | Session end: 12 writes across 8 files (32_full_audit_fix_misplaced_products.sql, Policy.jsx, OurServices.jsx, CategoryList.jsx, Category.jsx) | 14 reads | ~39406 tok |
+| 12:25 | Edited scripts/33_fix_surveillance_category_paths_and_products.sql | expanded (+14 lines) | ~274 |
+| 12:26 | Session end: 13 writes across 8 files (32_full_audit_fix_misplaced_products.sql, Policy.jsx, OurServices.jsx, CategoryList.jsx, Category.jsx) | 14 reads | ~39700 tok |
+
+## Session: 2026-08-19 12:32
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:43 | Edited src/main/java/com/techstore/controller/sync/TekraSyncController.java | added 4 import(s) | ~166 |
+| 12:43 | Edited src/main/java/com/techstore/controller/sync/TekraSyncController.java | 1→2 lines | ~28 |
+| 12:43 | Edited src/main/java/com/techstore/controller/sync/TekraSyncController.java | modified listTekraCategories() | ~112 |
+| 12:43 | Session end: 3 writes across 1 files (TekraSyncController.java) | 3 reads | ~10954 tok |
+| 12:45 | Session end: 3 writes across 1 files (TekraSyncController.java) | 3 reads | ~10954 tok |
+
+## Session: 2026-08-19 12:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:12 | Created scripts/34_fix_tekra_slugs_after_api_verification.sql | — | ~1168 |
+| 15:12 | Session end: 1 writes across 1 files (34_fix_tekra_slugs_after_api_verification.sql) | 2 reads | ~5024 tok |
+| 15:17 | Session end: 1 writes across 1 files (34_fix_tekra_slugs_after_api_verification.sql) | 3 reads | ~7351 tok |
+| 15:18 | Created scripts/34_fix_tekra_slugs_after_api_verification.sql | — | ~2231 |
+| 15:18 | Session end: 2 writes across 1 files (34_fix_tekra_slugs_after_api_verification.sql) | 3 reads | ~9741 tok |
+| 15:20 | Session end: 2 writes across 1 files (34_fix_tekra_slugs_after_api_verification.sql) | 3 reads | ~9741 tok |
+| 15:29 | Created scripts/35_remove_tekra_slug_from_leaf_cats.sql | — | ~1342 |
+| 15:29 | Session end: 3 writes across 2 files (34_fix_tekra_slugs_after_api_verification.sql, 35_remove_tekra_slug_from_leaf_cats.sql) | 5 reads | ~39093 tok |
+| 15:32 | Session end: 3 writes across 2 files (34_fix_tekra_slugs_after_api_verification.sql, 35_remove_tekra_slug_from_leaf_cats.sql) | 5 reads | ~39093 tok |
+| 15:34 | Edited src/main/java/com/techstore/service/TekraApiService.java | 2→2 lines | ~34 |
+| 15:34 | Session end: 4 writes across 3 files (34_fix_tekra_slugs_after_api_verification.sql, 35_remove_tekra_slug_from_leaf_cats.sql, TekraApiService.java) | 5 reads | ~39129 tok |
+| 15:43 | Session end: 4 writes across 3 files (34_fix_tekra_slugs_after_api_verification.sql, 35_remove_tekra_slug_from_leaf_cats.sql, TekraApiService.java) | 5 reads | ~39129 tok |
+| 15:46 | Session end: 4 writes across 3 files (34_fix_tekra_slugs_after_api_verification.sql, 35_remove_tekra_slug_from_leaf_cats.sql, TekraApiService.java) | 5 reads | ~39129 tok |
+| 15:50 | Created scripts/36_fix_tekra_product_categories.sql | — | ~576 |
+| 15:50 | Session end: 5 writes across 4 files (34_fix_tekra_slugs_after_api_verification.sql, 35_remove_tekra_slug_from_leaf_cats.sql, TekraApiService.java, 36_fix_tekra_product_categories.sql) | 5 reads | ~39746 tok |
+| 15:53 | Session end: 5 writes across 4 files (34_fix_tekra_slugs_after_api_verification.sql, 35_remove_tekra_slug_from_leaf_cats.sql, TekraApiService.java, 36_fix_tekra_product_categories.sql) | 5 reads | ~39746 tok |
+| 15:53 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/session_2026_08_19_tekra.md | — | ~371 |
+| 15:54 | Edited ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/MEMORY.md | 1→2 lines | ~75 |
+| 15:54 | Session end: 7 writes across 6 files (34_fix_tekra_slugs_after_api_verification.sql, 35_remove_tekra_slug_from_leaf_cats.sql, TekraApiService.java, 36_fix_tekra_product_categories.sql, session_2026_08_19_tekra.md) | 6 reads | ~40225 tok |
+
+## Session: 2026-08-19 15:56
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:12 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | 14→14 lines | ~133 |
+| 16:12 | Session end: 1 writes across 1 files (NavDropDown.jsx) | 9 reads | ~4600 tok |
+| 16:20 | Session end: 1 writes across 1 files (NavDropDown.jsx) | 9 reads | ~4600 tok |
+| 16:21 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | removed 16 lines | ~15 |
+| 16:21 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | 21→25 lines | ~385 |
+| 16:21 | Session end: 3 writes across 1 files (NavDropDown.jsx) | 9 reads | ~5000 tok |

@@ -149,8 +149,10 @@ public class ProductSearchService {
     }
 
     public ProductSearchResponse searchByCategory(String categoryId, String language, int page, int size, String sortBy) {
+        List<String> allIds = getAllDescendantIds(categoryId);
+
         ProductSearchRequest request = ProductSearchRequest.builder()
-                .categories(List.of(categoryId))
+                .categories(allIds)
                 .language(language)
                 .page(page)
                 .size(size)
@@ -158,6 +160,25 @@ public class ProductSearchService {
                 .build();
 
         return searchProducts(request);
+    }
+
+    /** Returns the given category ID plus all descendant IDs (recursive). */
+    private List<String> getAllDescendantIds(String categoryId) {
+        List<String> result = new java.util.ArrayList<>();
+        result.add(categoryId);
+        try {
+            Long id = Long.parseLong(categoryId);
+            collectDescendants(id, result);
+        } catch (NumberFormatException ignored) {
+        }
+        return result;
+    }
+
+    private void collectDescendants(Long parentId, List<String> accumulator) {
+        categoryRepository.findByParentId(parentId).forEach(child -> {
+            accumulator.add(String.valueOf(child.getId()));
+            collectDescendants(child.getId(), accumulator);
+        });
     }
 
     public ProductSearchResponse searchFeaturedProducts(String language, int page, int size) {

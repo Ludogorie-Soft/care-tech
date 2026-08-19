@@ -35,6 +35,12 @@
 
 ## Do-Not-Repeat
 
+- [2026-08-19] NEVER use `show` as a column name in SQL scripts for this project. The DB column is `show_flag` (BOOLEAN NOT NULL DEFAULT true) on BOTH `categories` and `products` tables. The Java entity field is named `show` but the `@Column(name = "show_flag")` annotation means SQL must use `show_flag`. Confirmed in `Category.java` and `Product.java`.
+
+- [2026-08-19] NEVER use `ON CONFLICT (slug)` for the `categories` table — `slug` has only an INDEX (`idx_categories_slug`), NOT a UNIQUE constraint. Use `WHERE NOT EXISTS (SELECT 1 FROM categories WHERE slug = '...')` for idempotent inserts.
+
+- [2026-08-19] When INSERT-ing into `categories`, always include ALL NOT NULL fields: `name_bg, name_en, slug, parent_id, show_flag, sort_order, is_promo_active, platform, created_at, updated_at, created_by, last_modified_by`. Missing `is_promo_active` or `sort_order` will fail with NOT NULL constraint violation.
+
 - [2026-07-24] NEVER do `collection.clear() + collection.addAll()` in Hibernate without `entityManager.flush()` between them when there is a unique constraint on the table. Hibernate batches the operations and sends INSERTs before DELETEs in the same flush, violating the constraint. Fix: inject `@PersistenceContext EntityManager` and call `entityManager.flush()` after `clear()`.
 
 - [2026-07-20] NEVER leave admin query methods in `TbiLeasingService` (or any service with `open-in-view=false`) without `@Transactional(readOnly = true)` when the entity has LAZY associations. Without it, the Hibernate session closes after the repository call and `Page.map()` triggers `LazyInitializationException` when accessing `e.getOrder()`. Fix: add `@Transactional(readOnly = true)` to `getAllApplications`, `getApplicationsByStatus`, `getApplicationById`.

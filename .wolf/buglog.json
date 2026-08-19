@@ -6884,6 +6884,102 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-08-11T00:00:00.000Z"
+    },
+    {
+      "id": "bug-424",
+      "timestamp": "2026-08-19T08:41:16.724Z",
+      "error_message": "CSS fix: description",
+      "file": "../../care-tech-ui/src/pages/OurServices.jsx",
+      "root_cause": "description: \"Инсталация и настройка\", → 'Инсталация и настройка | <a href=\"https://cctv.caretech.bg/\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-primary hover:underline\">cctv.caretech.bg</a>',",
+      "fix": "Changed description: \"Инсталация и настройка\", → 'Инсталация и настройка | <a href=\"https://cctv.caretech.bg/\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-primary hover:underline\">cctv.caretech.bg</a>',",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-19T08:42:52.929Z"
+    },
+    {
+      "id": "bug-425",
+      "timestamp": "2026-08-19T08:42:09.286Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/OurServices.jsx",
+      "root_cause": "Had 'Инсталация и настройка | <a href=\"",
+      "fix": "Changed to \"Инсталация и настройка\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-19T08:42:09.286Z"
+    },
+    {
+      "id": "bug-426",
+      "timestamp": "2026-08-19T08:46:57.240Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/pages/CategoryList.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-19T08:46:57.240Z"
+    },
+    {
+      "id": "bug-427",
+      "timestamp": "2026-08-19T08:49:38.520Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/pages/Category.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-19T08:49:38.520Z"
+    },
+    {
+      "id": "bug-428",
+      "timestamp": "2026-08-19T08:52:33.621Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/ProductSearchService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-19T08:52:33.621Z"
+    },
+    {
+      "id": "bug-429",
+      "timestamp": "2026-08-19T09:25:55.256Z",
+      "error_message": "Significant refactor of ",
+      "file": "scripts/33_fix_surveillance_category_paths_and_products.sql",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 27→41 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "sql"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-19T09:25:55.256Z"
     }
   ]
 }

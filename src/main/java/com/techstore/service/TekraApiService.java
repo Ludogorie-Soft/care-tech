@@ -408,7 +408,7 @@ public class TekraApiService {
         }
 
         int maxRetries = 3;
-        long retryDelayMs = 10_000; // 10 seconds initial backoff
+        long retryDelayMs = 60_000; // 60 seconds initial backoff (Tekra locks for longer periods)
 
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {

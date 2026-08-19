@@ -1,16 +1,17 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-11T14:39:52.305Z
-> Files: 606 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-19T13:21:53.980Z
+> Files: 620 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
 - `asbis_price_field.md` (~203 tok)
 - `euro_rate_convention.md` — Declares EURO_RATE (~194 tok)
-- `MEMORY.md` — Memory Index (~373 tok)
+- `MEMORY.md` — Memory Index (~409 tok)
 - `personal_offer_flow.md` — Declares stored (~373 tok)
 - `project_most_api.md` (~136 tok)
 - `session_2026_06_03.md` — Backend (`tech-store-api`) (~574 tok)
+- `session_2026_08_19_tekra.md` (~348 tok)
 - `speedy_autocomplete_pattern.md` (~297 tok)
 - `tbi_leasing_integration.md` — Status: Backend + Frontend COMPLETE (2026-06-03 — updated credentials + modal fix) (~881 tok)
 - `user_role_and_workflow.md` (~279 tok)
@@ -53,7 +54,7 @@
 
 - `AuthDropDown.jsx` — AuthDropDown — renders form (~3716 tok)
 - `NavBar.jsx` — NavBar (~4458 tok)
-- `NavDropDown.jsx` — MotionLink (~4210 tok)
+- `NavDropDown.jsx` — MotionLink (~4138 tok)
 - `SearchBar.jsx` — SearchBar — renders form (~2255 tok)
 
 ## ../../care-tech-ui/src/components/products/
@@ -67,14 +68,16 @@
 - `Blog.jsx` — formatDate (~2633 tok)
 - `BlogPostPage.jsx` — formatDate (~1953 tok)
 - `Cart.jsx` — EURO_RATE (~16680 tok)
-- `Category.jsx` — Category (~6560 tok)
+- `Category.jsx` — Category (~6664 tok)
+- `CategoryList.jsx` — CategoryList (~1407 tok)
 - `ComingSoonPage.jsx` — ComingSoonPage (~385 tok)
 - `ComparePage.jsx` — EURO_RATE — renders table (~3958 tok)
 - `Contact.jsx` — Contact — renders form (~2804 tok)
 - `Cookies.jsx` — Responsive Cookies / Cookie Policy component (~3474 tok)
 - `ForUs.jsx` — ForUs (~2823 tok)
 - `OurClients.jsx` — clients (~2724 tok)
-- `Policy.jsx` — sections (~4961 tok)
+- `OurServices.jsx` — OurServices — renders form (~3552 tok)
+- `Policy.jsx` — sections (~4978 tok)
 - `ProductPage.jsx` — EURO_RATE (~10247 tok)
 - `ReturnPolicyPage.jsx` — sections (~4896 tok)
 
@@ -317,7 +320,18 @@
 - `25_fix_remaining_cat37_mismatches.sql` — ============================================================ (~435 tok)
 - `26_fix_cat37_comprehensive.sql` — ============================================================ (~1591 tok)
 - `27_hide_accidental_asbis_categories_20260806.sql` — Скрива 430 Asbis категории, създадени неволно на 2026-08-06; 13 с show=true бяха видими на фронтенда (~258 tok)
+- `28_videosurveillance_audit_diagnostic.sql` — ============================================================ (~2299 tok)
+- `29_fix_most_products_in_wrong_surveillance_cats.sql` — ============================================================ (~1757 tok)
+- `29_videosurveillance_create_missing_categories.sql` — ============================================================ (~2327 tok)
 - `3_reorder_top_categories.sql` — Пренарежда главните категории (sort_order) вкл. 3-те нови Asbis roots (~1086 tok)
+- `30_add_missing_videosurveillance_subcategories.sql` — ============================================================ (~2677 tok)
+- `30_fix_most_products_wrong_cats.sql` — ============================================================ (~1590 tok)
+- `31_move_surveillance_products_from_other_cats.sql` — ============================================================ (~3604 tok)
+- `32_full_audit_fix_misplaced_products.sql` — ============================================================ (~1898 tok)
+- `33_fix_surveillance_category_paths_and_products.sql` — ============================================================ (~3772 tok)
+- `34_fix_tekra_slugs_after_api_verification.sql` — ============================================================ (~2231 tok)
+- `35_remove_tekra_slug_from_leaf_cats.sql` — ============================================================ (~1342 tok)
+- `36_fix_tekra_product_categories.sql` — ============================================================ (~576 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
 - `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
@@ -398,7 +412,7 @@
 ## src/main/java/com/techstore/controller/sync/
 
 - `MostSyncController.java` — Test Most API connection (~2222 tok)
-- `TekraSyncController.java` — RestController: TekraSyncController (5 endpoints) (~1230 tok)
+- `TekraSyncController.java` — RestController: TekraSyncController (6 endpoints) (~1296 tok)
 - `ValiSyncController.java` — RestController: ValiSyncController (5 endpoints) (~738 tok)
 
 ## src/main/java/com/techstore/dto/asbis/
@@ -659,7 +673,7 @@
 - `BlogPostRepository.java` — Repository: BlogPostRepository (~705 tok)
 - `BlogTagRepository.java` — Repository: BlogTagRepository (~270 tok)
 - `CartItemRepository.java` — Find users with abandoned carts: (~641 tok)
-- `CategoryRepository.java` — Repository: CategoryRepository (~316 tok)
+- `CategoryRepository.java` — Repository: CategoryRepository (~371 tok)
 - `LeasingApplicationRepository.java` — Repository: LeasingApplicationRepository (~376 tok)
 - `ManufacturerRepository.java` — Repository: ManufacturerRepository (~209 tok)
 - `OrderItemRepository.java` — Repository: OrderItemRepository (~87 tok)
@@ -700,7 +714,7 @@
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3484 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
-- `ProductSearchService.java` — Service: alias-aware search. resolveAliasId() + resolveAliasCategories() applied in searchProducts, getAvailableParametersWithCountsForCategory, getFilteredFacets. (~2242 tok)
+- `ProductSearchService.java` — Returns the given category ID plus all descendant IDs (recursive). (~2448 tok)
 - `ProductService.java` — Service: ProductService (~13628 tok)
 - `ReviewService.java` — Service: ReviewService (~946 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
@@ -708,7 +722,7 @@
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
 - `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8519 tok)
 - `TbiLeasingService.java` — TBI Fusion Pay integration: registerApplication (AES encrypt → TBI API), processStatusWebhook, getStatistics, admin queries (~350 tok)
-- `TekraApiService.java` — Get categories using JSON parsing (categories return JSON) (~4698 tok)
+- `TekraApiService.java` — Get categories using JSON parsing (categories return JSON) (~4707 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
 - `UserService.java` — Service: UserService (~6466 tok)
 - `ValiApiService.java` — Get categories (no pagination available) (~9170 tok)
