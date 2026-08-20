@@ -3113,3 +3113,10 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 12:31 | Edited src/main/java/com/techstore/entity/Product.java | 2→2 lines | ~24 |
+| 12:32 | Edited src/main/java/com/techstore/entity/Product.java | 4→4 lines | ~96 |
+| 12:32 | Created src/main/resources/db/migration/V34__increase_discount_precision.sql | — | ~53 |
+| 12:33 | Created ../../care-tech-ui/src/pages/admin/Promotions/PromoModal.jsx | — | ~4779 |
+| 12:33 | Fix promo discount precision: DB V34 migration (scale 2→6), Product.calculateFinalPrice scale fix, PromoModal % + target-price modes | Product.java, V34 migration, PromoModal.jsx | done | ~2k |
+| 12:34 | Session end: 4 writes across 3 files (Product.java, V34__increase_discount_precision.sql, PromoModal.jsx) | 8 reads | ~31497 tok |
+| 12:34 | Session end: 4 writes across 3 files (Product.java, V34__increase_discount_precision.sql, PromoModal.jsx) | 8 reads | ~31497 tok |

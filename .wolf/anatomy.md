@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-20T09:06:52.100Z
-> Files: 622 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-20T09:33:12.418Z
+> Files: 623 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -130,7 +130,7 @@
 
 ## ../../care-tech-ui/src/pages/admin/Promotions/
 
-- `PromoModal.jsx` — PromoModal — renders form (~3402 tok)
+- `PromoModal.jsx` — getBasePrice — renders form (~4779 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Reviews/
 
@@ -615,7 +615,7 @@
 - `Parameter.java` — Entity: Parameter (~544 tok)
 - `ParameterOption.java` — Entity: ParameterOption (~260 tok)
 - `PersonalOffer.java` — Entity: PersonalOffer (~665 tok)
-- `Product.java` — Entity: Product (~2705 tok)
+- `Product.java` — Entity: Product (~2714 tok)
 - `ProductFlag.java` — Entity: ProductFlag (~231 tok)
 - `ProductParameter.java` — Entity: ProductParameter (~266 tok)
 - `Review.java` — Entity: Review (~219 tok)
@@ -790,6 +790,7 @@
 - `V31__upgrade_blog_posts.sql` — Add new columns (~267 tok)
 - `V32__add_alias_to_categories.sql` — V32: Add alias_of_id to categories to support "virtual" categories that (~134 tok)
 - `V33__fix_sync_parameters_isfilter.sql` — Phase 1a: Remove junk MOST parameters created before the properties-map fix. (~521 tok)
+- `V34__increase_discount_precision.sql` — Increase discount column precision to support fractional percentages (~53 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)

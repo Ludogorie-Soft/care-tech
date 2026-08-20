@@ -101,7 +101,7 @@ public class Product extends BaseEntity {
 
     private Integer warranty;
 
-    @Column(precision = 8, scale = 2)
+    @Column(precision = 10, scale = 6)
     private BigDecimal discount = BigDecimal.ZERO;
 
     private Boolean active = true;
@@ -164,9 +164,9 @@ public class Product extends BaseEntity {
         BigDecimal basePrice = priceClient.add(markup);
 
         if (discount != null && discount.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal discountPercent = discount.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            BigDecimal discountPercent = discount.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP);
             BigDecimal discountAmount = basePrice.multiply(discountPercent);
-            this.finalPrice = basePrice.subtract(discountAmount);
+            this.finalPrice = basePrice.subtract(discountAmount).setScale(2, RoundingMode.HALF_UP);
         } else {
             this.finalPrice = basePrice;
         }

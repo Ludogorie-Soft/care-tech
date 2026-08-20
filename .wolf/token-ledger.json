@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 18229631,
-    "total_reads": 8852,
-    "total_writes": 13010,
+    "total_tokens_estimated": 18292625,
+    "total_reads": 8868,
+    "total_writes": 13018,
     "total_sessions": 74,
-    "anatomy_hits": 3937,
-    "anatomy_misses": 3652,
-    "repeated_reads_blocked": 3328,
-    "estimated_savings_vs_bare_cli": 14256664
+    "anatomy_hits": 3945,
+    "anatomy_misses": 3658,
+    "repeated_reads_blocked": 3330,
+    "estimated_savings_vs_bare_cli": 14263674
   },
   "sessions": [
     {
@@ -133673,6 +133673,176 @@
         "writes_count": 3,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-08-20-1223",
+      "started": "2026-08-20T09:23:25.722Z",
+      "ended": "2026-08-20T09:34:01.231Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/care-tech-ui/src/pages/admin/Promotions/PromoModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/ProductPromoRequest.java",
+          "tokens_estimated": 53,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Promotions/PromoModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductService.java",
+          "tokens_estimated": 13603,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/adminSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 5781,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/admin/AdminService.java",
+          "tokens_estimated": 4391,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Product.java",
+          "tokens_estimated": 2705,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Product.java",
+          "tokens_estimated": 26,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Product.java",
+          "tokens_estimated": 103,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/db/migration/V34__increase_discount_precision.sql",
+          "tokens_estimated": 56,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Promotions/PromoModal.jsx",
+          "tokens_estimated": 4779,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 26533,
+        "output_tokens_estimated": 4964,
+        "reads_count": 8,
+        "writes_count": 4,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 4
+      }
+    },
+    {
+      "id": "session-2026-08-20-1223",
+      "started": "2026-08-20T09:23:25.722Z",
+      "ended": "2026-08-20T09:34:40.022Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/care-tech-ui/src/pages/admin/Promotions/PromoModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/request/ProductPromoRequest.java",
+          "tokens_estimated": 53,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Promotions/PromoModal.jsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ProductService.java",
+          "tokens_estimated": 13603,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/redux/adminSlice.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/AdminController.java",
+          "tokens_estimated": 5781,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/admin/AdminService.java",
+          "tokens_estimated": 4391,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Product.java",
+          "tokens_estimated": 2705,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Product.java",
+          "tokens_estimated": 26,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/entity/Product.java",
+          "tokens_estimated": 103,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/db/migration/V34__increase_discount_precision.sql",
+          "tokens_estimated": 56,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Promotions/PromoModal.jsx",
+          "tokens_estimated": 4779,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 26533,
+        "output_tokens_estimated": 4964,
+        "reads_count": 8,
+        "writes_count": 4,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 4
       }
     }
   ],
