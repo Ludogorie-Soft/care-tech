@@ -6980,6 +6980,38 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-19T09:25:55.256Z"
+    },
+    {
+      "id": "bug-430",
+      "timestamp": "2026-08-20T08:14:58.627Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T08:14:58.627Z"
+    },
+    {
+      "id": "bug-431",
+      "timestamp": "2026-08-20T08:28:29.989Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/pages/admin/Promotions/PromoModal.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: dispatch(fetchPromotions({ page: currentPage, size: pageSize; showToast(`❌ Грешка при добавяне на промоция: ${error?.messa",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-20T08:28:37.216Z"
     }
   ]
 }

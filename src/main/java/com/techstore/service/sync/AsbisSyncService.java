@@ -743,6 +743,11 @@ public class AsbisSyncService {
             product.setNameEn(productCode);
         }
 
+        // Артикул (model) = productcode — the manufacturer's part number (e.g. "UDM-PRO-MAX-EU")
+        if (productCode != null && !productCode.isBlank()) {
+            product.setModel(productCode);
+        }
+
         // New Asbis products start hidden — they become visible only after
         // syncAsbisPriceAvail() confirms a positive price AND stock availability.
         if (product.getStatus() == null) {

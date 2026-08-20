@@ -1,17 +1,18 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-19T13:21:53.980Z
-> Files: 620 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-20T08:29:13.495Z
+> Files: 622 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
 - `asbis_price_field.md` (~203 tok)
 - `euro_rate_convention.md` — Declares EURO_RATE (~194 tok)
-- `MEMORY.md` — Memory Index (~409 tok)
+- `feedback_showtoast_duration.md` — Declares type (~140 tok)
+- `MEMORY.md` — Memory Index (~450 tok)
 - `personal_offer_flow.md` — Declares stored (~373 tok)
 - `project_most_api.md` (~136 tok)
 - `session_2026_06_03.md` — Backend (`tech-store-api`) (~574 tok)
-- `session_2026_08_19_tekra.md` (~348 tok)
+- `session_2026_08_19_tekra.md` (~525 tok)
 - `speedy_autocomplete_pattern.md` (~297 tok)
 - `tbi_leasing_integration.md` — Status: Backend + Frontend COMPLETE (2026-06-03 — updated credentials + modal fix) (~881 tok)
 - `user_role_and_workflow.md` (~279 tok)
@@ -36,7 +37,7 @@
 - `Breadcrumbs.jsx` — Breadcrumbs (~504 tok)
 - `CustomCheckbox.jsx` — CustomCheckbox (~258 tok)
 - `DateTimePicker.jsx` — MONTHS (~2516 tok)
-- `Footer.jsx` — categories (~2764 tok)
+- `Footer.jsx` — Dynamic: reads root categories from Redux (FOOTER_CATEGORY_IDS whitelist 11 IDs); no hardcoded category links (~2800 tok)
 - `TbiCheckoutModal.jsx` — TBI brand color (~5322 tok)
 
 ## ../../care-tech-ui/src/components/compare/
@@ -54,7 +55,7 @@
 
 - `AuthDropDown.jsx` — AuthDropDown — renders form (~3716 tok)
 - `NavBar.jsx` — NavBar (~4458 tok)
-- `NavDropDown.jsx` — MotionLink (~4138 tok)
+- `NavDropDown.jsx` — Dynamic nav dropdown: root→sub→children from Redux; selfChild removed; section headers with children render as clickable Link to /category/list/ (~4100 tok)
 - `SearchBar.jsx` — SearchBar — renders form (~2255 tok)
 
 ## ../../care-tech-ui/src/components/products/
@@ -125,7 +126,11 @@
 
 ## ../../care-tech-ui/src/pages/admin/Products/
 
-- `ProductForm.jsx` — SearchSelect (~10798 tok)
+- `ProductForm.jsx` — SearchSelect (~10797 tok)
+
+## ../../care-tech-ui/src/pages/admin/Promotions/
+
+- `PromoModal.jsx` — PromoModal — renders form (~3402 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Reviews/
 
@@ -329,9 +334,9 @@
 - `31_move_surveillance_products_from_other_cats.sql` — ============================================================ (~3604 tok)
 - `32_full_audit_fix_misplaced_products.sql` — ============================================================ (~1898 tok)
 - `33_fix_surveillance_category_paths_and_products.sql` — ============================================================ (~3772 tok)
-- `34_fix_tekra_slugs_after_api_verification.sql` — ============================================================ (~2231 tok)
-- `35_remove_tekra_slug_from_leaf_cats.sql` — ============================================================ (~1342 tok)
-- `36_fix_tekra_product_categories.sql` — ============================================================ (~576 tok)
+- `34_fix_tekra_slugs_after_api_verification.sql` — Поправя 3 грешни tekra_slug (hdd/mrezhovo/aksesoari-253); добавя category_path за cats 237-243; нови категории под Системи за пренос (parent=970) (~2231 tok)
+- `35_remove_tekra_slug_from_leaf_cats.sql` — Нулира tekra_slug от всички level-3 (leaf) категории под Видеонаблюдение; запазва category_path за routing. Level-2 пазят tekra_slug → sync ги фетчва. (~1342 tok)
+- `36_fix_tekra_product_categories.sql` — Премества 42 NVR продукта cat238→cat962; 42 Comelit IP камери cat100→cat964 (NDAA). По name ILIKE matching. (~576 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
 - `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
@@ -722,7 +727,7 @@
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
 - `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8519 tok)
 - `TbiLeasingService.java` — TBI Fusion Pay integration: registerApplication (AES encrypt → TBI API), processStatusWebhook, getStatistics, admin queries (~350 tok)
-- `TekraApiService.java` — Get categories using JSON parsing (categories return JSON) (~4707 tok)
+- `TekraApiService.java` — Fetches Tekra categories (JSON) and products (XML); retryDelayMs=60_000 (3 attempts, exponential backoff); productsCache HashMap; getProductsRaw/getAllProductsForCategory (~4707 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
 - `UserService.java` — Service: UserService (~6466 tok)
 - `ValiApiService.java` — Get categories (no pagination available) (~9170 tok)
@@ -733,7 +738,7 @@
 
 ## src/main/java/com/techstore/service/sync/
 
-- `AsbisSyncService.java` — AsbisSyncService (~14027 tok)
+- `AsbisSyncService.java` — AsbisSyncService (~14084 tok)
 - `MostSyncService.java` — VERSION 3.0. Collects seenSkus (partNumber) → markNotAvailableByPlatformSkuNotIn(MOST) after loop. MarkedUnavailable в sync log. (~14836 tok)
 - `TekraSyncService.java` — processedSkus already collected → markNotAvailableByPlatformSkuNotIn(TEKRA) before dedup. MarkedUnavailable в sync log. (~23217 tok)
 - `ValiSyncService.java` — VERSION 4.3. Syncs only VALI categories. Tracks seenExternalIds → markUnseenAsUnavailable() marks absent products NOT_AVAILABLE+show=false. show flag set only when status=AVAILABLE. (~15774 tok)

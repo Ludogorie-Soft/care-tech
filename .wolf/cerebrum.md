@@ -224,3 +224,17 @@
 - [2026-08-11] **Price sorting in Category.jsx:** `fetchProducts` (no-filter path) previously used `GET /api/products/category/{id}` → JPA `Sort.by("finalPrice")` with `@Query` JPQL — sort was unreliable. Fixed: now uses `GET /api/products/categories/{id}/products` → `ProductSearchController.searchByCategory` → `ProductSearchRepository` → raw SQL `ORDER BY p.final_price`. Both filter-active and no-filter paths now use the same SQL sort infrastructure. `handleClearAll` no longer explicitly dispatches `fetchProducts` — the `isFilterActive` useEffect handles the refetch.
 
 - [2026-08-11] **`fetchProducts` response format:** Now maps `ProductSearchResponse` (same as `filterProducts`) — the content array contains objects with `finalPrice`, `discount`, `primaryImageUrl`, `nameEn`/`nameBg`, `category`, `manufacturer`, `specifications` mapped from `ProductSearchResult`. The Redux state shape is identical for both paths.
+
+## Key Learnings (2026-08-19/20 — Tekra sync + Nav/Footer)
+
+- **Tekra API product depth:** Tekra API връща продукти САМО на level-2 (sub-category slug, напр. `hd-analogovi-sistemi`). Level-3 (leaf) категории имат `count: 0` в categories API → `getProductsRaw()` за тях връща 0 продукта. Решение: само level-2 категории имат `tekra_slug`; level-3 имат само `category_path` за routing чрез `findMostSpecificCategory()`.
+- **Tekra category_path routing:** `TekraSyncService.findMostSpecificCategory()` изгражда `expectedPath = category_1/category_2/category_3` от XML и търси точно съвпадение в `categoriesByCategoryPath` map. Leaf категориите (level-3) трябва да имат коректен `category_path` дори без `tekra_slug`.
+- **Tekra rate limiting (429):** Tekra lock-ва за по-дълго от 10s. `retryDelayMs` е 60_000 (60s initial, удвоява се, 3 опита). При 3 последователни 429 — изчакай минимум 10-15 мин преди следващ sync.
+- **NavDropDown section header pattern:** Ако `si.hasChildren == true`, секцията се рендерира като `<Link to="/category/list/${slug}/${id}">` (кликаем). Ако `false` — като `<Link to="/category/${slug}/${id}">`. НЕ добавяй selfChild hack за да правиш parent категория кликаема — вместо това направи хедъра директно Link.
+- **Footer dynamic pattern:** `Footer.jsx` чете от Redux (`state.categories.categories`); App.js вече е заредил категориите при старт. Филтрира по `FOOTER_CATEGORY_IDS = new Set([...])` за контрол кои категории се показват. hasChildren check определя `/category/list/` vs `/category/` prefix.
+- **Category routing convention (frontend):** Категория с деца → `/category/list/${slug}/${id}` (CategoryList). Leaf категория → `/category/${slug}/${id}` (Category + product grid). Линкове в NavDropDown и Footer ТРЯБВА да спазват това — директен линк към `/category/` за parent категория причинява spinner + redirect hop.
+
+## Do-Not-Repeat
+
+- [2026-08-19] NEVER add hardcoded `si.id === N` special cases in NavDropDown to make a parent category linkable. This creates a visual duplicate (category appears as its own subcategory) and causes a spinner/redirect loop. Instead: render the section header itself as a `<Link to="/category/list/...">`.
+- [2026-08-19] NEVER link to `/category/${slug}/${id}` for a category that has children. Category.jsx detects hasChildren, calls navigate() to /category/list/..., causing an unnecessary spinner + redirect. Always link directly to `/category/list/${slug}/${id}` for parent categories.

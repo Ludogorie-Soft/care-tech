@@ -3042,3 +3042,29 @@
 | 16:21 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | removed 16 lines | ~15 |
 | 16:21 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | 21→25 lines | ~385 |
 | 16:21 | Session end: 3 writes across 1 files (NavDropDown.jsx) | 9 reads | ~5000 tok |
+| 16:23 | Session end: 3 writes across 1 files (NavDropDown.jsx) | 9 reads | ~5000 tok |
+| 10:53 | Session end: 3 writes across 1 files (NavDropDown.jsx) | 9 reads | ~5000 tok |
+| 10:55 | Created ../../care-tech-ui/src/components/Footer.jsx | — | ~2704 |
+| 10:55 | Session end: 4 writes across 2 files (NavDropDown.jsx, Footer.jsx) | 9 reads | ~7704 tok |
+| 10:57 | Edited ../../care-tech-ui/src/components/Footer.jsx | 24→26 lines | ~277 |
+| 10:57 | Session end: 5 writes across 2 files (NavDropDown.jsx, Footer.jsx) | 9 reads | ~7981 tok |
+| 20:08 | Footer.jsx → динамичен от Redux; FOOTER_CATEGORY_IDS whitelist (11 ID-та); грешни линкове поправени (233→230, премахнат 236) | care-tech-ui/src/components/Footer.jsx | Footer синхронизиран с хедъра | ~2000 |
+| 10:58 | Session end: 5 writes across 2 files (NavDropDown.jsx, Footer.jsx) | 9 reads | ~7981 tok |
+| 11:02 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/session_2026_08_19_tekra.md | — | ~560 |
+| 11:02 | Session end: 6 writes across 3 files (NavDropDown.jsx, Footer.jsx, session_2026_08_19_tekra.md) | 10 reads | ~8581 tok |
+
+## Session: 2026-08-20 11:05
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:14 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | added 1 condition(s) | ~139 |
+| 11:15 | Asbis model field fix: productcode → product.setModel() in setAsbisProductFields() | AsbisSyncService.java | fixed | ~200 |
+| 11:15 | Session end: 1 writes across 1 files (AsbisSyncService.java) | 6 reads | ~27913 tok |
+| 11:28 | Edited ../../care-tech-ui/src/pages/admin/Products/ProductForm.jsx | 5→5 lines | ~88 |
+| 11:28 | Edited ../../care-tech-ui/src/pages/admin/Promotions/PromoModal.jsx | added optional chaining | ~92 |
+| 11:28 | Edited ../../care-tech-ui/src/pages/admin/Promotions/PromoModal.jsx | added optional chaining | ~96 |
+| 11:28 | Fixed: showToast 2nd arg is duration (ms), not type; PromoModal fetchPromotions unwrap removed | ProductForm.jsx, PromoModal.jsx | fixed | ~150 |
+| 11:28 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/feedback_showtoast_duration.md | — | ~150 |
+| 11:29 | Edited ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/MEMORY.md | modified showToast() | ~82 |
+| 11:29 | Session end: 6 writes across 5 files (AsbisSyncService.java, ProductForm.jsx, PromoModal.jsx, feedback_showtoast_duration.md, MEMORY.md) | 15 reads | ~28437 tok |
+| 11:31 | Session end: 6 writes across 5 files (AsbisSyncService.java, ProductForm.jsx, PromoModal.jsx, feedback_showtoast_duration.md, MEMORY.md) | 15 reads | ~28437 tok |
