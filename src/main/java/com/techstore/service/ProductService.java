@@ -598,7 +598,7 @@ public class ProductService {
     }
 
     public Page<ProductResponseDTO> findAllAdminProducts(Pageable pageable, String lang) {
-        return productRepository.findByCreatedByOrderByCreatedAtDesc("ADMIN", pageable)
+        return productRepository.findByPlatformIsNull(pageable)
                 .map(p -> convertToResponseDTO(p, lang));
     }
 
@@ -880,8 +880,6 @@ public class ProductService {
         p.setFeatured(dto.getFeatured());
         p.calculateFinalPrice();
         setParametersFromRest(p, dto.getParameters());
-        p.setCreatedBy("ADMIN");
-        p.setLastModifiedBy("ADMIN");
         p.generateSlug();
     }
 

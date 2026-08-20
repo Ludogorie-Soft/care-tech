@@ -7012,6 +7012,38 @@
       "related_bugs": [],
       "occurrences": 2,
       "last_seen": "2026-08-20T08:28:37.216Z"
+    },
+    {
+      "id": "bug-432",
+      "timestamp": "2026-08-20T08:46:56.930Z",
+      "error_message": "Wrong return value",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "Was returning: productRepository.findByCreatedByOrderByCreatedAtD",
+      "fix": "Now returns: productRepository.findByPlatformIsNull(pageable)",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T08:46:56.930Z"
+    },
+    {
+      "id": "bug-433",
+      "timestamp": "2026-08-20T08:47:11.764Z",
+      "error_message": "Wrong reference: setCreatedBy should be generateSlug",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "Used \"setCreatedBy\" instead of \"generateSlug\"",
+      "fix": "Changed setCreatedBy → generateSlug",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T08:47:11.764Z"
     }
   ]
 }

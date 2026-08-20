@@ -35,6 +35,14 @@
 
 ## Do-Not-Repeat
 
+- [2026-08-20] NEVER test nginx OG endpoints with plain `curl` — the `$bad_bot` map blocks `~*curl/` with `return 444` (empty response). Always use `curl -A "Mozilla/5.0 (compatible; Viber/10.0)"` or another non-blocked UA when testing through nginx on the production server.
+
+- [2026-08-20] Spring JPA Auditing (`@CreatedBy`) overrides manually set `setCreatedBy()` at `@PrePersist`. Admin-created products should NEVER be found via `findByCreatedByOrderByCreatedAtDesc("ADMIN")` — use `findByPlatformIsNull()` instead (platform IS NULL = admin-created).
+
+- [2026-08-20] `showToast(message, duration=2000)` — second arg is ms, NOT a toast type string. Passing `"error"` coerces to NaN → setTimeout(fn, NaN) → 0ms → invisible toast. Use `showToast(msg, 5000)` for errors, `showToast(msg)` for success.
+
+- [2026-08-20] Viber in-app browser and link-preview fetcher share the same cookie jar. The `__og=1` cookie (set by OgMetaController for browsers) causes nginx to serve React SPA to Viber's fetcher → no OG preview. Fix: add `$is_social_crawler` map in nginx to force Viber/Telegram/WhatsApp always through OgMetaController, regardless of cookie.
+
 - [2026-08-19] NEVER use `show` as a column name in SQL scripts for this project. The DB column is `show_flag` (BOOLEAN NOT NULL DEFAULT true) on BOTH `categories` and `products` tables. The Java entity field is named `show` but the `@Column(name = "show_flag")` annotation means SQL must use `show_flag`. Confirmed in `Category.java` and `Product.java`.
 
 - [2026-08-19] NEVER use `ON CONFLICT (slug)` for the `categories` table — `slug` has only an INDEX (`idx_categories_slug`), NOT a UNIQUE constraint. Use `WHERE NOT EXISTS (SELECT 1 FROM categories WHERE slug = '...')` for idempotent inserts.

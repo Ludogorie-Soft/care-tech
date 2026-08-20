@@ -73,6 +73,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     Page<Product> findByCreatedByOrderByCreatedAtDesc(String createdBy, Pageable pageable);
 
+    Page<Product> findByPlatformIsNull(Pageable pageable);
+
     @Modifying
     @Query(value = """
     DELETE FROM product_parameters WHERE product_id = :productId;

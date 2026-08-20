@@ -5,6 +5,17 @@
 
 | 15:45 | Analyzed products_202607201526.sql for miscategorized products | products_202607201526.sql, categories_202607201527.sql | Found 20 remaining mismatches in cat37 MOST: 14 LENOVO TAB tablets, 3 LENOVO YOGA BOOK 9, 3 ACER warranties | ~8000 |
 
+## Сесия 2026-08-20
+
+| Час | Действие | Файлове | Резултат | ~Токени |
+|-----|----------|---------|---------|---------|
+| 09:00 | Fix: Asbis "Артикул" (model) поле никога не е сетвано при sync | AsbisSyncService.java | Добавени 3 реда: product.setModel(productCode) след name блок | ~4000 |
+| 09:15 | Fix: невидими error toast-ове в ProductForm | ProductForm.jsx | showToast(msg, "error") → showToast(msg, 5000); "error" coerce-ваше до NaN → 0ms | ~3000 |
+| 09:20 | Fix: Promo "Грешка: undefined" — fetchPromotions().unwrap() след успешна промоция | PromoModal.jsx | Премахнато .unwrap() от fetchPromotions (fire-and-forget); error message: error?.message \|\| String(error) | ~3000 |
+| 09:30 | Fix: Създадени продукти не се виждат в Admin Products | ProductService.java, ProductRepository.java | findByCreatedByOrderByCreatedAtDesc("ADMIN") → findByPlatformIsNull(); Spring Auditing override-ваше ръчния setCreatedBy | ~5000 |
+| 09:45 | Диагностика + Fix: Viber OG preview не работи за някои продукти | nginx.prod.conf | Причина: Viber WebView и link-preview fetcher споделят __og=1 cookie → nginx сервира SPA вместо OG HTML. Fix: $is_social_crawler map + force rewrite за Viber/Telegram/WhatsApp | ~8000 |
+| 10:00 | Debug insight: curl блокиран от $bad_bot map (~*curl/) → 444 | nginx.prod.conf | Всички curl тестове връщаха празно/SSL abort; реален тест изисква -A Viber UA | ~2000 |
+
 ## Сесия 2026-08-19
 
 | 10:30 | Одит на Видеонаблюдение — пълна структура, намерени ~350 грешно наредени продукта | products_202608191035.csv, categories_202608191048.csv | Одитирани всички платформи | ~15000 |
@@ -3068,3 +3079,37 @@
 | 11:29 | Edited ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/MEMORY.md | modified showToast() | ~82 |
 | 11:29 | Session end: 6 writes across 5 files (AsbisSyncService.java, ProductForm.jsx, PromoModal.jsx, feedback_showtoast_duration.md, MEMORY.md) | 15 reads | ~28437 tok |
 | 11:31 | Session end: 6 writes across 5 files (AsbisSyncService.java, ProductForm.jsx, PromoModal.jsx, feedback_showtoast_duration.md, MEMORY.md) | 15 reads | ~28437 tok |
+| 11:34 | Session end: 6 writes across 5 files (AsbisSyncService.java, ProductForm.jsx, PromoModal.jsx, feedback_showtoast_duration.md, MEMORY.md) | 15 reads | ~28437 tok |
+| 11:35 | Session end: 6 writes across 5 files (AsbisSyncService.java, ProductForm.jsx, PromoModal.jsx, feedback_showtoast_duration.md, MEMORY.md) | 15 reads | ~28437 tok |
+| 11:36 | Session end: 6 writes across 5 files (AsbisSyncService.java, ProductForm.jsx, PromoModal.jsx, feedback_showtoast_duration.md, MEMORY.md) | 15 reads | ~28437 tok |
+| 11:46 | Edited src/main/java/com/techstore/repository/ProductRepository.java | 1→3 lines | ~41 |
+| 11:46 | Edited src/main/java/com/techstore/service/ProductService.java | findByCreatedByOrderByCreatedAtDesc() → findByPlatformIsNull() | ~59 |
+| 11:47 | Edited src/main/java/com/techstore/service/ProductService.java | removed 3 lines | ~7 |
+| 11:47 | Admin products not visible: @CreatedBy overrides manual 'ADMIN' → switched to findByPlatformIsNull | ProductRepository.java, ProductService.java | fixed | ~200 |
+| 11:47 | Session end: 9 writes across 7 files (AsbisSyncService.java, ProductForm.jsx, PromoModal.jsx, feedback_showtoast_duration.md, MEMORY.md) | 21 reads | ~52503 tok |
+| 11:56 | Session end: 9 writes across 7 files (AsbisSyncService.java, ProductForm.jsx, PromoModal.jsx, feedback_showtoast_duration.md, MEMORY.md) | 21 reads | ~52503 tok |
+
+## Session: 2026-08-20 12:00
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:06 | Edited nginx.prod.conf | expanded (+14 lines) | ~280 |
+| 12:06 | Edited nginx.prod.conf | added 1 condition(s) | ~229 |
+| 12:06 | Edited nginx.prod.conf | added 1 condition(s) | ~219 |
+| 12:07 | Session end: 3 writes across 1 files (nginx.prod.conf) | 2 reads | ~5728 tok |
+| 12:09 | Session end: 3 writes across 1 files (nginx.prod.conf) | 2 reads | ~5728 tok |
+| 12:10 | Session end: 3 writes across 1 files (nginx.prod.conf) | 2 reads | ~5728 tok |
+| 12:11 | Session end: 3 writes across 1 files (nginx.prod.conf) | 2 reads | ~5728 tok |
+| 12:14 | Session end: 3 writes across 1 files (nginx.prod.conf) | 2 reads | ~5728 tok |
+| 12:15 | Session end: 3 writes across 1 files (nginx.prod.conf) | 2 reads | ~5728 tok |
+| 12:18 | Session end: 3 writes across 1 files (nginx.prod.conf) | 2 reads | ~5728 tok |
+| 12:19 | Session end: 3 writes across 1 files (nginx.prod.conf) | 2 reads | ~5728 tok |
+| 12:20 | Session end: 3 writes across 1 files (nginx.prod.conf) | 2 reads | ~5728 tok |
+| 12:21 | Session end: 3 writes across 1 files (nginx.prod.conf) | 2 reads | ~5728 tok |
+| 12:21 | Session end: 3 writes across 1 files (nginx.prod.conf) | 2 reads | ~5728 tok |
+| 12:23 | Session end: 3 writes across 1 files (nginx.prod.conf) | 2 reads | ~5728 tok |
+
+## Session: 2026-08-20 12:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
