@@ -47,9 +47,7 @@ public class OGPreviewController {
             return new ResponseEntity<>(html, headers, HttpStatus.OK);
         } catch (Exception e) {
             log.warn("OG preview failed for product {}: {}", id, e.getMessage());
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Location", appUrl + "/product/" + id);
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+            return new ResponseEntity<>(HttpStatus.GONE);
         }
     }
 
@@ -72,9 +70,7 @@ public class OGPreviewController {
             return new ResponseEntity<>(html, headers, HttpStatus.OK);
         } catch (Exception e) {
             log.warn("OG preview failed for category {}: {}", id, e.getMessage());
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Location", appUrl + "/category/" + id);
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+            return new ResponseEntity<>(HttpStatus.GONE);
         }
     }
 

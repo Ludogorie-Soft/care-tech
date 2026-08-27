@@ -29,4 +29,5 @@ public class ProductSearchResult {
     private int status;
     private List<ProductParameterResponseDto>specifications;
     private String slug;
+    private String platform;
 }

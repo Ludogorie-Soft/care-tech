@@ -3,7 +3,21 @@
 > Chronological action log. Hooks and AI append to this file automatically.
 > Old sessions are consolidated by the daemon weekly.
 
+| 14:35 | SearchBar debounce race condition fix — sort bug | SearchBar.jsx | clearTimeout добавен в handleSubmit + clearSearch | ~8000 |
+
 | 15:45 | Analyzed products_202607201526.sql for miscategorized products | products_202607201526.sql, categories_202607201527.sql | Found 20 remaining mismatches in cat37 MOST: 14 LENOVO TAB tablets, 3 LENOVO YOGA BOOK 9, 3 ACER warranties | ~8000 |
+
+## Сесия 2026-08-27
+
+| Час | Действие | Файлове | Резултат | ~Токени |
+|-----|----------|---------|---------|---------|
+| 09:00 | Platform badge на продуктовата страница (admin-only) | ImageDisplaying.jsx, ProductResponseDTO.java, ProductService.java, ProductPage.jsx | Добавен PLATFORM_BADGE constant + badge absolute top-3 right-3; platform в DTO и convertToResponseDTO | ~6000 |
+| 09:30 | Platform badge в категорийни листинги | ProductCard.jsx, ProductSearchResult.java, ProductSearchRepository.java, productSlice.js | platform добавен в SELECT (main + fuzzy), mapRowToProduct, ProductSearchResult DTO, fetchProducts/fetchProductsByBrand mapper | ~8000 |
+| 10:00 | Fix: OGPreviewController 302 loop → 410 Gone | OGPreviewController.java | Изтрити продукти → 302 redirect причиняваше ~10 req/sec loop от социални ботове; заменено с 410 | ~3000 |
+| 10:15 | Fix: LazyInitializationException в AdminService.createPromo | AdminService.java | Добавен @Transactional на createPromo, createPromoByManufacturer, createPromoByCategory | ~3000 |
+| 11:00 | Filter consolidation scripts 40-44 изпълнени | scripts/40-44_*.sql | Script 43: canonical 3712 заменен с 3211 (изтрит от script 40); autocommit ON необходим | ~10000 |
+| 11:30 | Script 45: disable logistics/admin parameters as filters | scripts/45_disable_logistics_filters.sql | 54 параметъра деактивирани (опаковка, тегло, EAN, EU compliance, температура) | ~4000 |
+| 11:45 | Script 46: Външен цвят (4053) → Цвят canonical (6032) + disable Височина/Сертификати/Разположение | scripts/46_final_filter_cleanup.sql | Цвят: 8599 продукта в 155 категории след merge | ~3000 |
 
 ## Сесия 2026-08-20
 
@@ -3120,3 +3134,204 @@
 | 12:33 | Fix promo discount precision: DB V34 migration (scale 2→6), Product.calculateFinalPrice scale fix, PromoModal % + target-price modes | Product.java, V34 migration, PromoModal.jsx | done | ~2k |
 | 12:34 | Session end: 4 writes across 3 files (Product.java, V34__increase_discount_precision.sql, PromoModal.jsx) | 8 reads | ~31497 tok |
 | 12:34 | Session end: 4 writes across 3 files (Product.java, V34__increase_discount_precision.sql, PromoModal.jsx) | 8 reads | ~31497 tok |
+| 12:49 | Edited ../../care-tech-ui/src/pages/admin/Products/ProductForm.jsx | inline fix | ~19 |
+| 12:49 | Fix fetchCategoryParameters called with object instead of categoryId in handleCreateParam | ProductForm.jsx:311 | done | ~200 |
+| 12:49 | Session end: 5 writes across 4 files (Product.java, V34__increase_discount_precision.sql, PromoModal.jsx, ProductForm.jsx) | 18 reads | ~49053 tok |
+| 14:31 | Session end: 5 writes across 4 files (Product.java, V34__increase_discount_precision.sql, PromoModal.jsx, ProductForm.jsx) | 18 reads | ~49053 tok |
+| 14:32 | Session end: 5 writes across 4 files (Product.java, V34__increase_discount_precision.sql, PromoModal.jsx, ProductForm.jsx) | 18 reads | ~49053 tok |
+
+## Session: 2026-08-20 14:32
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:48 | Edited ../../care-tech-ui/src/components/navbar/SearchBar.jsx | 13→15 lines | ~118 |
+| 14:49 | Session end: 1 writes across 1 files (SearchBar.jsx) | 10 reads | ~14046 tok |
+| 15:00 | Session end: 1 writes across 1 files (SearchBar.jsx) | 10 reads | ~14046 tok |
+
+## Session: 2026-08-20 16:19
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:21 | Edited ../../care-tech-ui/src/pages/Certifications.jsx | 4→6 lines | ~150 |
+| 16:21 | Session end: 1 writes across 1 files (Certifications.jsx) | 1 reads | ~150 tok |
+| 16:23 | Session end: 1 writes across 1 files (Certifications.jsx) | 1 reads | ~150 tok |
+| 16:23 | Edited ../../care-tech-ui/src/pages/Certifications.jsx | 2→2 lines | ~92 |
+| 16:23 | Session end: 2 writes across 1 files (Certifications.jsx) | 1 reads | ~242 tok |
+| 16:30 | Добавени 2 нови сертификата (HCSA, CGSA Hikvision) на позиции 1 и 2 в Certifications.jsx; старите станаха 3 и 4 | ../../care-tech-ui/src/pages/Certifications.jsx | success | ~150 tok |
+| 16:26 | Session end: 2 writes across 1 files (Certifications.jsx) | 1 reads | ~242 tok |
+
+## Session: 2026-08-21 10:51
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:58 | Edited ../../care-tech-ui/tailwind.config.js | inline fix | ~14 |
+| 10:59 | Edited ../../care-tech-ui/src/index.css | expanded (+25 lines) | ~127 |
+| 10:59 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | CSS: sm | ~30 |
+| 10:59 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | "mt-4" → "mt-4 overflow-x-hidden w-" | ~17 |
+| 10:59 | Edited ../../care-tech-ui/src/pages/Blog.jsx | "flex items-center gap-2 o" → "flex items-center gap-2 o" | ~26 |
+| 10:59 | Blog responsive audit + fix | BlogPostPage.jsx, Blog.jsx, index.css, tailwind.config.js | Installed @tailwindcss/typography, added blog-content CSS overflow rules, fixed scrollbar-hide→no-scrollbar, added overflow-x-hidden | ~1800 |
+| 10:59 | Session end: 5 writes across 4 files (tailwind.config.js, index.css, BlogPostPage.jsx, Blog.jsx) | 5 reads | ~214 tok |
+| 11:09 | Created ../../care-tech-ui/src/pages/Blog.jsx | — | ~2804 |
+| 11:09 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | CSS: sm, md | ~74 |
+| 11:09 | Blog responsive round 2: overflow-x-hidden on main, grid breakpoint 520px, PostCard image h-44 mobile, fade gradient on filter bar, BlogPostPage cover image responsive height | Blog.jsx, BlogPostPage.jsx | ~900 |
+| 11:09 | Session end: 7 writes across 4 files (tailwind.config.js, index.css, BlogPostPage.jsx, Blog.jsx) | 8 reads | ~3092 tok |
+| 11:12 | Edited ../../care-tech-ui/src/index.css | expanded (+20 lines) | ~264 |
+| 11:13 | Created ../../care-tech-ui/src/pages/BlogPostPage.jsx | — | ~2465 |
+| 11:13 | Blog content responsive: !important CSS rules, iframe aspect-ratio JS wrapper, table scroll wrapper via makeContentResponsive() | BlogPostPage.jsx, index.css | ~600 |
+| 11:14 | Session end: 9 writes across 4 files (tailwind.config.js, index.css, BlogPostPage.jsx, Blog.jsx) | 9 reads | ~5821 tok |
+| 11:17 | Edited ../../care-tech-ui/src/index.css | modified not() | ~422 |
+| 11:17 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | 11→9 lines | ~128 |
+| 11:18 | Session end: 11 writes across 4 files (tailwind.config.js, index.css, BlogPostPage.jsx, Blog.jsx) | 12 reads | ~6371 tok |
+| 11:21 | Edited ../../care-tech-ui/src/index.css | CSS: overflow-x, max-width | ~46 |
+| 11:21 | Edited ../../care-tech-ui/public/index.html | 14→14 lines | ~376 |
+| 11:22 | ROOT CAUSE fix: global overflow-x:hidden on html+body in index.css; bottom bar in index.html: flex-wrap:wrap, min-width:0, flex:1 on copyright, word-break:break-word | index.css, public/index.html | ~300 |
+| 11:22 | Session end: 13 writes across 5 files (tailwind.config.js, index.css, BlogPostPage.jsx, Blog.jsx, index.html) | 13 reads | ~6819 tok |
+| 11:24 | Edited ../../care-tech-ui/public/index.html | inline fix | ~14 |
+| 11:24 | Edited ../../care-tech-ui/public/index.html | inline fix | ~34 |
+| 11:24 | Edited ../../care-tech-ui/public/index.html | inline fix | ~6 |
+| 11:24 | Session end: 16 writes across 5 files (tailwind.config.js, index.css, BlogPostPage.jsx, Blog.jsx, index.html) | 13 reads | ~6875 tok |
+| 11:30 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | 9→9 lines | ~154 |
+| 11:30 | Edited ../../care-tech-ui/src/index.css | CSS: color | ~75 |
+| 11:30 | Session end: 18 writes across 5 files (tailwind.config.js, index.css, BlogPostPage.jsx, Blog.jsx, index.html) | 13 reads | ~7104 tok |
+| 11:33 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | 9→8 lines | ~137 |
+| 11:33 | Edited ../../care-tech-ui/src/index.css | expanded (+15 lines) | ~162 |
+| 11:34 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | "max-w-[860px] mx-auto px-" → "max-w-[860px] mx-auto px-" | ~27 |
+| 11:34 | Session end: 21 writes across 5 files (tailwind.config.js, index.css, BlogPostPage.jsx, Blog.jsx, index.html) | 13 reads | ~7430 tok |
+
+## Session: 2026-08-21 11:41
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:42 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | added 2 condition(s) | ~347 |
+| 11:42 | Session end: 1 writes across 1 files (BlogPostPage.jsx) | 0 reads | ~347 tok |
+| 11:44 | Edited ../../care-tech-ui/src/pages/BlogPostPage.jsx | 15→13 lines | ~212 |
+| 11:44 | Session end: 2 writes across 1 files (BlogPostPage.jsx) | 0 reads | ~559 tok |
+| 11:48 | Session end: 2 writes across 1 files (BlogPostPage.jsx) | 0 reads | ~559 tok |
+| 11:50 | Created ../../care-tech-ui/blog-article-template.html | — | ~5772 |
+| 11:50 | Session end: 3 writes across 2 files (BlogPostPage.jsx, blog-article-template.html) | 0 reads | ~6743 tok |
+| 11:59 | Created blog-article-template.html | — | ~5142 |
+| 11:59 | Session end: 4 writes across 2 files (BlogPostPage.jsx, blog-article-template.html) | 1 reads | ~12253 tok |
+| 12:01 | Session end: 4 writes across 2 files (BlogPostPage.jsx, blog-article-template.html) | 1 reads | ~12253 tok |
+
+## Session: 2026-08-21 12:17
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:27 | Created CATEGORY_MAPPING_PLAN.md | — | ~7764 |
+| 12:27 | Одит на категорийна система + filter дедупликация; написан план CATEGORY_MAPPING_PLAN.md | CATEGORY_MAPPING_PLAN.md | Plan ready за review | ~15000 |
+| 12:27 | Session end: 1 writes across 1 files (CATEGORY_MAPPING_PLAN.md) | 14 reads | ~80875 tok |
+| 12:35 | Session end: 1 writes across 1 files (CATEGORY_MAPPING_PLAN.md) | 14 reads | ~80875 tok |
+| 15:16 | Session end: 1 writes across 1 files (CATEGORY_MAPPING_PLAN.md) | 15 reads | ~80875 tok |
+| 15:22 | Created CATEGORY_MAPPING_PLAN.md | — | ~6862 |
+| 15:22 | Анализ на categories CSV (941 реда); план обновен — само категории, Опция B seed, параметри → отделен план | CATEGORY_MAPPING_PLAN.md | Plan finalized | ~6000 |
+| 15:22 | Session end: 2 writes across 1 files (CATEGORY_MAPPING_PLAN.md) | 15 reads | ~88227 tok |
+| 15:26 | Created CATEGORY_MAPPING_PLAN.md | — | ~3396 |
+
+## Session: 2026-08-21 15:28
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:28 | Updated cerebrum.md: plan-first rule + Senior Dev role; anatomy.md: CATEGORY_MAPPING_PLAN.md | .wolf/cerebrum.md, .wolf/anatomy.md | done | ~200 |
+| 15:38 | Created CATEGORY_MAPPING_PLAN.md | — | ~7934 |
+| 15:38 | Deep analysis + plan revision: CATEGORY_MAPPING_PLAN.md updated with 8 critical corrections | CATEGORY_MAPPING_PLAN.md | done | ~800 |
+| 15:38 | Session end: 1 writes across 1 files (CATEGORY_MAPPING_PLAN.md) | 4 reads | ~17658 tok |
+| 15:47 | Created PARAMETER_MAPPING_PLAN.md | — | ~10776 |
+| 15:48 | Created PARAMETER_MAPPING_PLAN.md — AI-assisted parameter deduplication, 9 phases | PARAMETER_MAPPING_PLAN.md | done | ~500 |
+| 15:48 | Session end: 2 writes across 2 files (CATEGORY_MAPPING_PLAN.md, PARAMETER_MAPPING_PLAN.md) | 9 reads | ~40674 tok |
+| 16:04 | Created DB_RELATIONSHIP_ANALYSIS.md | — | ~7851 |
+| 16:04 | Edited CATEGORY_MAPPING_PLAN.md | 3→6 lines | ~161 |
+| 16:06 | Edited CATEGORY_MAPPING_PLAN.md | added 1 condition(s) | ~186 |
+| 16:06 | Edited CATEGORY_MAPPING_PLAN.md | 7→9 lines | ~100 |
+| 16:07 | Edited PARAMETER_MAPPING_PLAN.md | 1→3 lines | ~71 |
+| 16:07 | Edited PARAMETER_MAPPING_PLAN.md | 5→7 lines | ~126 |
+| 16:08 | Edited PARAMETER_MAPPING_PLAN.md | modified aiAnalysisExecutor() | ~192 |
+| 16:09 | Created DB_RELATIONSHIP_ANALYSIS.md — full FK/CASCADE audit, 20 risks, corrections to both plans | DB_RELATIONSHIP_ANALYSIS.md, CATEGORY_MAPPING_PLAN.md, PARAMETER_MAPPING_PLAN.md | done | ~1200 |
+| 16:09 | Session end: 9 writes across 3 files (CATEGORY_MAPPING_PLAN.md, PARAMETER_MAPPING_PLAN.md, DB_RELATIONSHIP_ANALYSIS.md) | 19 reads | ~68603 tok |
+
+## Session: 2026-08-26 10:20
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:31 | Created src/main/resources/db/migration/V35__add_deleted_flag_to_products.sql | — | ~80 |
+| 10:32 | Edited src/main/java/com/techstore/entity/Product.java | 3→6 lines | ~43 |
+| 10:32 | Edited src/main/java/com/techstore/service/ProductService.java | 7→8 lines | ~119 |
+| 10:32 | Edited src/main/java/com/techstore/service/ProductService.java | modified permanentDeleteProduct() | ~148 |
+| 10:33 | Edited src/main/java/com/techstore/repository/ProductRepository.java | inline fix | ~20 |
+| 10:33 | Edited src/main/java/com/techstore/repository/ProductRepository.java | inline fix | ~28 |
+| 10:33 | Edited src/main/java/com/techstore/service/ProductService.java | inline fix | ~21 |
+| 10:33 | Edited src/main/java/com/techstore/service/ProductService.java | inline fix | ~40 |
+| 10:34 | Session end: 8 writes across 4 files (V35__add_deleted_flag_to_products.sql, Product.java, ProductService.java, ProductRepository.java) | 7 reads | ~21636 tok |
+| 10:34 | Session end: 8 writes across 4 files (V35__add_deleted_flag_to_products.sql, Product.java, ProductService.java, ProductRepository.java) | 7 reads | ~21636 tok |
+| 10:35 | Session end: 8 writes across 4 files (V35__add_deleted_flag_to_products.sql, Product.java, ProductService.java, ProductRepository.java) | 7 reads | ~21636 tok |
+
+| 10:36 | Одит + fix на product delete (409 Conflict) | ProductService, ProductRepository, OrderItem entity, V35 migration | Имплементиран soft delete (deleted=true) вместо hard delete — запазва order_items история | ~2500 |
+| 10:37 | Session end: 8 writes across 4 files (V35__add_deleted_flag_to_products.sql, Product.java, ProductService.java, ProductRepository.java) | 7 reads | ~21636 tok |
+| 10:54 | Session end: 8 writes across 4 files (V35__add_deleted_flag_to_products.sql, Product.java, ProductService.java, ProductRepository.java) | 7 reads | ~21636 tok |
+| 10:55 | Session end: 8 writes across 4 files (V35__add_deleted_flag_to_products.sql, Product.java, ProductService.java, ProductRepository.java) | 7 reads | ~21636 tok |
+
+## Session: 2026-08-26 11:59
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:10 | Анализ на CSV данни за дублирани филтър параметри | parameters/parameter_options/category_parameters CSVs | 322 дублирани name-групи; VALI-alone: 203 групи с 810 излишни rows; 85 категории показват дублирани филтри | ~8000 |
+| 12:22 | Генериране на SQL скриптове 40-44 за директна консолидация на параметри | scripts/40-44_*.sql | 5 скрипта: VALI merge (810 rows), ASBIS merge (81 rows), is_filter cleanup, cross-platform top-20 merges, post-cleanup | ~3000 |
+| 12:47 | Created FILTER_CONSOLIDATION_PLAN.md | — | ~2324 |
+| 12:48 | Session end: 1 writes across 1 files (FILTER_CONSOLIDATION_PLAN.md) | 2 reads | ~18939 tok |
+| 08:17 | Edited src/main/java/com/techstore/dto/response/ProductResponseDTO.java | 2→3 lines | ~16 |
+| 08:17 | Edited src/main/java/com/techstore/service/ProductService.java | modified name() | ~61 |
+| 08:17 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | inline fix | ~60 |
+| 08:17 | Edited ../../care-tech-ui/src/components/products/ImageDisplaying.jsx | expanded (+7 lines) | ~94 |
+| 08:17 | Edited ../../care-tech-ui/src/components/products/ImageDisplaying.jsx | expanded (+7 lines) | ~111 |
+| 08:17 | Session end: 6 writes across 5 files (FILTER_CONSOLIDATION_PLAN.md, ProductResponseDTO.java, ProductService.java, ProductPage.jsx, ImageDisplaying.jsx) | 6 reads | ~33280 tok |
+| 08:18 | Edited ../../care-tech-ui/src/components/products/ImageDisplaying.jsx | added optional chaining | ~98 |
+| 08:18 | Session end: 7 writes across 5 files (FILTER_CONSOLIDATION_PLAN.md, ProductResponseDTO.java, ProductService.java, ProductPage.jsx, ImageDisplaying.jsx) | 6 reads | ~33378 tok |
+| 08:18 | Session end: 7 writes across 5 files (FILTER_CONSOLIDATION_PLAN.md, ProductResponseDTO.java, ProductService.java, ProductPage.jsx, ImageDisplaying.jsx) | 6 reads | ~33378 tok |
+
+## Session: 2026-08-27 08:32
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 08:34 | Edited src/main/java/com/techstore/dto/response/ProductSearchResult.java | 2→3 lines | ~15 |
+| 08:34 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 7→7 lines | ~121 |
+| 08:34 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 4→4 lines | ~95 |
+| 08:34 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 3→4 lines | ~46 |
+| 08:34 | Edited ../../care-tech-ui/src/components/products/ProductCard.jsx | added optional chaining | ~150 |
+| 08:35 | Edited ../../care-tech-ui/src/components/products/ProductCard.jsx | added optional chaining | ~129 |
+| 08:35 | Session end: 6 writes across 3 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx) | 3 reads | ~10140 tok |
+| 08:36 | Edited ../../care-tech-ui/src/redux/productSlice.js | 3→4 lines | ~26 |
+| 08:36 | Session end: 7 writes across 4 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js) | 4 reads | ~10166 tok |
+| 08:36 | Session end: 7 writes across 4 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js) | 4 reads | ~10166 tok |
+| 09:02 | Edited src/main/java/com/techstore/controller/OGPreviewController.java | modified catch() | ~49 |
+| 09:02 | Edited src/main/java/com/techstore/controller/OGPreviewController.java | modified catch() | ~49 |
+| 09:03 | Session end: 9 writes across 5 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 5 reads | ~10270 tok |
+| 09:14 | Edited src/main/java/com/techstore/service/admin/AdminService.java | added 1 import(s) | ~53 |
+| 09:14 | Edited src/main/java/com/techstore/service/admin/AdminService.java | modified createPromo() | ~28 |
+| 09:15 | Edited src/main/java/com/techstore/service/admin/AdminService.java | modified createPromoByManufacturer() | ~37 |
+| 09:15 | Edited src/main/java/com/techstore/service/admin/AdminService.java | modified createPromoByCategory() | ~36 |
+| 09:15 | Session end: 13 writes across 6 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 6 reads | ~14556 tok |
+| 09:23 | Session end: 13 writes across 6 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 6 reads | ~14556 tok |
+| 09:27 | Created scripts/40a_preflight_dedup.sql | — | ~486 |
+| 09:27 | Edited scripts/40a_preflight_dedup.sql | removed 9 lines | ~2 |
+| 09:27 | Session end: 15 writes across 7 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 6 reads | ~15078 tok |
+| 09:29 | Session end: 15 writes across 7 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 6 reads | ~15078 tok |
+| 09:33 | Session end: 15 writes across 7 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 6 reads | ~15078 tok |
+| 09:34 | Session end: 15 writes across 7 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 6 reads | ~15078 tok |
+| 09:36 | Session end: 15 writes across 7 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 6 reads | ~15078 tok |
+| 09:37 | Session end: 15 writes across 7 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 6 reads | ~15078 tok |
+| 09:38 | Session end: 15 writes across 7 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 6 reads | ~15078 tok |
+| 09:40 | Edited scripts/43_crossplatform_parameter_merges.sql | 3712 → 3211 | ~2 |
+| 09:41 | Session end: 16 writes across 8 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~15080 tok |
+| 09:42 | Session end: 16 writes across 8 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~15080 tok |
+| 09:42 | Session end: 16 writes across 8 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~15080 tok |
+| 09:43 | Session end: 16 writes across 8 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~15080 tok |
+| 09:44 | Session end: 16 writes across 8 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~15080 tok |
+| 09:46 | Session end: 16 writes across 8 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~15080 tok |
+| 09:48 | Created scripts/45_disable_logistics_filters.sql | — | ~837 |
+| 09:48 | Session end: 17 writes across 9 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~15977 tok |
+| 09:49 | Session end: 17 writes across 9 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~15977 tok |
+| 09:51 | Created scripts/46_final_filter_cleanup.sql | — | ~909 |
+| 09:51 | Session end: 18 writes across 10 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~16951 tok |
+| 09:52 | Session end: 18 writes across 10 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~16951 tok |
+| 09:52 | Session end: 18 writes across 10 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~16951 tok |
+| 09:53 | Session end: 18 writes across 10 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~16951 tok |
+| 09:55 | Session end: 18 writes across 10 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~16951 tok |

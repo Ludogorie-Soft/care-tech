@@ -40,7 +40,7 @@ public class ProductSearchRepository {
 
         sql.append("SELECT p.id, p.name_bg, p.name_en, p.description_bg, p.description_en, ")
                 .append("p.model, p.reference_number, p.final_price, p.discount, p.featured, p.status, ")
-                .append("p.slug, ")
+                .append("p.slug, p.platform, ")
                 .append("m.name as manufacturer_name, c.")
                 .append(nameField)
                 .append(" as category_name ")
@@ -377,6 +377,7 @@ public class ProductSearchRepository {
                 .onSale(rs.getBigDecimal("discount") != null && rs.getBigDecimal("discount").compareTo(BigDecimal.ZERO) > 0)
                 .score(rs.getFloat("search_rank"))
                 .slug(rs.getString("slug"))
+                .platform(rs.getString("platform"))
                 .build();
     }
 
@@ -644,7 +645,7 @@ public class ProductSearchRepository {
 
         String sql = "SELECT p.id, p.name_bg, p.name_en, p.description_bg, p.description_en, " +
                 "p.model, p.reference_number, p.final_price, p.discount, p.featured, p.status, " +
-                "p.slug, m.name as manufacturer_name, c." + nameField + " as category_name, " +
+                "p.slug, p.platform, m.name as manufacturer_name, c." + nameField + " as category_name, " +
                 "p.image_url AS primary_image_url, " +
                 "GREATEST(" +
                 "  CASE WHEN p.name_bg IS NOT NULL THEN word_similarity(:query, p.name_bg) ELSE 0 END, " +

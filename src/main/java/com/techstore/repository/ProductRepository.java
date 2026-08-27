@@ -73,7 +73,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     Page<Product> findByCreatedByOrderByCreatedAtDesc(String createdBy, Pageable pageable);
 
-    Page<Product> findByPlatformIsNull(Pageable pageable);
+    Page<Product> findByPlatformIsNullAndDeletedFalse(Pageable pageable);
 
     @Modifying
     @Query(value = """
@@ -86,7 +86,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     """, nativeQuery = true)
     void permanentlyDeleteProductWithRelations(@Param("productId") Long productId);
 
-    Page<Product> findByMarkupPercentageGreaterThan(BigDecimal markup, Pageable pageable);
+    Page<Product> findByMarkupPercentageGreaterThanAndDeletedFalse(BigDecimal markup, Pageable pageable);
 
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category WHERE p.asbisCode IN :asbisCodes")
     List<Product> findByAsbisCodeIn(@Param("asbisCodes") Collection<String> asbisCodes);

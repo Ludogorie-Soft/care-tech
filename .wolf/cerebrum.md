@@ -9,6 +9,10 @@
 - **EURO_RATE е винаги 1.95583** (официален фиксиран курс лев/евро). Никога не използвай 1.96 или друга стойност.
 - **Цените се изписват винаги първо в Евро (€), след това в лева (лв.)** — напр. "199.99 €  /  391.12 лв.". Лева цената е обвита в отделен `<span>` или компонент за лесно премахване в бъдеще. Никога не показвай само лева.
 
+- **Plan-first, always.** Before implementing ANY feature, write a detailed plan and get explicit user approval. No code until the plan is approved. No exceptions.
+- **Role = Senior Software Developer.** Act as a senior dev on this project — professional, precise, no unnecessary abstractions, no over-engineering. Plan first, implement second.
+- **Parameter mapping USES AI (reversed decision 2026-08-21).** Earlier decision "без AI, програмно" за параметри е ОТМЕНЕНО. Ползва се Claude API (haiku model) за batch analysis с confidence scores. ≥0.85 = auto-approve; 0.60-0.85 = needs human review; <0.60 = manual only.
+
 - Never show raw backend error messages (stack traces, `message` fields, Spring error objects) on customer-facing UI. Always replace with a fixed Bulgarian user-friendly string.
 - Admin-panel errors (ManufacturerModal, ParamsLayout etc.) may still show technical details — only customer-facing pages need sanitized messages.
 - TBI modal button labels should be minimal Bulgarian — e.g. "Продължи", not "Продължи към TBI →".
@@ -34,6 +38,10 @@
 - **Dropdown re-show bug pattern:** In a controlled input where selecting from dropdown also calls `setState` on the input value — any `useEffect` watching that value will re-fire. Use a `programmaticQueryRef` flag to suppress the effect when the change was programmatic (not user typing).
 
 ## Do-Not-Repeat
+
+- [2026-08-20] NEVER call `fetchCategoryParameters` (paramSlice) with an object `{ categoryId, language }` — the thunk accepts a plain number as first arg. Passing an object produces URL `parameters/category/[object Object]` → 404. `language=bg` is hardcoded inside the thunk. Correct: `dispatch(fetchCategoryParameters(categoryId))`.
+
+- [2026-08-20] NEVER use `divide(..., 2, RoundingMode.HALF_UP)` when converting a percentage to a decimal ratio in `calculateFinalPrice()`. Scale=2 means 25.5% → 0.26 (26%), destroying precision. Use scale=6. DB column `discount` must also be `NUMERIC(10,6)` (not NUMERIC(8,2)) to store fractional percentages meaningfully.
 
 - [2026-08-20] NEVER test nginx OG endpoints with plain `curl` — the `$bad_bot` map blocks `~*curl/` with `return 444` (empty response). Always use `curl -A "Mozilla/5.0 (compatible; Viber/10.0)"` or another non-blocked UA when testing through nginx on the production server.
 
@@ -242,7 +250,38 @@
 - **Footer dynamic pattern:** `Footer.jsx` чете от Redux (`state.categories.categories`); App.js вече е заредил категориите при старт. Филтрира по `FOOTER_CATEGORY_IDS = new Set([...])` за контрол кои категории се показват. hasChildren check определя `/category/list/` vs `/category/` prefix.
 - **Category routing convention (frontend):** Категория с деца → `/category/list/${slug}/${id}` (CategoryList). Leaf категория → `/category/${slug}/${id}` (Category + product grid). Линкове в NavDropDown и Footer ТРЯБВА да спазват това — директен линк към `/category/` за parent категория причинява spinner + redirect hop.
 
+## Key Learnings (2026-08-27 — Filter Consolidation Execution)
+
+- **DBeaver autocommit е критично за multi-DO-block скриптове.** Без autocommit ON всички DO блокове са в 1 транзакция — при грешка в един, всичко след него пада с "current transaction is aborted". Включва се от toolbar бутона (не от Connection settings — там е greyed out без да се отметне datasource checkbox-а).
+- **Pre-flight dedup pattern:** Преди multi-group consolidation скрипт да се re-run след грешка, трябва да се изпълни DELETE на конфликтиращи product_parameters: `DELETE FROM product_parameters pp USING parameter_options nc_opt, parameter_options c_opt WHERE pp.parameter_option_id = nc_opt.id AND nc_opt.parameter_id != c_opt.parameter_id AND LOWER(TRIM(nc_opt.name_bg)) = LOWER(TRIM(c_opt.name_bg)) AND EXISTS (SELECT 1 FROM product_parameters pp2 WHERE pp2.product_id = pp.product_id AND pp2.parameter_option_id = c_opt.id AND pp2.parameter_id = c_opt.parameter_id)`.
+- **Cross-script canonical invalidation:** Script 43 може да ползва canonical IDs, които Script 40 е изтрил като non-canonical. Преди изпълнение на 43, верифицирай всички canonicals: `SELECT id FROM parameters WHERE id IN (...)`. Ако липсва → намери кой canonical го е погълнал в Script 40 (grep в DO блока) и го замени.
+- **ASBIS logistics параметри:** IDs 4027, 4045, 4040, 4031, 4061, 4041, 4049, 4043, 4056 и ~50 още са логистични/опаковъчни полета от ASBIS — НЕ трябва да са is_filter=true. Деактивирани с Script 45.
+- **Финален резултат:** Цвят = 8599 продукта в 155 категории (merged от 91 VALI + TEKRA + ASBIS + "Външен цвят" sources). Всички активни филтри имат ≥2 опции.
+- **410 Gone за OG endpoints:** Изтрити продукти → OGPreviewController трябва да върне 410 Gone (не 302) — 302 причинява безкраен crawler loop (~10 req/sec). Facebook/WhatsApp спират crawling при 410.
+- **AdminService lazy init:** Методи, които викат `convertToResponseDTO()` (достъпва lazy колекции като `additionalImages`), трябва да имат `@Transactional`. Засяга: `createPromo`, `createPromoByManufacturer`, `createPromoByCategory`.
+
+## Key Learnings (2026-08-26 — Filter Parameter Consolidation)
+
+- **VALI per-category parameter architecture:** VALI sync създава нов `parameters` ред за ВСЯКА категория. "Цвят" = 91 отделни parameter rows, "Размери" = 53, "Интерфейс" = 27. Старият план (caretech_parameters + distributor_parameter_mapping) не решаваше options дедупликацията (Phase B = отложена).
+- **Нов подход: директна SQL консолидация** — скриптове 40-44 физически сливат дублиращите rows. Canonical = param с най-много category linkages (тie-breaker: max products → min id). Options се сливат по `LOWER(TRIM(name_bg))`. Без code промени в backend/frontend.
+- **Canonical selection pitfall:** Canonical по max products може да избере принтер/тонер категория (id=6032 "Цвят" има "Yellow", "Magenta" опции). ОК защото filter query показва само опции с продукти в текущата категория (HAVING COUNT > 0).
+- **Ред на изпълнение:** Script 40 (VALI) → Script 41 (ASBIS) → Script 42 (is_filter cleanup) → Script 43 (cross-platform top-20) → Script 44 (post-cleanup). Всеки в отделна BEGIN/COMMIT транзакция.
+- **is_filter junk:** MOST params "Гаранция" (3265 products!), "URL на производителя" (2938), "Weight", "Manufacturer" са is_filter=true но НЕ трябва да са филтри → Script 42 ги деактивира.
+- **cross-platform дублирания след 40+41:** 52 кроссплатформени групи с еднакви имена. Script 43 мержва топ 20 (Интерфейс, Цвят, Тип продукт, ...). OPTIONS не се сливат при cross-platform (различни езици).
+
+## Key Learnings (2026-08-26 — Product soft delete)
+
+- **Product delete = soft delete.** `DELETE /api/products/{id}` НЕ трие физически. Сет-ва `deleted=true, active=false, show=false, status=NOT_AVAILABLE`. `order_items` FK е `ON DELETE RESTRICT` → hard delete е невъзможен за продукти в поръчки. `deleted=true` е авторитетният флаг — sync-ът не го reset-ва.
+- **`findByPlatformIsNullAndDeletedFalse`** и **`findByMarkupPercentageGreaterThanAndDeletedFalse`** — единствените admin repo методи без active/show/status filter, затова изискват explicit `deleted=false`. Всички останали query-та филтрират `active=true AND show=true AND status=AVAILABLE`.
+- **Flyway V35** добавя `deleted BOOLEAN NOT NULL DEFAULT FALSE` към `products` таблицата.
+
 ## Do-Not-Repeat
+
+- [2026-08-27] NEVER return 302 redirect from OGPreviewController when product/category is not found — social media crawlers (Facebook, WhatsApp, Viber) loop ~10 req/sec on 302. Always return 410 Gone for deleted/missing resources.
+- [2026-08-27] NEVER call `convertToResponseDTO()` from AdminService methods without `@Transactional` — the method accesses `product.getAdditionalImages()` (lazy collection) which fails after the Hibernate session closes. Add `@Transactional` to `createPromo`, `createPromoByManufacturer`, `createPromoByCategory`.
+- [2026-08-27] When running multi-group consolidation SQL scripts in DBeaver, ALWAYS enable autocommit first. Each DO block must be its own transaction — without autocommit, a single failure aborts the entire session and all subsequent blocks fail with "current transaction is aborted".
+
+- [2026-08-26] NEVER hard-delete products. `order_items.product_id` е `ON DELETE RESTRICT` — FK violation → 409 Conflict. Винаги ползвай soft delete: `product.setDeleted(true)` + `active=false` + `show=false` + `status=NOT_AVAILABLE` + `productRepository.save()`.
 
 - [2026-08-19] NEVER add hardcoded `si.id === N` special cases in NavDropDown to make a parent category linkable. This creates a visual duplicate (category appears as its own subcategory) and causes a spinner/redirect loop. Instead: render the section header itself as a `<Link to="/category/list/...">`.
 - [2026-08-19] NEVER link to `/category/${slug}/${id}` for a category that has children. Category.jsx detects hasChildren, calls navigate() to /category/list/..., causing an unnecessary spinner + redirect. Always link directly to `/category/list/${slug}/${id}` for parent categories.

@@ -285,7 +285,8 @@ public class ProductService {
         validateProductId(id);
         validateLanguage(lang);
         Product product = findProductByIdOrThrow(id);
-        if (product.getStatus() != ProductStatus.AVAILABLE
+        if (Boolean.TRUE.equals(product.getDeleted())
+                || product.getStatus() != ProductStatus.AVAILABLE
                 || !Boolean.TRUE.equals(product.getActive())
                 || !Boolean.TRUE.equals(product.getShow())) {
             throw new ResourceNotFoundException("Product not found with id: " + id);
@@ -416,7 +417,7 @@ public class ProductService {
     }
 
     public Page<ProductResponseDTO> findProductsWithMarkup(Pageable pageable, String lang) {
-        return productRepository.findByMarkupPercentageGreaterThan(BigDecimal.ZERO, pageable).map(p -> convertToResponseDTO(p,lang));
+        return productRepository.findByMarkupPercentageGreaterThanAndDeletedFalse(BigDecimal.ZERO, pageable).map(p -> convertToResponseDTO(p,lang));
     }
 
     @CacheEvict(value = "products", allEntries = true)
@@ -537,21 +538,18 @@ public class ProductService {
 
     @CacheEvict(value = "products", allEntries = true)
     public void permanentDeleteProduct(Long id) {
-        log.warn("Permanently deleting product with id: {}", id);
+        log.warn("Soft-deleting product with id: {}", id);
         validateProductId(id);
 
         Product product = findProductByIdOrThrow(id);
 
-        List<String> allImages = collectAllProductImages(product);
+        product.setDeleted(true);
+        product.setShow(false);
+        product.setActive(false);
+        product.setStatus(ProductStatus.NOT_AVAILABLE);
+        productRepository.save(product);
 
-        // ✅ ЕДИН native query за всичко
-        log.info("Deleting product {} and all relations", id);
-        productRepository.permanentlyDeleteProductWithRelations(id);
-
-        // ✅ Cleanup снимки
-        cleanupImagesOnError(allImages);
-
-        log.warn("Product permanently deleted successfully with id: {}", id);
+        log.warn("Product soft-deleted successfully with id: {}", id);
         clearProductCache();
     }
 
@@ -598,7 +596,7 @@ public class ProductService {
     }
 
     public Page<ProductResponseDTO> findAllAdminProducts(Pageable pageable, String lang) {
-        return productRepository.findByPlatformIsNull(pageable)
+        return productRepository.findByPlatformIsNullAndDeletedFalse(pageable)
                 .map(p -> convertToResponseDTO(p, lang));
     }
 
@@ -1045,6 +1043,7 @@ public class ProductService {
         dto.setOnSale(p.isOnSale());
         dto.setStatus(p.getStatus() != null ? p.getStatus().getCode() : 0);
         dto.setWorkflowId(p.getWorkflowId());
+        dto.setPlatform(p.getPlatform() != null ? p.getPlatform().name() : null);
         return dto;
     }
     private ProductParameterResponseDto convertToProductParameterResponse(ProductParameter pp, String lang) {

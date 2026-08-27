@@ -7044,6 +7044,429 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-20T08:47:11.764Z"
+    },
+    {
+      "id": "bug-434",
+      "timestamp": "2026-08-20T09:49:21.132Z",
+      "error_message": "Wrong reference: categoryId should be loadedCategoryId",
+      "file": "../../care-tech-ui/src/pages/admin/Products/ProductForm.jsx",
+      "root_cause": "Used \"categoryId\" instead of \"loadedCategoryId\"",
+      "fix": "Changed categoryId → loadedCategoryId",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T09:49:21.132Z"
+    },
+    {
+      "id": "bug-435",
+      "timestamp": "2026-08-20T10:00:00Z",
+      "error_message": "Грешка при зареждане на параметрите — след създаване на нов параметър в ProductForm",
+      "file": "care-tech-ui/src/pages/admin/Products/ProductForm.jsx",
+      "root_cause": "handleCreateParam (ред 311) извикваше fetchCategoryParameters({ categoryId: loadedCategoryId, language: \"bg\" }) — обект вместо число. Thunk-ът приема директно categoryId (число), така URL ставаше parameters/category/[object Object] → 404.",
+      "fix": "Променено на fetchCategoryParameters(loadedCategoryId). language=bg е hardcoded в thunk-а.",
+      "tags": [
+        "frontend",
+        "redux",
+        "params",
+        "wrong-argument-type"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T10:00:00Z"
+    },
+    {
+      "id": "bug-436",
+      "timestamp": "2026-08-20T10:00:00Z",
+      "error_message": "Невъзможно задаване на точна промо цена (напр. 19.99) — само цели % се приемат",
+      "file": "care-tech-ui/src/pages/admin/Promotions/PromoModal.jsx, src/main/java/com/techstore/entity/Product.java",
+      "root_cause": "3 слоя проблеми: (1) Yup .integer() блокира дробни %; (2) calculateFinalPrice() използваше divide(..., 2, ...) → закръгляше 25.5% до 0.26 (26%); (3) DB колоната discount е NUMERIC(8,2) — само 2 десетични знака.",
+      "fix": "Product.java: scale 2→6 в @Column и в calculateFinalPrice() divide. V34 Flyway миграция: ALTER TABLE products ALTER COLUMN discount TYPE numeric(10,6). PromoModal.jsx: добавен режим Крайна цена (€) с автоизчисление на %.",
+      "tags": [
+        "promo",
+        "discount",
+        "precision",
+        "frontend",
+        "backend",
+        "flyway"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T10:00:00Z"
+    },
+    {
+      "id": "bug-437",
+      "timestamp": "2026-08-20T14:35:00Z",
+      "error_message": "Сортирането по цена в страницата за търсене не работи — резултатите изглеждат наредени по подкатегория, а не по цена",
+      "file": "care-tech-ui/src/components/navbar/SearchBar.jsx",
+      "root_cause": "Race condition: debounce timer в SearchBar НЕ се анулира при натискане на Enter. Потребителят натиска Enter на T=50ms (преди 300ms debounce). SearchPage изпраща заявка А (sortBy=price_asc). На T=300ms debounce callback fires с СТАР closure (isOnSearchPage=false) и изпраща заявка Б (sortBy=relevance). Заявка Б пристига ~250ms след заявка А и OVERWRITE-ва Redux с relevance-сортирани резултати. Потребителят не може да поправи ръчно защото setSortBy('price_asc') е no-op — вече е 'price_asc'.",
+      "fix": "handleSubmit и clearSearch в SearchBar.jsx — добавен clearTimeout(debounceTimer.current) преди navigate/clearSearch, за да се анулира pending debounce при submit или затваряне.",
+      "tags": [
+        "search",
+        "sorting",
+        "race-condition",
+        "debounce",
+        "frontend",
+        "SearchBar"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T14:35:00Z"
+    },
+    {
+      "id": "bug-438",
+      "timestamp": "2026-08-20T13:21:47.307Z",
+      "error_message": "CSS fix: id",
+      "file": "../../care-tech-ui/src/pages/Certifications.jsx",
+      "root_cause": "id: 2, src: \"/certificates/certification-1.png\", alt: \"Сертификат 2\" → 4, src: \"/certificates/certification-1.png\", alt: \"Сертификат 4\"",
+      "fix": "Changed id: 2, src: \"/certificates/certification-1.png\", alt: \"Сертификат 2\" → 4, src: \"/certificates/certification-1.png\", alt: \"Сертификат 4\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T13:21:47.307Z"
+    },
+    {
+      "id": "bug-439",
+      "timestamp": "2026-08-20T13:23:41.678Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/Certifications.jsx",
+      "root_cause": "Had \"HCSA Hikvision Certified Security Associate – Ins",
+      "fix": "Changed to \"Сертификат HCSA – Hikvision Certified Security As",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-20T13:23:41.678Z"
+    },
+    {
+      "id": "bug-440",
+      "timestamp": "2026-08-21T07:58:52.799Z",
+      "error_message": "Missing import: @tailwindcss/typography",
+      "file": "../../care-tech-ui/tailwind.config.js",
+      "root_cause": "Module(s) not imported: @tailwindcss/typography",
+      "fix": "Added import(s) for @tailwindcss/typography",
+      "tags": [
+        "auto-detected",
+        "missing-import",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T07:58:52.799Z"
+    },
+    {
+      "id": "bug-441",
+      "timestamp": "2026-08-21T07:59:08.260Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/BlogPostPage.jsx",
+      "root_cause": "Had \"max-w-[860px] mx-auto px-4 py-6 min-h-[60vh]\"",
+      "fix": "Changed to \"max-w-[860px] mx-auto px-4 sm:px-6 py-6 min-h-[60",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-21T07:59:14.850Z"
+    },
+    {
+      "id": "bug-442",
+      "timestamp": "2026-08-21T07:59:21.837Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/Blog.jsx",
+      "root_cause": "Had \"flex items-center gap-2 overflow-x-auto pb-2 mb-4",
+      "fix": "Changed to \"flex items-center gap-2 overflow-x-auto pb-2 mb-4",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T07:59:21.837Z"
+    },
+    {
+      "id": "bug-443",
+      "timestamp": "2026-08-21T08:12:38.219Z",
+      "error_message": "CSS fix: max-width, height, display",
+      "file": "../../care-tech-ui/src/index.css",
+      "root_cause": "max-width: 100% → none !important; height: auto → 100% !important; display: block → block !important",
+      "fix": "Changed max-width: 100% → none !important; height: auto → 100% !important; display: block → block !important",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-21T08:17:30.480Z"
+    },
+    {
+      "id": "bug-444",
+      "timestamp": "2026-08-21T08:17:50.895Z",
+      "error_message": "CSS fix: display",
+      "file": "../../care-tech-ui/src/pages/BlogPostPage.jsx",
+      "root_cause": "display: block we set via CSS so table renders correctly inside the wrapper → table layout",
+      "fix": "Changed display: block we set via CSS so table renders correctly inside the wrapper → table layout",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T08:17:50.895Z"
+    },
+    {
+      "id": "bug-445",
+      "timestamp": "2026-08-21T08:24:13.549Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/public/index.html",
+      "root_cause": "Had \"#000000\"",
+      "fix": "Changed to \"#1a1a1a\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-21T08:24:24.808Z"
+    },
+    {
+      "id": "bug-446",
+      "timestamp": "2026-08-21T08:24:34.695Z",
+      "error_message": "Wrong reference: 071018 should be 1a1a1a",
+      "file": "../../care-tech-ui/public/index.html",
+      "root_cause": "Used \"071018\" instead of \"1a1a1a\"",
+      "fix": "Changed 071018 → 1a1a1a",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T08:24:34.695Z"
+    },
+    {
+      "id": "bug-447",
+      "timestamp": "2026-08-21T08:30:20.894Z",
+      "error_message": "CSS fix: prose-headings",
+      "file": "../../care-tech-ui/src/pages/BlogPostPage.jsx",
+      "root_cause": "prose-headings: font-semibold prose-headings:text-gray-900 → font-semibold",
+      "fix": "Changed prose-headings: font-semibold prose-headings:text-gray-900 → font-semibold",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-21T08:33:30.093Z"
+    },
+    {
+      "id": "bug-448",
+      "timestamp": "2026-08-21T08:34:00.817Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/BlogPostPage.jsx",
+      "root_cause": "Had \"max-w-[860px] mx-auto px-4 sm:px-6 py-6 min-h-[60",
+      "fix": "Changed to \"max-w-[860px] mx-auto px-3 sm:px-5 py-6 min-h-[60",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T08:34:00.817Z"
+    },
+    {
+      "id": "bug-449",
+      "timestamp": "2026-08-21T08:42:25.232Z",
+      "error_message": "Missing guard clause",
+      "file": "../../care-tech-ui/src/pages/BlogPostPage.jsx",
+      "root_cause": "No early return/throw for edge case: table.parentElement?.classList.contains(\"table-scroll-wrap\"",
+      "fix": "Added guard clause: if (table.parentElement?.classList.contains()",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T08:42:25.232Z"
+    },
+    {
+      "id": "bug-450",
+      "timestamp": "2026-08-21T08:44:12.891Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../care-tech-ui/src/pages/BlogPostPage.jsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T08:44:12.891Z"
+    },
+    {
+      "id": "bug-451",
+      "timestamp": "2026-08-21T13:06:24.941Z",
+      "error_message": "Null/undefined access in ",
+      "file": "CATEGORY_MAPPING_PLAN.md",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T13:06:24.941Z"
+    },
+    {
+      "id": "bug-452",
+      "timestamp": "2026-08-21T13:08:10.371Z",
+      "error_message": "Function not marked async",
+      "file": "PARAMETER_MAPPING_PLAN.md",
+      "root_cause": "Function uses await but wasn't declared async",
+      "fix": "Added async modifier",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T13:08:10.371Z"
+    },
+    {
+      "id": "bug-453",
+      "timestamp": "2026-08-26T07:33:16.532Z",
+      "error_message": "Wrong reference: findByPlatformIsNull should be findByPlatformIsNullAndDeletedFalse",
+      "file": "src/main/java/com/techstore/repository/ProductRepository.java",
+      "root_cause": "Used \"findByPlatformIsNull\" instead of \"findByPlatformIsNullAndDeletedFalse\"",
+      "fix": "Changed findByPlatformIsNull → findByPlatformIsNullAndDeletedFalse",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-26T07:33:29.666Z"
+    },
+    {
+      "id": "bug-454",
+      "timestamp": "2026-08-26T07:33:41.234Z",
+      "error_message": "Wrong reference: findByPlatformIsNull should be findByPlatformIsNullAndDeletedFalse",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "Used \"findByPlatformIsNull\" instead of \"findByPlatformIsNullAndDeletedFalse\"",
+      "fix": "Changed findByPlatformIsNull → findByPlatformIsNullAndDeletedFalse",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-26T07:33:50.524Z"
+    },
+    {
+      "id": "bug-455",
+      "timestamp": "2026-08-27T05:17:19.002Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-27T05:17:19.002Z"
+    },
+    {
+      "id": "bug-456",
+      "timestamp": "2026-08-27T05:18:26.983Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/components/products/ImageDisplaying.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-27T05:18:26.983Z"
+    },
+    {
+      "id": "bug-457",
+      "timestamp": "2026-08-27T05:34:55.254Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/components/products/ProductCard.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: {isAdmin && (; <span className={`absolute bottom-4 left-0 z-[2] px-1.5 py-0",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-27T05:35:02.217Z"
+    },
+    {
+      "id": "bug-458",
+      "timestamp": "2026-08-27T06:02:35.827Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/controller/OGPreviewController.java",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 6→4 lines (3 removed) | Also: HttpHeaders headers = new HttpHeaders();; headers.set(\"Location\", appUrl + \"/category/\" + id",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-27T06:02:46.405Z"
+    },
+    {
+      "id": "bug-459",
+      "timestamp": "2026-08-27T06:40:59.793Z",
+      "error_message": "Wrong reference: 3712 should be 3211",
+      "file": "scripts/43_crossplatform_parameter_merges.sql",
+      "root_cause": "Used \"3712\" instead of \"3211\"",
+      "fix": "Changed 3712 → 3211",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "sql"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-27T06:40:59.793Z"
     }
   ]
 }

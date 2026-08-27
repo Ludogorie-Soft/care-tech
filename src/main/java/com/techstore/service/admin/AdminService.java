@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -29,6 +30,7 @@ public class AdminService {
     private final ParameterMapper parameterMapper;
     private final CacheManager cacheManager;
 
+    @Transactional
     public List<ProductResponseDTO> createPromoByManufacturer(Long manufacturerId, BigDecimal discount, String lang) {
         Manufacturer manufacturer = manufacturerRepository.findById(manufacturerId).orElseThrow(
                 () -> new ResourceNotFoundException("Manufacturer not found with id " + manufacturerId)
@@ -66,6 +68,7 @@ public class AdminService {
                 .toList();
     }
 
+    @Transactional
     public List<ProductResponseDTO> createPromoByCategory(Long categoryId, BigDecimal discount, String language) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(
                 () -> new ResourceNotFoundException("Category not found with id " + categoryId)
@@ -92,6 +95,7 @@ public class AdminService {
         return products.stream().map(p -> convertToResponseDTO(p, language)).toList();
     }
 
+    @Transactional
     public ProductResponseDTO createPromo(ProductPromoRequest request, String lang) {
         Product product = getProduct(request.getId());
 

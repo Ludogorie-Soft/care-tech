@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-20T09:33:12.418Z
-> Files: 623 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T06:51:11.591Z
+> Files: 639 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -18,15 +18,20 @@
 - `user_role_and_workflow.md` (~279 tok)
 - `vali_sync_status_bug.md` (~502 tok)
 
+## ../../care-tech-ui/
+
+- `blog-article-template.html` — IMOU T800 и S800 Pro: 4K видеорегистратори за повече сигурност на пътя (~5772 tok)
+- `tailwind.config.js` — Declares on (~227 tok)
+
 ## ../../care-tech-ui/public/
 
-- `index.html` — Care Tech – SEO мета, GA, FB Pixel, Pazaruvaj backlink (статичен, crawler-visible) + тъмен bottom bar с copyright (~1900 tok)
+- `index.html` — Care Tech – Продажба и ремонт на лаптопи (~1910 tok)
 - `leasing-complete.html` — TBI Complete (~184 tok)
 
 ## ../../care-tech-ui/src/
 
 - `App.js` — Declares ScrollToTop (~3149 tok)
-- `index.css` — Styles: 39 rules (~2126 tok)
+- `index.css` — Styles: 67 rules (~2775 tok)
 
 ## ../../care-tech-ui/src/api/
 
@@ -56,21 +61,23 @@
 - `AuthDropDown.jsx` — AuthDropDown — renders form (~3716 tok)
 - `NavBar.jsx` — NavBar (~4458 tok)
 - `NavDropDown.jsx` — Dynamic nav dropdown: root→sub→children from Redux; selfChild removed; section headers with children render as clickable Link to /category/list/ (~4100 tok)
-- `SearchBar.jsx` — SearchBar — renders form (~2255 tok)
+- `SearchBar.jsx` — SearchBar — renders form (~2279 tok)
 
 ## ../../care-tech-ui/src/components/products/
 
 - `CompareButton.jsx` — Reusable compare toggle button. (~695 tok)
-- `ImageDisplaying.jsx` — NextArrow (~3614 tok)
-- `ProductCard.jsx` — ProductCard (~3408 tok)
+- `ImageDisplaying.jsx` — NextArrow (~3782 tok)
+- `ProductCard.jsx` — PLATFORM_BADGE (~3578 tok)
 
 ## ../../care-tech-ui/src/pages/
 
-- `Blog.jsx` — formatDate (~2633 tok)
-- `BlogPostPage.jsx` — formatDate (~1953 tok)
+- `Blog.jsx` — formatDate (~2804 tok)
+- `BlogPostPage.jsx` — formatDate (~2609 tok)
 - `Cart.jsx` — EURO_RATE (~16680 tok)
 - `Category.jsx` — Category (~6664 tok)
 - `CategoryList.jsx` — CategoryList (~1407 tok)
+- `Certifications.jsx` — Grid от 4 сертификата (HCSA, CGSA Hikvision на 1-2 място; стари на 3-4); lightbox с AnimatePresence (~400 tok)
+- `Certifications.jsx` — Certifications (~884 tok)
 - `ComingSoonPage.jsx` — ComingSoonPage (~385 tok)
 - `ComparePage.jsx` — EURO_RATE — renders table (~3958 tok)
 - `Contact.jsx` — Contact — renders form (~2804 tok)
@@ -79,7 +86,7 @@
 - `OurClients.jsx` — clients (~2724 tok)
 - `OurServices.jsx` — OurServices — renders form (~3552 tok)
 - `Policy.jsx` — sections (~4978 tok)
-- `ProductPage.jsx` — EURO_RATE (~10247 tok)
+- `ProductPage.jsx` — EURO_RATE (~10260 tok)
 - `ReturnPolicyPage.jsx` — sections (~4896 tok)
 
 ## ../../care-tech-ui/src/pages/admin/
@@ -126,7 +133,7 @@
 
 ## ../../care-tech-ui/src/pages/admin/Products/
 
-- `ProductForm.jsx` — SearchSelect (~10797 tok)
+- `ProductForm.jsx` — SearchSelect (~10788 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Promotions/
 
@@ -157,7 +164,7 @@
 - `offersSlice.js` — API routes: GET, PUT, POST (10 endpoints) (~2807 tok)
 - `orderSlice.js` — orderSlice.js (~3037 tok)
 - `paramSlice.js` — API routes: GET, POST, PUT, PATCH, DELETE (15 endpoints) (~5217 tok)
-- `productSlice.js` — API routes: GET, POST, PUT (11 endpoints) (~6680 tok)
+- `productSlice.js` — API routes: GET, POST, PUT (11 endpoints) (~6701 tok)
 - `reviewsSlice.js` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~1554 tok)
 - `store.js` — Exports store, persistor (~702 tok)
 
@@ -176,13 +183,17 @@
 - `.gitattributes` — Git attributes (~11 tok)
 - `.gitignore` — Git ignore rules (~124 tok)
 - `BLOG_PLAN.md` — План: Блог функционалност (~1556 tok)
+- `blog-article-template.html` (~5142 tok)
 - `categories_202605130941.sql` (~14427 tok)
+- `CATEGORY_MAPPING_PLAN.md` — План: CareTech Категорийна Йерархия + Distributor Mapping (~7659 tok)
 - `CLAUDE.md` — OpenWolf (~57 tok)
 - `COMPARE_PLAN.md` — План: Функционалност за Сравнение на Продукти (~1975 tok)
 - `database_backup_script.txt` (~121 tok)
+- `DB_RELATIONSHIP_ANALYSIS.md` — Анализ на всички DB връзки — преди имплементация (~7360 tok)
 - `docker-compose.dev.yml` — Docker Compose: 4 services (~361 tok)
 - `docker-compose.yml` — Docker Compose services (~497 tok)
 - `Dockerfile` — Docker container definition (~324 tok)
+- `FILTER_CONSOLIDATION_PLAN.md` — План: Консолидация на филтър параметри (SQL-базиран) (~2179 tok)
 - `How_To_Run_In_AWS.md` — Tech Store API (~536 tok)
 - `init-databases.sh` (~35 tok)
 - `mvnw` — or more contributor license agreements.  See the NOTICE file (~3144 tok)
@@ -191,6 +202,7 @@
 - `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~2968 tok)
 - `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
 - `ORDER_EDIT_PLAN.md` — План: Редактиране на поръчки от администратор (~577 tok)
+- `PARAMETER_MAPPING_PLAN.md` — План: CareTech Параметри + Филтър Дедупликация (AI-assisted) (~10360 tok)
 - `parameters_202605130941.sql` (~43615 tok)
 - `pom.xml` (~1688 tok)
 - `README.md` — Project documentation (~1777 tok)
@@ -208,6 +220,10 @@
 ## .mvn/wrapper/
 
 - `maven-wrapper.properties` (~40 tok)
+
+## /
+
+- `CATEGORY_MAPPING_PLAN.md` — 10-phase implementation plan for CareTech category hierarchy + distributor category mapping. Checkbox format. Phases: 1=DB migrations, 2=Entities/Repos, 3=Services, 4=DTOs/Controllers, 5=Redux, 6=Admin UI, 7=Seed, 8=Frontend routing, 9=ProductForm, 10=SEO. (~2100 tok)
 
 ## New files added 2026-06-04
 
@@ -338,6 +354,10 @@
 - `35_remove_tekra_slug_from_leaf_cats.sql` — Нулира tekra_slug от всички level-3 (leaf) категории под Видеонаблюдение; запазва category_path за routing. Level-2 пазят tekra_slug → sync ги фетчва. (~1342 tok)
 - `36_fix_tekra_product_categories.sql` — Премества 42 NVR продукта cat238→cat962; 42 Comelit IP камери cat100→cat964 (NDAA). По name ILIKE matching. (~576 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
+- `40a_preflight_dedup.sql` — ============================================================================= (~427 tok)
+- `43_crossplatform_parameter_merges.sql` — ============================================================================= (~9330 tok)
+- `45_disable_logistics_filters.sql` — ============================================================================= (~837 tok)
+- `46_final_filter_cleanup.sql` — ============================================================================= (~909 tok)
 - `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
@@ -400,6 +420,7 @@
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
 - `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~2282 tok)
 - `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~1379 tok)
+- `OGPreviewController.java` — RestController: OGPreviewController (3 endpoints) (~1834 tok)
 - `OrderController.java` — Създаване на нова поръчка (~1909 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
 - `PazaruvajFeedController.java` — Public XML product feed consumed by pazaruvaj.com crawler (every ~12 h). (~1747 tok)
@@ -536,9 +557,9 @@
 - `ProductImageResponseDto.java` — Class: ProductImageResponseDto (~61 tok)
 - `ProductImageUploadResponseDTO.java` — Class: ProductImageUploadResponseDTO (~121 tok)
 - `ProductParameterResponseDto.java` — Class: ProductParameterResponseDto (~162 tok)
-- `ProductResponseDTO.java` — Class: ProductResponseDTO (~400 tok)
+- `ProductResponseDTO.java` — Class: ProductResponseDTO (~382 tok)
 - `ProductSearchResponse.java` — Class: ProductSearchResponse (~156 tok)
-- `ProductSearchResult.java` — Class: ProductSearchResult (~229 tok)
+- `ProductSearchResult.java` — Class: ProductSearchResult (~221 tok)
 - `ProductSummaryDto.java` — Class: ProductSummaryDto (~95 tok)
 - `ReviewResponseDto.java` — ReviewResponseDto: from (~322 tok)
 - `ShippingPreviewResponseDTO.java` — Class: ShippingPreviewResponseDTO (~209 tok)
@@ -615,7 +636,7 @@
 - `Parameter.java` — Entity: Parameter (~544 tok)
 - `ParameterOption.java` — Entity: ParameterOption (~260 tok)
 - `PersonalOffer.java` — Entity: PersonalOffer (~665 tok)
-- `Product.java` — Entity: Product (~2714 tok)
+- `Product.java` — Entity: Product (~2737 tok)
 - `ProductFlag.java` — Entity: ProductFlag (~231 tok)
 - `ProductParameter.java` — Entity: ProductParameter (~266 tok)
 - `Review.java` — Entity: Review (~219 tok)
@@ -687,8 +708,8 @@
 - `ParameterRepository.java` — Repository: ParameterRepository. findParametersForAvailableProductsByCategory uses status = AVAILABLE (not <> NOT_AVAILABLE) (~1065 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~478 tok)
-- `ProductRepository.java` — Cross-platform deduplication by SKU. (~3491 tok)
-- `ProductSearchRepository.java` — Full-text + LIKE search. All 7 SQL queries filter status = 'AVAILABLE' (not <> 'NOT_AVAILABLE'). (~9335 tok)
+- `ProductRepository.java` — Cross-platform deduplication by SKU. (~3499 tok)
+- `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9355 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
 - `SyncLogRepository.java` — Repository: SyncLogRepository (~214 tok)
@@ -720,7 +741,7 @@
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Returns the given category ID plus all descendant IDs (recursive). (~2448 tok)
-- `ProductService.java` — Service: ProductService (~13603 tok)
+- `ProductService.java` — Service: ProductService (~13615 tok)
 - `ReviewService.java` — Service: ReviewService (~946 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
@@ -734,7 +755,7 @@
 
 ## src/main/java/com/techstore/service/admin/
 
-- `AdminService.java` — Service: AdminService (~4391 tok)
+- `AdminService.java` — Service: AdminService (~4131 tok)
 
 ## src/main/java/com/techstore/service/sync/
 
@@ -791,6 +812,7 @@
 - `V32__add_alias_to_categories.sql` — V32: Add alias_of_id to categories to support "virtual" categories that (~134 tok)
 - `V33__fix_sync_parameters_isfilter.sql` — Phase 1a: Remove junk MOST parameters created before the properties-map fix. (~521 tok)
 - `V34__increase_discount_precision.sql` — Increase discount column precision to support fractional percentages (~53 tok)
+- `V35__add_deleted_flag_to_products.sql` — Soft-delete support for products. (~80 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)

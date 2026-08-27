@@ -46,4 +46,5 @@ public class ProductResponseDTO {
     private Long workflowId;
     private String slug;
     private String createdBy;
+    private String platform;
 }

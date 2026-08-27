@@ -108,6 +108,9 @@ public class Product extends BaseEntity {
 
     private Boolean featured = false;
 
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = false;
+
     @Column(name = "image_url", length = 1000)
     private String primaryImageUrl;
 
