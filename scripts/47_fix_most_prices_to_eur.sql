@@ -3,60 +3,63 @@
 --
 -- Коригира MOST цените от ЛЕВА към ЕВРО.
 --
--- ЧИСТ SQL — без psql meta-команди (\echo, \set, \timing), за да работи и в
--- GUI клиент (DBeaver / DataGrip / pgAdmin), и през psql.
--- Съобщенията идват като NOTICE (виж прозореца със сървърните съобщения),
--- а отчетите — като нормални result set-ове.
+-- ЧИСТ SQL — без psql meta-команди, работи и в GUI клиент, и през psql.
 --
 -- ОСНОВАНИЕ (bug-466, SEARCH_AUDIT_PLAN.md фаза 0.4):
 --   MostSyncService умножаваше цената по курса лев/евро 1.95583, но MOST
---   feed-ът вече подава евро (<currency>EUR</currency> за 6089/6089 продукта,
---   URL-ът изрично иска ?currency=EUR). Конвенцията на системата е
---   price_client / final_price = ЕВРО без ДДС — потвърдено от ASBIS
---   (<CURRENCY_CODE>EUR</CURRENCY_CODE>), VALI и TEKRA.
---   Резултат: 5545 MOST реда са точно 1.95583x завишени.
+--   feed-ът вече подава евро (<currency>EUR</currency> за 6089/6089 продукта).
+--   Конвенцията на системата е price_client / final_price = ЕВРО без ДДС —
+--   потвърдено от ASBIS (<CURRENCY_CODE>EUR</CURRENCY_CODE>), VALI и TEKRA.
+--   Резултат: 5430 MOST реда с цена > 0 са точно 1.95583x завишени.
 --
 -- ОБХВАТ: само platform = 'MOST'. Останалите три платформи са коректни.
 --   price_partner, price_promo, price_client_promo са NULL за всички MOST реда.
 --   markup_percentage е 0 за всички MOST реда. 11 реда имат discount > 0.
---   115 реда имат price_client <= 0 — умишлено се прескачат (и без това са
---   невидими по правилото "няма цена -> невидим").
---
--- ВАЛИДАЦИЯ НА ФОРМУЛАТА (изпълнена read-only на прод преди писането на скрипта):
---   формулата за final_price по-долу, приложена върху текущите цени, връща
---   точно текущия final_price за 5429 от 5430 реда. Единственото разминаване е
---   SGM-3010-KKMF1 (база 9.66, формула 9.67) — там формулата съвпада с
---   Product.calculateFinalPrice(), а записаната стойност е остаряла.
---   Скриптът я преизчислява коректно.
+--   115 реда имат price_client <= 0 — умишлено се прескачат.
 --
 -- ИДЕМПОТЕНТЕН: пази оригинала в price_client_pre_eur_fix и коригира само
 --   редове, където тази колона е още NULL. Повторно пускане не прави нищо.
 --
--- БЕЗОПАСНОСТ: стъпка 3 е в транзакция и завършва с DO блок, който проверява
---   резултата и хвърля изключение при проблем. В PostgreSQL грешка в явна
---   транзакция я превежда в aborted състояние и следващият COMMIT действа като
---   ROLLBACK — тоест при неуспешна проверка НИЩО не се записва, независимо от
---   настройките на клиента.
---
--- ⚠️  ПРЕДИ ДА ПУСНЕШ: поправката в MostSyncService.java (комит dacf3c9) трябва
---     вече да е деплойната, иначе нощният sync в 03:00 ще върне старите цени.
---
--- КАК СЕ ПУСКА: изпълни целия файл като скрипт (DBeaver: Alt+X / "Execute
---   script", НЕ Ctrl+Enter за единична заявка). През psql: -f <файл>.
---
--- Дата: 2026-09-18
+-- ============================================================================
+-- КАК СЕ ПУСКА
+--   Изпълни целия файл като СКРИПТ (DBeaver: Alt+X / "Execute script";
+--   DataGrip: Run file; psql: -f <файл>). НЕ като единична заявка.
+--   Секция A слага предпазни таймаути, така че скриптът да не може да блокира
+--   сайта дори ако клиентът е в manual-commit режим.
 -- ============================================================================
 
 
--- ─── СТЪПКА 1: backup колона (idempotent) ───────────────────────────────────
+-- ─── СЕКЦИЯ A: предпазни таймаути за сесията ────────────────────────────────
+-- ВАЖНО: ALTER TABLE взима ACCESS EXCLUSIVE lock върху products — най-силният
+-- лок, който блокира дори четене. Ако клиент в manual-commit режим го държи
+-- незакоммитен, целият сайт спира (това се случи при първия опит: 22 заявки
+-- на приложението блокирани за 6 минути).
+--   lock_timeout                        -> ALTER-ът се отказва бързо, вместо да
+--                                          застане на опашка и да блокира и
+--                                          всички следващи четения зад себе си
+--   idle_in_transaction_session_timeout -> ако въпреки всичко остане отворена
+--                                          транзакция, сървърът я прекъсва сам
+
+SET lock_timeout = '10s';
+SET idle_in_transaction_session_timeout = '60s';
+SET statement_timeout = '300s';
+
+
+-- ─── СЕКЦИЯ B: backup колона, в собствена транзакция ────────────────────────
+-- Изрично BEGIN/COMMIT, за да се освободи ACCESS EXCLUSIVE веднага,
+-- независимо от auto-commit настройката на клиента.
+
+BEGIN;
 
 ALTER TABLE products ADD COLUMN IF NOT EXISTS price_client_pre_eur_fix NUMERIC(10,2);
 
 COMMENT ON COLUMN products.price_client_pre_eur_fix IS
   'Оригиналната (левова) цена преди корекцията от скрипт 47. NULL = не е коригиран.';
 
+COMMIT;
 
--- ─── СТЪПКА 2: отчет ПРЕДИ ──────────────────────────────────────────────────
+
+-- ─── СЕКЦИЯ C: отчет ПРЕДИ ──────────────────────────────────────────────────
 -- Очаквано при първо пускане: shte_bydat_korigirani = 5430, veche_korigirani = 0
 
 SELECT
@@ -85,11 +88,11 @@ WHERE platform = 'MOST'
 ORDER BY sku;
 
 
--- ─── СТЪПКА 3: корекцията (в транзакция с проверка) ─────────────────────────
+-- ─── СЕКЦИЯ D: корекцията (в транзакция с проверка) ─────────────────────────
 
 BEGIN;
 
--- 3a. price_client: лева -> евро, оригиналът отива в backup колоната
+-- D1. price_client: лева -> евро, оригиналът отива в backup колоната
 UPDATE products
 SET price_client_pre_eur_fix = price_client,
     price_client             = round(price_client / 1.95583, 2),
@@ -99,7 +102,7 @@ WHERE platform = 'MOST'
   AND price_client_pre_eur_fix IS NULL
   AND price_client > 0;
 
--- 3b. final_price: преизчисляване по същата формула като Product.calculateFinalPrice()
+-- D2. final_price: преизчисляване по същата формула като Product.calculateFinalPrice()
 --     markup = price_client * round(markup_percentage/100, 2)   [scale 2, както в Java]
 --     base   = price_client + markup
 --     final  = base * (1 - round(discount/100, 6))  при discount > 0, иначе base
@@ -119,25 +122,41 @@ WHERE platform = 'MOST'
   AND price_client_pre_eur_fix IS NOT NULL
   AND price_client > 0;
 
--- 3c. Автоматичен предпазител: при провал на която и да е проверка хвърля
---     изключение, транзакцията става aborted и COMMIT-ът действа като ROLLBACK.
+-- D3. Автоматичен предпазител: при провал хвърля изключение, транзакцията става
+--     aborted и COMMIT-ът действа като ROLLBACK — нищо не се записва.
+--
+--     ЗАБЕЛЕЖКА ЗА ПРОВЕРКАТА НА ТОЧНОСТТА: сравнява се АБСОЛЮТНИЯТ остатък
+--     |старо - ново*1.95583|, НЕ отношението старо/ново. Отношението е негодна
+--     проверка, защото ново е закръглено до 2 знака и при малки цени това
+--     изкривява отношението: 0.02 -> 0.01 дава отношение 2.00, а не 1.956,
+--     макар грешката да е под половин стотинка. Проверено на прод: максималният
+--     абсолютен остатък за всичките 5430 реда е 0.005, тоест толеранс 0.01
+--     (= 0.005 * 1.95583, закръглено нагоре) е точната граница.
+
 DO $$
 DECLARE
     v_korigirani  int;
     v_zero        int;
     v_null_final  int;
-    v_bad_ratio   int;
+    v_bad_amount  int;
     v_bad_final   int;
+    v_max_greshka numeric;
     v_median      numeric;
 BEGIN
     SELECT count(*),
            count(*) FILTER (WHERE price_client <= 0),
            count(*) FILTER (WHERE final_price IS NULL),
-           count(*) FILTER (WHERE round(price_client_pre_eur_fix / price_client, 3) <> 1.956),
-           count(*) FILTER (WHERE COALESCE(discount,0) = 0 AND final_price <> price_client)
-      INTO v_korigirani, v_zero, v_null_final, v_bad_ratio, v_bad_final
+           count(*) FILTER (WHERE abs(price_client_pre_eur_fix - price_client * 1.95583) > 0.01),
+           count(*) FILTER (WHERE COALESCE(discount,0) = 0 AND final_price <> price_client),
+           max(abs(price_client_pre_eur_fix - price_client * 1.95583))
+      INTO v_korigirani, v_zero, v_null_final, v_bad_amount, v_bad_final, v_max_greshka
       FROM products
      WHERE platform = 'MOST' AND price_client_pre_eur_fix IS NOT NULL;
+
+    IF v_korigirani = 0 THEN
+        RAISE NOTICE 'Няма нищо за коригиране — вече е приложено. Нищо не се променя.';
+        RETURN;
+    END IF;
 
     IF v_zero > 0 THEN
         RAISE EXCEPTION 'ПРЕКЪСНАТО: % реда с цена <= 0 след корекцията', v_zero;
@@ -145,8 +164,9 @@ BEGIN
     IF v_null_final > 0 THEN
         RAISE EXCEPTION 'ПРЕКЪСНАТО: % реда с NULL final_price', v_null_final;
     END IF;
-    IF v_bad_ratio > 0 THEN
-        RAISE EXCEPTION 'ПРЕКЪСНАТО: % реда с отношение старо/ново различно от 1.956', v_bad_ratio;
+    IF v_bad_amount > 0 THEN
+        RAISE EXCEPTION 'ПРЕКЪСНАТО: % реда, където |старо - ново*1.95583| > 0.01 (макс. %)',
+                        v_bad_amount, v_max_greshka;
     END IF;
     IF v_bad_final > 0 THEN
         RAISE EXCEPTION 'ПРЕКЪСНАТО: % реда без отстъпка, където final_price <> price_client', v_bad_final;
@@ -164,14 +184,14 @@ BEGIN
         RAISE EXCEPTION 'ПРЕКЪСНАТО: медианата MOST/други е % — очаква се ~1.0', v_median;
     END IF;
 
-    RAISE NOTICE '✓ Всички проверки минаха. Коригирани % реда. Медиана MOST/други = %.',
-                 v_korigirani, v_median;
+    RAISE NOTICE '✓ Проверките минаха. Коригирани % реда, макс. отклонение %, медиана MOST/други %.',
+                 v_korigirani, v_max_greshka, v_median;
 END $$;
 
 COMMIT;
 
 
--- ─── СТЪПКА 4: отчет СЛЕД ───────────────────────────────────────────────────
+-- ─── СЕКЦИЯ E: отчет СЛЕД ───────────────────────────────────────────────────
 
 SELECT
     'СЛЕД'                                                        AS etap,
@@ -182,7 +202,7 @@ SELECT
 FROM products
 WHERE platform = 'MOST';
 
--- Контролната извадка след корекцията — otnoshenie трябва да е 1.95583 навсякъде
+-- Контролната извадка след корекцията
 SELECT sku,
        left(name_bg, 34)                                  AS name_bg,
        price_client_pre_eur_fix                           AS stara_leva,
@@ -208,7 +228,7 @@ FROM pairs;
 
 -- Колко скрити MOST AVAILABLE продукта вече са най-евтини за своя SKU.
 -- Тези трябва да станат видими след фаза 1 (кодовата поправка на ратчетите).
--- Очаквано: ~384
+-- Преди корекцията: 272. Очаквано след нея: ~384.
 SELECT count(*) AS gotovi_za_pokazvane_sled_faza_1
 FROM products h
 WHERE h.platform = 'MOST'
@@ -227,8 +247,7 @@ WHERE h.platform = 'MOST'
 -- Този скрипт НЕ пуска deduplicateCrossPlatformBySku() и НЕ променя show_flag.
 -- Причина: dedup заявката гледа само редове с show_flag = true, затова НЕ МОЖЕ
 -- да върне скритите продукти — може само да скрие още. Възстановяването на
--- видимостта иска кодовата поправка от фаза 1 (ратчетът в MostSyncService и
--- dedup-ът в ProductRepository:225-253).
+-- видимостта иска кодовата поправка от фаза 1.
 --
 -- ОТКАТ (ако се наложи) — пусни само този блок:
 --   BEGIN;
