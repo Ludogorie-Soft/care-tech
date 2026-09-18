@@ -3531,3 +3531,6 @@
 | 13:50 | Created scripts/50_retire_home_appliances.sql | — | ~1788 |
 | 13:50 | Edited scripts/50_retire_home_appliances.sql | 9→13 lines | ~196 |
 | 13:51 | Скрипт 50: 87 компютърни вентилатора от домакинската "Вентилатори" (455) отиват при id 12; 268 продукта дребна бяла техника се маркират manually_hidden. Потребителят потвърди поправката ми, че групи B и C бяха описани грешно (325 е аудио техника, не Creative ZEN; 500 са детски часовници Canyon) | scripts/50_retire_home_appliances.sql | симулация: видими в невидими 495 -> 420, вентилатори 329 -> 416 | ~22k |
+| 13:52 | Session end: 118 writes across 36 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~182174 tok |
+| 14:01 | Created scripts/51_migrate_products_from_hidden_categories.sql | — | ~2750 |
+| 14:02 | Скрипт 50 потвърден (вентилатори 416, спрени 268, видими в невидими 495->420). Написан скрипт 51 за 2б: 14 категории цяло + разделяне по ключови думи на 443 (геймърска) и 325 (аудио) и 500 (детски часовници) | scripts/51_migrate_products_from_hidden_categories.sql | симулация: 322 от 420 излизат, остават 98 | ~24k |
