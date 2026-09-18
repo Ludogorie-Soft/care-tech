@@ -3513,3 +3513,10 @@
 | 13:05 | Session end: 109 writes across 32 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~176383 tok |
 | 13:07 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | expanded (+17 lines) | ~347 |
 | 13:10 | СТЪПКА 2а ИМПЛЕМЕНТИРАНА: 12 нови двойки за LAN и FAN -> 270 продукта (104 видими) излизат от скритите "Мрежов хардуер" и "Охладители" към видими категории. Суичовете решени по данни (20 от 22 без признак за управляем), не по догадка | MostSyncService.java, MostCategoryResolutionTest.java | 88 теста зелени; прогнозата проверена на прод, без източник на регресия | ~18k |
+| 13:10 | Session end: 110 writes across 32 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~176755 tok |
+| 13:10 | Session end: 110 writes across 32 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~176755 tok |
+| 13:21 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 4→5 lines | ~89 |
+| 13:22 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 5→2 lines | ~36 |
+| 13:22 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 1→3 lines | ~55 |
+| 13:24 | Created ../../../../../../tmp/step2a_result.md | — | ~508 |
+| 13:25 | СТЪПКА 2а ПОТВЪРДЕНА: 601->497 видими продукта в невидими категории; Мрежов хардуер 110->5, Охладители 176->11. НО открих 2 свои грешки — търсих с LIKE %охлажд% и пропуснах "Охладители за процесори" и "Термо пасти и подложки"; поправени. Добавена и Tablet LENOVO -> Таблети. Отбелязан bug-507 за Водно охлаждане (коренова, sort 21) | MostSyncService.java, тестове, CATEGORY_CLEANUP_PLAN.md, buglog | 90 теста зелени | ~20k |

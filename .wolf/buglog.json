@@ -8247,6 +8247,74 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-18T08:43:40.293Z"
+    },
+    {
+      "id": "bug-504",
+      "timestamp": "2026-09-18T09:26:10.317Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T09:26:10.317Z"
+    },
+    {
+      "id": "bug-505",
+      "timestamp": "2026-09-18T09:30:03.602Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 3→8 lines (3 removed) | Also: // The name overrides run for the generic accessor; // \"Лаптопи\", and they win. They resolve to someth",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-18T09:30:49.478Z"
+    },
+    {
+      "id": "bug-506",
+      "timestamp": "2026-09-18T09:41:03.009Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T09:41:03.009Z"
+    },
+    {
+      "id": "bug-507",
+      "timestamp": "2026-09-18T13:30:00.000Z",
+      "error_message": "„Водно охлаждане\" (id 23) е КОРЕНОВА категория в главното меню със sort_order 21, между „Софтуер\" и „VR - Виртуална реалност\". Досега беше празна и не личеше; след стъпка 2а получи 40 продукта и вече се вижда на неудобно място.",
+      "file": "данни (categories id=23)",
+      "root_cause": "Категорията е създадена от VALI като коренова, но логически принадлежи под „Компютърни компоненти\" (id 2 в подредбата), където вече стоят „Охладители за процесори\" (sort 3), „Вентилатори\" (15), „Контролери за вентилатори\" (16) и „Термо пасти и подложки\" (17). Докато беше празна, мястото ѝ нямаше значение.",
+      "fix": "НЕ Е ПОПРАВЕН — отбелязан по искане на потребителя. Предложение: преместване под „Компютърни компоненти\" на свободен слот до останалите охлаждащи категории (слот 7 е свободен — редът там минава 6 → 8). Изисква: обновяване на parent_id, sort_order и category_path, без да се пренареждат съществуващите. Проверка след това: кореновите категории да са с непрекъсната подредба и дървото да остане 3 нива.",
+      "tags": [
+        "categories",
+        "menu",
+        "sort-order",
+        "tree-structure",
+        "phase-5"
+      ],
+      "related_bugs": [
+        "bug-496"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T13:30:00.000Z"
     }
   ]
 }

@@ -77,8 +77,6 @@ class MostCategoryResolutionTest {
     @Test
     @DisplayName("pairs held back on purpose keep their old destination")
     void deliberatelyUnmappedPairsUnchanged() {
-        // No plain "Таблети" category exists and creating one would touch the tree.
-        assertEquals("Лаптопи", MostSyncService.resolveTargetCategoryName("NOTEBOOK", "Tablet LENOVO"));
         // A genuinely mixed bag — needs per-product classification, not a blanket move.
         assertEquals("Консумативи(тонери) за лазерни устройства",
                 MostSyncService.resolveTargetCategoryName("HP", "PSG Accessories"));
@@ -134,7 +132,7 @@ class MostCategoryResolutionTest {
             "LAN,  LAN Accessories,          Рутери и мрежово оборудване",
             "LAN,  Other,                    Рутери и мрежово оборудване",
             "FAN,  CASE fan,                 Вентилатори",
-            "FAN,  CPU Cooler,               Вентилатори",
+            "FAN,  CPU Cooler,               Охладители за процесори",
             "FAN,  Water Cooler,             Водно охлаждане",
             "FAN,  Others,                   Вентилатори"
     })
@@ -144,10 +142,23 @@ class MostCategoryResolutionTest {
     }
 
     @Test
-    @DisplayName("an unmapped LAN or FAN subcategory still falls back to the old destination")
-    void unmappedLanFanStillFallsBack() {
-        // Thermal paste has no category of its own, so it stays where it was.
-        assertEquals("Охладители", MostSyncService.resolveTargetCategoryName("FAN", "Thermal Grease"));
+    @DisplayName("cooling pairs reach the specific categories, not the generic fan one")
+    void coolingPairsReachSpecificCategories() {
+        // Both of these were missed on the first pass because the search for candidate
+        // categories used '%охлажд%', which does not match "Охладители за процесори".
+        assertEquals("Охладители за процесори", MostSyncService.resolveTargetCategoryName("FAN", "CPU Cooler"));
+        assertEquals("Термо пасти и подложки", MostSyncService.resolveTargetCategoryName("FAN", "Thermal Grease"));
+    }
+
+    @Test
+    @DisplayName("tablets go to Таблети now that script 48 made it visible")
+    void tabletsReachTheirOwnCategory() {
+        assertEquals("Таблети", MostSyncService.resolveTargetCategoryName("NOTEBOOK", "Tablet LENOVO"));
+    }
+
+    @Test
+    @DisplayName("an unmapped LAN subcategory still falls back to the old destination")
+    void unmappedLanStillFallsBack() {
         assertEquals("Мрежов хардуер", MostSyncService.resolveTargetCategoryName("LAN", "Something New"));
     }
 }

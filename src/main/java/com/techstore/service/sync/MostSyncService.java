@@ -284,6 +284,8 @@ public class MostSyncService {
         map.put("GSM|Accessories",           "Други мобилни аксесоари");
         map.put("CASE|PSU",                  "Захранвания");
         map.put("NOTEBOOK|NB Accessories",   "Аксесоари за лаптопи/таблети");
+        // Valid since script 48 moved "Таблети" into the visible tree.
+        map.put("NOTEBOOK|Tablet LENOVO",    "Таблети");
         map.put("M - MEDIA|Projectors",      "Проектори");
         map.put("M - MEDIA|Headset and mic", "Слушалки");
         map.put("LAN|LAN Cable",             "Мрежови кабели");
@@ -303,14 +305,12 @@ public class MostSyncService {
         map.put("LAN|Other",                 "Рутери и мрежово оборудване");
         map.put("LAN|TENDA",                 "Рутери и мрежово оборудване");
         map.put("FAN|CASE fan",              "Вентилатори");
-        map.put("FAN|CPU Cooler",            "Вентилатори");
+        map.put("FAN|CPU Cooler",            "Охладители за процесори");
         map.put("FAN|Water Cooler",          "Водно охлаждане");
+        map.put("FAN|Thermal Grease",        "Термо пасти и подложки");
         map.put("FAN|Others",                "Вентилатори");
 
         // Deliberately absent, with reasons:
-        //   NOTEBOOK|Tablet LENOVO  — no plain "Таблети" category exists; "Графични таблети"
-        //                             is a different product. Creating one would touch the tree.
-        //   FAN|Thermal Grease      — no category for thermal paste, same reason.
         //   HP|PSG Accessories      — 100 products, but a genuinely mixed bag: docking
         //                             stations, carrying cases and batteries alongside RAM,
         //                             graphics cards, keyboards and mice. Moving them
