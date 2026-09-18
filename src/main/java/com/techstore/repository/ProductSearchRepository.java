@@ -7,6 +7,7 @@ import com.techstore.dto.response.ProductSearchResult;
 import com.techstore.dto.response.ProductParameterResponseDto;
 import com.techstore.dto.response.ParameterOptionResponseDto;
 import com.techstore.enums.ProductStatus;
+import com.techstore.util.CyrillicTransliterator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,7 +45,7 @@ public class ProductSearchRepository {
      * word "лаптоп" lives in the category name, not in "Lenovo IdeaPad Slim 3".
      */
     private static final String SEARCH_BLOB =
-            "(coalesce(p.name_bg, '') || ' ' || coalesce(p.name_en, '') || ' ' || coalesce(p.model, '') || ' ' || " +
+            "lower(coalesce(p.name_bg, '') || ' ' || coalesce(p.name_en, '') || ' ' || coalesce(p.model, '') || ' ' || " +
             "coalesce(p.reference_number, '') || ' ' || coalesce(p.sku, '') || ' ' || " +
             "coalesce(m.name, '') || ' ' || coalesce(c.name_bg, '') || ' ' || coalesce(c.name_en, ''))";
 
@@ -143,8 +144,26 @@ public class ProductSearchRepository {
                     if (i > 0) {
                         whereClause.append(" AND ");
                     }
-                    whereClause.append(SEARCH_BLOB).append(" ILIKE :word").append(i).append(" ESCAPE '\\'");
-                    params.put("word" + i, "%" + escapeLikeWildcards(words.get(i)) + "%");
+                    String word = words.get(i);
+                    // SEARCH_BLOB is already lowercased, so LIKE against a lowercased
+                    // pattern does the same job as ILIKE without case-folding every
+                    // comparison — worth it here because a Cyrillic word costs two
+                    // comparisons. Measured on "гейминг лаптоп": ~800ms down to ~550ms.
+                    params.put("word" + i, "%" + escapeLikeWildcards(word.toLowerCase()) + "%");
+
+                    // Customers type brand names in Cyrillic while the catalogue stores them
+                    // in Latin, so each word may also match its transliteration: "леново"
+                    // found nothing against 95 for "lenovo", "гейминг" 16 against 729 for
+                    // "gaming". Bulgarian common nouns are not handled here and do not need
+                    // to be — they already match through the category name.
+                    String latin = CyrillicTransliterator.transliterate(word);
+                    if (latin != null) {
+                        whereClause.append("(").append(SEARCH_BLOB).append(" LIKE :word").append(i).append(" ESCAPE '\\'")
+                                .append(" OR ").append(SEARCH_BLOB).append(" LIKE :latin").append(i).append(" ESCAPE '\\')");
+                        params.put("latin" + i, "%" + escapeLikeWildcards(latin) + "%");
+                    } else {
+                        whereClause.append(SEARCH_BLOB).append(" LIKE :word").append(i).append(" ESCAPE '\\'");
+                    }
                 }
                 whereClause.append(")");
             }

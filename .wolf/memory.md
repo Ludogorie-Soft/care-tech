@@ -3436,3 +3436,12 @@
 | 11:01 | Edited src/main/java/com/techstore/config/SearchIndexManager.java | added 1 condition(s) | ~67 |
 | 11:03 | Edited SEARCH_AUDIT_PLAN.md | added nullish coalescing | ~606 |
 | 11:03 | ФАЗА 4 ИЗПЪЛНЕНА: falseGROUP syntax error поправен + per-category броене, IS NOT FALSE, unless за празен кеш, setParameterName поправен, countFuzzyMatches премахнат, spring.hikari премахнат, SearchIndexManager дублиране, performance-test се чете, deleted=false на 6 места | ProductSearchRepository, ProductSearchService, SearchConfig, SearchIndexManager, application.yml | компилира; поправеният endpoint тестван на прод | ~20k |
+| 11:04 | Session end: 67 writes across 22 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~114262 tok |
+| 11:08 | Created src/main/java/com/techstore/util/CyrillicTransliterator.java | — | ~1367 |
+| 11:08 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | added 1 condition(s) | ~406 |
+| 11:09 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | added 1 import(s) | ~25 |
+| 11:09 | Created src/test/java/com/techstore/util/CyrillicTransliteratorTest.java | — | ~900 |
+| 11:11 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 4→4 lines | ~97 |
+| 11:12 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 2→6 lines | ~131 |
+| 11:13 | Edited SEARCH_AUDIT_PLAN.md | expanded (+25 lines) | ~439 |
+| 11:13 | ФАЗА 3.8 ИЗПЪЛНЕНА: CyrillicTransliterator (правила + таблица с фонетични изключения), включен като втори израз за всяка кирилска дума; SEARCH_BLOB минат на lower()+LIKE за компенсация на цената | CyrillicTransliterator.java, CyrillicTransliteratorTest.java, ProductSearchRepository.java | 28 теста минават; на прод: асус 0->247, гейминг 16->744, логитек 0->196, леново 0->95 | ~28k |
