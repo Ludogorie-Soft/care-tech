@@ -3486,3 +3486,13 @@
 | 12:15 | Session end: 94 writes across 27 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 17 reads | ~164117 tok |
 | 12:18 | Edited CATEGORY_CLEANUP_PLAN.md | expanded (+34 lines) | ~396 |
 | 12:19 | КОРЕКЦИЯ на одита: "17 разцепени категории" беше грешна метрика — мерех по име, а еднакво име с различен родител НЕ е дубликат (Монитори под "Монитори и дисплеи" vs под Видеонаблюдение; IP камери под IP системи vs под NDAA/NIS2). Истински дубликати: 33 групи, 102 категории, 0 разцепени. Проблем C отпада | CATEGORY_CLEANUP_PLAN.md | планът преработен на 5 стъпки; щях да слея CCTV монитори с компютърни | ~14k |
+| 12:24 | Session end: 95 writes across 27 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 17 reads | ~164541 tok |
+| 12:25 | Edited src/main/java/com/techstore/service/MostApiService.java | added 1 condition(s) | ~304 |
+| 12:26 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 3 condition(s) | ~806 |
+| 12:26 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 3→4 lines | ~72 |
+| 12:26 | Created src/test/java/com/techstore/service/sync/MostCategoryResolutionTest.java | — | ~1111 |
+| 12:27 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | expanded (+8 lines) | ~277 |
+| 12:30 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 3→8 lines | ~167 |
+| 12:30 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | removed 19 lines | ~47 |
+| 12:30 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 2 condition(s) | ~356 |
+| 12:33 | ФАЗА 5 СТЪПКА 1 ИЗПЪЛНЕНА: MOST мапва по (category, subcategory) — subcategory изобщо не се парсваше в MostApiService; 497 продукта се преместват (145 захранвания от Кутии, 137 аксесоари от Мобилни телефони). Уловена регресия при проверката: щеше да придърпа 65 продукта от по-точни категории -> name-overrides вече имат приоритет. Плюс детерминиран избор при двусмислени имена | MostApiService, MostSyncService, MostCategoryResolutionTest, CATEGORY_CLEANUP_PLAN.md | 76 теста зелени; комит 16a3374 | ~40k |
