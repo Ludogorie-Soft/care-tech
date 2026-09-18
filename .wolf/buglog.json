@@ -7572,14 +7572,15 @@
       "error_message": "Множествено число и multi-word заявки връщат 0 резултата при очевидно съвпадение ('лаптопи' -> 5 вместо 315; 'гейминг лаптоп' -> 0; 'лаптоп lenovo' -> 1 вместо 41)",
       "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java:91-99",
       "root_cause": "Две отделни причини. (1) likeQuery = '%' + цялата заявка + '%' -> ILIKE иска непрекъснат подстринг, затова всяка multi-word заявка дава 0 от ILIKE клона ('asus rog backpack', 'asus монитор', 'samsung ssd 1tb' -> всички 0). (2) FTS конфигурацията е 'simple' = без stemming, затова 'лаптопи' не намира 'лаптоп'. Плюс: категорията (c.name_bg) не участва в търсенето, а името на категорията е точно там, където е множественото число ('Лаптопи', 'Монитори'). Измерено срещу прод: 'лаптоп' 159, 'лаптопи' 5, 'монитори' 5, 'камери' 101. Транслитерация също липсва: 'гейминг' 16 срещу 'gaming' 729; 'леново' 0 срещу 'lenovo' 80.",
-      "fix": "ПРЕДЛОЖЕН (чака одобрение): per-word ILIKE (AND между думите) върху name_bg/name_en/model/reference_number/sku/m.name/c.name_bg/c.name_en, UNION с досегашния FTS клон (не замяна — замяната регресира 'iphone 15' от 11 на 2). Измерено с union: 'лаптопи' 315, 'лаптоп lenovo' 41, 'iphone 15' 12 (без регресия).",
+      "fix": "ПОПРАВЕН 2026-09-18 (фаза 3.1-3.4). WHERE: FTS клонът се запазва, а ILIKE клонът вече е per-word (всяка дума задължителна) върху конкатениран blob от име, модел, реф. номер, sku, производител И КАТЕГОРИЯ — категорията е ключова, защото там живее множественото число ('Лаптопи', 'Монитори'). Добавен escapeLikeWildcards() за % и _. ИЗМЕРЕНО НА ПРОД: 'лаптопи' 5->334, 'монитори' 5->246, 'камери' 101->346, 'лаптоп lenovo' 1->50, 'лаптоп' 153->367, 'rtx 5080' 1->4, 'iphone 15' 11->12 (без регресия), '%' от целия каталог на 55. ПОДРЕЖДАНЕ: добавен hybrid score (ts_rank + 3.0 префикс в име / 1.0 подниз + 3.0 съвпадаща главна категория / 0.5 категория-аксесоар + 0.5 производител), имената се сравняват без интервали за 'rtx 5080' vs 'RTX5080'. Фронтендът вече има 'Най-подходящи' като default вместо цена. ВНИМАНИЕ ЗА ЕВРИСТИКАТА: разграничението главна/аксесоар категория ползва наличието на ' за ' в името на категорията — валидно за този каталог, не е универсално правило.",
       "tags": [
-        "search",
+        "bulgarian",
+        "fixed",
         "fts",
         "ilike",
         "multi-word",
+        "search",
         "stemming",
-        "bulgarian",
         "transliteration"
       ],
       "related_bugs": [],
@@ -7954,6 +7955,54 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-18T07:33:24.336Z"
+    },
+    {
+      "id": "bug-487",
+      "timestamp": "2026-09-18T07:40:27.086Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 14→27 lines (9 removed) | Also: sql.append(\", (\").append(FTS_VECTOR); .append(\" <-> plainto_tsquery('\").append(language) | Also: // Full-text search — точни думи, ползва GIN индек; .append(\"to_tsvector('\").append(language).append(\"",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-09-18T07:40:51.737Z"
+    },
+    {
+      "id": "bug-488",
+      "timestamp": "2026-09-18T07:41:23.787Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T07:41:23.787Z"
+    },
+    {
+      "id": "bug-489",
+      "timestamp": "2026-09-18T07:45:00.273Z",
+      "error_message": "Significant refactor of ",
+      "file": "SEARCH_AUDIT_PLAN.md",
+      "root_cause": "11 lines replaced/restructured",
+      "fix": "Rewrote 14→47 lines (11 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T07:45:00.273Z"
     }
   ]
 }

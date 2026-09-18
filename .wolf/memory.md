@@ -3410,3 +3410,15 @@
 | 10:27 | Edited ../../care-tech-ui/src/pages/SearchPage.jsx | inline fix | ~12 |
 | 10:33 | Edited SEARCH_AUDIT_PLAN.md | expanded (+14 lines) | ~605 |
 | 10:33 | ФАЗА 2 ИЗПЪЛНЕНА: buildFacets премахнат (-677ms), p.id tiebreaker, error UI в SearchBar+SearchPage, requestId guard + AbortSignal, валидация -> 400, query timeout само за търсенето | ProductSearchRepository, ProductSearchService, SearchConfig, SearchBar.jsx, SearchPage.jsx, productSlice.js | mvn compile ok, npm run build ok, eslint чист | ~24k |
+| 10:34 | Session end: 47 writes across 21 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~106166 tok |
+| 10:40 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | expanded (+26 lines) | ~454 |
+| 10:40 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | expanded (+13 lines) | ~580 |
+| 10:40 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 4→3 lines | ~48 |
+| 10:40 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | added 2 condition(s) | ~591 |
+| 10:41 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | modified splitQueryWords() | ~327 |
+| 10:41 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | added 6 condition(s) | ~590 |
+| 10:41 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 12→15 lines | ~257 |
+| 10:41 | Edited ../../care-tech-ui/src/pages/SearchPage.jsx | 1→4 lines | ~81 |
+| 10:41 | Edited ../../care-tech-ui/src/pages/SearchPage.jsx | 4→5 lines | ~54 |
+| 10:45 | Edited SEARCH_AUDIT_PLAN.md | expanded (+33 lines) | ~1002 |
+| 10:47 | ФАЗА 3 ИЗПЪЛНЕНА: per-word union WHERE вкл. категория/производител, escape на % и _, hybrid score с евристика за главна/аксесоар категория, нормализация без интервали, fuzzy наследява филтрите, релевантност като default | ProductSearchRepository.java, SearchPage.jsx, SEARCH_AUDIT_PLAN.md | измерено на прод: лаптопи 5->334, лаптоп lenovo 1->50, % -> 55; 3.7 отпада като безполезна, 3.5 пропусната умишлено | ~32k |

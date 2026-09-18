@@ -29,6 +29,32 @@ public class ProductSearchRepository {
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedJdbcTemplate;
 
+    /** Guards against a pathological query turning into dozens of ANDed ILIKEs. */
+    private static final int MAX_QUERY_WORDS = 6;
+
+    /** The text FTS indexes — matches the expression in V5__update_fts_combined_index.sql. */
+    private static final String FTS_VECTOR =
+            "to_tsvector('simple', coalesce(p.name_bg, '') || ' ' || coalesce(p.name_en, '') || ' ' || " +
+            "coalesce(p.description_bg, '') || ' ' || coalesce(p.description_en, '') || ' ' || " +
+            "coalesce(p.model, '') || ' ' || coalesce(p.reference_number, ''))";
+
+    /**
+     * Everything a word may match against. Category and manufacturer are included on
+     * purpose: "лаптоп lenovo" found one product without them and 50 with, because the
+     * word "лаптоп" lives in the category name, not in "Lenovo IdeaPad Slim 3".
+     */
+    private static final String SEARCH_BLOB =
+            "(coalesce(p.name_bg, '') || ' ' || coalesce(p.name_en, '') || ' ' || coalesce(p.model, '') || ' ' || " +
+            "coalesce(p.reference_number, '') || ' ' || coalesce(p.sku, '') || ' ' || " +
+            "coalesce(m.name, '') || ' ' || coalesce(c.name_bg, '') || ' ' || coalesce(c.name_en, ''))";
+
+    /** Name with spaces stripped, so "rtx 5080" can match a product named "RTX5080". */
+    private static final String NAME_NO_SPACES =
+            "replace(lower(coalesce(p.name_bg, '') || ' ' || coalesce(p.name_en, '') || ' ' || coalesce(p.model, '')), ' ', '')";
+
+    private static final String CATEGORY_NAME =
+            "lower(coalesce(c.name_bg, '') || ' ' || coalesce(c.name_en, ''))";
+
     public ProductSearchResponse searchProducts(ProductSearchRequest request) {
         String language = "simple";
         String nameField = request.getLanguage().equals("en") ? "name_en" : "name_bg";
@@ -48,15 +74,27 @@ public class ProductSearchRepository {
 
 
         if (StringUtils.hasText(request.getQuery())) {
-            sql.append(", ts_rank(")
-                    .append("to_tsvector('").append(language).append("', ")
-                    .append("coalesce(p.name_bg, '') || ' ' || ")
-                    .append("coalesce(p.name_en, '') || ' ' || ")
-                    .append("coalesce(p.description_bg, '') || ' ' || ")
-                    .append("coalesce(p.description_en, '') || ' ' || ")
-                    .append("coalesce(p.model, '') || ' ' || ")
-                    .append("coalesce(p.reference_number, '')), ")
-                    .append("plainto_tsquery('").append(language).append("', :query)) as search_rank ");
+            // Relevance. ts_rank alone was not enough: it is 0 whenever a row matched
+            // through ILIKE rather than full text, which left whole result sets tied at
+            // zero and falling back to price — "лаптопи" opened with a CMOS battery and
+            // three cabinets, "iphone 15" with DVR recorders.
+            sql.append(", (")
+                    .append("ts_rank(").append(FTS_VECTOR)
+                    .append(", plainto_tsquery('").append(language).append("', :query))")
+                    // Name match is the strongest signal, prefix stronger than substring.
+                    .append(" + CASE WHEN ").append(NAME_NO_SPACES).append(" LIKE :qPrefix ESCAPE '\\' THEN 3.0")
+                    .append(" WHEN ").append(NAME_NO_SPACES).append(" LIKE :qNameLike ESCAPE '\\' THEN 1.0 ELSE 0 END")
+                    // A category whose own name matches is what the user is after when they
+                    // type "лаптопи" or "камери". Accessory categories in this catalogue are
+                    // consistently phrased "X за Y" ("Чанти за лаптопи", "Стойки и основи за
+                    // камери") while the real ones are not ("Лаптопи", "IP камери"), so that
+                    // "за" is what separates a laptop from a laptop bag. It is a heuristic
+                    // over this data, not a rule — revisit it if category naming changes.
+                    .append(" + CASE WHEN ").append(CATEGORY_NAME).append(" LIKE :qLike ESCAPE '\\'")
+                    .append(" AND ").append(CATEGORY_NAME).append(" NOT LIKE '% за %' THEN 3.0")
+                    .append(" WHEN ").append(CATEGORY_NAME).append(" LIKE :qLike ESCAPE '\\' THEN 0.5 ELSE 0 END")
+                    .append(" + CASE WHEN lower(coalesce(m.name, '')) LIKE :qLike ESCAPE '\\' THEN 0.5 ELSE 0 END")
+                    .append(") as search_rank ");
             params.put("query", request.getQuery());
         } else {
             sql.append(", 1.0 as search_rank ");
@@ -76,27 +114,45 @@ public class ProductSearchRepository {
         );
 
         if (StringUtils.hasText(request.getQuery())) {
+            // Two independent ways to match, OR-ed together.
+            //
+            // The old ILIKE branch searched for the whole query as one contiguous
+            // substring, so every multi-word query fell back to full text alone:
+            // "asus rog backpack", "asus монитор" and "samsung ssd 1tb" each matched
+            // nothing through ILIKE. And because the FTS config is 'simple' there is no
+            // stemming, so "лаптопи" did not find "лаптоп" — 5 hits against 153.
+            //
+            // Matching word by word instead, with every word required, fixes both:
+            // "лаптопи" now returns 334 and "лаптоп lenovo" 50. The words are matched
+            // against the category and manufacturer too, which is where the plural
+            // actually lives ("Лаптопи", "Монитори").
+            List<String> words = splitQueryWords(request.getQuery());
+
             whereClause.append("AND (")
-                    // Full-text search — точни думи, ползва GIN индекс
-                    .append("to_tsvector('").append(language).append("', ")
-                    .append("coalesce(p.name_bg, '') || ' ' || ")
-                    .append("coalesce(p.name_en, '') || ' ' || ")
-                    .append("coalesce(p.description_bg, '') || ' ' || ")
-                    .append("coalesce(p.description_en, '') || ' ' || ")
-                    .append("coalesce(p.model, '') || ' ' || ")
-                    .append("coalesce(p.reference_number, '')) ")
-                    .append("@@ plainto_tsquery('").append(language).append("', :query) OR ")
+                    // Full text — whole words, uses the GIN index, covers descriptions
+                    .append(FTS_VECTOR)
+                    .append(" @@ plainto_tsquery('").append(language).append("', :query)")
+                    .append(" OR p.barcode = :exactQuery");
 
-                    // ILIKE — частични думи, ползва trigram индекс
-                    .append("p.name_bg ILIKE :likeQuery OR ")
-                    .append("p.name_en ILIKE :likeQuery OR ")
-                    .append("p.model ILIKE :likeQuery OR ")
-                    .append("p.reference_number ILIKE :likeQuery OR ")
-                    .append("p.barcode = :exactQuery OR ")
-                    .append("m.name ILIKE :likeQuery) ");
+            if (!words.isEmpty()) {
+                whereClause.append(" OR (");
+                for (int i = 0; i < words.size(); i++) {
+                    if (i > 0) {
+                        whereClause.append(" AND ");
+                    }
+                    whereClause.append(SEARCH_BLOB).append(" ILIKE :word").append(i).append(" ESCAPE '\\'");
+                    params.put("word" + i, "%" + escapeLikeWildcards(words.get(i)) + "%");
+                }
+                whereClause.append(")");
+            }
+            whereClause.append(") ");
 
-            params.put("likeQuery", "%" + request.getQuery() + "%");
             params.put("exactQuery", request.getQuery());
+
+            String normalized = escapeLikeWildcards(request.getQuery().toLowerCase().replace(" ", ""));
+            params.put("qPrefix", normalized + "%");
+            params.put("qNameLike", "%" + normalized + "%");
+            params.put("qLike", "%" + escapeLikeWildcards(request.getQuery().toLowerCase()) + "%");
         }
 
         if (request.getMinPrice() != null) {
@@ -238,6 +294,32 @@ public class ProductSearchRepository {
             log.error("PostgreSQL search failed for query: '{}'. Error: {}", request.getQuery(), e.getMessage(), e);
             throw new RuntimeException("Search failed: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Splits a query into the words that must all be present, capped at
+     * {@link #MAX_QUERY_WORDS} so a long paste cannot generate an unbounded
+     * number of ANDed ILIKE conditions.
+     */
+    private List<String> splitQueryWords(String query) {
+        return Arrays.stream(query.trim().split("\\s+"))
+                .filter(StringUtils::hasText)
+                .limit(MAX_QUERY_WORDS)
+                .toList();
+    }
+
+    /**
+     * Escapes the LIKE wildcards. Without this a query of "%" matched every product,
+     * and "_" silently matched any single character. Queries are parameterised, so this
+     * is about matching what the user typed, not about injection. Backslash is escaped
+     * first so it cannot double-escape the wildcards added afterwards; note that
+     * ProductSearchService.sanitizeQuery already strips backslashes, this is defence in
+     * depth for any other caller.
+     */
+    private String escapeLikeWildcards(String value) {
+        return value.replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
     }
 
     private Map<Long, List<ProductParameterResponseDto>> loadProductParameters(List<Long> productIds, String language) {
@@ -595,6 +677,40 @@ public class ProductSearchRepository {
         params.put("limit", request.getSize());
         params.put("offset", request.getPage() * request.getSize());
 
+        // The fallback used to ignore the caller's filters entirely, so a fruitless
+        // search inside one category answered with near-matches from the whole shop.
+        StringBuilder scope = new StringBuilder();
+        if (request.getCategories() != null && !request.getCategories().isEmpty()) {
+            scope.append("AND p.category_id IN (:categoryIds) ");
+            params.put("categoryIds", request.getCategories().stream().map(Long::valueOf).toList());
+        }
+        if (request.getManufacturers() != null && !request.getManufacturers().isEmpty()) {
+            scope.append("AND p.manufacturer_id IN (:manufacturerIds) ");
+            params.put("manufacturerIds", request.getManufacturers().stream().map(Long::valueOf).toList());
+        }
+        if (request.getMinPrice() != null) {
+            scope.append("AND p.final_price >= :minPrice ");
+            params.put("minPrice", request.getMinPrice());
+        }
+        if (request.getMaxPrice() != null) {
+            scope.append("AND p.final_price <= :maxPrice ");
+            params.put("maxPrice", request.getMaxPrice());
+        }
+        if (request.getFilters() != null && !request.getFilters().isEmpty()) {
+            int i = 0;
+            for (Map.Entry<Long, List<Long>> filter : request.getFilters().entrySet()) {
+                if (filter.getValue() == null || filter.getValue().isEmpty()) {
+                    continue;
+                }
+                scope.append("AND EXISTS (SELECT 1 FROM product_parameters pp ")
+                        .append("WHERE pp.product_id = p.id AND pp.parameter_id = :fzParamId").append(i)
+                        .append(" AND pp.parameter_option_id IN (:fzOptIds").append(i).append(")) ");
+                params.put("fzParamId" + i, filter.getKey());
+                params.put("fzOptIds" + i, filter.getValue());
+                i++;
+            }
+        }
+
         String sql = "SELECT p.id, p.name_bg, p.name_en, p.description_bg, p.description_en, " +
                 "p.model, p.reference_number, p.final_price, p.discount, p.featured, p.status, " +
                 "p.slug, p.platform, m.name as manufacturer_name, c." + nameField + " as category_name, " +
@@ -611,16 +727,19 @@ public class ProductSearchRepository {
                 "AND (p.image_url IS NOT NULL AND p.image_url <> '') " +
                 "AND (p.name_bg IS NOT NULL AND word_similarity(:query, p.name_bg) > 0.35 " +
                 "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35) " +
+                scope +
                 // p.id breaks ties so paging stays deterministic — see searchProducts()
                 "ORDER BY search_rank DESC, p.final_price ASC, p.id ASC " +
                 "LIMIT :limit OFFSET :offset";
 
         String countSql = "SELECT COUNT(*) FROM products p " +
+                "LEFT JOIN manufacturers m ON p.manufacturer_id = m.id " +
                 "WHERE p.active = true AND p.show_flag = true " +
                 "AND p.status = 'AVAILABLE' " +
                 "AND (p.image_url IS NOT NULL AND p.image_url <> '') " +
                 "AND (p.name_bg IS NOT NULL AND word_similarity(:query, p.name_bg) > 0.35 " +
-                "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35)";
+                "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35) " +
+                scope;
 
         try {
             List<ProductSearchResult> products = namedJdbcTemplate.query(
