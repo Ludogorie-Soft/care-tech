@@ -3502,3 +3502,5 @@
 | 12:41 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | added 3 condition(s) | ~179 |
 | 12:42 | Created scripts/48_make_tablets_visible.sql | — | ~1852 |
 | 12:44 | Потребителят разреши "Таблети" да стане видима -> открито усложнение: 744 е ASBIS корен (ниво-1 родител за PC таблет/PC таблет с Windows), преместването ѝ би накарало ASBIS да създаде нов ВИДИМ корен със sort_order=0. Добавен пазач anyByName в AsbisSyncService + скрипт 48 | AsbisSyncService.java, scripts/48_make_tablets_visible.sql | 76 теста зелени; допусканията验证ирани на прод (слот 7 свободен, 3 нива, 68 продукта) | ~30k |
+| 12:44 | Session end: 107 writes across 30 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~174927 tok |
+| 12:55 | Скрипт 48 изпълнен успешно на прод: "Таблети" видима под 36 на sort_order=7, 68 продукта, подредбата и 3-те нива непокътнати. Проверено че ASBIS не може да върне 49-те продукта — продуктовият sync зарежда само findByShowTrue() | прод база, CATEGORY_CLEANUP_PLAN.md | MOST мапингът чака sync прогон (последен 10:21, преди деплоя) | ~12k |
