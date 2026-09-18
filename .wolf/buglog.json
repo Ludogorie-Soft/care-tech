@@ -7627,12 +7627,13 @@
       "error_message": "ОПРОВЕРГАН: TEKRA sync НЕ е спрял. Реалният бъг е друг: продукти, налични при доставчика, се маркират NOT_AVAILABLE всяка нощ, защото sync-ът не може да ги мапне към категория",
       "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
       "root_cause": "ПЪРВОНАЧАЛНАТА ДИАГНОЗА БЕШЕ ГРЕШНА. Заключих 'TEKRA не е синхронизирана от 11 септември' от max(products.updated_at), което е НЕГОДЕН показател: Hibernate не прави UPDATE, когато никое поле не се е променило, така че updated_at остава стар дори при успешен прогон. Истината от sync_logs: TEKRA_PRODUCTS върви всяка нощ със статус SUCCESS, последно 2026-09-18 01:44, 402 обработени. Проверено срещу живия feed: 98 от 98 цени съвпадат ТОЧНО. РЕАЛНИЯТ БЪГ: логът рапортува 'Skipped: 232' = skippedNoCategory + skippedNoManufacturer (TekraSyncService:794-798, 818). Когато findMostSpecificCategory() не намери валидна категория за запис от feed-а, кодът прави 'continue' ПРЕДИ продуктът да влезе в processedSkus. После ред 876 вика markNotAvailableByPlatformSkuNotIn(TEKRA, processedSkus), който маркира като NOT_AVAILABLE всичко извън този списък — тоест пропуснатите продукти се маркират неналични всяка нощ, въпреки че са в наличност. Потвърдено: 3 продукта с количества 14/35/18 във feed-а стоят NOT_AVAILABLE + скрити при нас, при това с валидна категория и производител в базата (внесени успешно през август). 11 такива само в една TEKRA категория (videonablyudenie, 482 записа). Общо 197 от 520 TEKRA продукта са NOT_AVAILABLE.",
-      "fix": "НЕ Е ПОПРАВЕН. Предложение: пропуснат продукт да НЕ се третира като отсъстващ от feed-а — да се добави в processedSkus (или в отделен списък 'видени, но необработени'), за да не го маркира markNotAvailableByPlatformSkuNotIn. Отделно: да се проследи защо findMostSpecificCategory се проваля за 232 записа на прогон — това е същият корен като Фаза 5 (мискатегоризация).",
+      "fix": "ПОПРАВЕН 2026-09-18. TekraSyncService: когато findMostSpecificCategory() се провали, вместо 'continue' сега се търси категорията, в която продуктът ВЕЧЕ седи при нас (ProductRepository.findCategoryIdsBySkuAndPlatform — връща id, не entity, за да не се пипа lazy асоциация при open-in-view=false). Само реално новите продукти се пропускат. Добавен брояч RecoveredByExistingCategory в sync лога. СЪЩОТО приложено и в MostSyncService (17 пропуснати/нощ) — там се връщаше 0 на два клона ПРЕДИ търсенето на съществуващия продукт. ПРОВЕРЕНИ И ОСТАНАЛИТЕ: AsbisSyncService:601-613 ВЕЧЕ прави точно това ('preserve its current category instead of losing it') — то беше референтната имплементация; неговите 519 SkippedNoCat са реално нови продукти без категория, което е коректно. ValiSyncService задава категория само при създаване (ред 990 в isNew блок), тоест съществуващите я пазят по дизайн. ВАЖНА КОРЕКЦИЯ НА ДИАГНОЗАТА: markNotAvailableByPlatformSkuNotIn НЕ е виновникът — processedSkus се пълни на ред 744 по време на ЧЕТЕНЕТО от feed-а, преди обработката, така че пропуснатите продукти са в списъка и mark-unseen не ги пипа. Реалният механизъм е замразяване: пропуснатият продукт никога не минава през processOneTekraProduct, затова статусът и цената му остават от последния успешен мач.",
       "tags": [
         "429",
         "category-matching",
         "diagnosed",
         "false-diagnosis-corrected",
+        "fixed",
         "needs-investigation",
         "rate-limit",
         "stale-data",
@@ -8144,6 +8145,38 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-18T08:27:24.122Z"
+    },
+    {
+      "id": "bug-498",
+      "timestamp": "2026-09-18T08:30:22.040Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:30:22.040Z"
+    },
+    {
+      "id": "bug-499",
+      "timestamp": "2026-09-18T08:30:32.196Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 5→7 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:30:32.196Z"
     }
   ]
 }

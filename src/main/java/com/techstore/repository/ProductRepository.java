@@ -66,6 +66,16 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT p FROM Product p WHERE p.sku = :sku AND p.platform = :platform")
     List<Product> findBySkuAndPlatform(@Param("sku") String sku, @Param("platform") com.techstore.enums.Platform platform);
 
+    /**
+     * The category a product already sits in. Returns the id rather than the entity so the
+     * caller does not touch a lazy association — with open-in-view disabled that would
+     * throw outside a transaction.
+     */
+    @Query("SELECT p.category.id FROM Product p " +
+            "WHERE p.sku = :sku AND p.platform = :platform AND p.category IS NOT NULL")
+    List<Long> findCategoryIdsBySkuAndPlatform(@Param("sku") String sku,
+                                               @Param("platform") com.techstore.enums.Platform platform);
+
     @Query("SELECT DISTINCT p.manufacturer FROM Product p " +
             "WHERE p.category.id = :categoryId " +
             "AND p.manufacturer IS NOT NULL")

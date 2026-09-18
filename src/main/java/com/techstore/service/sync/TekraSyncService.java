@@ -769,6 +769,7 @@ public class TekraSyncService {
 
             long totalProcessed = 0, totalCreated = 0, totalUpdated = 0, totalErrors = 0;
             long skippedNoCategory = 0, skippedNoManufacturer = 0;
+            long recoveredByExistingCategory = 0;
             long analogCount = 0, digitalCount = 0, undeterminedCount = 0;
 
             Map<String, Integer> matchTypeStats = new HashMap<>();
@@ -791,11 +792,35 @@ public class TekraSyncService {
                             categoriesByName, categoriesBySlug, categoriesByTekraSlug,
                             categoriesByCategoryPath, matchTypeStats);
 
+                    Long fallbackCategoryId = null;
                     if (productCategory == null || !isValidCategory(productCategory)) {
-                        log.warn("✗ Skipping product '{}' ({}): NO VALID CATEGORY", name, sku);
-                        skippedNoCategory++;
-                        matchTypeStats.put("no_match", matchTypeStats.get("no_match") + 1);
-                        continue;
+                        // Falling through to `continue` here meant the product was never
+                        // processed at all, so its price and availability froze at whatever
+                        // they were the last time the match succeeded. A product the supplier
+                        // has in stock then sits NOT_AVAILABLE and hidden indefinitely —
+                        // three were found that way with 14, 35 and 18 units in the feed, and
+                        // 11 in a single Tekra category. Note the mark-unseen step is not the
+                        // culprit: processedSkus is filled while reading the feed, so a
+                        // skipped product is still counted as seen.
+                        //
+                        // If we already carry the product, its existing category is a better
+                        // answer than dropping it. The root cause — why the feed's category
+                        // path stops matching, here "Видеонаблюдение > IP системи > Камери"
+                        // against a catalogue with no "Камери" — is phase 5 in
+                        // SEARCH_AUDIT_PLAN.md.
+                        fallbackCategoryId = productRepository
+                                .findCategoryIdsBySkuAndPlatform(sku, Platform.TEKRA)
+                                .stream().findFirst().orElse(null);
+
+                        if (fallbackCategoryId == null) {
+                            log.warn("✗ Skipping product '{}' ({}): NO VALID CATEGORY", name, sku);
+                            skippedNoCategory++;
+                            matchTypeStats.put("no_match", matchTypeStats.get("no_match") + 1);
+                            continue;
+                        }
+                        recoveredByExistingCategory++;
+                        log.debug("Category match failed for '{}' ({}) — keeping its existing category {}",
+                                name, sku, fallbackCategoryId);
                     }
 
                     String productType = determineProductType(rawProduct);
@@ -803,8 +828,13 @@ public class TekraSyncService {
                     else if ("Analog".equals(productType)) analogCount++;
                     else undeterminedCount++;
 
-                    productCategory = findCategoryWithTypeDiscrimination(rawProduct, productCategory, categoriesByName);
-                    Long categoryId = productCategory.getId();
+                    Long categoryId;
+                    if (fallbackCategoryId != null) {
+                        categoryId = fallbackCategoryId;
+                    } else {
+                        productCategory = findCategoryWithTypeDiscrimination(rawProduct, productCategory, categoriesByName);
+                        categoryId = productCategory.getId();
+                    }
 
                     // Each product in its own REQUIRES_NEW transaction —
                     // one duplicate key rolls back only that product, not the entire sync
@@ -880,9 +910,11 @@ public class TekraSyncService {
             }
 
             String message = String.format(
-                    "Total: %d, Created: %d, Updated: %d, Digital: %d, Analog: %d, Skipped: %d, Errors: %d, MarkedUnavailable: %d",
+                    "Total: %d, Created: %d, Updated: %d, Digital: %d, Analog: %d, Skipped: %d, "
+                            + "RecoveredByExistingCategory: %d, Errors: %d, MarkedUnavailable: %d",
                     totalProcessed, totalCreated, totalUpdated, digitalCount, analogCount,
-                    skippedNoCategory + skippedNoManufacturer, totalErrors, markedUnavailable
+                    skippedNoCategory + skippedNoManufacturer, recoveredByExistingCategory,
+                    totalErrors, markedUnavailable
             );
 
             int deduplicated = productRepository.deduplicateCrossPlatformBySku();

@@ -3460,3 +3460,10 @@
 | 11:23 | Session end: 81 writes across 24 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~120541 tok |
 | 11:26 | TEKRA диагноза: ОПРОВЕРГАХ собственото си твърдение, че sync-ът е спрял — sync_logs показва SUCCESS всяка нощ и 98/98 цени съвпадат с feed-а. Намерен реален бъг: Skipped 232/прогон (неуспешен category match) -> не влизат в processedSkus -> markNotAvailableByPlatformSkuNotIn ги маркира неналични въпреки наличност | buglog bug-467 преработен | 11 налични продукта скрити само в една категория; 197 от 520 са NOT_AVAILABLE | ~22k |
 | 11:27 | Edited SEARCH_AUDIT_PLAN.md | expanded (+9 lines) | ~575 |
+| 11:28 | Session end: 82 writes across 24 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~121157 tok |
+| 11:30 | Edited src/main/java/com/techstore/repository/ProductRepository.java | expanded (+10 lines) | ~203 |
+| 11:30 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | added 2 condition(s) | ~740 |
+| 11:30 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | 1→2 lines | ~31 |
+| 11:30 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | 5→7 lines | ~131 |
+| 11:33 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 2 condition(s) | ~558 |
+| 11:34 | По предложение на потребителя: fallback към съществуваща категория приложен и в MostSyncService; проверени ASBIS (вече го прави — референтна имплементация) и VALI (задава категория само при създаване, няма проблем) | TekraSyncService, MostSyncService, ProductRepository | компилира; тестовите грешки са отпреди (SPEEDY_SENDER_ID липсва в test config) | ~19k |

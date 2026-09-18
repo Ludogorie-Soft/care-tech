@@ -858,28 +858,42 @@ public class MostSyncService {
 
         String categoryName = (String) mostProduct.get("category");
         String targetCategoryName = MOST_CATEGORY_MAPPING.get(categoryName);
+        Long categoryId = null;
+
         if (targetCategoryName == null) {
             if (categoryName != null) unmappedCategories.add(categoryName);
-            return 0;
-        }
-
-        // For products mapped to "Лаптопи", check if the name reveals an accessory type
-        // and override to the correct category (bags, covers, chargers, etc.)
-        if ("Лаптопи".equals(targetCategoryName)) {
-            String nameLower = name.toLowerCase();
-            for (String[] override : LAPTOP_CATEGORY_NAME_OVERRIDES) {
-                if (nameLower.contains(override[0])) {
-                    log.debug("Overriding category for '{}': Лаптопи → {} (matched '{}')", sku, override[1], override[0]);
-                    targetCategoryName = override[1];
-                    break;
+        } else {
+            // For products mapped to "Лаптопи", check if the name reveals an accessory type
+            // and override to the correct category (bags, covers, chargers, etc.)
+            if ("Лаптопи".equals(targetCategoryName)) {
+                String nameLower = name.toLowerCase();
+                for (String[] override : LAPTOP_CATEGORY_NAME_OVERRIDES) {
+                    if (nameLower.contains(override[0])) {
+                        log.debug("Overriding category for '{}': Лаптопи → {} (matched '{}')", sku, override[1], override[0]);
+                        targetCategoryName = override[1];
+                        break;
+                    }
                 }
+            }
+
+            categoryId = categoryIdsByName.get(targetCategoryName.toLowerCase().trim());
+            if (categoryId == null) {
+                log.warn("Category '{}' not found in DB for product {}", targetCategoryName, sku);
             }
         }
 
-        Long categoryId = categoryIdsByName.get(targetCategoryName.toLowerCase().trim());
         if (categoryId == null) {
-            log.warn("Category '{}' not found in DB for product {}", targetCategoryName, sku);
-            return 0;
+            // Returning here outright meant a product we already carry was never processed
+            // again once its feed category stopped mapping, freezing its price and stock at
+            // whatever they were that day. Its existing category is a better answer than
+            // dropping it — the same thing AsbisSyncService already does. Only genuinely
+            // new products are skipped, since for those there is nothing to preserve.
+            categoryId = productRepository.findCategoryIdsBySkuAndPlatform(sku, Platform.MOST)
+                    .stream().findFirst().orElse(null);
+            if (categoryId == null) {
+                return 0;
+            }
+            log.debug("Category mapping failed for {} — keeping its existing category {}", sku, categoryId);
         }
 
         List<Product> existing = productRepository.findBySkuAndPlatform(sku, Platform.MOST);
