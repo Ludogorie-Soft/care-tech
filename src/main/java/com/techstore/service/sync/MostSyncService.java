@@ -263,6 +263,92 @@ public class MostSyncService {
         MOST_CATEGORY_MAPPING = Collections.unmodifiableMap(map);
     }
 
+    /**
+     * Feed pair "CATEGORY|SUBCATEGORY" → our category name, consulted before
+     * {@link #MOST_CATEGORY_MAPPING}.
+     * <p>
+     * The feed distinguishes 222 (category, subcategory) pairs but only 29 categories, and
+     * mapping on the category alone collapsed them into at most 29 buckets. That is how 150
+     * phone accessories ended up in "Мобилни телефони", 147 power supplies in "Кутии за
+     * компютри", 143 laptop accessories in "Лаптопи" and 9 televisions in "Монитори".
+     * <p>
+     * Only pairs whose destination already exists in the visible tree are listed here —
+     * this mapping never needs a category to be created, so the hand-curated ordering and
+     * the three-level structure are untouched.
+     */
+    private static final Map<String, String> MOST_SUBCATEGORY_MAPPING;
+
+    static {
+        Map<String, String> map = new HashMap<>();
+
+        map.put("GSM|Accessories",           "Други мобилни аксесоари");
+        map.put("CASE|PSU",                  "Захранвания");
+        map.put("NOTEBOOK|NB Accessories",   "Аксесоари за лаптопи/таблети");
+        map.put("M - MEDIA|Projectors",      "Проектори");
+        map.put("M - MEDIA|Headset and mic", "Слушалки");
+        map.put("LAN|LAN Cable",             "Мрежови кабели");
+        map.put("MONITOR|TV",                "Телевизори");
+        map.put("UPS|Power Bank",            "Външни батерии");
+
+        // Deliberately absent, with reasons:
+        //   NOTEBOOK|Tablet LENOVO  — no plain "Таблети" category exists; "Графични таблети"
+        //                             is a different product. Creating one would touch the tree.
+        //   FAN|Thermal Grease      — no category for thermal paste, same reason.
+        //   HP|PSG Accessories      — 100 products, but a genuinely mixed bag: docking
+        //                             stations, carrying cases and batteries alongside RAM,
+        //                             graphics cards, keyboards and mice. Moving them
+        //                             wholesale would relocate the problem rather than fix
+        //                             it; they need per-product classification.
+
+        MOST_SUBCATEGORY_MAPPING = Collections.unmodifiableMap(map);
+    }
+
+    /**
+     * Resolves which of our categories a Most product belongs in: the (category, subcategory)
+     * pair first, falling back to the category alone.
+     *
+     * @return our category name, or {@code null} when nothing maps
+     */
+    /**
+     * Refines a laptop-ish destination using the product name, which can be more specific
+     * than any feed mapping.
+     * <p>
+     * These overrides take precedence over {@link #MOST_SUBCATEGORY_MAPPING} on purpose.
+     * The feed says only {@code NB Accessories}, while a name can say "чанта" or "зарядно":
+     * 43 products already sit correctly in "Чанти за лаптопи" and 22 in "Зарядни за лаптопи"
+     * because of these rules. Applying the pair mapping over them would pull 65 products back
+     * into a generic bucket in order to place 3 correctly.
+     *
+     * @return the refined name, or the original when nothing matches
+     */
+    static String applyLaptopNameOverride(String targetCategoryName, String productName) {
+        if (productName == null
+                || !("Лаптопи".equals(targetCategoryName)
+                        || "Аксесоари за лаптопи/таблети".equals(targetCategoryName))) {
+            return targetCategoryName;
+        }
+        String nameLower = productName.toLowerCase();
+        for (String[] override : LAPTOP_CATEGORY_NAME_OVERRIDES) {
+            if (nameLower.contains(override[0])) {
+                return override[1];
+            }
+        }
+        return targetCategoryName;
+    }
+
+    static String resolveTargetCategoryName(String category, String subcategory) {
+        if (category == null || category.isBlank()) {
+            return null;
+        }
+        if (subcategory != null && !subcategory.isBlank()) {
+            String byPair = MOST_SUBCATEGORY_MAPPING.get(category + "|" + subcategory);
+            if (byPair != null) {
+                return byPair;
+            }
+        }
+        return MOST_CATEGORY_MAPPING.get(category);
+    }
+
     // ===========================================
     // MANUFACTURERS SYNC - CREATE ONLY
     // ===========================================
@@ -703,8 +789,16 @@ public class MostSyncService {
                     ));
             log.info("Loaded {} manufacturers", manufacturerIdsByName.size());
 
+            // Category names are not unique — "Слушалки" and "Мрежови кабели" each exist
+            // three times, once in the visible tree and twice in the invisible Asbis one.
+            // With a plain toMap the winner was whichever the repository happened to return
+            // first, so a product could land in a category nobody can browse to. Visible
+            // wins, then lowest id, which makes the choice deterministic as well as correct.
             Map<String, Long> categoryIdsByName = categoryRepository.findAll().stream()
                     .filter(c -> c.getNameBg() != null)
+                    .sorted(Comparator
+                            .comparing((Category c) -> !Boolean.TRUE.equals(c.getShow()))
+                            .thenComparing(Category::getId))
                     .collect(Collectors.toMap(
                             c -> c.getNameBg().toLowerCase().trim(),
                             Category::getId,
@@ -857,24 +951,14 @@ public class MostSyncService {
         }
 
         String categoryName = (String) mostProduct.get("category");
-        String targetCategoryName = MOST_CATEGORY_MAPPING.get(categoryName);
+        String subcategoryName = (String) mostProduct.get("subcategory");
+        String targetCategoryName = resolveTargetCategoryName(categoryName, subcategoryName);
         Long categoryId = null;
 
         if (targetCategoryName == null) {
             if (categoryName != null) unmappedCategories.add(categoryName);
         } else {
-            // For products mapped to "Лаптопи", check if the name reveals an accessory type
-            // and override to the correct category (bags, covers, chargers, etc.)
-            if ("Лаптопи".equals(targetCategoryName)) {
-                String nameLower = name.toLowerCase();
-                for (String[] override : LAPTOP_CATEGORY_NAME_OVERRIDES) {
-                    if (nameLower.contains(override[0])) {
-                        log.debug("Overriding category for '{}': Лаптопи → {} (matched '{}')", sku, override[1], override[0]);
-                        targetCategoryName = override[1];
-                        break;
-                    }
-                }
-            }
+            targetCategoryName = applyLaptopNameOverride(targetCategoryName, name);
 
             categoryId = categoryIdsByName.get(targetCategoryName.toLowerCase().trim());
             if (categoryId == null) {

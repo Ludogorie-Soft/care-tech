@@ -180,6 +180,17 @@ public class MostApiService {
                 product.put("category", categoryElement.getTextContent().trim());
             }
 
+            // Subcategory — <subcategory id="N">NAME</subcategory>
+            // The feed carries 222 distinct (category, subcategory) pairs against only 29
+            // categories, and until now only the category was read: every pair collapsed
+            // into at most 29 buckets, which is why 150 phone accessories sat in
+            // "Мобилни телефони" and 147 power supplies in "Кутии за компютри".
+            Element subcategoryElement = (Element) productElement.getElementsByTagName("subcategory").item(0);
+            if (subcategoryElement != null) {
+                product.put("subcategory_id", subcategoryElement.getAttribute("id"));
+                product.put("subcategory", subcategoryElement.getTextContent().trim());
+            }
+
             // Properties (parameters) — <property name="..." s="sort_order">value</property>
             product.put("properties", extractProperties(productElement));
 
