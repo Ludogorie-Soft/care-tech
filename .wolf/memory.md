@@ -3526,3 +3526,8 @@
 | 13:38 | Session end: 115 writes across 34 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~179127 tok |
 | 13:43 | Created ../../../../../../tmp/step2b.md | — | ~859 |
 | 13:44 | Скрипт 49 потвърден (Водно охлаждане под Компютърни компоненти, слот 7, 3 нива, коренови 24->23). АНАЛИЗ 2б: ASBIS sync ползва findByShowTrue(), значи 495-те са историческа утайка -> еднократна миграция без промяна в кода; 23 категории покриват 82%; предложена таблица за 15 от тях (264 продукта) + 3 групи за решение (47 домакински уреди без цел, 84 Creative ZEN аксесоари, 13 дребни) | CATEGORY_CLEANUP_PLAN.md | чака решения | ~28k |
+| 13:44 | Session end: 116 writes across 35 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~180048 tok |
+| 13:48 | Session end: 116 writes across 35 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~180048 tok |
+| 13:50 | Created scripts/50_retire_home_appliances.sql | — | ~1788 |
+| 13:50 | Edited scripts/50_retire_home_appliances.sql | 9→13 lines | ~196 |
+| 13:51 | Скрипт 50: 87 компютърни вентилатора от домакинската "Вентилатори" (455) отиват при id 12; 268 продукта дребна бяла техника се маркират manually_hidden. Потребителят потвърди поправката ми, че групи B и C бяха описани грешно (325 е аудио техника, не Creative ZEN; 500 са детски часовници Canyon) | scripts/50_retire_home_appliances.sql | симулация: видими в невидими 495 -> 420, вентилатори 329 -> 416 | ~22k |
