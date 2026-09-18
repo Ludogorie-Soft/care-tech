@@ -144,6 +144,12 @@ public class AsbisSyncService {
             Map<String, Category> rootByName = new HashMap<>();
             // Child categories → by "parentId:::normalizedNameBg"
             Map<String, Category> childByParentAndName = new HashMap<>();
+            // Every category by name, wherever it sits. Used only as a fallback when a level-1
+            // name is not among the roots: a category this sync once created as a root may
+            // since have been adopted into the curated tree. Without this it would be treated
+            // as missing and created again as a root — and createCategory sets show = true
+            // with sort_order 0, so a duplicate would appear at the very top of the menu.
+            Map<String, Category> anyByName = new HashMap<>();
 
             for (Category c : allExistingCats) {
                 if (c.getNameBg() == null) continue;
@@ -153,6 +159,9 @@ public class AsbisSyncService {
                 } else {
                     childByParentAndName.put(c.getParent().getId() + ":::" + normalizedName, c);
                 }
+                // Names are not unique across the tree, so prefer a visible category and then
+                // the lowest id, which makes the choice deterministic rather than insertion-ordered.
+                anyByName.merge(normalizedName, c, AsbisSyncService::preferVisibleThenLowestId);
             }
 
             long created = 0, reused = 0;
@@ -161,9 +170,20 @@ public class AsbisSyncService {
                 String cat1Name = entry.getKey();
                 Set<String> cat2Names = entry.getValue();
 
-                // Level 1 — match only among ROOT categories (parent == null)
+                // Level 1 — roots first, then anywhere in the tree before giving up
                 String cat1Key = cat1Name.toLowerCase().trim();
                 Category parent = rootByName.get(cat1Key);
+                if (parent == null) {
+                    Category adopted = anyByName.get(cat1Key);
+                    if (adopted != null) {
+                        // Moved under a curated parent at some point — reuse it rather than
+                        // creating a second copy back at the top level.
+                        parent = adopted;
+                        rootByName.put(cat1Key, adopted);
+                        log.debug("↑ Reusing '{}' from its new home under '{}'", cat1Name,
+                                adopted.getParent() != null ? adopted.getParent().getNameBg() : "(root)");
+                    }
+                }
                 if (parent == null) {
                     parent = createCategory(cat1Name, null);
                     rootByName.put(cat1Key, parent);
@@ -201,6 +221,21 @@ public class AsbisSyncService {
             log.error("Error during Asbis categories synchronization", e);
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Picks between two categories sharing a name: a visible one wins, otherwise the lower id.
+     * Deterministic, so the same tree always resolves the same way.
+     */
+    private static Category preferVisibleThenLowestId(Category a, Category b) {
+        boolean aVisible = Boolean.TRUE.equals(a.getShow());
+        boolean bVisible = Boolean.TRUE.equals(b.getShow());
+        if (aVisible != bVisible) {
+            return aVisible ? a : b;
+        }
+        if (a.getId() == null) return b;
+        if (b.getId() == null) return a;
+        return a.getId() <= b.getId() ? a : b;
     }
 
     private Category createCategory(String name, Category parent) {

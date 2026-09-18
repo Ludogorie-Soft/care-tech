@@ -3496,3 +3496,9 @@
 | 12:30 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | removed 19 lines | ~47 |
 | 12:30 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 2 condition(s) | ~356 |
 | 12:33 | ФАЗА 5 СТЪПКА 1 ИЗПЪЛНЕНА: MOST мапва по (category, subcategory) — subcategory изобщо не се парсваше в MostApiService; 497 продукта се преместват (145 захранвания от Кутии, 137 аксесоари от Мобилни телефони). Уловена регресия при проверката: щеше да придърпа 65 продукта от по-точни категории -> name-overrides вече имат приоритет. Плюс детерминиран избор при двусмислени имена | MostApiService, MostSyncService, MostCategoryResolutionTest, CATEGORY_CLEANUP_PLAN.md | 76 теста зелени; комит 16a3374 | ~40k |
+| 12:34 | Session end: 103 writes across 29 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~171950 tok |
+| 12:40 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | modified for() | ~408 |
+| 12:41 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | added 2 condition(s) | ~304 |
+| 12:41 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | added 3 condition(s) | ~179 |
+| 12:42 | Created scripts/48_make_tablets_visible.sql | — | ~1852 |
+| 12:44 | Потребителят разреши "Таблети" да стане видима -> открито усложнение: 744 е ASBIS корен (ниво-1 родител за PC таблет/PC таблет с Windows), преместването ѝ би накарало ASBIS да създаде нов ВИДИМ корен със sort_order=0. Добавен пазач anyByName в AsbisSyncService + скрипт 48 | AsbisSyncService.java, scripts/48_make_tablets_visible.sql | 76 теста зелени; допусканията验证ирани на прод (слот 7 свободен, 3 нива, 68 продукта) | ~30k |
