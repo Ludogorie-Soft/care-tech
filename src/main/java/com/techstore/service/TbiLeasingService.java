@@ -244,9 +244,25 @@ public class TbiLeasingService {
 
     private void transitionOrderStatus(LeasingApplication application, String tbiStatus) {
         if (CONTRACT_SIGNED_STATUSES.contains(tbiStatus)) {
+            // getOrCreateOrder already treats a replayed webhook as a no-op once the order
+            // has moved past LEASING_PENDING, but the emails below did not: a second
+            // ContractSigned arriving after the order was confirmed sent the customer a
+            // duplicate order confirmation. Read the status before the call, since
+            // getOrCreateOrder is what moves it.
+            boolean alreadyConfirmed = application.getOrder() != null
+                    && orderRepository.findById(application.getOrder().getId())
+                            .map(existing -> existing.getStatus() != OrderStatus.LEASING_PENDING)
+                            .orElse(false);
+
             // Order is created lazily here — only after TBI approval
             Order order = getOrCreateOrder(application, tbiStatus);
             if (order == null) return;
+
+            if (alreadyConfirmed) {
+                log.info("Order {} was already confirmed — ignoring repeated TBI status '{}'",
+                        order.getOrderNumber(), tbiStatus);
+                return;
+            }
 
             log.info("Order {} created/confirmed with PENDING status after TBI status '{}'",
                     order.getOrderNumber(), tbiStatus);

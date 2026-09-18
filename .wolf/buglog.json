@@ -8177,6 +8177,58 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-18T08:30:32.196Z"
+    },
+    {
+      "id": "bug-500",
+      "timestamp": "2026-09-18T08:38:36.212Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:38:36.212Z"
+    },
+    {
+      "id": "bug-501",
+      "timestamp": "2026-09-18T12:05:00.000Z",
+      "error_message": "TechStoreApiApplicationTests.contextLoads: Failed to bind properties under 'speedy.sender-site-id' to java.lang.Long — NumberFormatException: For input string: \"${SPEEDY_SENDER_ID}\"",
+      "file": "src/test/resources/application-test.properties",
+      "root_cause": "В application-test.properties липсваха няколко променливи, които application.yml ползва БЕЗ default стойност. Само SPEEDY_SENDER_ID чупеше контекста, защото SpeedyConfig я свързва към Long и неразрешеният литерал '${SPEEDY_SENDER_ID}' се проваля при конверсия. Останалите липсващи (SPEEDY_USERNAME/PASSWORD, TBI_*, POSTGRES_*, CORS_ALLOWED_ORIGINS) се свързват към String и мълчаливо приемаха литерала '${...}'.",
+      "fix": "Добавени всички липсващи в application-test.properties, с изрична бележка защо SPEEDY_SENDER_ID е задължително числова. Контекстът зарежда, цялата сюита е 52/52 зелена.",
+      "tags": [
+        "tests",
+        "spring",
+        "configuration",
+        "placeholder",
+        "context-load"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T12:05:00.000Z"
+    },
+    {
+      "id": "bug-502",
+      "timestamp": "2026-09-18T12:05:00.000Z",
+      "error_message": "Дублиран ContractSigned webhook праща на клиента ВТОРО потвърждение за поръчка (тест orderAlreadyPending_noSecondConfirmation падаше)",
+      "file": "src/main/java/com/techstore/service/TbiLeasingService.java:245-258",
+      "root_cause": "getOrCreateOrder() е внимателен към дублирани webhook-и — ако поръчката вече е минала LEASING_PENDING, не прави нищо и просто я връща (има и коментар 'e.g. duplicate webhook'). Но transitionOrderStatus() праща sendOrderConfirmationEmail() БЕЗУСЛОВНО след това извикване, без да проверява дали нещо реално се е променило. Тестът кодираше правилното поведение, имплементацията го беше пропуснала.",
+      "fix": "В transitionOrderStatus() статусът на поръчката се чете ПРЕДИ getOrCreateOrder() (защото самият getOrCreateOrder го променя); ако поръчката вече е извън LEASING_PENDING, методът логва и излиза, без да праща имейли. Поправен е КОДЪТ, не тестът — изпращането на дублирано потвърждение до клиент е реален дефект.",
+      "tags": [
+        "tbi",
+        "webhook",
+        "idempotency",
+        "email",
+        "duplicate"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T12:05:00.000Z"
     }
   ]
 }

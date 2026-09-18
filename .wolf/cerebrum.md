@@ -376,3 +376,9 @@
 - Състояние по платформи след 2026-09-18: **ASBIS** го прави отдавна (`AsbisSyncService:601-613`, референтната имплементация); **VALI** задава категория само при създаване, тоест съществуващите я пазят по дизайн; **TEKRA** и **MOST** бяха поправени.
 - Ползвай `ProductRepository.findCategoryIdsBySkuAndPlatform()` — връща id, а не entity, за да не се докосва lazy асоциация при `open-in-view=false`.
 - **`processedSkus` в TekraSyncService се пълни на ред 744, по време на ЧЕТЕНЕТО от feed-а**, не след обработката. Значи `markNotAvailableByPlatformSkuNotIn` вижда пропуснатите продукти като „видени" и НЕ ги маркира неналични. Не обвинявай mark-unseen стъпката, без да провериш къде се пълни списъкът.
+
+## Key Learnings (Тестове, 2026-09-18)
+
+- **Сюитата е зелена: 52/52.** Ако видиш червено, първо провери дали не е от липсваща променлива в `src/test/resources/application-test.properties` — там трябва да има стойност за ВСЯКА `${VAR}` без default в `application.yml`. Само тези, свързани към не-String тип, чупят контекста; String-овите мълчаливо приемат литерала `${VAR}`.
+- **`SPEEDY_SENDER_ID` задължително е числова** — `SpeedyConfig.senderSiteId` е `Long`.
+- **`npm run build` с `CI=true` пада** заради предварително съществуващи `no-unused-vars` в care-tech-ui. За проверка на собствени промени пускай без `CI`.

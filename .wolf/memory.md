@@ -3467,3 +3467,7 @@
 | 11:30 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | 5→7 lines | ~131 |
 | 11:33 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 2 condition(s) | ~558 |
 | 11:34 | По предложение на потребителя: fallback към съществуваща категория приложен и в MostSyncService; проверени ASBIS (вече го прави — референтна имплементация) и VALI (задава категория само при създаване, няма проблем) | TekraSyncService, MostSyncService, ProductRepository | компилира; тестовите грешки са отпреди (SPEEDY_SENDER_ID липсва в test config) | ~19k |
+| 11:35 | Session end: 87 writes across 24 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 15 reads | ~146302 tok |
+| 11:36 | Edited src/test/resources/application-test.properties | expanded (+26 lines) | ~370 |
+| 11:38 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added 1 condition(s) | ~432 |
+| 11:41 | Поправени и двата падащи теста: липсващи env променливи в application-test.properties (SPEEDY_SENDER_ID е Long и чупеше контекста) + реален дефект в TbiLeasingService — дублиран ContractSigned пращаше второ потвърждение до клиента | application-test.properties, TbiLeasingService.java | цялата сюита 52/52 зелена | ~14k |
