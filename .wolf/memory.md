@@ -3534,3 +3534,6 @@
 | 13:52 | Session end: 118 writes across 36 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~182174 tok |
 | 14:01 | Created scripts/51_migrate_products_from_hidden_categories.sql | — | ~2750 |
 | 14:02 | Скрипт 50 потвърден (вентилатори 416, спрени 268, видими в невидими 495->420). Написан скрипт 51 за 2б: 14 категории цяло + разделяне по ключови думи на 443 (геймърска) и 325 (аудио) и 500 (детски часовници) | scripts/51_migrate_products_from_hidden_categories.sql | симулация: 322 от 420 излизат, остават 98 | ~24k |
+| 14:02 | Session end: 119 writes across 37 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~185121 tok |
+| 14:04 | Created ../../../../../../tmp/2b_result.md | — | ~544 |
+| 14:05 | СТЪПКА 2б ИЗПЪЛНЕНА: скрипт 51 премести 322 продукта; общо за фаза 5 — 3359 премествания. Видими продукти в невидими категории 726 -> 98 (-86%). Монитори 932, Мишки 523, Геймърски аксесоари 440, Звукови системи 438 | прод база, CATEGORY_CLEANUP_PLAN.md | остават 98 в опашка + 301 в 325 и 78 в 500, умишлено непипнати | ~14k |
