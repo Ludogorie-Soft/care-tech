@@ -1,16 +1,18 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-27T06:51:11.591Z
-> Files: 639 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-18T06:39:58.479Z
+> Files: 643 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
 - `asbis_price_field.md` (~203 tok)
-- `euro_rate_convention.md` — Declares EURO_RATE (~194 tok)
+- `euro_rate_convention.md` (~361 tok)
 - `feedback_showtoast_duration.md` — Declares type (~140 tok)
-- `MEMORY.md` — Memory Index (~450 tok)
+- `MEMORY.md` — Memory Index (~512 tok)
 - `personal_offer_flow.md` — Declares stored (~373 tok)
+- `prod_db_readonly_access.md` (~236 tok)
 - `project_most_api.md` (~136 tok)
+- `search_visibility_findings.md` (~376 tok)
 - `session_2026_06_03.md` — Backend (`tech-store-api`) (~574 tok)
 - `session_2026_08_19_tekra.md` (~525 tok)
 - `speedy_autocomplete_pattern.md` (~297 tok)
@@ -206,6 +208,7 @@
 - `parameters_202605130941.sql` (~43615 tok)
 - `pom.xml` (~1688 tok)
 - `README.md` — Project documentation (~1777 tok)
+- `SEARCH_AUDIT_PLAN.md` — План: Одит и оптимизация на търсачката (~3987 tok)
 - `sync-diagnostics.sql` — ============================================================= (~1278 tok)
 
 ## .claude/
@@ -358,6 +361,7 @@
 - `43_crossplatform_parameter_merges.sql` — ============================================================================= (~9330 tok)
 - `45_disable_logistics_filters.sql` — ============================================================================= (~837 tok)
 - `46_final_filter_cleanup.sql` — ============================================================================= (~909 tok)
+- `47_fix_most_prices_to_eur.sql` — Коригира 5545 MOST цени от лева към евро (/1.95583) + преизчислява final_price. Идемпотентен (backup колона price_client_pre_eur_fix), с транзакция и автоматичен предпазител, който прекъсва при неуспешна проверка. Не пипа show_flag. (~1500 tok)
 - `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
@@ -760,7 +764,7 @@
 ## src/main/java/com/techstore/service/sync/
 
 - `AsbisSyncService.java` — AsbisSyncService (~14084 tok)
-- `MostSyncService.java` — VERSION 3.0. Collects seenSkus (partNumber) → markNotAvailableByPlatformSkuNotIn(MOST) after loop. MarkedUnavailable в sync log. (~14836 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~15383 tok)
 - `TekraSyncService.java` — processedSkus already collected → markNotAvailableByPlatformSkuNotIn(TEKRA) before dedup. MarkedUnavailable в sync log. (~23217 tok)
 - `ValiSyncService.java` — VERSION 4.3. Syncs only VALI categories. Tracks seenExternalIds → markUnseenAsUnavailable() marks absent products NOT_AVAILABLE+show=false. show flag set only when status=AVAILABLE. (~15774 tok)
 
@@ -780,7 +784,7 @@
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` (~2652 tok)
+- `application.yml` (~2760 tok)
 - `logback-spring.xml` (~249 tok)
 
 ## src/main/resources/db/

@@ -11,12 +11,14 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,8 +62,12 @@ public class MostSyncService {
     @Lazy
     private MostSyncService self;
 
-    private static final String USD_TO_BGN_RATE = "1.80";
-    private static final String EUR_TO_BGN_RATE = "1.95583";
+    // USD -> EUR rate, used only if the Most feed ever returns a USD price.
+    // Unlike EUR/BGN this is a floating rate, so it is configuration, not a constant.
+    // 0 (the default) means "not configured" — see the USD branch below for the
+    // deliberate fail-safe behaviour in that case.
+    @Value("${most.exchange.usd-to-eur:0}")
+    private BigDecimal usdToEurRate;
 
     // Products whose MOST category maps to "Лаптопи" but whose name reveals they are accessories.
     // Checked in order — first match wins.
@@ -928,9 +934,36 @@ public class MostSyncService {
         if (priceObj != null) {
             BigDecimal price = convertToPrice(priceObj);
             String currency = (String) mostProduct.get("currency");
-            if ("USD".equals(currency)) price = price.multiply(new BigDecimal(USD_TO_BGN_RATE));
-            else if ("EUR".equals(currency)) price = price.multiply(new BigDecimal(EUR_TO_BGN_RATE));
-            product.setPriceClient(price);
+            // priceClient is stored in EUR on every platform (Vali, Asbis, Tekra all store
+            // the supplier price as-is; Asbis states <CURRENCY_CODE>EUR</CURRENCY_CODE>).
+            // The Most feed is requested with ?currency=EUR and returns EUR for every
+            // product, so an EUR price needs no conversion. This used to multiply by
+            // the EUR/BGN rate, storing BGN in a EUR field — every Most price was 1.95583x
+            // too high, which also made Most lose every cross-platform dedup (bug-466).
+            boolean priceUsable = true;
+
+            if ("EUR".equals(currency)) {
+                // no conversion needed — already the target currency
+            } else if ("USD".equals(currency)) {
+                if (usdToEurRate != null && usdToEurRate.compareTo(BigDecimal.ZERO) > 0) {
+                    price = price.multiply(usdToEurRate).setScale(2, RoundingMode.HALF_UP);
+                    log.warn("Most returned a USD price for SKU {} — converted with rate {}", sku, usdToEurRate);
+                } else {
+                    // Fail safe rather than silently storing USD in a EUR field (~16% off).
+                    // Leaving the price unset makes hasValidPrice false, so the product is
+                    // hidden by the existing "no price -> not shown" rule instead of going
+                    // on sale at the wrong price. Set most.exchange.usd-to-eur to enable.
+                    log.error("Most returned a USD price for SKU {} but most.exchange.usd-to-eur "
+                            + "is not configured — skipping price to avoid storing USD as EUR", sku);
+                    priceUsable = false;
+                }
+            } else if (currency != null) {
+                log.warn("Unexpected Most currency '{}' for SKU {} — storing price as-is", currency, sku);
+            }
+
+            if (priceUsable) {
+                product.setPriceClient(price);
+            }
         }
 
         boolean inStock = Boolean.TRUE.equals(mostProduct.get("inStock"));

@@ -285,3 +285,30 @@
 
 - [2026-08-19] NEVER add hardcoded `si.id === N` special cases in NavDropDown to make a parent category linkable. This creates a visual duplicate (category appears as its own subcategory) and causes a spinner/redirect loop. Instead: render the section header itself as a `<Link to="/category/list/...">`.
 - [2026-08-19] NEVER link to `/category/${slug}/${id}` for a category that has children. Category.jsx detects hasChildren, calls navigate() to /category/list/..., causing an unnecessary spinner + redirect. Always link directly to `/category/list/${slug}/${id}` for parent categories.
+
+## Key Learnings (Търсачка — измерено 2026-09-18)
+
+- **Прод база достъп:** PostgreSQL 15.18 на `63.182.239.155:5432`, credentials от `.env` (`POSTGRES_USER/PASSWORD/DB`). Порт 22 е затворен, 5432 е отворен отвън. Потребителят разрешава **само четене** — винаги ползвай `PGOPTIONS='-c default_transaction_read_only=on'`.
+- **Мащаб на каталога:** 26 567 продукта общо, но само **7 276 са видими** за търсачката (active + show_flag + status='AVAILABLE' + image_url непразен). 15 573 са NOT_AVAILABLE+скрити (по дизайн), 2 417 LIMITED_QUANTITY+скрити (по дизайн).
+- **`deduplicateCrossPlatformBySku()`** (ProductRepository:225) скрива по-скъпите дубликати по `sku` с приоритет VALI > TEKRA > ASBIS > MOST. Ратчет е: `dup_skus` гледа само `show_flag=true`, така че скрит губещ никога не се реактивира ако победителят изчезне.
+- **MOST sync е one-way ratchet** (MostSyncService:966-972): за съществуващи продукти може само да СКРИЕ, никога да покаже. Затова 272 MOST продукта са AVAILABLE с цена и картинка, но невидими завинаги.
+- **FTS GIN индексът от V5 не се ползва** при търсене. OR-веригата с `m.name ILIKE` (join-нат таблица) кара планера да прави bitmap scan по `idx_products_active_show` и да пресмята `to_tsvector` за всичките 7276 реда → 319ms.
+- **`word_similarity(a,b) > 0.35` НЕ ползва trigram индекс** — само операторът `<%` го ползва, но той работи с `pg_trgm.word_similarity_threshold` (default 0.6), не с литерала в заявката. За индексиран fuzzy: `SET pg_trgm.word_similarity_threshold = 0.35` + `<%`.
+- **Имената на категориите носят множественото число** ("Лаптопи", "Монитори") — включването на `c.name_bg` в търсенето поправя plural заявките без нужда от stemming.
+- **Транслитерацията е реален gap:** 'гейминг' → 16 резултата срещу 'gaming' → 729; 'леново' → 0 срещу 'lenovo' → 80.
+- **`.env` редове 39-41 са повредени:** `JAVA_OPTS` е без кавички (чупи `source`), а `ASBIS_USERNAME:detelin` / `ASBIS_PASSWORD:...` ползват `:` вместо `=` → тези две променливи най-вероятно НЕ се подават на контейнера.
+
+## Key Learnings (Валутна конвенция — установено 2026-09-18)
+
+- **`price_client` и `final_price` са ВИНАГИ в ЕВРО без ДДС.** Това е конвенцията на цялата система. Фронтендът прави `finalPrice * 1.2` за евро с ДДС и после `* euroRate` за лева. НИКОГА не конвертирай цена от доставчик към лева при запис в базата.
+- **Всички четири sync сервиза пазят цената от доставчика както е** (`ValiSyncService:1016`, `AsbisSyncService:893`, `TekraSyncService:1125`). MOST беше единственото изключение и това беше бъг (bug-466), поправен във фаза 0.1.
+- **Как да проверяваш валутна хипотеза:** ASBIS е котвата — `PriceAvail.xml` изрично подава `<CURRENCY_CODE>EUR</CURRENCY_CODE>`. VALI и TEKRA не подават валутно поле, но съвпадат с ASBIS по общ SKU (медиана 1.010 съответно 1.000). Заявката за сравнение е в `SEARCH_AUDIT_PLAN.md` секция 1.2.
+- **MOST feed:** `https://portal.mostbg.com/api/product/xml/all?currency=EUR` — XML със структура `<data><productList><product id="..."><price>`, `<currency>`, `<PartNumber>` (мапва се към `products.sku`), `<product_status>` ("В наличност"). 6089 продукта, ~17MB.
+- **TEKRA API:** `action=categories` връща 21 root категории със `slug`. Продуктите се вземат с `action=browse&catSlug=<slug>&feed=1`, което връща **XML** (не JSON), игнорира `perPage`. **Rate-limit-ва агресивно — HTTP 429 след ~6 бързи заявки.** Не пускай тестове в цикъл.
+- **Няма тестове за sync сервизите.** Цялата тест сюита е 3 файла (`TechStoreApiApplicationTests`, `TbiLeasingControllerTest`, `TbiLeasingServiceTest`).
+
+## User Preferences (потвърдено от потребителя 2026-09-18)
+
+- **Курсът лев/евро е ТВЪРДО ФИКСИРАН на 1.95583.** Не е плаващ, не се взема от API, не се конфигурира. Винаги точно 1.95583 — никога 1.96 или друга стойност. (Потребителят потвърди изрично.)
+- **Разграничението, което трябва да се пази в кода:** EUR/BGN е фиксиран peg → уместно е да е константа. USD/EUR плава → трябва да е конфигурация, а не hardcode-нат курс.
+- **Къде живее фиксираният курс:** `OgMetaController:42` (`EURO_RATE = 1.95583`) в бекенда и `euroRate` в `care-tech-ui/src/utils/utils.js` за фронтенда. Ползва се САМО за показване (евро → лева). Sync сервизите НЕ конвертират — те пазят евро (виж Key Learnings за валутната конвенция).

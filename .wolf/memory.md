@@ -3335,3 +3335,35 @@
 | 09:52 | Session end: 18 writes across 10 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~16951 tok |
 | 09:53 | Session end: 18 writes across 10 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~16951 tok |
 | 09:55 | Session end: 18 writes across 10 files (ProductSearchResult.java, ProductSearchRepository.java, ProductCard.jsx, productSlice.js, OGPreviewController.java) | 7 reads | ~16951 tok |
+
+## Session: 2026-09-18 08:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 08:51 | Генерален одит на търсачката (home page) — прочетени ProductSearchController/Service/Repository, SearchIndexManager, V1/V5 migrations, SearchBar.jsx, SearchPage.jsx, productSlice.js | 9 файла (read-only) | намерени 12 бъга + 7 оптимизации, чака одобрение на план | ~45k |
+| 08:59 | Одит на търсачката ПОТВЪРДЕН срещу прод база (63.182.239.155, read-only) — 273 AVAILABLE продукта невидими заради MOST sync ratchet; SQL syntax error в Repository:409; нестабилно ORDER BY; facets 677ms се хвърлят; per-word union тестван | buglog.json (bug-460..465) | 6 бъга логнати, чака одобрение на план за fix | ~55k |
+| 09:00 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/prod_db_readonly_access.md | — | ~222 |
+| 09:00 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/search_visibility_findings.md | — | ~371 |
+| 09:00 | Edited ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/MEMORY.md | modified showToast() | ~110 |
+| 09:01 | Session end: 3 writes across 3 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md) | 7 reads | ~18517 tok |
+| 09:06 | Проследена коренна причина: MostSyncService:931 конвертира цените КЪМ ЛЕВА (*1.95583) докато системната конвенция е евро -> MOST винаги губи dedup-а -> скрит -> ратчет -> SKU изчезва | buglog bug-466 | потвърдено с 797 SKU двойки (медиана 1.846) | ~18k |
+| 09:07 | Session end: 3 writes across 3 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md) | 7 reads | ~18517 tok |
+| 09:15 | Одит на валутите във всички 4 sync платформи с живи данни от feed-овете — MOST е единствената сгрешена (feed е EUR, кодът умножава по 1.95583); ASBIS/VALI/TEKRA са коректно евро | buglog bug-466 (обновен), bug-467, bug-468 | ЕВРО потвърдено като конвенция; 384 продукта се възстановяват след корекция | ~38k |
+| 09:16 | Session end: 3 writes across 3 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md) | 7 reads | ~18517 tok |
+| 09:25 | Created SEARCH_AUDIT_PLAN.md | — | ~4068 |
+| 09:26 | Created scripts/47_fix_most_prices_to_eur.sql | — | ~2305 |
+| 09:27 | Edited scripts/47_fix_most_prices_to_eur.sql | expanded (+9 lines) | ~208 |
+| 09:27 | Edited scripts/47_fix_most_prices_to_eur.sql | modified GROUP() | ~527 |
+| 09:29 | Създаден SEARCH_AUDIT_PLAN.md (5 фази) + scripts/47_fix_most_prices_to_eur.sql; формулата за final_price валидирана read-only (5429/5430 съвпадат), предпазителят тестван и блокира при медиана 1.846 | SEARCH_AUDIT_PLAN.md, scripts/47_*.sql, anatomy.md | планът и скриптът готови, нищо не е писано в базата | ~22k |
+| 09:30 | Session end: 7 writes across 5 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 7 reads | ~26132 tok |
+| 09:33 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 condition(s) | ~338 |
+| 09:34 | ФАЗА 0.1 ИЗПЪЛНЕНА: MostSyncService:927-947 — EUR клонът вече е no-op, добавен log.warn за неочаквана валута, USD оставен с TODO към 0.2 | MostSyncService.java | компилира чисто (mvn compile), buglog+cerebrum обновени | ~12k |
+| 09:35 | Session end: 8 writes across 6 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 8 reads | ~41330 tok |
+| 09:37 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 2→6 lines | ~101 |
+| 09:37 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 2 condition(s) | ~519 |
+| 09:37 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 import(s) | ~47 |
+| 09:37 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 import(s) | ~16 |
+| 09:37 | Edited src/main/resources/application.yml | 3→7 lines | ~124 |
+| 09:39 | Edited SEARCH_AUDIT_PLAN.md | expanded (+6 lines) | ~397 |
+| 09:39 | ФАЗИ 0.2+0.3: USD клонът -> конфигурируем most.exchange.usd-to-eur с fail-safe при неконфигуриран курс; премахнати мъртвите константи и мъртвата most.exchange конфигурация; потребителят потвърди че EUR/BGN е твърдо 1.95583 | MostSyncService.java, application.yml, SEARCH_AUDIT_PLAN.md, cerebrum.md | компилира чисто, YAML валиден | ~14k |
+| 09:39 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/euro_rate_convention.md | — | ~354 |

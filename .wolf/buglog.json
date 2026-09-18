@@ -7467,6 +7467,263 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-27T06:40:59.793Z"
+    },
+    {
+      "id": "bug-460",
+      "timestamp": "2026-09-18T08:55:00.000Z",
+      "error_message": "Търсачката не намира продукт, който съществува в базата (потвърдено: 273 продукта са AVAILABLE + active + с цена + с картинка, но show_flag=false и няма видим дубликат — включително LENOVO LEGION PRO 7 8147лв, RTX5080 карти)",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java:966-972",
+      "root_cause": "One-way ratchet в MOST sync: за съществуващи продукти sync-ът може само да СКРИЕ (if !inStock || !hasValidPrice -> setShow(false)), но никога не връща show=true когато наличността се възстанови. Продукт излиза от склад -> show=false; връща се в склад -> status=AVAILABLE, но show_flag остава false завинаги. Същият ратчет има и в deduplicateCrossPlatformBySku() (ProductRepository:225-253): dup_skus гледа само show_flag=true, така че скрит губещ никога не се реактивира ако победителят изчезне.",
+      "fix": "ПРЕДЛОЖЕН (чака одобрение): в MostSyncService да се re-show продукт когато inStock && hasValidPrice && hasImage && не е warranty; ръчното скриване да се пази с отделен флаг (напр. manually_hidden), а не чрез show_flag. Dedup да преизчислява от status='AVAILABLE' вместо от show_flag=true.",
+      "tags": [
+        "search",
+        "sync",
+        "most",
+        "show_flag",
+        "ratchet",
+        "dedup",
+        "invisible-products"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:55:00.000Z"
+    },
+    {
+      "id": "bug-461",
+      "timestamp": "2026-09-18T08:55:00.000Z",
+      "error_message": "SQL syntax error: syntax error at or near \"BY\" — ...AND cp.is_filter != falseGROUP BY param.id",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java:409",
+      "root_cause": "Липсващ space при конкатенация на SQL стринг: \"AND cp.is_filter != false\" + \"GROUP BY ...\" дава falseGROUP. Потвърдено срещу прод базата. Грешката се гълта от try/catch (само log.error) и методът винаги връща празна Map; @Cacheable после кешира празния резултат. Endpoint GET /api/products/categories/{id}/parameters е неработещ.",
+      "fix": "ПРЕДЛОЖЕН (чака одобрение): добавяне на space -> \"AND cp.is_filter IS NOT FALSE \" + \"GROUP BY...\"; плюс филтриране на products по category_id (сега брои глобално) и махане на кеширането на празен резултат.",
+      "tags": [
+        "search",
+        "sql",
+        "string-concat",
+        "syntax-error",
+        "facets",
+        "silent-failure"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:55:00.000Z"
+    },
+    {
+      "id": "bug-462",
+      "timestamp": "2026-09-18T08:55:00.000Z",
+      "error_message": "Продукт се повтаря на една страница и липсва на друга при разлистване на резултатите",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java:162-181",
+      "root_cause": "ORDER BY p.final_price ASC (и всички останали sort клаузи) е без tiebreaker. PostgreSQL не гарантира стабилен ред при равни ключове, а с LIMIT/OFFSET това означава дублиране/пропускане между страниците. Потвърдено: 7276 видими продукта при само 3854 различни цени; 1108 цени се споделят от 2+ продукта; най-голямата група с еднаква цена е 56 продукта.",
+      "fix": "ПРЕДЛОЖЕН (чака одобрение): добавяне на , p.id ASC като финален tiebreaker във всеки sort branch (вкл. fuzzy заявката).",
+      "tags": [
+        "search",
+        "pagination",
+        "order-by",
+        "unstable-sort",
+        "postgres"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:55:00.000Z"
+    },
+    {
+      "id": "bug-463",
+      "timestamp": "2026-09-18T08:55:00.000Z",
+      "error_message": "Търсачката 'понякога не дава отговор' — при 500 от бекенда дропдаунът не се появява, а SearchPage показва 'Няма намерени продукти'",
+      "file": "care-tech-ui/src/components/navbar/SearchBar.jsx:79",
+      "root_cause": "ProductSearchService:67 обвива ВСЯКО изключение в RuntimeException('Search failed') -> 500. Фронтендът няма клауза за status==='failed': SearchBar рендира null (дропдаунът просто не излиза), SearchPage показва същото съобщение като при 0 резултата. Timeout/SQL грешка е визуално неразличима от 'няма такъв продукт'. Утежнява се от бавните заявки: 319ms rows + 677ms facets + 2x223ms fuzzy = ~1.4s DB време за заявка с 0 резултата.",
+      "fix": "ПРЕДЛОЖЕН (чака одобрение): status==='failed' UI в SearchBar и SearchPage с отделно съобщение; IllegalArgumentException да не се обвива в RuntimeException (400 вместо 500); requestId guard в productSlice срещу stale отговори.",
+      "tags": [
+        "search",
+        "frontend",
+        "error-handling",
+        "ux",
+        "silent-failure",
+        "SearchBar"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:55:00.000Z"
+    },
+    {
+      "id": "bug-464",
+      "timestamp": "2026-09-18T08:55:00.000Z",
+      "error_message": "Търсачката прави най-скъпата си заявка (677ms) при всяко търсене, а резултатът не се ползва никъде",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java:220",
+      "root_cause": "buildFacets() се вика безусловно от searchProducts() и джойва products x product_parameters x parameters x parameter_options с GROUP BY върху ВСИЧКИ съвпадения (не само страницата). Измерено 677ms на прод базата. Фронтендът записва response.facets в state.searchItems.facets (productSlice:600), но нито един компонент не го чете — категорийната страница ползва paramSlice/filter-facets.",
+      "fix": "ПРЕДЛОЖЕН (чака одобрение): махане на buildFacets от пътя на търсенето или зад флаг includeFacets=false по подразбиране.",
+      "tags": [
+        "search",
+        "performance",
+        "facets",
+        "dead-code",
+        "optimization"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:55:00.000Z"
+    },
+    {
+      "id": "bug-465",
+      "timestamp": "2026-09-18T08:55:00.000Z",
+      "error_message": "Множествено число и multi-word заявки връщат 0 резултата при очевидно съвпадение ('лаптопи' -> 5 вместо 315; 'гейминг лаптоп' -> 0; 'лаптоп lenovo' -> 1 вместо 41)",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java:91-99",
+      "root_cause": "Две отделни причини. (1) likeQuery = '%' + цялата заявка + '%' -> ILIKE иска непрекъснат подстринг, затова всяка multi-word заявка дава 0 от ILIKE клона ('asus rog backpack', 'asus монитор', 'samsung ssd 1tb' -> всички 0). (2) FTS конфигурацията е 'simple' = без stemming, затова 'лаптопи' не намира 'лаптоп'. Плюс: категорията (c.name_bg) не участва в търсенето, а името на категорията е точно там, където е множественото число ('Лаптопи', 'Монитори'). Измерено срещу прод: 'лаптоп' 159, 'лаптопи' 5, 'монитори' 5, 'камери' 101. Транслитерация също липсва: 'гейминг' 16 срещу 'gaming' 729; 'леново' 0 срещу 'lenovo' 80.",
+      "fix": "ПРЕДЛОЖЕН (чака одобрение): per-word ILIKE (AND между думите) върху name_bg/name_en/model/reference_number/sku/m.name/c.name_bg/c.name_en, UNION с досегашния FTS клон (не замяна — замяната регресира 'iphone 15' от 11 на 2). Измерено с union: 'лаптопи' 315, 'лаптоп lenovo' 41, 'iphone 15' 12 (без регресия).",
+      "tags": [
+        "search",
+        "fts",
+        "ilike",
+        "multi-word",
+        "stemming",
+        "bulgarian",
+        "transliteration"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:55:00.000Z"
+    },
+    {
+      "id": "bug-466",
+      "timestamp": "2026-09-18T09:10:00.000Z",
+      "error_message": "MOST продуктите са с ~1.96x надути цени и системно губят cross-platform dedup-а, което ги прави невидими (потвърдено: медиана на отношението MOST/друга платформа за същия SKU = 1.846, p75 = 1.975, мода 1.75-2.00 при 336 от 797 двойки)",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java:931-933",
+      "root_cause": "MostSyncService конвертира цената КЪМ ЛЕВА: if USD -> *1.80, else if EUR -> *1.95583 (EUR_TO_BGN_RATE), после setPriceClient(price). Останалите три sync сервиза (ValiSyncService:1016, AsbisSyncService:893, TekraSyncService:1125) пазят цената от доставчика без конверсия, а Product.calculateFinalPrice() само добавя надценка/отстъпка. Конвенцията на системата е final_price = ЕВРО без ДДС — фронтендът прави finalEuro = finalPrice * 1.2 и после * euroRate за лева. Значи MOST цените се пазят 1.95583x завишени и се показват 1.95583x завишени и в двете колони (€ и лв.). Каскадата: надутата цена -> deduplicateCrossPlatformBySku() (cheapest wins) винаги отсъжда срещу MOST -> show_flag=false -> MostSyncService:966 ратчетът никога не го връща -> когато по-евтините платформи излязат от наличност и те се скриват, целият SKU изчезва от сайта. Пример: SKU 100-000001404 (AMD Ryzen 7 9700X) — VALI 213.35 LIMITED_QUANTITY, ASBIS 243.58 NOT_AVAILABLE, MOST 509.94 AVAILABLE и трите скрити. ДОКАЗАНО с живи данни (2026-09-18): MOST feed-ът (https://portal.mostbg.com/api/product/xml/all?currency=EUR) връща <currency>EUR</currency> за ВСИЧКИТЕ 6089 продукта; 24 от 24 сверени SKU показват точно съотношение price_client/feed_price = 1.95583 (напр. C1806A_: feed 78.43 EUR -> база 153.40). ASBIS PriceAvail.xml подава <CURRENCY_CODE>EUR</CURRENCY_CODE> за всичките 6058 записа. VALI съвпада с ASBIS (медиана 1.010 на 867 двойки). TEKRA съвпада с ASBIS до стотинка (25 двойки, медиана 1.000) и feed price=10 -> база 10.00. Значи ЕВРО е конвенцията и MOST е единствената сгрешена платформа. Ефект върху показваните цени: и двете колони (€ и лв.) са точно 1.95583x завишени.",
+      "fix": "ПОПРАВЕН В КОДА 2026-09-18 (фази 0.1-0.3 от SEARCH_AUDIT_PLAN.md): MostSyncService.java — клонът 'EUR' вече е no-op; USD клонът ползва конфигурируем most.exchange.usd-to-eur с fail-safe (при неконфигуриран курс цената се прескача с log.error, вместо USD да се запише като EUR); премахнати мъртвите константи USD_TO_BGN_RATE/EUR_TO_BGN_RATE и мъртвата конфигурация most.exchange.usd-to-bgn/eur-to-bgn (никога не се е четела от кода). Компилира чисто, YAML валидиран. ОСТАВА (данни): scripts/47_fix_most_prices_to_eur.sql за вече записаните 5545 реда, после фаза 1 за възстановяване на видимостта на 273 продукта.",
+      "tags": [
+        "confirmed",
+        "currency",
+        "dedup",
+        "invisible-products",
+        "live-data",
+        "most",
+        "partially-fixed",
+        "pricing",
+        "search",
+        "show_flag",
+        "sync"
+      ],
+      "related_bugs": [
+        "bug-460"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T09:10:00.000Z"
+    },
+    {
+      "id": "bug-467",
+      "timestamp": "2026-09-18T09:30:00.000Z",
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T09:30:00.000Z",
+      "error_message": "TEKRA продуктите не са обновявани от 2026-09-11 — 0 реда с updated_at в последните 2 дни (при ASBIS 2539, MOST 5325, VALI 1360)",
+      "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "НЕУСТАНОВЕНА — иска отделно разследване. Потвърдено: (1) action=products връща {\"data\":[],\"error\":[]} — sync-ът обаче ползва action=browse&catSlug=..., не action=products; (2) action=browse&catSlug=videonablyudenie РАБОТИ и връща 482 продукта (1.1MB), тоест API-то и токенът са живи; (3) TEKRA rate-limit-ва агресивно — HTTP 429 след ~6 бързи заявки. Внимание: първоначалният ми тест 'всички slug-ове връщат 0 продукта' беше НЕВАЛИДЕН, защото попадна в 429, не защото slug-овете са грешни. Най-вероятна хипотеза: 429 по време на нощния прогон (cerebrum вече отбелязва backoff 60s от сесия 2026-08-19).",
+      "fix": "НЕ Е ПОПРАВЕН. Следваща стъпка: прочитане на sync логовете за TEKRA от нощния прогон, за да се види дали има 429 / изключение, преди да се пипа код.",
+      "tags": [
+        "tekra",
+        "sync",
+        "stale-data",
+        "rate-limit",
+        "429",
+        "needs-investigation"
+      ]
+    },
+    {
+      "id": "bug-468",
+      "timestamp": "2026-09-18T09:30:00.000Z",
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T09:30:00.000Z",
+      "error_message": "ASBIS_USERNAME и ASBIS_PASSWORD в .env ползват двоеточие вместо равно (ASBIS_USERNAME:detelin), което не е валиден env формат",
+      "file": ".env:40-41",
+      "root_cause": "Редове 40-41 са 'ASBIS_USERNAME:detelin' и 'ASBIS_PASSWORD:...' вместо KEY=VALUE. docker-compose env_file игнорира редове без '='. Също ред 39 (JAVA_OPTS) е без кавички и чупи 'source .env' в shell. ЗАБЕЛЕЖКА: въпреки това ASBIS данните са свежи (2539 реда обновени в последните 2 дни), значи credentials-ите идват отнякъде другаде (вероятно docker-compose environment: секция) — т.е. тези редове в .env са по-скоро заблуждаващи, отколкото активно счупени. Да се провери преди пипане.",
+      "fix": "ПРЕДЛОЖЕН: поправка на ':' -> '=' и кавички около JAVA_OPTS, след проверка откъде реално идват ASBIS credentials-ите.",
+      "tags": [
+        "config",
+        "env",
+        "asbis",
+        "credentials",
+        "low-severity"
+      ]
+    },
+    {
+      "id": "bug-469",
+      "timestamp": "2026-09-18T06:27:59.765Z",
+      "error_message": "Wrong operator: >> should be <=",
+      "file": "scripts/47_fix_most_prices_to_eur.sql",
+      "root_cause": "Used \">>\" instead of \"<=\"",
+      "fix": "Changed operator >> → <=",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "sql"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T06:27:59.765Z"
+    },
+    {
+      "id": "bug-470",
+      "timestamp": "2026-09-18T06:33:40.215Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T06:33:40.215Z"
+    },
+    {
+      "id": "bug-471",
+      "timestamp": "2026-09-18T06:37:29.434Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 16→30 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T06:37:29.434Z"
+    },
+    {
+      "id": "bug-472",
+      "timestamp": "2026-09-18T06:37:55.809Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/resources/application.yml",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 3→7 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "yml"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T06:37:55.809Z"
+    },
+    {
+      "id": "bug-473",
+      "timestamp": "2026-09-18T06:39:10.066Z",
+      "error_message": "Significant refactor of ",
+      "file": "SEARCH_AUDIT_PLAN.md",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 7→13 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T06:39:10.066Z"
     }
   ]
 }

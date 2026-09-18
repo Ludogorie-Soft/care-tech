@@ -296,8 +296,12 @@ most:
     url: https://portal.mostbg.com/api/product/xml/all?currency=EUR
     enabled: true
   exchange:
-    usd-to-bgn: 1.80
-    eur-to-bgn: 1.95583
+    # Prices are stored in EUR, so only a USD -> EUR rate can ever be needed.
+    # The feed is requested with ?currency=EUR and currently returns EUR for every
+    # product, so this path is not exercised. Left at 0 = not configured: a USD price
+    # is then skipped with an ERROR rather than stored as EUR at the wrong value.
+    # Set to the current USD -> EUR rate only if Most starts sending USD.
+    usd-to-eur: 0
 
 asbis:
   api:
