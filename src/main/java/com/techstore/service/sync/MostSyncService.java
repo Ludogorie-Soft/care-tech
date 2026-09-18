@@ -290,6 +290,23 @@ public class MostSyncService {
         map.put("MONITOR|TV",                "Телевизори");
         map.put("UPS|Power Bank",            "Външни батерии");
 
+        // LAN and FAN previously resolved to "Мрежов хардуер" and "Охладители", which exist
+        // only as hidden Asbis categories — every product filed there was reachable by search
+        // but not by browsing. Both hold Most products exclusively, and the visible tree
+        // already carries twelve network subcategories and two cooling ones to aim at.
+        map.put("LAN|WL Router",             "Безжични рутери");
+        map.put("LAN|LAN Switch",            "Суичове - неуправляеми");
+        map.put("LAN|WL Card / USB / Device","Безжични адаптери");
+        map.put("LAN|LAN Card",              "Мрежови карти");
+        map.put("LAN|Bluetooth",             "Блутут адаптери");
+        map.put("LAN|LAN Accessories",       "Рутери и мрежово оборудване");
+        map.put("LAN|Other",                 "Рутери и мрежово оборудване");
+        map.put("LAN|TENDA",                 "Рутери и мрежово оборудване");
+        map.put("FAN|CASE fan",              "Вентилатори");
+        map.put("FAN|CPU Cooler",            "Вентилатори");
+        map.put("FAN|Water Cooler",          "Водно охлаждане");
+        map.put("FAN|Others",                "Вентилатори");
+
         // Deliberately absent, with reasons:
         //   NOTEBOOK|Tablet LENOVO  — no plain "Таблети" category exists; "Графични таблети"
         //                             is a different product. Creating one would touch the tree.

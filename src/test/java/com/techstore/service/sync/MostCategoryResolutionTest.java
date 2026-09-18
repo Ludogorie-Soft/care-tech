@@ -121,4 +121,33 @@ class MostCategoryResolutionTest {
     void toleratesNullName() {
         assertEquals("Лаптопи", MostSyncService.applyLaptopNameOverride("Лаптопи", null));
     }
+
+    // ── step 2a: LAN and FAN out of the hidden categories ─────────────────────
+
+    @ParameterizedTest
+    @CsvSource({
+            "LAN,  WL Router,                Безжични рутери",
+            "LAN,  LAN Switch,               Суичове - неуправляеми",
+            "LAN,  WL Card / USB / Device,   Безжични адаптери",
+            "LAN,  LAN Card,                 Мрежови карти",
+            "LAN,  Bluetooth,                Блутут адаптери",
+            "LAN,  LAN Accessories,          Рутери и мрежово оборудване",
+            "LAN,  Other,                    Рутери и мрежово оборудване",
+            "FAN,  CASE fan,                 Вентилатори",
+            "FAN,  CPU Cooler,               Вентилатори",
+            "FAN,  Water Cooler,             Водно охлаждане",
+            "FAN,  Others,                   Вентилатори"
+    })
+    @DisplayName("LAN and FAN pairs reach visible categories instead of the hidden ones")
+    void lanAndFanPairsReachVisibleCategories(String category, String subcategory, String expected) {
+        assertEquals(expected, MostSyncService.resolveTargetCategoryName(category, subcategory));
+    }
+
+    @Test
+    @DisplayName("an unmapped LAN or FAN subcategory still falls back to the old destination")
+    void unmappedLanFanStillFallsBack() {
+        // Thermal paste has no category of its own, so it stays where it was.
+        assertEquals("Охладители", MostSyncService.resolveTargetCategoryName("FAN", "Thermal Grease"));
+        assertEquals("Мрежов хардуер", MostSyncService.resolveTargetCategoryName("LAN", "Something New"));
+    }
 }
