@@ -65,6 +65,16 @@ public class ProductSearchRepository {
         StringBuilder countSql = new StringBuilder();
         Map<String, Object> params = new HashMap<>();
 
+        // Worked out up front because both the relevance score and the WHERE clause need
+        // them. The Latin form has to reach the score as well as the filter: a Cyrillic
+        // query that only matches through transliteration would otherwise score zero on
+        // every row — 728 of the 744 hits for "гейминг" — and fall back to price order,
+        // which is the exact problem the score exists to solve.
+        List<String> words = StringUtils.hasText(request.getQuery())
+                ? splitQueryWords(request.getQuery())
+                : List.of();
+        String latinQuery = toLatinQuery(words);
+
         sql.append("SELECT p.id, p.name_bg, p.name_en, p.description_bg, p.description_en, ")
                 .append("p.model, p.reference_number, p.final_price, p.discount, p.featured, p.status, ")
                 .append("p.slug, p.platform, ")
@@ -83,18 +93,19 @@ public class ProductSearchRepository {
                     .append("ts_rank(").append(FTS_VECTOR)
                     .append(", plainto_tsquery('").append(language).append("', :query))")
                     // Name match is the strongest signal, prefix stronger than substring.
-                    .append(" + CASE WHEN ").append(NAME_NO_SPACES).append(" LIKE :qPrefix ESCAPE '\\' THEN 3.0")
-                    .append(" WHEN ").append(NAME_NO_SPACES).append(" LIKE :qNameLike ESCAPE '\\' THEN 1.0 ELSE 0 END")
+                    .append(" + CASE WHEN ").append(matchesEitherScript(NAME_NO_SPACES, "qPrefix", latinQuery)).append(" THEN 3.0")
+                    .append(" WHEN ").append(matchesEitherScript(NAME_NO_SPACES, "qNameLike", latinQuery)).append(" THEN 1.0 ELSE 0 END")
                     // A category whose own name matches is what the user is after when they
                     // type "лаптопи" or "камери". Accessory categories in this catalogue are
                     // consistently phrased "X за Y" ("Чанти за лаптопи", "Стойки и основи за
                     // камери") while the real ones are not ("Лаптопи", "IP камери"), so that
                     // "за" is what separates a laptop from a laptop bag. It is a heuristic
                     // over this data, not a rule — revisit it if category naming changes.
-                    .append(" + CASE WHEN ").append(CATEGORY_NAME).append(" LIKE :qLike ESCAPE '\\'")
+                    .append(" + CASE WHEN ").append(matchesEitherScript(CATEGORY_NAME, "qLike", latinQuery))
                     .append(" AND ").append(CATEGORY_NAME).append(" NOT LIKE '% за %' THEN 3.0")
-                    .append(" WHEN ").append(CATEGORY_NAME).append(" LIKE :qLike ESCAPE '\\' THEN 0.5 ELSE 0 END")
-                    .append(" + CASE WHEN lower(coalesce(m.name, '')) LIKE :qLike ESCAPE '\\' THEN 0.5 ELSE 0 END")
+                    .append(" WHEN ").append(matchesEitherScript(CATEGORY_NAME, "qLike", latinQuery)).append(" THEN 0.5 ELSE 0 END")
+                    .append(" + CASE WHEN ").append(matchesEitherScript("lower(coalesce(m.name, ''))", "qLike", latinQuery))
+                    .append(" THEN 0.5 ELSE 0 END")
                     .append(") as search_rank ");
             params.put("query", request.getQuery());
         } else {
@@ -130,8 +141,6 @@ public class ProductSearchRepository {
             // "лаптопи" now returns 334 and "лаптоп lenovo" 50. The words are matched
             // against the category and manufacturer too, which is where the plural
             // actually lives ("Лаптопи", "Монитори").
-            List<String> words = splitQueryWords(request.getQuery());
-
             whereClause.append("AND (")
                     // Full text — whole words, uses the GIN index, covers descriptions
                     .append(FTS_VECTOR)
@@ -175,6 +184,16 @@ public class ProductSearchRepository {
             params.put("qPrefix", normalized + "%");
             params.put("qNameLike", "%" + normalized + "%");
             params.put("qLike", "%" + escapeLikeWildcards(request.getQuery().toLowerCase()) + "%");
+
+            // Same three patterns over the transliterated query, so the score can see a
+            // match that only exists in Latin. matchesEitherScript() adds the OR branches
+            // that read these, and only when latinQuery is non-null.
+            if (latinQuery != null) {
+                String latinNormalized = escapeLikeWildcards(latinQuery.replace(" ", ""));
+                params.put("qPrefixLatin", latinNormalized + "%");
+                params.put("qNameLikeLatin", "%" + latinNormalized + "%");
+                params.put("qLikeLatin", "%" + escapeLikeWildcards(latinQuery) + "%");
+            }
         }
 
         if (request.getMinPrice() != null) {
@@ -323,6 +342,42 @@ public class ProductSearchRepository {
      * {@link #MAX_QUERY_WORDS} so a long paste cannot generate an unbounded
      * number of ANDed ILIKE conditions.
      */
+    /**
+     * The whole query with every Cyrillic word replaced by its Latin form, or {@code null}
+     * when nothing would change. Used by the relevance score so that a query which only
+     * matches through transliteration still ranks, rather than scoring zero everywhere.
+     */
+    private String toLatinQuery(List<String> words) {
+        if (words.isEmpty()) {
+            return null;
+        }
+        StringBuilder out = new StringBuilder();
+        boolean changed = false;
+        for (String word : words) {
+            String latin = CyrillicTransliterator.transliterate(word);
+            if (latin != null) {
+                changed = true;
+            }
+            if (out.length() > 0) {
+                out.append(' ');
+            }
+            out.append(latin != null ? latin : word.toLowerCase());
+        }
+        return changed ? out.toString() : null;
+    }
+
+    /**
+     * {@code expr LIKE :param}, widened to {@code (expr LIKE :param OR expr LIKE :paramLatin)}
+     * when the query has a Latin form worth checking too.
+     */
+    private String matchesEitherScript(String expression, String param, String latinQuery) {
+        String single = expression + " LIKE :" + param + " ESCAPE '\\'";
+        if (latinQuery == null) {
+            return single;
+        }
+        return "(" + single + " OR " + expression + " LIKE :" + param + "Latin ESCAPE '\\')";
+    }
+
     private List<String> splitQueryWords(String query) {
         return Arrays.stream(query.trim().split("\\s+"))
                 .filter(StringUtils::hasText)
