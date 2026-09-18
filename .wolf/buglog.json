@@ -7495,14 +7495,15 @@
       "error_message": "SQL syntax error: syntax error at or near \"BY\" — ...AND cp.is_filter != falseGROUP BY param.id",
       "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java:409",
       "root_cause": "Липсващ space при конкатенация на SQL стринг: \"AND cp.is_filter != false\" + \"GROUP BY ...\" дава falseGROUP. Потвърдено срещу прод базата. Грешката се гълта от try/catch (само log.error) и методът винаги връща празна Map; @Cacheable после кешира празния резултат. Endpoint GET /api/products/categories/{id}/parameters е неработещ.",
-      "fix": "ПРЕДЛОЖЕН (чака одобрение): добавяне на space -> \"AND cp.is_filter IS NOT FALSE \" + \"GROUP BY...\"; плюс филтриране на products по category_id (сега брои глобално) и махане на кеширането на празен резултат.",
+      "fix": "ПОПРАВЕН 2026-09-18 (фаза 4.1-4.3): добавен липсващият space и '!= false' -> 'IS NOT FALSE' за консистентност с getFilteredFacets. Плюс 4.2: добавено 'AND p.category_id = :categoryId' — методът броеше продукти от целия каталог, а join-ът ограничаваше само кои параметри се изброяват, тоест всички бройки бяха завишени. Проверено на прод: заявката вече се изпълнява (беше syntax error).",
       "tags": [
+        "facets",
+        "fixed",
         "search",
+        "silent-failure",
         "sql",
         "string-concat",
-        "syntax-error",
-        "facets",
-        "silent-failure"
+        "syntax-error"
       ],
       "related_bugs": [],
       "occurrences": 1,
@@ -7642,7 +7643,7 @@
       "error_message": "ASBIS_USERNAME и ASBIS_PASSWORD в .env ползват двоеточие вместо равно (ASBIS_USERNAME:detelin), което не е валиден env формат",
       "file": ".env:40-41",
       "root_cause": "Редове 40-41 са 'ASBIS_USERNAME:detelin' и 'ASBIS_PASSWORD:...' вместо KEY=VALUE. docker-compose env_file игнорира редове без '='. Също ред 39 (JAVA_OPTS) е без кавички и чупи 'source .env' в shell. ЗАБЕЛЕЖКА: въпреки това ASBIS данните са свежи (2539 реда обновени в последните 2 дни), значи credentials-ите идват отнякъде другаде (вероятно docker-compose environment: секция) — т.е. тези редове в .env са по-скоро заблуждаващи, отколкото активно счупени. Да се провери преди пипане.",
-      "fix": "ПРЕДЛОЖЕН: поправка на ':' -> '=' и кавички около JAVA_OPTS, след проверка откъде реално идват ASBIS credentials-ите.",
+      "fix": "ИЗЯСНЕН, НЕ Е ПОПРАВЕН 2026-09-18 (фаза 4.10). Проблемът е САМО в локалното копие на .env. application.yml резолвира ${ASBIS_USERNAME} и ${ASBIS_PASSWORD} БЕЗ default стойност, тоест ако липсваха в контейнера, Spring нямаше да стартира заради неразрешен placeholder. Приложението работи и ASBIS данните са свежи -> прод .env е коректен. Файлът е gitignored и съдържа тайни, затова не е пипан. За локална употреба: смени ':' с '=' на редове 40-41 и сложи кавички на JAVA_OPTS (ред 39), за да работи 'source .env'.",
       "tags": [
         "config",
         "env",
@@ -8003,6 +8004,54 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-18T07:45:00.273Z"
+    },
+    {
+      "id": "bug-490",
+      "timestamp": "2026-09-18T07:59:33.090Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T07:59:33.090Z"
+    },
+    {
+      "id": "bug-491",
+      "timestamp": "2026-09-18T08:01:10.312Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/resources/application.yml",
+      "root_cause": "8 lines replaced/restructured",
+      "fix": "Rewrote 9→7 lines (8 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "yml"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:01:10.312Z"
+    },
+    {
+      "id": "bug-492",
+      "timestamp": "2026-09-18T08:03:31.797Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "SEARCH_AUDIT_PLAN.md",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:03:31.797Z"
     }
   ]
 }

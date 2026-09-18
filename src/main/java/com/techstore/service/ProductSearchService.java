@@ -117,7 +117,12 @@ public class ProductSearchService {
         return sanitized;
     }
 
-    @Cacheable(value = "categoryParametersWithCounts", key = "#categoryId + '_' + #language")
+    // unless = don't cache an empty result. The repository swallows its own errors and
+    // returns an empty map, and the cache has a one hour TTL, so a single transient
+    // failure used to leave a category with no filters for the rest of the hour. An
+    // empty map is cheap enough to recompute.
+    @Cacheable(value = "categoryParametersWithCounts", key = "#categoryId + '_' + #language",
+            unless = "#result == null || #result.isEmpty()")
     public Map<String, List<FacetValue>> getAvailableParametersWithCountsForCategory(
             Long categoryId, String language) {
         try {

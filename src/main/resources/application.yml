@@ -82,14 +82,12 @@ spring:
                         directory:
                             root: ${SPRING_JPA_PROPERTIES_HIBERNATE_SEARCH_BACKEND_DIRECTORY_ROOT}
 
-    # Connection Pool Configuration
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 20000
-      idle-timeout: 300000
-      max-lifetime: 1800000
-      leak-detection-threshold: 60000
+    # NOTE: the connection pool is configured under spring.datasource.hikari above.
+    # A second block used to sit here as spring.hikari, which is not a key Spring reads,
+    # so its values (pool size 10, connection-timeout 20s) were silently ignored while
+    # the real pool ran with 20 connections. Removed rather than merged: leak detection
+    # would fire constantly on the sync jobs, which legitimately hold a connection for
+    # minutes at a time.
 
     # Flyway Migrations Configuration
     flyway:
@@ -196,7 +194,7 @@ app:
     search:
         postgresql:
             auto-create-indexes: true  # Set to false to disable auto-creation
-            performance-test: true
+            performance-test: false   # виж SearchIndexManager — пуска две probe заявки при всеки старт
             log-slow-queries: true
     error:
         include-stack-trace: false

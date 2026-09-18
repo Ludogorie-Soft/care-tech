@@ -3422,3 +3422,17 @@
 | 10:41 | Edited ../../care-tech-ui/src/pages/SearchPage.jsx | 4→5 lines | ~54 |
 | 10:45 | Edited SEARCH_AUDIT_PLAN.md | expanded (+33 lines) | ~1002 |
 | 10:47 | ФАЗА 3 ИЗПЪЛНЕНА: per-word union WHERE вкл. категория/производител, escape на % и _, hybrid score с евристика за главна/аксесоар категория, нормализация без интервали, fuzzy наследява филтрите, релевантност като default | ProductSearchRepository.java, SearchPage.jsx, SEARCH_AUDIT_PLAN.md | измерено на прод: лаптопи 5->334, лаптоп lenovo 1->50, % -> 55; 3.7 отпада като безполезна, 3.5 пропусната умишлено | ~32k |
+| 10:49 | Session end: 57 writes across 21 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~111280 tok |
+| 10:51 | Session end: 57 writes across 21 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~111280 tok |
+| 10:53 | Session end: 57 writes across 21 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~111280 tok |
+| 10:59 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | expanded (+8 lines) | ~330 |
+| 10:59 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | modified loadProductParameters() | ~101 |
+| 10:59 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | getString() → equals() | ~100 |
+| 11:00 | Edited src/main/java/com/techstore/service/ProductSearchService.java | modified getAvailableParametersWithCountsForCategory() | ~336 |
+| 11:01 | Edited src/main/resources/application.yml | 9→7 lines | ~132 |
+| 11:01 | Edited src/main/java/com/techstore/config/SearchConfig.java | 5→4 lines | ~89 |
+| 11:01 | Edited src/main/java/com/techstore/config/SearchConfig.java | 2→1 lines | ~20 |
+| 11:01 | Edited src/main/java/com/techstore/config/SearchIndexManager.java | expanded (+7 lines) | ~102 |
+| 11:01 | Edited src/main/java/com/techstore/config/SearchIndexManager.java | added 1 condition(s) | ~67 |
+| 11:03 | Edited SEARCH_AUDIT_PLAN.md | added nullish coalescing | ~606 |
+| 11:03 | ФАЗА 4 ИЗПЪЛНЕНА: falseGROUP syntax error поправен + per-category броене, IS NOT FALSE, unless за празен кеш, setParameterName поправен, countFuzzyMatches премахнат, spring.hikari премахнат, SearchIndexManager дублиране, performance-test се чете, deleted=false на 6 места | ProductSearchRepository, ProductSearchService, SearchConfig, SearchIndexManager, application.yml | компилира; поправеният endpoint тестван на прод | ~20k |

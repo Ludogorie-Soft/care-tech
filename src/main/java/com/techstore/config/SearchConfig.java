@@ -1,7 +1,6 @@
 package com.techstore.config;
 
 import lombok.Data;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -48,9 +47,8 @@ public class SearchConfig {
         private boolean enableQueryLogging = false;
     }
 
-    @Bean
-    @ConditionalOnProperty(name = "app.search.postgresql.auto-create-indexes", havingValue = "true", matchIfMissing = true)
-    public SearchIndexManager searchIndexManager(JdbcTemplate jdbcTemplate) {
-        return new SearchIndexManager(jdbcTemplate);
-    }
+    // SearchIndexManager used to be declared twice — once here as a @Bean and once by
+    // its own @Component annotation. The factory method is the redundant one: the class
+    // already reads app.search.postgresql.auto-create-indexes itself and returns early
+    // when it is false, so the @ConditionalOnProperty added nothing.
 }

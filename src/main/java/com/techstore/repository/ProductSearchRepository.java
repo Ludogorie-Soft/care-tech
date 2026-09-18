@@ -110,6 +110,9 @@ public class ProductSearchRepository {
 
         StringBuilder whereClause = new StringBuilder(
                 "WHERE p.active = true AND p.show_flag = true AND p.status = 'AVAILABLE' " +
+                // Soft-deleted products already get active=false from ProductService, but a
+                // sync that re-activates one by external id would otherwise resurrect it.
+                "AND p.deleted = false " +
                 "AND (p.image_url IS NOT NULL AND p.image_url <> '') "
         );
 
@@ -323,7 +326,8 @@ public class ProductSearchRepository {
     }
 
     private Map<Long, List<ProductParameterResponseDto>> loadProductParameters(List<Long> productIds, String language) {
-        String paramNameField = language.equals("en") ? "param.name_en" : "param.name_bg";
+        // Both parameter names are selected and picked apart in Java below, so unlike the
+        // other methods here there is no paramNameField to build into the SQL.
         String optionNameField = language.equals("en") ? "po.name_en" : "po.name_bg";
 
         String sql = "SELECT pp.product_id, " +
@@ -360,7 +364,10 @@ public class ProductSearchRepository {
             option.setExternalId(rs.getObject("option_external_id") != null ? rs.getLong("option_external_id") : null);
             option.setName(rs.getString("option_name"));
             option.setParameterId(parameterId);
-            option.setParameterName(rs.getString("option_name")); // Corrected line
+            // The parameter's name, not the option's — this used to repeat option_name, so
+            // an option came back as {name: "16GB", parameterName: "16GB"} instead of
+            // {name: "16GB", parameterName: "RAM"}.
+            option.setParameterName(language.equals("en") ? parameterNameEn : parameterNameBg);
             option.setOrder(rs.getObject("option_order") != null ? rs.getInt("option_order") : null);
             option.setCreatedAt(rs.getTimestamp("option_created_at") != null ? rs.getTimestamp("option_created_at").toLocalDateTime() : null);
             option.setUpdatedAt(rs.getTimestamp("option_updated_at") != null ? rs.getTimestamp("option_updated_at").toLocalDateTime() : null);
@@ -438,9 +445,18 @@ public class ProductSearchRepository {
                     "   AND p.active = true " +
                     "   AND p.show_flag = true " +
                     "   AND p.status = 'AVAILABLE' " +
+                    "   AND p.deleted = false " +
                     "   AND (p.image_url IS NOT NULL AND p.image_url <> '') " +
                     "WHERE cp.category_id = :categoryId " +
-                    "  AND cp.is_filter != false" +
+                    // Counts are per category. Without this the join above constrained only
+                    // which parameters were listed, while the products behind the counts came
+                    // from the whole catalogue, so every number was inflated.
+                    "  AND p.category_id = :categoryId " +
+                    // IS NOT FALSE, matching getFilteredFacets: with "!= false" a NULL is_filter
+                    // evaluates to NULL and the parameter silently disappears. The missing space
+                    // before GROUP BY also made this "falseGROUP BY", a syntax error that the
+                    // catch below swallowed — the method always returned an empty map.
+                    "  AND cp.is_filter IS NOT FALSE " +
                     "GROUP BY param.id, param_name, po.id, option_name, param.sort_order, po.sort_order " +
                     "HAVING COUNT(DISTINCT pp.product_id) > 0 " +
                     "ORDER BY param.sort_order, param_name, po.sort_order, option_name";
@@ -518,7 +534,7 @@ public class ProductSearchRepository {
 
             StringBuilder where = new StringBuilder(
                     "WHERE p.active = true AND p.show_flag = true " +
-                    "AND p.status = 'AVAILABLE' " +
+                    "AND p.status = 'AVAILABLE' AND p.deleted = false " +
                     "AND (p.image_url IS NOT NULL AND p.image_url <> '') " +
                     "AND p.category_id = :categoryId "
             );
@@ -589,7 +605,7 @@ public class ProductSearchRepository {
         try {
             StringBuilder mWhere = new StringBuilder(
                     "WHERE p.active = true AND p.show_flag = true " +
-                    "AND p.status = 'AVAILABLE' " +
+                    "AND p.status = 'AVAILABLE' AND p.deleted = false " +
                     "AND (p.image_url IS NOT NULL AND p.image_url <> '') " +
                     "AND p.category_id = :categoryId "
             );
@@ -648,26 +664,6 @@ public class ProductSearchRepository {
         return facets;
     }
 
-    // Fuzzy fallback — извиква се само когато основното търсене върне 0 резултата.
-    // Използва word_similarity (бавно при голям dataset, затова е изолиран).
-    public long countFuzzyMatches(ProductSearchRequest request) {
-        if (!StringUtils.hasText(request.getQuery()) || request.getQuery().length() < 4) {
-            return 0;
-        }
-
-        String countSql = "SELECT COUNT(*) FROM products p " +
-                "LEFT JOIN manufacturers m ON p.manufacturer_id = m.id " +
-                "WHERE p.active = true AND p.show_flag = true " +
-                "AND p.status = 'AVAILABLE' " +
-                "AND (p.image_url IS NOT NULL AND p.image_url <> '') " +
-                "AND (p.name_bg IS NOT NULL AND word_similarity(:query, p.name_bg) > 0.35 " +
-                "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35)";
-
-        Map<String, Object> params = Map.of("query", request.getQuery());
-        Long count = namedJdbcTemplate.queryForObject(countSql, params, Long.class);
-        return count != null ? count : 0;
-    }
-
     public ProductSearchResponse searchProductsFuzzy(ProductSearchRequest request) {
         String language = "simple";
         String nameField = request.getLanguage().equals("en") ? "name_en" : "name_bg";
@@ -723,7 +719,7 @@ public class ProductSearchRepository {
                 "LEFT JOIN manufacturers m ON p.manufacturer_id = m.id " +
                 "LEFT JOIN categories c ON p.category_id = c.id " +
                 "WHERE p.active = true AND p.show_flag = true " +
-                "AND p.status = 'AVAILABLE' " +
+                "AND p.status = 'AVAILABLE' AND p.deleted = false " +
                 "AND (p.image_url IS NOT NULL AND p.image_url <> '') " +
                 "AND (p.name_bg IS NOT NULL AND word_similarity(:query, p.name_bg) > 0.35 " +
                 "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35) " +
@@ -735,7 +731,7 @@ public class ProductSearchRepository {
         String countSql = "SELECT COUNT(*) FROM products p " +
                 "LEFT JOIN manufacturers m ON p.manufacturer_id = m.id " +
                 "WHERE p.active = true AND p.show_flag = true " +
-                "AND p.status = 'AVAILABLE' " +
+                "AND p.status = 'AVAILABLE' AND p.deleted = false " +
                 "AND (p.image_url IS NOT NULL AND p.image_url <> '') " +
                 "AND (p.name_bg IS NOT NULL AND word_similarity(:query, p.name_bg) > 0.35 " +
                 "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35) " +
