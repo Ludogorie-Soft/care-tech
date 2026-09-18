@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-18T06:39:58.479Z
-> Files: 643 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-18T08:16:26.890Z
+> Files: 647 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -63,7 +63,7 @@
 - `AuthDropDown.jsx` — AuthDropDown — renders form (~3716 tok)
 - `NavBar.jsx` — NavBar (~4458 tok)
 - `NavDropDown.jsx` — Dynamic nav dropdown: root→sub→children from Redux; selfChild removed; section headers with children render as clickable Link to /category/list/ (~4100 tok)
-- `SearchBar.jsx` — SearchBar — renders form (~2279 tok)
+- `SearchBar.jsx` — SearchBar — renders form (~2518 tok)
 
 ## ../../care-tech-ui/src/components/products/
 
@@ -90,6 +90,7 @@
 - `Policy.jsx` — sections (~4978 tok)
 - `ProductPage.jsx` — EURO_RATE (~10260 tok)
 - `ReturnPolicyPage.jsx` — sections (~4896 tok)
+- `SearchPage.jsx` — SearchPage (~2180 tok)
 
 ## ../../care-tech-ui/src/pages/admin/
 
@@ -166,7 +167,7 @@
 - `offersSlice.js` — API routes: GET, PUT, POST (10 endpoints) (~2807 tok)
 - `orderSlice.js` — orderSlice.js (~3037 tok)
 - `paramSlice.js` — API routes: GET, POST, PUT, PATCH, DELETE (15 endpoints) (~5217 tok)
-- `productSlice.js` — API routes: GET, POST, PUT (11 endpoints) (~6701 tok)
+- `productSlice.js` — API routes: GET, POST, PUT (11 endpoints) (~7093 tok)
 - `reviewsSlice.js` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~1554 tok)
 - `store.js` — Exports store, persistor (~702 tok)
 
@@ -208,7 +209,7 @@
 - `parameters_202605130941.sql` (~43615 tok)
 - `pom.xml` (~1688 tok)
 - `README.md` — Project documentation (~1777 tok)
-- `SEARCH_AUDIT_PLAN.md` — План: Одит и оптимизация на търсачката (~3987 tok)
+- `SEARCH_AUDIT_PLAN.md` — План: Одит и оптимизация на търсачката (~5902 tok)
 - `sync-diagnostics.sql` — ============================================================= (~1278 tok)
 
 ## .claude/
@@ -361,7 +362,7 @@
 - `43_crossplatform_parameter_merges.sql` — ============================================================================= (~9330 tok)
 - `45_disable_logistics_filters.sql` — ============================================================================= (~837 tok)
 - `46_final_filter_cleanup.sql` — ============================================================================= (~909 tok)
-- `47_fix_most_prices_to_eur.sql` — Коригира 5545 MOST цени от лева към евро (/1.95583) + преизчислява final_price. Идемпотентен (backup колона price_client_pre_eur_fix), с транзакция и автоматичен предпазител, който прекъсва при неуспешна проверка. Не пипа show_flag. (~1500 tok)
+- `47_fix_most_prices_to_eur.sql` — ============================================================================ (~3178 tok)
 - `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
@@ -396,8 +397,8 @@
 - `OpenApiConfig.java` — Configuration: OpenApiConfig (~712 tok)
 - `RestTemplateConfig.java` — Configuration: RestTemplateConfig (~765 tok)
 - `S3Config.java` — Configuration: S3Config (~289 tok)
-- `SearchConfig.java` — Configuration: SearchConfig (~424 tok)
-- `SearchIndexManager.java` — Component: SearchIndexManager (~4470 tok)
+- `SearchConfig.java` — Seconds a single search query may run before the driver cancels it. (~610 tok)
+- `SearchIndexManager.java` — app.search.postgresql.performance-test was already in application.yml but nothing (~4263 tok)
 - `SecurityConfig.java` — Configuration: SecurityConfig (~2554 tok)
 - `ShippingConfig.java` — Изчислява цената на доставка (~354 tok)
 - `SlugRegenerationRunner.java` — Component: SlugRegenerationRunner (~401 tok)
@@ -640,7 +641,7 @@
 - `Parameter.java` — Entity: Parameter (~544 tok)
 - `ParameterOption.java` — Entity: ParameterOption (~260 tok)
 - `PersonalOffer.java` — Entity: PersonalOffer (~665 tok)
-- `Product.java` — Entity: Product (~2737 tok)
+- `Product.java` — True when an admin hid this product from the admin panel. The sync recomputes (~2836 tok)
 - `ProductFlag.java` — Entity: ProductFlag (~231 tok)
 - `ProductParameter.java` — Entity: ProductParameter (~266 tok)
 - `Review.java` — Entity: Review (~219 tok)
@@ -712,8 +713,8 @@
 - `ParameterRepository.java` — Repository: ParameterRepository. findParametersForAvailableProductsByCategory uses status = AVAILABLE (not <> NOT_AVAILABLE) (~1065 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~478 tok)
-- `ProductRepository.java` — Cross-platform deduplication by SKU. (~3499 tok)
-- `ProductSearchRepository.java` — Repository: ProductSearchRepository (~9355 tok)
+- `ProductRepository.java` — Cross-platform deduplication by SKU. (~3813 tok)
+- `ProductSearchRepository.java` — Guards against a pathological query turning into dozens of ANDed ILIKEs. (~11934 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
 - `SyncLogRepository.java` — Repository: SyncLogRepository (~214 tok)
@@ -744,8 +745,8 @@
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3484 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
-- `ProductSearchService.java` — Returns the given category ID plus all descendant IDs (recursive). (~2448 tok)
-- `ProductService.java` — Service: ProductService (~13615 tok)
+- `ProductSearchService.java` — Returns the given category ID plus all descendant IDs (recursive). (~2597 tok)
+- `ProductService.java` — Service: ProductService (~13811 tok)
 - `ReviewService.java` — Service: ReviewService (~946 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
@@ -763,14 +764,15 @@
 
 ## src/main/java/com/techstore/service/sync/
 
-- `AsbisSyncService.java` — AsbisSyncService (~14084 tok)
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~15383 tok)
-- `TekraSyncService.java` — processedSkus already collected → markNotAvailableByPlatformSkuNotIn(TEKRA) before dedup. MarkedUnavailable в sync log. (~23217 tok)
-- `ValiSyncService.java` — VERSION 4.3. Syncs only VALI categories. Tracks seenExternalIds → markUnseenAsUnavailable() marks absent products NOT_AVAILABLE+show=false. show flag set only when status=AVAILABLE. (~15774 tok)
+- `AsbisSyncService.java` — AsbisSyncService (~14164 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~15456 tok)
+- `TekraSyncService.java` — Service: TekraSyncService (~23291 tok)
+- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15844 tok)
 
 ## src/main/java/com/techstore/util/
 
 - `CriticalMarkerFilter.java` — Custom logback filter: ACCEPT only if event has marker "CRITICAL", else DENY. Used by SLACK_ASYNC appender. (~142 tok)
+- `CyrillicTransliterator.java` — Turns a Cyrillic search word into the Latin form the catalogue actually stores. (~1367 tok)
 - `ExceptionHelper.java` — Wraps database operations and converts common exceptions to business exceptions (~1811 tok)
 - `FilterUtils.java` — FilterUtils: calculatePriceRange, calculateNumericRange, createFilterOptions (~861 tok)
 - `JwtUtil.java` — Component: JwtUtil (~1188 tok)
@@ -784,7 +786,7 @@
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` (~2760 tok)
+- `application.yml` (~2828 tok)
 - `logback-spring.xml` (~249 tok)
 
 ## src/main/resources/db/
@@ -817,6 +819,7 @@
 - `V33__fix_sync_parameters_isfilter.sql` — Phase 1a: Remove junk MOST parameters created before the properties-map fix. (~521 tok)
 - `V34__increase_discount_precision.sql` — Increase discount column precision to support fractional percentages (~53 tok)
 - `V35__add_deleted_flag_to_products.sql` — Soft-delete support for products. (~80 tok)
+- `V36__add_manually_hidden_to_products.sql` — Separates "an admin deliberately hid this product" from "the sync hid it". (~571 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)
@@ -850,6 +853,10 @@
 ## src/test/java/com/techstore/service/
 
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
+
+## src/test/java/com/techstore/util/
+
+- `CyrillicTransliteratorTest.java` — Class: CyrillicTransliteratorTest (~900 tok)
 
 ## src/test/resources/
 

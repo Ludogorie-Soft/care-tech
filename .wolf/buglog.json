@@ -8052,6 +8052,54 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-18T08:03:31.797Z"
+    },
+    {
+      "id": "bug-493",
+      "timestamp": "2026-09-18T08:08:54.744Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:08:54.744Z"
+    },
+    {
+      "id": "bug-494",
+      "timestamp": "2026-09-18T08:15:49.113Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java",
+      "root_cause": "Had \" LIKE :qPrefix ESCAPE '",
+      "fix": "Changed to \"qPrefix\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:15:49.113Z"
+    },
+    {
+      "id": "bug-495",
+      "timestamp": "2026-09-18T08:16:05.588Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: // Same three patterns over the transliterated query, so the; // match that only exists in Latin. matchesEitherScript() ad",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-18T08:16:26.912Z"
     }
   ]
 }

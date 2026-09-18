@@ -3445,3 +3445,12 @@
 | 11:12 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 2→6 lines | ~131 |
 | 11:13 | Edited SEARCH_AUDIT_PLAN.md | expanded (+25 lines) | ~439 |
 | 11:13 | ФАЗА 3.8 ИЗПЪЛНЕНА: CyrillicTransliterator (правила + таблица с фонетични изключения), включен като втори израз за всяка кирилска дума; SEARCH_BLOB минат на lower()+LIKE за компенсация на цената | CyrillicTransliterator.java, CyrillicTransliteratorTest.java, ProductSearchRepository.java | 28 теста минават; на прод: асус 0->247, гейминг 16->744, логитек 0->196, леново 0->95 | ~28k |
+| 11:14 | Session end: 74 writes across 24 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~117865 tok |
+| 11:15 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | expanded (+10 lines) | ~208 |
+| 11:15 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 3→3 lines | ~96 |
+| 11:15 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 4→5 lines | ~138 |
+| 11:16 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | added 4 condition(s) | ~388 |
+| 11:16 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 5→3 lines | ~48 |
+| 11:16 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | added 1 condition(s) | ~254 |
+| 11:17 | Хванат пропуск в 3.8: транслитерацията влизаше само в WHERE, но не и в скоринга -> 728 от 744 резултата за "гейминг" бяха с ранг 0 и се подреждаха по цена. Поправено с matchesEitherScript() + toLatinQuery() | ProductSearchRepository.java | комит 64433df; разпределението на ранга вече е 4.50/4.00/3.00/1.00, само 1 ред с 0 | ~11k |
+| 11:18 | Session end: 80 writes across 24 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~119819 tok |
