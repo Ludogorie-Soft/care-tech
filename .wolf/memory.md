@@ -3483,3 +3483,6 @@
 | 12:09 | Session end: 93 writes across 26 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 17 reads | ~161516 tok |
 | 12:14 | Created CATEGORY_CLEANUP_PLAN.md | — | ~2428 |
 | 12:14 | ДЪЛБОК ОДИТ на категоризацията -> CATEGORY_CLEANUP_PLAN.md: 4 отделни проблема с количествени доказателства (MOST 222->29 кошници, ASBIS паралелно дърво 663/2 видими, 17 разцепени, 726 видими продукта в невидими категории) + план в 6 стъпки + 4 отворени въпроса | CATEGORY_CLEANUP_PLAN.md, anatomy.md | одитът е завършен, нищо не е имплементирано, чака решения | ~35k |
+| 12:15 | Session end: 94 writes across 27 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 17 reads | ~164117 tok |
+| 12:18 | Edited CATEGORY_CLEANUP_PLAN.md | expanded (+34 lines) | ~396 |
+| 12:19 | КОРЕКЦИЯ на одита: "17 разцепени категории" беше грешна метрика — мерех по име, а еднакво име с различен родител НЕ е дубликат (Монитори под "Монитори и дисплеи" vs под Видеонаблюдение; IP камери под IP системи vs под NDAA/NIS2). Истински дубликати: 33 групи, 102 категории, 0 разцепени. Проблем C отпада | CATEGORY_CLEANUP_PLAN.md | планът преработен на 5 стъпки; щях да слея CCTV монитори с компютърни | ~14k |
