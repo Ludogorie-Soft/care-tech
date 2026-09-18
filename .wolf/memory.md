@@ -3479,3 +3479,7 @@
 | 11:45 | Втора ос за Фаза 5 по указание на потребителя — измерено собственото ни дърво: 941 категории, 591 празни, 245 дублирани имена (652 засегнати категории), 17 разцепени с реални продукти | SEARCH_AUDIT_PLAN.md, buglog, cerebrum | записано; ЧАКА РАЗРЕШЕНИЕ за старт на Фаза 5 | ~12k |
 | 11:46 | Edited SEARCH_AUDIT_PLAN.md | expanded (+31 lines) | ~459 |
 | 11:46 | Записани ограниченията за Фаза 5: ръчна подредба (sort_order, 219/221 видими) и три нива йерархия не бива да се чупят; добавена проверка след всеки скрипт | SEARCH_AUDIT_PLAN.md, buglog, cerebrum | ЧАКА РАЗРЕШЕНИЕ за старт на Фаза 5 | ~10k |
+| 11:47 | Session end: 93 writes across 26 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 17 reads | ~161516 tok |
+| 12:09 | Session end: 93 writes across 26 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 17 reads | ~161516 tok |
+| 12:14 | Created CATEGORY_CLEANUP_PLAN.md | — | ~2428 |
+| 12:14 | ДЪЛБОК ОДИТ на категоризацията -> CATEGORY_CLEANUP_PLAN.md: 4 отделни проблема с количествени доказателства (MOST 222->29 кошници, ASBIS паралелно дърво 663/2 видими, 17 разцепени, 726 видими продукта в невидими категории) + план в 6 стъпки + 4 отворени въпроса | CATEGORY_CLEANUP_PLAN.md, anatomy.md | одитът е завършен, нищо не е имплементирано, чака решения | ~35k |

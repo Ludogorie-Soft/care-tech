@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-18T08:16:26.890Z
-> Files: 647 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-18T09:14:14.997Z
+> Files: 648 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -188,6 +188,7 @@
 - `BLOG_PLAN.md` — План: Блог функционалност (~1556 tok)
 - `blog-article-template.html` (~5142 tok)
 - `categories_202605130941.sql` (~14427 tok)
+- `CATEGORY_CLEANUP_PLAN.md` — Одит и план: категоризация на продуктите (Фаза 5) (~2276 tok)
 - `CATEGORY_MAPPING_PLAN.md` — План: CareTech Категорийна Йерархия + Distributor Mapping (~7659 tok)
 - `CLAUDE.md` — OpenWolf (~57 tok)
 - `COMPARE_PLAN.md` — План: Функционалност за Сравнение на Продукти (~1975 tok)
@@ -209,7 +210,7 @@
 - `parameters_202605130941.sql` (~43615 tok)
 - `pom.xml` (~1688 tok)
 - `README.md` — Project documentation (~1777 tok)
-- `SEARCH_AUDIT_PLAN.md` — План: Одит и оптимизация на търсачката (~5902 tok)
+- `SEARCH_AUDIT_PLAN.md` — План: Одит и оптимизация на търсачката (~8326 tok)
 - `sync-diagnostics.sql` — ============================================================= (~1278 tok)
 
 ## .claude/
@@ -713,7 +714,7 @@
 - `ParameterRepository.java` — Repository: ParameterRepository. findParametersForAvailableProductsByCategory uses status = AVAILABLE (not <> NOT_AVAILABLE) (~1065 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~478 tok)
-- `ProductRepository.java` — Cross-platform deduplication by SKU. (~3813 tok)
+- `ProductRepository.java` — The category a product already sits in. Returns the id rather than the entity so the (~3960 tok)
 - `ProductSearchRepository.java` — Guards against a pathological query turning into dozens of ANDed ILIKEs. (~11934 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
@@ -751,7 +752,7 @@
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
-- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8519 tok)
+- `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8765 tok)
 - `TbiLeasingService.java` — TBI Fusion Pay integration: registerApplication (AES encrypt → TBI API), processStatusWebhook, getStatistics, admin queries (~350 tok)
 - `TekraApiService.java` — Fetches Tekra categories (JSON) and products (XML); retryDelayMs=60_000 (3 attempts, exponential backoff); productsCache HashMap; getProductsRaw/getAllProductsForCategory (~4707 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
@@ -765,8 +766,8 @@
 ## src/main/java/com/techstore/service/sync/
 
 - `AsbisSyncService.java` — AsbisSyncService (~14164 tok)
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~15456 tok)
-- `TekraSyncService.java` — Service: TekraSyncService (~23291 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~15696 tok)
+- `TekraSyncService.java` — Service: TekraSyncService (~23855 tok)
 - `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15844 tok)
 
 ## src/main/java/com/techstore/util/
@@ -860,5 +861,5 @@
 
 ## src/test/resources/
 
-- `application-test.properties` — ── Datasource — H2 in-memory (replaces PostgreSQL for context-load tests) ── (~580 tok)
+- `application-test.properties` — ── Datasource — H2 in-memory (replaces PostgreSQL for context-load tests) ── (~907 tok)
 - `application.properties` — Overrides for ALL tests — resolves placeholders that have no default in application.yml (~40 tok)
