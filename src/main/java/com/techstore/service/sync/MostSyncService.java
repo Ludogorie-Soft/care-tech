@@ -991,18 +991,18 @@ public class MostSyncService {
         if (isWarranty) {
             product.setShow(false);
             product.setStatus(ProductStatus.NOT_AVAILABLE);
-        } else if (!hasImage) {
-            // Products without an image are never shown
+        } else if (Boolean.TRUE.equals(product.getManuallyHidden())) {
+            // An admin hid this on purpose — that decision outlives the sync.
             product.setShow(false);
-        } else if (isNew) {
-            // New products: auto-show only if in stock and has valid price
-            product.setShow(inStock && hasValidPrice);
         } else {
-            // Existing products: sync can only HIDE (out of stock / no price).
-            // Never force-show a product that was manually hidden (e.g. no image).
-            if (!inStock || !hasValidPrice) {
-                product.setShow(false);
-            }
+            // Visibility is recomputed from scratch on every run, for new and existing
+            // products alike. This used to be a one-way ratchet for existing products:
+            // the sync could hide but never re-show, so a product that went out of stock
+            // stayed invisible forever once it came back. That left 273 in-stock, priced
+            // products with images permanently missing from the site (bug-460).
+            // Manual hiding is now carried by manuallyHidden above, so show_flag is free
+            // to follow stock and price.
+            product.setShow(inStock && hasValidPrice && hasImage);
         }
 
         product = productRepository.save(product);

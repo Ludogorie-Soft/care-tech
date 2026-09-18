@@ -855,6 +855,23 @@ public class ProductService {
         updateProductFieldsFromRest(p, dto);
         return p;
     }
+
+    /**
+     * Applies an admin's visibility choice, recording it as manual intent.
+     * <p>
+     * show_flag alone cannot express this: the sync recomputes it on every run from
+     * stock and price, so a manual decision would be overwritten the same night.
+     * Hiding from the admin panel therefore also sets {@code manuallyHidden}, which
+     * the sync and the cross-platform dedup both honour; showing again clears it.
+     * A null value leaves both flags untouched rather than nulling show_flag.
+     */
+    private void applyAdminVisibility(Product p, Boolean show) {
+        if (show == null) {
+            return;
+        }
+        p.setShow(show);
+        p.setManuallyHidden(!show);
+    }
     private void updateProductFieldsFromRest(Product p, ProductCreateRequestDTO dto) {
         p.setReferenceNumber(dto.getReferenceNumber());
         p.setNameEn(dto.getNameEn());
@@ -871,7 +888,7 @@ public class ProductService {
         p.setPricePromo(dto.getPricePromo());
         p.setPriceClientPromo(dto.getPriceClientPromo());
         p.setMarkupPercentage(dto.getMarkupPercentage());
-        p.setShow(dto.getShow());
+        applyAdminVisibility(p, dto.getShow());
         p.setWarranty(dto.getWarranty());
         p.setWeight(dto.getWeight());
         p.setActive(dto.getActive());
@@ -945,7 +962,7 @@ public class ProductService {
         p.setPricePromo(dto.getPricePromo());
         p.setPriceClientPromo(dto.getPriceClientPromo());
         p.setMarkupPercentage(dto.getMarkupPercentage());
-        p.setShow(dto.getShow());
+        applyAdminVisibility(p, dto.getShow());
         p.setWarranty(dto.getWarranty());
         p.setWeight(dto.getWeight());
         p.setActive(dto.getActive());

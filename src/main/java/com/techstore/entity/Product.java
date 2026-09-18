@@ -99,6 +99,14 @@ public class Product extends BaseEntity {
     @Column(name = "show_flag")
     private Boolean show = true;
 
+    /**
+     * True when an admin hid this product from the admin panel. The sync recomputes
+     * {@link #show} on every run but never re-shows a product with this flag set, so
+     * manual intent survives a sync. Sync-driven hiding uses {@link #show} only.
+     */
+    @Column(name = "manually_hidden", nullable = false)
+    private Boolean manuallyHidden = false;
+
     private Integer warranty;
 
     @Column(precision = 10, scale = 6)

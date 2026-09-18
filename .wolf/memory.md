@@ -3367,3 +3367,28 @@
 | 09:39 | Edited SEARCH_AUDIT_PLAN.md | expanded (+6 lines) | ~397 |
 | 09:39 | ФАЗИ 0.2+0.3: USD клонът -> конфигурируем most.exchange.usd-to-eur с fail-safe при неконфигуриран курс; премахнати мъртвите константи и мъртвата most.exchange конфигурация; потребителят потвърди че EUR/BGN е твърдо 1.95583 | MostSyncService.java, application.yml, SEARCH_AUDIT_PLAN.md, cerebrum.md | компилира чисто, YAML валиден | ~14k |
 | 09:39 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/euro_rate_convention.md | — | ~354 |
+| 09:41 | Session end: 15 writes across 8 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 9 reads | ~45882 tok |
+| 09:44 | Created scripts/47_fix_most_prices_to_eur.sql | — | ~2969 |
+| 09:45 | Скрипт 47 преработен на чист SQL — psql meta-командите (\set, \echo, \timing) чупеха изпълнението в GUI клиент (SQL Error 42601 на позиция 1966); отчетите валидирани read-only срещу прод | scripts/47_fix_most_prices_to_eur.sql | комит 5fa0c60, готов за пускане | ~9k |
+| 09:46 | Session end: 16 writes across 8 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 9 reads | ~49063 tok |
+| 09:54 | Session end: 16 writes across 8 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 9 reads | ~49063 tok |
+| 09:57 | Created scripts/47_fix_most_prices_to_eur.sql | — | ~3178 |
+| 09:58 | Скрипт 47 поправен двойно: (1) предпазителят ползваше отношение вместо абсолютен остатък -> 272 фалшиви положителни при цени под 19 EUR; (2) ALTER TABLE в manual-commit клиент свали сайта за 6 мин -> вече е в свой BEGIN/COMMIT + lock_timeout + idle_in_transaction_timeout | scripts/47_*.sql | комит c278ba1; всичките 5 проверки симулирани read-only: 0 нарушения | ~16k |
+| 09:59 | Session end: 17 writes across 8 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 10 reads | ~52468 tok |
+| 10:01 | Edited SEARCH_AUDIT_PLAN.md | expanded (+13 lines) | ~254 |
+| 10:01 | ФАЗА 0 ЗАВЪРШЕНА: скрипт 47 изпълнен успешно на прод — 5430 реда, медиана MOST/други 1.846 -> 0.944, готови за показване 272 -> 384; открито че 112 видими продукта са по-скъпи от скрит MOST близнак (разлика 1465.68 EUR) | прод база, SEARCH_AUDIT_PLAN.md, buglog | верифицирано от отделна сесия, локове чисти | ~11k |
+| 10:02 | Session end: 18 writes across 8 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 10 reads | ~52740 tok |
+| 10:07 | Created src/main/resources/db/migration/V36__add_manually_hidden_to_products.sql | — | ~571 |
+| 10:07 | Edited src/main/java/com/techstore/entity/Product.java | expanded (+8 lines) | ~116 |
+| 10:07 | Edited src/main/java/com/techstore/service/ProductService.java | setShow() → applyAdminVisibility() | ~40 |
+| 10:08 | Edited src/main/java/com/techstore/service/ProductService.java | added 1 condition(s) | ~239 |
+| 10:08 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | modified if() | ~259 |
+| 10:08 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | 3→8 lines | ~139 |
+| 10:08 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | 2→4 lines | ~72 |
+| 10:08 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | 5→6 lines | ~136 |
+| 10:09 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | 2→3 lines | ~83 |
+| 10:09 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | 2→3 lines | ~86 |
+| 10:09 | Edited src/main/java/com/techstore/repository/ProductRepository.java | expanded (+11 lines) | ~409 |
+| 10:09 | Edited src/main/java/com/techstore/repository/ProductRepository.java | expanded (+13 lines) | ~304 |
+| 10:11 | Edited SEARCH_AUDIT_PLAN.md | expanded (+17 lines) | ~612 |
+| 10:12 | ФАЗА 1 ИЗПЪЛНЕНА: V36 миграция manually_hidden, Product entity, ProductService.applyAdminVisibility, MOST ратчетът премахнат, VALI/ASBIS/TEKRA уважават флага, dedup преработен да избира от годните редове и да присвоява в двете посоки | V36, Product.java, ProductService.java, MostSyncService.java, ValiSyncService.java, AsbisSyncService.java, TekraSyncService.java, ProductRepository.java | компилира чисто; симулирано на прод: +273 видими, 112/112 dedup размяна, EXPLAIN валидиран | ~26k |

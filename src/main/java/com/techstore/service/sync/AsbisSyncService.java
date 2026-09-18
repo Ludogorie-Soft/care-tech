@@ -899,9 +899,12 @@ public class AsbisSyncService {
                     int stock = (stockObj instanceof Integer) ? (Integer) stockObj : 0;
                     boolean inStock = stock > 0;
                     boolean hasPrice = price != null && price.compareTo(BigDecimal.ZERO) > 0;
-                    boolean visible = inStock && hasPrice;
-                    product.setShow(visible);
-                    product.setStatus(visible ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
+                    boolean available = inStock && hasPrice;
+                    // Status reflects stock only. Visibility additionally honours an
+                    // admin's manual hide, which outlives the sync (phase 1) — hiding a
+                    // product must not make it look out of stock.
+                    product.setStatus(available ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
+                    product.setShow(available && !Boolean.TRUE.equals(product.getManuallyHidden()));
 
                     product.calculateFinalPrice();
                     productRepository.save(product);

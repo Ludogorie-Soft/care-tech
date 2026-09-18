@@ -1020,7 +1020,12 @@ public class ValiSyncService {
         product.calculateFinalPrice();
 
         boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
-        product.setShow(Boolean.TRUE.equals(extProduct.getShow()) && hasValidPrice && resolvedStatus == ProductStatus.AVAILABLE);
+        // manuallyHidden wins over the feed: an admin who hid a product should not see
+        // it reappear on the next sync (SEARCH_AUDIT_PLAN.md phase 1).
+        product.setShow(!Boolean.TRUE.equals(product.getManuallyHidden())
+                && Boolean.TRUE.equals(extProduct.getShow())
+                && hasValidPrice
+                && resolvedStatus == ProductStatus.AVAILABLE);
     }
 
     private void setParametersToProduct(Product product, ProductRequestDto extProduct,

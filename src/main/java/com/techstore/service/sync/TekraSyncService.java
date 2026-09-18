@@ -1132,7 +1132,8 @@ public class TekraSyncService {
         product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
         product.calculateFinalPrice();
         boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
-        product.setShow(inStock && hasValidPrice);
+        // An admin's manual hide outlives the sync (SEARCH_AUDIT_PLAN.md phase 1).
+        product.setShow(inStock && hasValidPrice && !Boolean.TRUE.equals(product.getManuallyHidden()));
 
         product = productRepository.save(product);
 
@@ -1406,7 +1407,8 @@ public class TekraSyncService {
             product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
             product.calculateFinalPrice();
             boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
-            product.setShow(inStock && hasValidPrice);
+            // An admin's manual hide outlives the sync (SEARCH_AUDIT_PLAN.md phase 1).
+            product.setShow(inStock && hasValidPrice && !Boolean.TRUE.equals(product.getManuallyHidden()));
 
             return true;
 

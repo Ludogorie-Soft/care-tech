@@ -7474,15 +7474,16 @@
       "error_message": "Търсачката не намира продукт, който съществува в базата (потвърдено: 273 продукта са AVAILABLE + active + с цена + с картинка, но show_flag=false и няма видим дубликат — включително LENOVO LEGION PRO 7 8147лв, RTX5080 карти)",
       "file": "src/main/java/com/techstore/service/sync/MostSyncService.java:966-972",
       "root_cause": "One-way ratchet в MOST sync: за съществуващи продукти sync-ът може само да СКРИЕ (if !inStock || !hasValidPrice -> setShow(false)), но никога не връща show=true когато наличността се възстанови. Продукт излиза от склад -> show=false; връща се в склад -> status=AVAILABLE, но show_flag остава false завинаги. Същият ратчет има и в deduplicateCrossPlatformBySku() (ProductRepository:225-253): dup_skus гледа само show_flag=true, така че скрит губещ никога не се реактивира ако победителят изчезне.",
-      "fix": "ПРЕДЛОЖЕН (чака одобрение): в MostSyncService да се re-show продукт когато inStock && hasValidPrice && hasImage && не е warranty; ръчното скриване да се пази с отделен флаг (напр. manually_hidden), а не чрез show_flag. Dedup да преизчислява от status='AVAILABLE' вместо от show_flag=true.",
+      "fix": "ПОПРАВЕН В КОДА 2026-09-18 (фаза 1 от SEARCH_AUDIT_PLAN.md). Коренът беше, че show_flag носеше две значения наведнъж: присъдата на sync-а за наличност/цена И ръчното решение на админ. За да не пре-показва ръчно скрити продукти, MOST sync-ът се отказа да пре-показва каквото и да е. Решение: (1) нова колона manually_hidden (V36) пази ръчното намерение отделно — без backfill, защото всичките 273 засегнати имаха last_modified_by='system', тоест нито един не беше скрит от админ; (2) Product.manuallyHidden + ProductService.applyAdminVisibility() записва намерението при админ скриване/показване; (3) MostSyncService преизчислява show_flag всеки път от inStock && hasValidPrice && hasImage, ратчетът е премахнат; (4) VALI/ASBIS/TEKRA уважават флага (в ASBIS статусът беше разделен от видимостта, за да не изглежда ръчно скрит продукт като неналичен); (5) deduplicateCrossBySku() избира от ГОДНИТЕ редове (active+AVAILABLE+цена+картинка+не е ръчно скрит) вместо от show_flag=true и присвоява show_flag в ДВЕТЕ посоки, така че вече не е ратчет. ИЗМЕРЕН ОБХВАТ (симулирано read-only на прод): 273 продукта стават видими, 112 dedup победители излизат, 112 губещи се скриват, видим каталог 7276 -> 7549. UPDATE-ът валидиран с EXPLAIN. АКТИВИРАНЕ: POST /api/sync/most/products след деплой, иначе при нощния прогон в 03:00.",
       "tags": [
-        "search",
-        "sync",
-        "most",
-        "show_flag",
-        "ratchet",
         "dedup",
-        "invisible-products"
+        "fixed",
+        "invisible-products",
+        "most",
+        "ratchet",
+        "search",
+        "show_flag",
+        "sync"
       ],
       "related_bugs": [],
       "occurrences": 1,
@@ -7588,19 +7589,20 @@
       "error_message": "MOST продуктите са с ~1.96x надути цени и системно губят cross-platform dedup-а, което ги прави невидими (потвърдено: медиана на отношението MOST/друга платформа за същия SKU = 1.846, p75 = 1.975, мода 1.75-2.00 при 336 от 797 двойки)",
       "file": "src/main/java/com/techstore/service/sync/MostSyncService.java:931-933",
       "root_cause": "MostSyncService конвертира цената КЪМ ЛЕВА: if USD -> *1.80, else if EUR -> *1.95583 (EUR_TO_BGN_RATE), после setPriceClient(price). Останалите три sync сервиза (ValiSyncService:1016, AsbisSyncService:893, TekraSyncService:1125) пазят цената от доставчика без конверсия, а Product.calculateFinalPrice() само добавя надценка/отстъпка. Конвенцията на системата е final_price = ЕВРО без ДДС — фронтендът прави finalEuro = finalPrice * 1.2 и после * euroRate за лева. Значи MOST цените се пазят 1.95583x завишени и се показват 1.95583x завишени и в двете колони (€ и лв.). Каскадата: надутата цена -> deduplicateCrossPlatformBySku() (cheapest wins) винаги отсъжда срещу MOST -> show_flag=false -> MostSyncService:966 ратчетът никога не го връща -> когато по-евтините платформи излязат от наличност и те се скриват, целият SKU изчезва от сайта. Пример: SKU 100-000001404 (AMD Ryzen 7 9700X) — VALI 213.35 LIMITED_QUANTITY, ASBIS 243.58 NOT_AVAILABLE, MOST 509.94 AVAILABLE и трите скрити. ДОКАЗАНО с живи данни (2026-09-18): MOST feed-ът (https://portal.mostbg.com/api/product/xml/all?currency=EUR) връща <currency>EUR</currency> за ВСИЧКИТЕ 6089 продукта; 24 от 24 сверени SKU показват точно съотношение price_client/feed_price = 1.95583 (напр. C1806A_: feed 78.43 EUR -> база 153.40). ASBIS PriceAvail.xml подава <CURRENCY_CODE>EUR</CURRENCY_CODE> за всичките 6058 записа. VALI съвпада с ASBIS (медиана 1.010 на 867 двойки). TEKRA съвпада с ASBIS до стотинка (25 двойки, медиана 1.000) и feed price=10 -> база 10.00. Значи ЕВРО е конвенцията и MOST е единствената сгрешена платформа. Ефект върху показваните цени: и двете колони (€ и лв.) са точно 1.95583x завишени.",
-      "fix": "ПОПРАВЕН В КОДА 2026-09-18 (фази 0.1-0.3 от SEARCH_AUDIT_PLAN.md): MostSyncService.java — клонът 'EUR' вече е no-op; USD клонът ползва конфигурируем most.exchange.usd-to-eur с fail-safe (при неконфигуриран курс цената се прескача с log.error, вместо USD да се запише като EUR); премахнати мъртвите константи USD_TO_BGN_RATE/EUR_TO_BGN_RATE и мъртвата конфигурация most.exchange.usd-to-bgn/eur-to-bgn (никога не се е четела от кода). Компилира чисто, YAML валидиран. ОСТАВА (данни): scripts/47_fix_most_prices_to_eur.sql за вече записаните 5545 реда, после фаза 1 за възстановяване на видимостта на 273 продукта.",
+      "fix": "ПОПРАВЕН НАПЪЛНО 2026-09-18. Код (комит dacf3c9, фази 0.1-0.3): MostSyncService — клонът 'EUR' е no-op; USD клонът ползва конфигурируем most.exchange.usd-to-eur с fail-safe; премахнати мъртвите константи и мъртвата most.exchange конфигурация. Данни (фаза 0.4): scripts/47_fix_most_prices_to_eur.sql изпълнен на прод — 5430 реда коригирани, макс. отклонение от закръгляне 0.005. ИЗМЕРЕН РЕЗУЛТАТ: медианата MOST/други платформи за общ SKU падна от 1.846 на 0.944 (797 двойки); C1806A_ от 153.40 на 78.43, което съвпада точно с feed-а; скритите MOST AVAILABLE продукти, които вече са най-евтини, се качиха от 272 на 384. ОСТАВА: фаза 1 (ратчетите) за реално връщане на видимостта — dedup-ът гледа само show_flag=true и не може да върне скритите сам.",
       "tags": [
         "confirmed",
         "currency",
         "dedup",
+        "fixed",
         "invisible-products",
         "live-data",
         "most",
-        "partially-fixed",
         "pricing",
         "search",
         "show_flag",
-        "sync"
+        "sync",
+        "verified"
       ],
       "related_bugs": [
         "bug-460"
@@ -7724,6 +7726,135 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-18T06:39:10.066Z"
+    },
+    {
+      "id": "bug-474",
+      "timestamp": "2026-09-18T09:52:00.000Z",
+      "error_message": "SQL Error [42601]: ERROR: syntax error at or near \"\\\"  Position: 1966 — при пускане на scripts/47_fix_most_prices_to_eur.sql",
+      "file": "scripts/47_fix_most_prices_to_eur.sql",
+      "root_cause": "Скриптът беше написан с psql meta-команди (\\set ON_ERROR_STOP, \\echo, \\timing), които се интерпретират САМО от psql CLI клиента. Потребителят го пусна през GUI клиент (DBeaver/DataGrip), който изпраща съдържанието директно към сървъра — PostgreSQL не разбира обратната наклонена черта и гърми на първата от тях (позиция 1966).",
+      "fix": "Преработен на чист SQL: \\echo -> RAISE NOTICE в DO блок, отчетите -> нормални SELECT result set-ове, \\set/\\timing премахнати. DO блокът с проверките е запазен — в PostgreSQL грешка в явна транзакция я прави aborted и следващият COMMIT действа като ROLLBACK, така че безопасността не зависи от ON_ERROR_STOP. Добавена инструкция да се изпълнява като СКРИПТ (DBeaver Alt+X), не като единична заявка.",
+      "tags": [
+        "sql",
+        "script",
+        "psql",
+        "meta-commands",
+        "dbeaver",
+        "portability"
+      ],
+      "related_bugs": [
+        "bug-466"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T09:52:00.000Z"
+    },
+    {
+      "id": "bug-475",
+      "timestamp": "2026-09-18T10:05:00.000Z",
+      "error_message": "SQL Error [P0001]: ERROR: ПРЕКЪСНАТО: 272 реда с отношение старо/ново различно от 1.956",
+      "file": "scripts/47_fix_most_prices_to_eur.sql",
+      "root_cause": "Предпазителят в скрипта сравняваше ОТНОШЕНИЕТО round(staro/novo,3) с 1.956. Но novo = round(staro/1.95583, 2) е закръглено до 2 знака, и при малки цени това закръгляне доминира отношението: 0.02 -> 0.01 дава отношение точно 2.00, 0.39 -> 0.20 дава 1.95. Всичките 272 провалили реда бяха с цена под 19 EUR (най-голямата 14.83). Конверсията беше ПРАВИЛНА — проверката беше математически грешна. Максималният реален абсолютен остатък |staro - novo*1.95583| за всичките 5430 реда е 0.005, тоест под половин стотинка.",
+      "fix": "Проверката смени базата си: вместо отношение сравнява АБСОЛЮТНИЯ остатък abs(price_client_pre_eur_fix - price_client*1.95583) > 0.01. Толерансът 0.01 = 0.005*1.95583 закръглено нагоре и е точната математическа граница за закръгляне до 2 знака. Симулирано read-only срещу прод: 0 нарушения при всичките 5 проверки, макс. отклонение 0.005, медиана след корекция 0.944.",
+      "tags": [
+        "sql",
+        "script",
+        "rounding",
+        "numeric-precision",
+        "false-positive",
+        "guard"
+      ],
+      "related_bugs": [
+        "bug-466"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T10:05:00.000Z"
+    },
+    {
+      "id": "bug-476",
+      "timestamp": "2026-09-18T09:58:00.000Z",
+      "error_message": "Сайтът блокира за 6 минути — 22 заявки на приложението чакаха на Lock: relation върху products, скриптът не върна изход",
+      "file": "scripts/47_fix_most_prices_to_eur.sql",
+      "root_cause": "ALTER TABLE products ADD COLUMN взима ACCESS EXCLUSIVE lock — най-силният, блокира дори четене. Скриптът беше пуснат от GUI клиент в manual-commit режим, който остави транзакцията отворена (pg_stat_activity: 'idle in transaction', wait_event ClientRead, 6 минути). pg_blocking_pids показа един блокиращ PID 1465782 и 22 блокирани Hibernate заявки. При пул от 20 връзки това изчерпа connection pool-а и сайтът спря да отговаря. Утежняващо: чакащ ACCESS EXCLUSIVE в lock опашката блокира и всички ПОСЛЕДВАЩИ четения зад себе си, дори да са съвместими помежду си.",
+      "fix": "Три промени в скрипта: (1) ALTER TABLE е в собствен явен BEGIN/COMMIT, за да се освободи локът независимо от auto-commit настройката на клиента; (2) SET lock_timeout = '10s' — ALTER-ът се отказва бързо вместо да застане на опашка пред четящите; (3) SET idle_in_transaction_session_timeout = '60s' — сървърът сам прекъсва забравена отворена транзакция. Разрешено чрез ROLLBACK от потребителя; базата остана чиста (колоната не беше създадена).",
+      "tags": [
+        "postgres",
+        "locks",
+        "access-exclusive",
+        "outage",
+        "alter-table",
+        "manual-commit",
+        "dbeaver",
+        "connection-pool"
+      ],
+      "related_bugs": [
+        "bug-466"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T09:58:00.000Z"
+    },
+    {
+      "id": "bug-477",
+      "timestamp": "2026-09-18T07:08:19.022Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "8 lines replaced/restructured",
+      "fix": "Rewrote 16→16 lines (8 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T07:08:19.022Z"
+    },
+    {
+      "id": "bug-478",
+      "timestamp": "2026-09-18T07:08:55.681Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 5→6 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T07:08:55.681Z"
+    },
+    {
+      "id": "bug-479",
+      "timestamp": "2026-09-18T07:09:35.828Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/repository/ProductRepository.java",
+      "root_cause": "13 lines replaced/restructured",
+      "fix": "Rewrote 34→45 lines (13 removed) | Also: * For each SKU visible on 2+ platforms simultaneou; * Winner = lowest final_price, tiebreaker = platfo",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-18T07:09:46.996Z"
+    },
+    {
+      "id": "bug-480",
+      "timestamp": "2026-09-18T07:11:50.779Z",
+      "error_message": "Significant refactor of ",
+      "file": "SEARCH_AUDIT_PLAN.md",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 10→27 lines (7 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T07:11:50.779Z"
     }
   ]
 }

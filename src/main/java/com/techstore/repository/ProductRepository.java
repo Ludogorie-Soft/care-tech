@@ -213,42 +213,66 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     /**
      * Cross-platform deduplication by SKU.
-     * For each SKU visible on 2+ platforms simultaneously, hides all but the winner.
-     * Winner = lowest final_price, tiebreaker = platform priority (VALI > TEKRA > ASBIS > MOST), then lowest id.
-     * Called at the end of every sync to ensure price changes are reflected correctly.
+     * <p>
+     * For each SKU carried by 2+ platforms, shows the winner and hides the rest.
+     * Winner = lowest final_price, tiebreaker = platform priority (VALI > TEKRA > ASBIS > MOST),
+     * then lowest id. Called at the end of every sync so price changes are reflected.
+     * <p>
+     * The candidate set is every <em>sellable</em> row — active, AVAILABLE, priced, with an
+     * image and not hidden by an admin — rather than every row that happens to be visible.
+     * That distinction matters: keying off {@code show_flag = true} made this a one-way
+     * ratchet. A row it had hidden was invisible to the next run, so it could never win
+     * again even after becoming the cheapest, and once the winner went out of stock and was
+     * hidden on its own merits, the whole SKU disappeared from the site. 91 SKUs were in
+     * exactly that state (bug-460).
+     * <p>
+     * For the same reason this now assigns {@code show_flag} in both directions instead of
+     * only hiding, and skips rows already in the right state so the returned count reflects
+     * real changes.
      */
     @Modifying
     @Query(value = """
-        WITH dup_skus AS (
+        WITH eligible AS (
+            SELECT p.id, p.sku, p.platform, p.final_price, p.show_flag
+            FROM products p
+            WHERE p.sku IS NOT NULL
+              AND p.active = true
+              AND p.status = 'AVAILABLE'
+              AND p.final_price > 0
+              AND p.image_url IS NOT NULL AND p.image_url <> ''
+              AND p.manually_hidden = false
+        ),
+        dup_skus AS (
             SELECT sku
-            FROM products
-            WHERE sku IS NOT NULL AND show_flag = true
+            FROM eligible
             GROUP BY sku
             HAVING COUNT(DISTINCT platform) > 1
         ),
         ranked AS (
             SELECT
-                p.id,
+                e.id,
+                e.show_flag,
                 ROW_NUMBER() OVER (
-                    PARTITION BY p.sku
+                    PARTITION BY e.sku
                     ORDER BY
-                        p.final_price ASC NULLS LAST,
-                        CASE p.platform
+                        e.final_price ASC NULLS LAST,
+                        CASE e.platform
                             WHEN 'VALI'  THEN 1
                             WHEN 'TEKRA' THEN 2
                             WHEN 'ASBIS' THEN 3
                             WHEN 'MOST'  THEN 4
                             ELSE 5
                         END,
-                        p.id ASC
+                        e.id ASC
                 ) AS rn
-            FROM products p
-            INNER JOIN dup_skus d ON p.sku = d.sku
-            WHERE p.show_flag = true
+            FROM eligible e
+            INNER JOIN dup_skus d ON d.sku = e.sku
         )
-        UPDATE products
-        SET show_flag = false, updated_at = NOW()
-        WHERE id IN (SELECT id FROM ranked WHERE rn > 1)
+        UPDATE products p
+        SET show_flag = (r.rn = 1), updated_at = NOW()
+        FROM ranked r
+        WHERE p.id = r.id
+          AND p.show_flag IS DISTINCT FROM (r.rn = 1)
         """, nativeQuery = true)
     int deduplicateCrossPlatformBySku();
 }
