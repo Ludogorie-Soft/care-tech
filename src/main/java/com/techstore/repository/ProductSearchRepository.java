@@ -179,6 +179,12 @@ public class ProductSearchRepository {
             default:
                 sql.append("search_rank DESC, p.final_price ASC");
         }
+        // Every sort key above has duplicates — 1108 price values are shared by two or
+        // more of the 7276 visible products, the largest group being 56. PostgreSQL does
+        // not promise a stable order for ties, so with LIMIT/OFFSET a product could show
+        // up twice across pages while another never appeared at all. The id breaks every
+        // tie and makes paging deterministic.
+        sql.append(", p.id ASC");
 
         sql.append(" LIMIT :limit OFFSET :offset");
         params.put("limit", request.getSize());
@@ -217,7 +223,14 @@ public class ProductSearchRepository {
                     .totalElements(totalElements)
                     .totalPages(totalPages)
                     .currentPage(request.getPage())
-                    .facets(buildFacets(request, params, whereClause.toString()))
+                    // Facets are deliberately not computed here. Building them joined
+                    // products against product_parameters, parameters and parameter_options
+                    // and grouped over every match rather than the current page — measured
+                    // at 677ms on production, more than the rest of the search put together.
+                    // Nothing consumed the result: the value reached Redux and no component
+                    // ever read it, because the category page gets its facets from
+                    // /categories/{id}/filter-facets, which does proper disjunctive faceting.
+                    .facets(Collections.emptyMap())
                     .searchTime(0L)
                     .build();
 
@@ -295,67 +308,6 @@ public class ProductSearchRepository {
         }
 
         return result;
-    }
-
-    private Map<String, List<FacetValue>> buildFacets(
-            ProductSearchRequest request,
-            Map<String, Object> params,
-            String whereClause) {
-
-        Map<String, List<FacetValue>> facets = new HashMap<>();
-
-        try {
-            String language = request.getLanguage();
-            String paramNameField = language.equals("en") ? "param.name_en" : "param.name_bg";
-            String optionNameField = language.equals("en") ? "po.name_en" : "po.name_bg";
-
-            String facetSql = "SELECT " +
-                    "param.id as param_id, " +
-                    paramNameField + " as param_name, " +
-                    "po.id as option_id, " +
-                    optionNameField + " as option_name, " +
-                    "COUNT(DISTINCT p.id) as count " +
-                    "FROM products p " +
-                    "LEFT JOIN manufacturers m ON p.manufacturer_id = m.id " +
-                    "LEFT JOIN categories c ON p.category_id = c.id " +
-                    "JOIN product_parameters pp ON pp.product_id = p.id " +
-                    "JOIN parameters param ON pp.parameter_id = param.id " +
-                    "JOIN parameter_options po ON pp.parameter_option_id = po.id " +
-                    whereClause +
-                    "GROUP BY param.id, param_name, po.id, option_name " +
-                    "ORDER BY param_name, count DESC";
-
-            namedJdbcTemplate.query(facetSql, params, rs -> {
-                Long paramId = rs.getLong("param_id");
-                String paramName = rs.getString("param_name");
-                Long optionId = rs.getLong("option_id");
-                String optionName = rs.getString("option_name");
-                Long count = rs.getLong("count");
-
-                // Check if this option is currently selected
-                boolean isSelected = request.getFilters() != null &&
-                        request.getFilters().containsKey(paramId) &&
-                        request.getFilters().get(paramId) != null &&
-                        request.getFilters().get(paramId).contains(optionId);
-
-                FacetValue facetValue = FacetValue.builder()
-                        .id(optionId)
-                        .value(optionName)
-                        .count(count)
-                        .selected(isSelected)
-                        .build();
-
-                // Use "param_id:param_name" as key to keep both ID and name
-                String facetKey = paramId + ":" + paramName;
-                facets.computeIfAbsent(facetKey, k -> new ArrayList<>())
-                        .add(facetValue);
-            });
-
-        } catch (Exception e) {
-            log.warn("Failed to build facets: {}", e.getMessage());
-        }
-
-        return facets;
     }
 
     private ProductSearchResult mapRowToProduct(ResultSet rs, int rowNum, String language) throws SQLException {
@@ -659,7 +611,8 @@ public class ProductSearchRepository {
                 "AND (p.image_url IS NOT NULL AND p.image_url <> '') " +
                 "AND (p.name_bg IS NOT NULL AND word_similarity(:query, p.name_bg) > 0.35 " +
                 "  OR p.name_en IS NOT NULL AND word_similarity(:query, p.name_en) > 0.35) " +
-                "ORDER BY search_rank DESC, p.final_price ASC " +
+                // p.id breaks ties so paging stays deterministic — see searchProducts()
+                "ORDER BY search_rank DESC, p.final_price ASC, p.id ASC " +
                 "LIMIT :limit OFFSET :offset";
 
         String countSql = "SELECT COUNT(*) FROM products p " +

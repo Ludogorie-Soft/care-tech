@@ -3392,3 +3392,21 @@
 | 10:09 | Edited src/main/java/com/techstore/repository/ProductRepository.java | expanded (+13 lines) | ~304 |
 | 10:11 | Edited SEARCH_AUDIT_PLAN.md | expanded (+17 lines) | ~612 |
 | 10:12 | ФАЗА 1 ИЗПЪЛНЕНА: V36 миграция manually_hidden, Product entity, ProductService.applyAdminVisibility, MOST ратчетът премахнат, VALI/ASBIS/TEKRA уважават флага, dedup преработен да избира от годните редове и да присвоява в двете посоки | V36, Product.java, ProductService.java, MostSyncService.java, ValiSyncService.java, AsbisSyncService.java, TekraSyncService.java, ProductRepository.java | компилира чисто; симулирано на прод: +273 видими, 112/112 dedup размяна, EXPLAIN валидиран | ~26k |
+| 10:13 | Session end: 31 writes across 15 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~102592 tok |
+| 10:23 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | expanded (+6 lines) | ~324 |
+| 10:24 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | expanded (+7 lines) | ~265 |
+| 10:24 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | 1→2 lines | ~44 |
+| 10:24 | Edited src/main/java/com/techstore/service/ProductSearchService.java | added error handling | ~140 |
+| 10:25 | Edited src/main/java/com/techstore/config/SearchConfig.java | modified namedParameterJdbcTemplate() | ~263 |
+| 10:25 | Edited ../../care-tech-ui/src/redux/productSlice.js | modified catch() | ~268 |
+| 10:25 | Edited ../../care-tech-ui/src/redux/productSlice.js | added 3 condition(s) | ~537 |
+| 10:26 | Edited ../../care-tech-ui/src/redux/productSlice.js | 4→6 lines | ~50 |
+| 10:26 | Edited ../../care-tech-ui/src/redux/productSlice.js | modified clearSearchResults() | ~95 |
+| 10:26 | Edited ../../care-tech-ui/src/components/navbar/SearchBar.jsx | 2→7 lines | ~112 |
+| 10:26 | Edited ../../care-tech-ui/src/components/navbar/SearchBar.jsx | CSS: md, hover | ~250 |
+| 10:26 | Edited ../../care-tech-ui/src/components/navbar/SearchBar.jsx | 3→3 lines | ~60 |
+| 10:26 | Edited ../../care-tech-ui/src/pages/SearchPage.jsx | CSS: purpose | ~78 |
+| 10:26 | Edited ../../care-tech-ui/src/pages/SearchPage.jsx | expanded (+25 lines) | ~355 |
+| 10:27 | Edited ../../care-tech-ui/src/pages/SearchPage.jsx | inline fix | ~12 |
+| 10:33 | Edited SEARCH_AUDIT_PLAN.md | expanded (+14 lines) | ~605 |
+| 10:33 | ФАЗА 2 ИЗПЪЛНЕНА: buildFacets премахнат (-677ms), p.id tiebreaker, error UI в SearchBar+SearchPage, requestId guard + AbortSignal, валидация -> 400, query timeout само за търсенето | ProductSearchRepository, ProductSearchService, SearchConfig, SearchBar.jsx, SearchPage.jsx, productSlice.js | mvn compile ok, npm run build ok, eslint чист | ~24k |

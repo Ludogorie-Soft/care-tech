@@ -28,13 +28,15 @@ public class ProductSearchService {
     public ProductSearchResponse searchProducts(ProductSearchRequest request) {
         long startTime = System.currentTimeMillis();
 
+        log.debug("Searching products with query: '{}', language: {}, filters: {}",
+                request.getQuery(), request.getLanguage(), request.getFilters());
+
+        // Validation runs outside the catch below on purpose. Wrapping it meant a bad
+        // page size or a backwards price range came back as a 500 "Search failed" instead
+        // of a 400, hiding a client mistake behind a server error.
+        validateSearchRequest(request);
+
         try {
-            log.debug("Searching products with query: '{}', language: {}, filters: {}",
-                    request.getQuery(), request.getLanguage(), request.getFilters());
-
-            // Validate and sanitize input
-            validateSearchRequest(request);
-
             // Resolve alias category IDs before querying
             if (request.getCategories() != null && !request.getCategories().isEmpty()) {
                 request.setCategories(resolveAliasCategories(request.getCategories()));

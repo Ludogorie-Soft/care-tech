@@ -330,3 +330,10 @@
 - **`deduplicateCrossPlatformBySku()` вече избира от ГОДНИТЕ редове**, не от `show_flag = true`, и присвоява `show_flag` в двете посоки (`SET show_flag = (rn = 1)`). Старата версия беше ратчет: скрит ред беше невидим за следващия прогон и не можеше да спечели пак, а когато победителят излезеше от наличност, целият SKU изчезваше от сайта (91 SKU в това състояние).
 - **Пълно преизчисляване на видимостта се задейства с `POST /api/sync/most/products`** (или съответния endpoint за другите платформи) — всичките четири sync сервиза викат dedup-а накрая. Иначе се случва при нощния cron в 03:00.
 - **В ASBIS sync `visible` се ползваше и за `setStatus`, и за `setShow`.** Разделено: статусът следва само наличността. Ръчното скриване не бива да прави продукта „неналичен".
+
+## Key Learnings (Търсачка — фаза 2, 2026-09-18)
+
+- **`NamedParameterJdbcTemplate` се ползва САМО от `ProductSearchRepository`.** Затова query timeout-ът (15 s) е сложен на този bean в `SearchConfig`, а не глобално на datasource-а — глобален `statement_timeout` би прекъснал дългите bulk заявки на sync-овете, които минават през JPA.
+- **`buildFacets` е премахнат изцяло** (не зад флаг). Отговорът на `/api/products/search` вече връща `facets` като празна карта. Ако някога потрябва faceting на страницата за търсене — ползвай `getFilteredFacets`, не възстановявай стария метод.
+- **`care-tech-ui` е Create React App (`react-scripts`), НЕ vite.** Билдва се с `npm run build`. Внимание: с `CI=true` react-scripts третира warnings като грешки и билдът пада заради множество предварително съществуващи `no-unused-vars` в други файлове. За проверка на собствените промени пускай `npm run build` без `CI`.
+- **RTK stale-response шаблон:** `createAsyncThunk` дава `action.meta.requestId` и `signal`. Пази `currentRequestId` в state-а при `pending`, сравнявай го в `fulfilled`/`rejected` и игнорирай несъвпадащите. Отменена заявка (`action.meta.aborted`) НЕ е грешка — не я показвай в UI.

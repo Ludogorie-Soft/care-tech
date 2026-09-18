@@ -7514,13 +7514,14 @@
       "error_message": "Продукт се повтаря на една страница и липсва на друга при разлистване на резултатите",
       "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java:162-181",
       "root_cause": "ORDER BY p.final_price ASC (и всички останали sort клаузи) е без tiebreaker. PostgreSQL не гарантира стабилен ред при равни ключове, а с LIMIT/OFFSET това означава дублиране/пропускане между страниците. Потвърдено: 7276 видими продукта при само 3854 различни цени; 1108 цени се споделят от 2+ продукта; най-голямата група с еднаква цена е 56 продукта.",
-      "fix": "ПРЕДЛОЖЕН (чака одобрение): добавяне на , p.id ASC като финален tiebreaker във всеки sort branch (вкл. fuzzy заявката).",
+      "fix": "ПОПРАВЕН 2026-09-18 (фаза 2.2): добавен ', p.id ASC' като финален tiebreaker в главната заявка (ProductSearchRepository:183) и във fuzzy заявката (:614). Разлистването вече е детерминистично.",
       "tags": [
-        "search",
-        "pagination",
+        "fixed",
         "order-by",
-        "unstable-sort",
-        "postgres"
+        "pagination",
+        "postgres",
+        "search",
+        "unstable-sort"
       ],
       "related_bugs": [],
       "occurrences": 1,
@@ -7532,14 +7533,15 @@
       "error_message": "Търсачката 'понякога не дава отговор' — при 500 от бекенда дропдаунът не се появява, а SearchPage показва 'Няма намерени продукти'",
       "file": "care-tech-ui/src/components/navbar/SearchBar.jsx:79",
       "root_cause": "ProductSearchService:67 обвива ВСЯКО изключение в RuntimeException('Search failed') -> 500. Фронтендът няма клауза за status==='failed': SearchBar рендира null (дропдаунът просто не излиза), SearchPage показва същото съобщение като при 0 резултата. Timeout/SQL грешка е визуално неразличима от 'няма такъв продукт'. Утежнява се от бавните заявки: 319ms rows + 677ms facets + 2x223ms fuzzy = ~1.4s DB време за заявка с 0 резултата.",
-      "fix": "ПРЕДЛОЖЕН (чака одобрение): status==='failed' UI в SearchBar и SearchPage с отделно съобщение; IllegalArgumentException да не се обвива в RuntimeException (400 вместо 500); requestId guard в productSlice срещу stale отговори.",
+      "fix": "ПОПРАВЕН 2026-09-18 (фаза 2.3-2.5): SearchBar и SearchPage вече рендират отделно състояние при status==='failed' с бутон 'Опитай отново' вместо да мълчат / да показват 'Няма намерени продукти'. Валидацията в ProductSearchService излезе извън try блока, така че IllegalArgumentException стига до GlobalExceptionHandler като 400 вместо да се обвива в RuntimeException -> 500. Добавен и requestId guard + AbortSignal в productSlice срещу презаписване от закъснели отговори.",
       "tags": [
-        "search",
-        "frontend",
+        "SearchBar",
         "error-handling",
-        "ux",
+        "fixed",
+        "frontend",
+        "search",
         "silent-failure",
-        "SearchBar"
+        "ux"
       ],
       "related_bugs": [],
       "occurrences": 1,
@@ -7551,13 +7553,14 @@
       "error_message": "Търсачката прави най-скъпата си заявка (677ms) при всяко търсене, а резултатът не се ползва никъде",
       "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java:220",
       "root_cause": "buildFacets() се вика безусловно от searchProducts() и джойва products x product_parameters x parameters x parameter_options с GROUP BY върху ВСИЧКИ съвпадения (не само страницата). Измерено 677ms на прод базата. Фронтендът записва response.facets в state.searchItems.facets (productSlice:600), но нито един компонент не го чете — категорийната страница ползва paramSlice/filter-facets.",
-      "fix": "ПРЕДЛОЖЕН (чака одобрение): махане на buildFacets от пътя на търсенето или зад флаг includeFacets=false по подразбиране.",
+      "fix": "ПОПРАВЕН 2026-09-18 (фаза 2.1): buildFacets премахнат от searchProducts() заедно със самия метод (60 реда). Отговорът връща празна карта вместо null. Мотив за пълно премахване вместо флаг: getFilteredFacets вече прави по-добро (disjunctive) faceting и фронтендът ползва него.",
       "tags": [
-        "search",
-        "performance",
-        "facets",
         "dead-code",
-        "optimization"
+        "facets",
+        "fixed",
+        "optimization",
+        "performance",
+        "search"
       ],
       "related_bugs": [],
       "occurrences": 1,
@@ -7855,6 +7858,102 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-18T07:11:50.779Z"
+    },
+    {
+      "id": "bug-481",
+      "timestamp": "2026-09-18T07:24:27.488Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/repository/ProductSearchRepository.java",
+      "root_cause": "Had \"ORDER BY search_rank DESC, p.final_price ASC \"",
+      "fix": "Changed to \"ORDER BY search_rank DESC, p.final_price ASC, p.i",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T07:24:27.488Z"
+    },
+    {
+      "id": "bug-482",
+      "timestamp": "2026-09-18T07:24:36.990Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/ProductSearchService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T07:24:36.991Z"
+    },
+    {
+      "id": "bug-483",
+      "timestamp": "2026-09-18T07:25:04.776Z",
+      "error_message": "Wrong return value",
+      "file": "src/main/java/com/techstore/config/SearchConfig.java",
+      "root_cause": "Was returning: new NamedParameterJdbcTemplate(dataSource);",
+      "fix": "Now returns: new NamedParameterJdbcTemplate(jdbcTemplate);",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T07:25:04.776Z"
+    },
+    {
+      "id": "bug-484",
+      "timestamp": "2026-09-18T07:25:59.673Z",
+      "error_message": "Missing guard clause",
+      "file": "../../care-tech-ui/src/redux/productSlice.js",
+      "root_cause": "No early return/throw for edge case: action.meta.requestId !== state.searchItems.currentRequestId",
+      "fix": "Added guard clause: if (action.meta.requestId !== state.searchIt)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T07:25:59.674Z"
+    },
+    {
+      "id": "bug-485",
+      "timestamp": "2026-09-18T07:26:42.598Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/components/navbar/SearchBar.jsx",
+      "root_cause": "Had \"overflow-hidden max-w-[257px] md:max-w-full\"",
+      "fix": "Changed to \"failed\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T07:26:42.598Z"
+    },
+    {
+      "id": "bug-486",
+      "timestamp": "2026-09-18T07:33:24.336Z",
+      "error_message": "Significant refactor of ",
+      "file": "SEARCH_AUDIT_PLAN.md",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 12→26 lines (9 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T07:33:24.336Z"
     }
   ]
 }
