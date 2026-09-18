@@ -3542,3 +3542,6 @@
 | 14:11 | Session end: 120 writes across 38 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~185704 tok |
 | 14:15 | Created CATEGORY_REPRODUCIBILITY_PLAN.md | — | ~1251 |
 | 14:16 | Потребителят повдигна ключов въпрос: деплой от нула не възпроизвежда категорийната структура. Потвърдено — НЯМА нито една миграция за категории или производители; дървото е продукт на sync-овете + 20 от 51 ad-hoc скрипта + ръчни редакции. Написан CATEGORY_REPRODUCIBILITY_PLAN.md | CATEGORY_REPRODUCIBILITY_PLAN.md | предложение, чака решения по 3 въпроса | ~16k |
+| 14:16 | Session end: 121 writes across 39 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~187044 tok |
+| 14:19 | Created ../../../../../../tmp/honest.md | — | ~736 |
+| 14:19 | ЧЕСТНА СМЕТКА по въпрос на потребителя: НЕ сме обходили продуктите поединично. Работено с правила на ниво категория; 341 от 7469 видими продукта са местени, ~95% непоглеждани. Груповото преместване на "Мрежови продукти" внесе суич и кабел в "USB хъбове". Първоначалното оплакване (грешна ВИДИМА категория) е адресирано само частично | CATEGORY_CLEANUP_PLAN.md | предложен модел: Claude API batch класификация с confidence, както при параметрите | ~14k |
