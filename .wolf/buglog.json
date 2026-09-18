@@ -8316,6 +8316,43 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-18T13:30:00.000Z"
+    },
+    {
+      "id": "bug-508",
+      "timestamp": "2026-09-18T10:50:42.834Z",
+      "error_message": "Significant refactor of ",
+      "file": "scripts/50_retire_home_appliances.sql",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 9→13 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "sql"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T10:50:42.834Z"
+    },
+    {
+      "id": "bug-510",
+      "timestamp": "2026-09-18T14:30:00.000Z",
+      "error_message": "AsbisSyncService.createCategory() създава нови категории с show=true и sortOrder=0 — всяка нова ASBIS категория от ниво 1 би се появила ВИДИМА най-отгоре в главното меню",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java:206-222",
+      "root_cause": "createCategory() слага setShow(true) и setSortOrder(0). ASBIS дървото обаче НЕ е дървото на сайта — 660 от 663 ASBIS категории са скрити, а реалното меню е VALI (186 видими) + TEKRA (33). Всяка новосъздадена ASBIS категория от ниво 1 влиза като видим корен със sort_order 0, тоест преди курираните КОМПЮТРИ (1), Компютърни компоненти (2) и т.н. Рискът не е автоматичен — CronJobService НЕ вика syncAsbisCategories (само parameters, products, priceAvail), затова последният категориен прогон е от 2026-08-06 и е създал 0 нови. Но при ръчно пускане или при добавяне към крона проблемът е реален.",
+      "fix": "НЕ Е ПОПРАВЕН — предложение: setShow(false) в createCategory(). Админ може да направи категория видима съзнателно през панела. Това е и предусловие за изтриването на празните ASBIS категории: в момента 303 от 519-те празни листни категории още се рефират от feed-а и биха се пресъздали ВИДИМИ при изтриване.",
+      "tags": [
+        "asbis",
+        "categories",
+        "menu",
+        "sort-order",
+        "createCategory",
+        "phase-5"
+      ],
+      "related_bugs": [
+        "bug-496"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T14:30:00.000Z"
     }
   ]
 }

@@ -425,3 +425,10 @@
 ## Do-Not-Repeat (SQL)
 
 - [2026-09-18] ВНИМАНИЕ с `NOT (... OR column = value)`, когато колоната може да е NULL. `NOT (c.id IN (454,556) OR c.parent_id = 454)` изключва и всички редове с `parent_id IS NULL`, защото `FALSE OR NULL = NULL` и `NOT NULL = NULL` → редът не минава филтъра. Това ми даде симулация „495 → 18" вместо вярното „495 → 420". Ползвай `coalesce(c.parent_id, -1) = 454` или `c.parent_id IS NOT DISTINCT FROM 454`. В положителен контекст (`WHERE ... OR c.parent_id = 454`) няма проблем — там NULL просто не съвпада, което е желаното.
+
+## Key Learnings (ASBIS дърво — стъпка 3, 2026-09-18)
+
+- **`CronJobService` (нощният прогон 01:00) НЕ вика `syncAsbisCategories`** — само `syncAsbisParameters`, `syncAsbisProducts`, `syncAsbisPriceAvail`. Затова ASBIS категорийният sync последно е вървял на 2026-08-06. Пуска се само ръчно.
+- **Изтриването на празни ASBIS категории е опасно**: от 519-те празни листни, **303 още се рефират от `ProductList.xml`** (41 стойности `PRODUCTCATEGORY` + 253 двойки с `PRODUCTTYPE`). При изтриване следващият категориен прогон би ги пресъздал с `show=true, sortOrder=0`, тоест като видими корени най-отгоре в менюто.
+- **216 са безопасни за изтриване, но НИТО ЕДНА не се сблъсква по име с видима категория** — тоест изтриването им не решава двусмислието при търсене на категория по име, което беше единствената реална полза. Остава само козметика.
+- **FK-ите към `categories`**: `products.category_id` SET NULL, `categories.parent_id` SET NULL, `categories.alias_of_id` SET NULL, **`category_parameters.category_id` CASCADE**. Изтриването на категория трие и параметърните ѝ връзки.
