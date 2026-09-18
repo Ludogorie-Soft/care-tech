@@ -3471,3 +3471,7 @@
 | 11:36 | Edited src/test/resources/application-test.properties | expanded (+26 lines) | ~370 |
 | 11:38 | Edited src/main/java/com/techstore/service/TbiLeasingService.java | added 1 condition(s) | ~432 |
 | 11:41 | Поправени и двата падащи теста: липсващи env променливи в application-test.properties (SPEEDY_SENDER_ID е Long и чупеше контекста) + реален дефект в TbiLeasingService — дублиран ContractSigned пращаше второ потвърждение до клиента | application-test.properties, TbiLeasingService.java | цялата сюита 52/52 зелена | ~14k |
+| 11:41 | Session end: 89 writes across 26 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 17 reads | ~159592 tok |
+| 11:43 | Edited SEARCH_AUDIT_PLAN.md | expanded (+23 lines) | ~460 |
+| 11:43 | Edited SEARCH_AUDIT_PLAN.md | expanded (+10 lines) | ~423 |
+| 11:44 | Преди Фаза 5: установено че MOST/TEKRA/ASBIS пре-задават категорията на всеки прогон (само VALI е в isNew) -> скрипт сам по себе си е безполезен; потребителят изисква верен мапинг и при създаване -> флаг е недостатъчен, решението е поправка на мапинга | SEARCH_AUDIT_PLAN.md, buglog bug-496, cerebrum | записано; чака разрешение за старт на Фаза 5 | ~13k |
