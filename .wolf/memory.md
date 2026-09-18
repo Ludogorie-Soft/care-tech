@@ -3454,3 +3454,6 @@
 | 11:16 | Edited src/main/java/com/techstore/repository/ProductSearchRepository.java | added 1 condition(s) | ~254 |
 | 11:17 | Хванат пропуск в 3.8: транслитерацията влизаше само в WHERE, но не и в скоринга -> 728 от 744 резултата за "гейминг" бяха с ранг 0 и се подреждаха по цена. Поправено с matchesEitherScript() + toLatinQuery() | ProductSearchRepository.java | комит 64433df; разпределението на ранга вече е 4.50/4.00/3.00/1.00, само 1 ред с 0 | ~11k |
 | 11:18 | Session end: 80 writes across 24 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~119819 tok |
+| 11:19 | Session end: 80 writes across 24 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~119819 tok |
+| 11:22 | Edited SEARCH_AUDIT_PLAN.md | expanded (+37 lines) | ~674 |
+| 11:22 | Потребителят отказа логване на заявки; заяви мискатегоризацията като основен приоритет -> записана като Фаза 5 в плана + bug в buglog, с грубо измерване (200+ подозрителни) | SEARCH_AUDIT_PLAN.md, buglog.json | записано, не е започнато | ~8k |
