@@ -3520,3 +3520,6 @@
 | 13:22 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 1→3 lines | ~55 |
 | 13:24 | Created ../../../../../../tmp/step2a_result.md | — | ~508 |
 | 13:25 | СТЪПКА 2а ПОТВЪРДЕНА: 601->497 видими продукта в невидими категории; Мрежов хардуер 110->5, Охладители 176->11. НО открих 2 свои грешки — търсих с LIKE %охлажд% и пропуснах "Охладители за процесори" и "Термо пасти и подложки"; поправени. Добавена и Tablet LENOVO -> Таблети. Отбелязан bug-507 за Водно охлаждане (коренова, sort 21) | MostSyncService.java, тестове, CATEGORY_CLEANUP_PLAN.md, buglog | 90 теста зелени | ~20k |
+| 13:25 | Session end: 114 writes across 33 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~177491 tok |
+| 13:37 | Created scripts/49_move_water_cooling_under_components.sql | — | ~1527 |
+| 13:38 | Поправките от afef0c8 потвърдени на прод (Охладители за процесори 251->306, Термо пасти 124->130, скрита Охладители 11->5, Таблети 68->72). Подготвен скрипт 49 за bug-507 — Водно охлаждане под Компютърни компоненти на свободен слот 7; проверено че VALI sync не го връща (задава родител само при NULL) | scripts/49_*.sql, buglog | симулация: дървото остава 3 нива, 0 сираци | ~16k |
