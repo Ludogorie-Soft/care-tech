@@ -7618,20 +7618,26 @@
     {
       "id": "bug-467",
       "timestamp": "2026-09-18T09:30:00.000Z",
-      "related_bugs": [],
+      "related_bugs": [
+        "bug-460",
+        "bug-496"
+      ],
       "occurrences": 1,
       "last_seen": "2026-09-18T09:30:00.000Z",
-      "error_message": "TEKRA продуктите не са обновявани от 2026-09-11 — 0 реда с updated_at в последните 2 дни (при ASBIS 2539, MOST 5325, VALI 1360)",
+      "error_message": "ОПРОВЕРГАН: TEKRA sync НЕ е спрял. Реалният бъг е друг: продукти, налични при доставчика, се маркират NOT_AVAILABLE всяка нощ, защото sync-ът не може да ги мапне към категория",
       "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
-      "root_cause": "НЕУСТАНОВЕНА — иска отделно разследване. Потвърдено: (1) action=products връща {\"data\":[],\"error\":[]} — sync-ът обаче ползва action=browse&catSlug=..., не action=products; (2) action=browse&catSlug=videonablyudenie РАБОТИ и връща 482 продукта (1.1MB), тоест API-то и токенът са живи; (3) TEKRA rate-limit-ва агресивно — HTTP 429 след ~6 бързи заявки. Внимание: първоначалният ми тест 'всички slug-ове връщат 0 продукта' беше НЕВАЛИДЕН, защото попадна в 429, не защото slug-овете са грешни. Най-вероятна хипотеза: 429 по време на нощния прогон (cerebrum вече отбелязва backoff 60s от сесия 2026-08-19).",
-      "fix": "НЕ Е ПОПРАВЕН. Следваща стъпка: прочитане на sync логовете за TEKRA от нощния прогон, за да се види дали има 429 / изключение, преди да се пипа код.",
+      "root_cause": "ПЪРВОНАЧАЛНАТА ДИАГНОЗА БЕШЕ ГРЕШНА. Заключих 'TEKRA не е синхронизирана от 11 септември' от max(products.updated_at), което е НЕГОДЕН показател: Hibernate не прави UPDATE, когато никое поле не се е променило, така че updated_at остава стар дори при успешен прогон. Истината от sync_logs: TEKRA_PRODUCTS върви всяка нощ със статус SUCCESS, последно 2026-09-18 01:44, 402 обработени. Проверено срещу живия feed: 98 от 98 цени съвпадат ТОЧНО. РЕАЛНИЯТ БЪГ: логът рапортува 'Skipped: 232' = skippedNoCategory + skippedNoManufacturer (TekraSyncService:794-798, 818). Когато findMostSpecificCategory() не намери валидна категория за запис от feed-а, кодът прави 'continue' ПРЕДИ продуктът да влезе в processedSkus. После ред 876 вика markNotAvailableByPlatformSkuNotIn(TEKRA, processedSkus), който маркира като NOT_AVAILABLE всичко извън този списък — тоест пропуснатите продукти се маркират неналични всяка нощ, въпреки че са в наличност. Потвърдено: 3 продукта с количества 14/35/18 във feed-а стоят NOT_AVAILABLE + скрити при нас, при това с валидна категория и производител в базата (внесени успешно през август). 11 такива само в една TEKRA категория (videonablyudenie, 482 записа). Общо 197 от 520 TEKRA продукта са NOT_AVAILABLE.",
+      "fix": "НЕ Е ПОПРАВЕН. Предложение: пропуснат продукт да НЕ се третира като отсъстващ от feed-а — да се добави в processedSkus (или в отделен списък 'видени, но необработени'), за да не го маркира markNotAvailableByPlatformSkuNotIn. Отделно: да се проследи защо findMostSpecificCategory се проваля за 232 записа на прогон — това е същият корен като Фаза 5 (мискатегоризация).",
       "tags": [
-        "tekra",
-        "sync",
-        "stale-data",
-        "rate-limit",
         "429",
-        "needs-investigation"
+        "category-matching",
+        "diagnosed",
+        "false-diagnosis-corrected",
+        "needs-investigation",
+        "rate-limit",
+        "stale-data",
+        "sync",
+        "tekra"
       ]
     },
     {
@@ -8122,6 +8128,22 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-18T11:40:00.000Z"
+    },
+    {
+      "id": "bug-497",
+      "timestamp": "2026-09-18T08:27:24.122Z",
+      "error_message": "Significant refactor of ",
+      "file": "SEARCH_AUDIT_PLAN.md",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 10→19 lines (7 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T08:27:24.122Z"
     }
   ]
 }

@@ -3457,3 +3457,6 @@
 | 11:19 | Session end: 80 writes across 24 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~119819 tok |
 | 11:22 | Edited SEARCH_AUDIT_PLAN.md | expanded (+37 lines) | ~674 |
 | 11:22 | Потребителят отказа логване на заявки; заяви мискатегоризацията като основен приоритет -> записана като Фаза 5 в плана + bug в buglog, с грубо измерване (200+ подозрителни) | SEARCH_AUDIT_PLAN.md, buglog.json | записано, не е започнато | ~8k |
+| 11:23 | Session end: 81 writes across 24 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 14 reads | ~120541 tok |
+| 11:26 | TEKRA диагноза: ОПРОВЕРГАХ собственото си твърдение, че sync-ът е спрял — sync_logs показва SUCCESS всяка нощ и 98/98 цени съвпадат с feed-а. Намерен реален бъг: Skipped 232/прогон (неуспешен category match) -> не влизат в processedSkus -> markNotAvailableByPlatformSkuNotIn ги маркира неналични въпреки наличност | buglog bug-467 преработен | 11 налични продукта скрити само в една категория; 197 от 520 са NOT_AVAILABLE | ~22k |
+| 11:27 | Edited SEARCH_AUDIT_PLAN.md | expanded (+9 lines) | ~575 |
