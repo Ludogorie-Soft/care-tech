@@ -660,7 +660,12 @@ public class AsbisSyncService {
                         product.setCategory(correctLaptopAccessoryCategory(category, getString(asbisProduct, "productdescription"), catsById));
                         setAsbisProductFields(product, asbisProduct, true);
                     } else {
-                        product.setCategory(correctLaptopAccessoryCategory(category, product.getNameEn(), catsById));
+                        // A hand-set category wins over the feed mapping - see
+                        // Product#manuallyCategorized. Without this the assignment below
+                        // undoes a manual correction on the next run.
+                        if (!Boolean.TRUE.equals(product.getManuallyCategorized())) {
+                            product.setCategory(correctLaptopAccessoryCategory(category, product.getNameEn(), catsById));
+                        }
                         setAsbisProductFields(product, asbisProduct, false);
                     }
 

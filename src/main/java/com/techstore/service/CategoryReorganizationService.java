@@ -676,7 +676,11 @@ public class CategoryReorganizationService {
             new SubCategoryDef("Смарт часовници, телефони и аксесоари", "Стилус - химикалки за телефони", "Stylus Pens", 8),
             new SubCategoryDef("Смарт часовници, телефони и аксесоари", "Калъфи за телефони", "Phone Cases", 9),
             new SubCategoryDef("Смарт часовници, телефони и аксесоари", "Поставки за мобилни телефони", "Phone Stands", 10),
-            new SubCategoryDef("Смарт часовници, телефони и аксесоари", "Защитни фолиа / стъкла за телефони", "Screen Protectors", 11),
+            // Името е скъсено съзнателно: категорията държи протектори и за
+            // таблети, и за конзоли, не само за телефони (скрипт 52 + 53).
+            // reorganizeValiCategories търси по ИМЕ — ако това разминe със
+            // categories.name_bg, POST /reorganize създава дубликат.
+            new SubCategoryDef("Смарт часовници, телефони и аксесоари", "Защитни фолиа и стъкла", "Screen protectors", 11),
             new SubCategoryDef("Смарт часовници, телефони и аксесоари", "Други мобилни аксесоари", "Other Mobile Accessories", 12),
 
             // Проектори, интерактивен под, стойки

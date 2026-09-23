@@ -117,8 +117,12 @@ public class MostSyncService {
         overrides.add(new String[]{"case",           "Аксесоари за лаптопи/таблети"});
         overrides.add(new String[]{"folio",          "Аксесоари за лаптопи/таблети"});
         overrides.add(new String[]{"simpro",         "Аксесоари за лаптопи/таблети"});
-        overrides.add(new String[]{"protect film",   "Аксесоари за лаптопи/таблети"});
-        overrides.add(new String[]{"screen protector","Аксесоари за лаптопи/таблети"});
+        // Протекторите за екран отиват в „Защитни фолиа и стъкла" (кат. 165),
+        // не при аксесоарите — независимо за телефон, таблет или конзола.
+        // Тези два override-а бяха причината 6-те фолиа ACER да стоят в кат. 47.
+        // Името трябва да съвпада с categories.name_bg — резолвва се по име.
+        overrides.add(new String[]{"protect film",   "Защитни фолиа и стъкла"});
+        overrides.add(new String[]{"screen protector","Защитни фолиа и стъкла"});
         overrides.add(new String[]{"docking",        "Аксесоари за лаптопи/таблети"});
         overrides.add(new String[]{"dock station",   "Аксесоари за лаптопи/таблети"});
         overrides.add(new String[]{"hybrid dock",    "Аксесоари за лаптопи/таблети"});
@@ -1015,7 +1019,11 @@ public class MostSyncService {
             isNew = true;
         }
 
-        product.setCategory(entityManager.getReference(Category.class, categoryId));
+        // A hand-set category wins over the feed mapping: this assignment runs on every
+        // sync, so without the guard a manual correction lasts until the next night.
+        if (isNew || !Boolean.TRUE.equals(product.getManuallyCategorized())) {
+            product.setCategory(entityManager.getReference(Category.class, categoryId));
+        }
 
         if (isNew) {
             product.setNameBg(name);

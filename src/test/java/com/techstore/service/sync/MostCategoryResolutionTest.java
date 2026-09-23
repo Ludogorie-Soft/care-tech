@@ -120,6 +120,24 @@ class MostCategoryResolutionTest {
         assertEquals("Лаптопи", MostSyncService.applyLaptopNameOverride("Лаптопи", null));
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            "ACER AG PROTECT FILM B1-71X,      Защитни фолиа и стъкла",
+            "ACER AGLR PROTECT FILM A1-830,    Защитни фолиа и стъкла",
+            "NACON SCREEN PROTECTOR SWITCH,    Защитни фолиа и стъкла",
+            "ACER PORTFOLIO CASE W3-810 GRY,   Аксесоари за лаптопи/таблети",
+            "ASUS TRICOVER ME180A BLACK,       Аксесоари за лаптопи/таблети"
+    })
+    @DisplayName("a screen protector leaves the accessories bucket; a case stays in it")
+    void screenProtectorsGoToTheirOwnCategory(String productName, String expected) {
+        // Тези два override-а бяха причината 6-те фолиа ACER да стоят в кат. 47
+        // вместо в „Защитни фолиа и стъкла" (165). Низът трябва да съвпада с
+        // categories.name_bg — резолвва се по име (MostSyncService:986),
+        // затова скрипт 53 и този низ вървят заедно.
+        assertEquals(expected,
+                MostSyncService.applyLaptopNameOverride("Аксесоари за лаптопи/таблети", productName));
+    }
+
     // ── step 2a: LAN and FAN out of the hidden categories ─────────────────────
 
     @ParameterizedTest

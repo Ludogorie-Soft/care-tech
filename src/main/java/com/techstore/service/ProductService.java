@@ -872,6 +872,28 @@ public class ProductService {
         p.setShow(show);
         p.setManuallyHidden(!show);
     }
+
+    /**
+     * Applies an admin's category choice, recording it as manual intent.
+     * <p>
+     * Same problem as {@link #applyAdminVisibility}: MOST and TEKRA reassign the
+     * category on every sync run and ASBIS does so whenever its feed mapping succeeds,
+     * so an admin's choice would be overwritten the same night. Setting
+     * {@code manuallyCategorized} makes the syncs leave this product's category alone.
+     * Only an actual change raises the flag — re-saving a product without touching its
+     * category must not freeze a mapping the admin never chose.
+     */
+    private void applyAdminCategory(Product p, Long categoryId) {
+        Category resolved = resolveAndActivateCategory(categoryId);
+        Long currentId = p.getCategory() != null ? p.getCategory().getId() : null;
+        Long resolvedId = resolved != null ? resolved.getId() : null;
+
+        if (!Objects.equals(currentId, resolvedId)) {
+            p.setCategory(resolved);
+            p.setManuallyCategorized(true);
+        }
+    }
+
     private void updateProductFieldsFromRest(Product p, ProductCreateRequestDTO dto) {
         p.setReferenceNumber(dto.getReferenceNumber());
         p.setNameEn(dto.getNameEn());
@@ -880,7 +902,7 @@ public class ProductService {
         p.setDescriptionBg(dto.getDescriptionBg());
         p.setModel(dto.getModel());
         p.setBarcode(dto.getBarcode());
-        p.setCategory(resolveAndActivateCategory(dto.getCategoryId()));
+        applyAdminCategory(p, dto.getCategoryId());
         p.setManufacturer(findManufacturerByIdOrThrow(dto.getManufacturerId()));
         p.setStatus(ProductStatus.fromCode(dto.getStatus()));
         p.setPriceClient(dto.getPriceClient());
@@ -954,7 +976,7 @@ public class ProductService {
         p.setDescriptionBg(dto.getDescriptionBg());
         p.setModel(dto.getModel());
         p.setBarcode(dto.getBarcode());
-        p.setCategory(resolveAndActivateCategory(dto.getCategoryId()));
+        applyAdminCategory(p, dto.getCategoryId());
         p.setManufacturer(findManufacturerByIdOrThrow(dto.getManufacturerId()));
         p.setStatus(ProductStatus.fromCode(dto.getStatus()));
         p.setPriceClient(dto.getPriceClient());

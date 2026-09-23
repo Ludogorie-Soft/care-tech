@@ -107,6 +107,17 @@ public class Product extends BaseEntity {
     @Column(name = "manually_hidden", nullable = false)
     private Boolean manuallyHidden = false;
 
+    /**
+     * True when this product's category was set by hand rather than derived from a
+     * distributor feed. MOST and TEKRA overwrite {@link #category} on every run and
+     * ASBIS overwrites it whenever its feed mapping succeeds, so without this flag a
+     * manual correction is gone by the next night. The sync skips the category
+     * assignment for a flagged product; VALI needs no guard because it only sets the
+     * category when creating a product.
+     */
+    @Column(name = "manually_categorized", nullable = false)
+    private Boolean manuallyCategorized = false;
+
     private Integer warranty;
 
     @Column(precision = 10, scale = 6)

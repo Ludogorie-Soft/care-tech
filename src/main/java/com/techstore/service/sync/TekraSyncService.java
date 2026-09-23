@@ -1121,7 +1121,10 @@ public class TekraSyncService {
             isNew = true;
         }
 
-        product.setCategory(entityManager.getReference(Category.class, categoryId));
+        // A hand-set category wins over the feed mapping - see Product#manuallyCategorized.
+        if (isNew || !Boolean.TRUE.equals(product.getManuallyCategorized())) {
+            product.setCategory(entityManager.getReference(Category.class, categoryId));
+        }
 
         if (isNew) {
             product.setNameBg(name);
@@ -1372,7 +1375,10 @@ public class TekraSyncService {
                 product.setPlatform(Platform.TEKRA);
             }
 
-            product.setCategory(category);
+            // A hand-set category wins over the feed mapping - see Product#manuallyCategorized.
+            if (!Boolean.TRUE.equals(product.getManuallyCategorized())) {
+                product.setCategory(category);
+            }
 
             return product;
 
