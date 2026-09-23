@@ -23,6 +23,46 @@ public class RestTemplateConfig {
     @Value("${asbis.api.connection-timeout:30000}")
     private int connectionTimeout;
 
+    @Value("${most.api.timeout:180000}")
+    private int mostTimeout;
+
+    @Value("${most.api.connection-timeout:15000}")
+    private int mostConnectionTimeout;
+
+    /**
+     * Most previously used the @Primary bare {@code new RestTemplate()}, which has no
+     * timeouts at all: a hung supplier would have blocked the nightly cron indefinitely.
+     * Sized for the feed it actually pulls — ~17 MB of XML in one GET.
+     */
+    @Bean("mostRestTemplate")
+    public RestTemplate mostRestTemplate() {
+        PoolingHttpClientConnectionManager connectionManager =
+                PoolingHttpClientConnectionManagerBuilder.create()
+                        .setMaxConnTotal(5)
+                        .setMaxConnPerRoute(5)
+                        .setDefaultSocketConfig(
+                                SocketConfig.custom()
+                                        .setSoTimeout(Timeout.ofMilliseconds(mostTimeout))
+                                        .build()
+                        )
+                        .setConnectionTimeToLive(TimeValue.ofSeconds(30))
+                        .build();
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(Timeout.ofMilliseconds(mostConnectionTimeout))
+                .setResponseTimeout(Timeout.ofMilliseconds(mostTimeout))
+                .build();
+
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setConnectionManager(connectionManager)
+                .setDefaultRequestConfig(requestConfig)
+                .evictExpiredConnections()
+                .evictIdleConnections(TimeValue.ofSeconds(30))
+                .build();
+
+        return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
+    }
+
     @Bean("asbisRestTemplate")
     public RestTemplate asbisRestTemplate() {
         // Connection pool configuration using Builder (HttpClient 5.x style)

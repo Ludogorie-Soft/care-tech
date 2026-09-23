@@ -1,9 +1,11 @@
 package com.techstore.service;
 
-import lombok.RequiredArgsConstructor;
+import com.techstore.exception.ExternalApiException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -18,11 +20,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class MostApiService {
 
     private final RestTemplate restTemplate;
+
+    public MostApiService(@Qualifier("mostRestTemplate") RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     @Value("${most.api.url:https://portal.mostbg.com/api/product/xml/all?currency=EUR}")
     private String apiUrl;
@@ -30,12 +35,26 @@ public class MostApiService {
     @Value("${most.api.enabled:false}")
     private boolean mostApiEnabled;
 
+    @Value("${most.api.retry-attempts:4}")
+    private int retryAttempts;
+
+    @Value("${most.api.retry-delay:5000}")
+    private long retryDelay;
+
     private List<Map<String, Object>> productsCache;
     private long cacheTimestamp = 0;
     private static final long CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 
     /**
-     * Test API connectivity
+     * Test API connectivity.
+     *
+     * <p>Deliberately does not catch: the whole point of this endpoint is to say <em>why</em>
+     * the feed is failing, and a swallowed exception reduced that to a bare "Connection
+     * failed". {@code MostSyncController} turns the exception into a 500 carrying the real
+     * message. Note this inherits the retry policy, so a total outage takes the full backoff
+     * (~35 s by default) before it reports; a success is cached for 10 minutes.
+     *
+     * @throws ExternalApiException if the feed cannot be fetched or parsed
      */
     public boolean testConnection() {
         if (!mostApiEnabled) {
@@ -43,15 +62,10 @@ public class MostApiService {
             return false;
         }
 
-        try {
-            List<Map<String, Object>> products = getAllProducts();
-            boolean isConnected = !products.isEmpty();
-            log.info("Most API connection test: {}", isConnected ? "SUCCESS" : "FAILED");
-            return isConnected;
-        } catch (Exception e) {
-            log.error("Most API connection test failed", e);
-            return false;
-        }
+        List<Map<String, Object>> products = getAllProducts();
+        boolean isConnected = !products.isEmpty();
+        log.info("Most API connection test: {} ({} products)", isConnected ? "SUCCESS" : "FAILED", products.size());
+        return isConnected;
     }
 
     /**
@@ -69,30 +83,75 @@ public class MostApiService {
             return productsCache;
         }
 
-        try {
-            log.info("Fetching products from Most API: {}", apiUrl);
+        String xmlResponse = fetchXmlWithRetry();
+        List<Map<String, Object>> products = parseProductsFromXML(xmlResponse);
 
-            byte[] xmlBytes = restTemplate.getForObject(apiUrl, byte[].class);
+        // Update cache
+        productsCache = products;
+        cacheTimestamp = System.currentTimeMillis();
 
-            if (xmlBytes == null || xmlBytes.length == 0) {
-                log.error("Received null or empty XML response from Most API");
-                return new ArrayList<>();
+        log.info("Successfully fetched {} products from Most API", products.size());
+        return products;
+    }
+
+    /**
+     * Fetch the feed, retrying on transient failures.
+     *
+     * <p>This used to swallow every exception and return an empty list, which the sync
+     * services could not tell apart from a supplier that genuinely had no stock: the
+     * nightly run recorded SUCCESS with 0 products and nobody was alerted. It now throws,
+     * so the caller's existing catch records FAILED and CronJobService raises CRITICAL.
+     *
+     * @throws ExternalApiException if every attempt fails or the body comes back empty
+     */
+    private String fetchXmlWithRetry() {
+        int attempts = Math.max(1, retryAttempts);
+        Exception lastException = null;
+        int lastStatusCode = 0;
+
+        for (int attempt = 1; attempt <= attempts; attempt++) {
+            try {
+                log.info("Fetching products from Most API: {} (attempt {}/{})", apiUrl, attempt, attempts);
+
+                byte[] xmlBytes = restTemplate.getForObject(apiUrl, byte[].class);
+
+                // An empty body is a failed fetch, not an empty catalogue — retry it.
+                if (xmlBytes == null || xmlBytes.length == 0) {
+                    log.warn("Most API returned an empty body on attempt {}/{}", attempt, attempts);
+                    lastException = new IllegalStateException("empty response body");
+                } else {
+                    log.info("Fetched {} bytes from Most API on attempt {}", xmlBytes.length, attempt);
+                    return new String(xmlBytes, StandardCharsets.UTF_8);
+                }
+
+            } catch (RestClientResponseException e) {
+                lastStatusCode = e.getStatusCode().value();
+                lastException = e;
+                log.warn("Most API returned HTTP {} on attempt {}/{}", lastStatusCode, attempt, attempts);
+            } catch (Exception e) {
+                lastException = e;
+                log.warn("Most API fetch failed on attempt {}/{}: {}", attempt, attempts, e.getMessage());
             }
 
-            String xmlResponse = new String(xmlBytes, StandardCharsets.UTF_8);
-            List<Map<String, Object>> products = parseProductsFromXML(xmlResponse);
-
-            // Update cache
-            productsCache = products;
-            cacheTimestamp = System.currentTimeMillis();
-
-            log.info("Successfully fetched {} products from Most API", products.size());
-            return products;
-
-        } catch (Exception e) {
-            log.error("Error fetching products from Most API", e);
-            return new ArrayList<>();
+            if (attempt < attempts) {
+                // Exponential backoff, same shape as Asbis: 5s → 10s → 20s
+                long delay = retryDelay * (long) Math.pow(2, attempt - 1);
+                log.warn("⟳ Retrying Most API in {}ms", delay);
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new ExternalApiException(
+                            "Most API fetch interrupted during retry backoff", 0, null, ie);
+                }
+            }
         }
+
+        log.error("✗ Most API fetch failed after {} attempts", attempts, lastException);
+        throw new ExternalApiException(
+                "Most API fetch failed after " + attempts + " attempts: "
+                        + (lastException == null ? "unknown cause" : lastException.getMessage()),
+                lastStatusCode, null, lastException);
     }
 
     /**
@@ -123,7 +182,10 @@ public class MostApiService {
             log.info("Successfully parsed {} products from Most XML", products.size());
 
         } catch (Exception e) {
+            // Truncated or malformed XML used to yield an empty list, indistinguishable
+            // from a supplier with no stock. A broken document is a failure.
             log.error("Error parsing Most XML", e);
+            throw new ExternalApiException("Could not parse the Most XML feed: " + e.getMessage(), 0, null, e);
         }
 
         return products;

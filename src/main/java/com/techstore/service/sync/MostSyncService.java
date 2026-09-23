@@ -3,6 +3,7 @@ package com.techstore.service.sync;
 import com.techstore.entity.*;
 import com.techstore.enums.Platform;
 import com.techstore.enums.ProductStatus;
+import com.techstore.exception.SyncException;
 import com.techstore.repository.*;
 import com.techstore.service.MostApiService;
 import com.techstore.util.LogHelper;
@@ -385,6 +386,10 @@ public class MostSyncService {
             List<Map<String, Object>> allProducts = mostApiService.getAllProducts();
             log.info("Fetched {} products from Most API", allProducts.size());
 
+            if (allProducts.isEmpty()) {
+                throw new SyncException("Most returned 0 products — cannot derive manufacturers");
+            }
+
             Set<String> manufacturerNames = allProducts.stream()
                     .map(product -> (String) product.get("manufacturer"))
                     .filter(Objects::nonNull)
@@ -548,6 +553,10 @@ public class MostSyncService {
 
             List<Map<String, Object>> allProducts = mostApiService.getAllProducts();
             log.info("Processing parameters from {} Most products", allProducts.size());
+
+            if (allProducts.isEmpty()) {
+                throw new SyncException("Most returned 0 products — cannot derive parameters");
+            }
 
             Map<String, ParameterData> allParametersData = new HashMap<>();
 
@@ -850,8 +859,11 @@ public class MostSyncService {
             log.info("Fetched {} products from Most API", allProducts.size());
 
             if (allProducts.isEmpty()) {
-                logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, 0, 0, 0, 0, "No products found", startTime);
-                return;
+                // Most has never legitimately sent an empty catalogue — a working night is
+                // ~5 500 products. Recording this as SUCCESS is how the failed run of
+                // 2026-09-23 went unnoticed. The outer catch logs FAILED and rethrows,
+                // which is what raises CRITICAL in CronJobService.
+                throw new SyncException("Most returned 0 products — treating as a failed sync, not an empty feed");
             }
 
             long totalProcessed = 0, totalCreated = 0, totalUpdated = 0, totalErrors = 0;

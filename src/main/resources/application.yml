@@ -293,6 +293,14 @@ most:
   api:
     url: https://portal.mostbg.com/api/product/xml/all?currency=EUR
     enabled: true
+    # The feed is a single ~17 MB XML GET. A working night takes ~70 s end to end,
+    # so the response timeout is deliberately generous; the connection timeout is not.
+    timeout: 180000
+    connection-timeout: 15000
+    # On 2026-09-23 a single transient failure at 01:50 (592 ms, no bytes received)
+    # cost the whole nightly Most sync. Retries with exponential backoff: 5s → 10s → 20s.
+    retry-attempts: 4
+    retry-delay: 5000
   exchange:
     # Prices are stored in EUR, so only a USD -> EUR rate can ever be needed.
     # The feed is requested with ?currency=EUR and currently returns EUR for every
