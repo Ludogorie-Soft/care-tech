@@ -1,7 +1,19 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-18T09:14:14.997Z
-> Files: 648 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-23T10:27:55.202Z
+> Files: 670 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../../../../../tmp/
+
+- `2b_result.md` — ## Стъпка 2б — РЕЗУЛТАТ ✅ 2026-09-18 (~510 tok)
+- `fixes.tsv` — product_id	target_cat	reason (~1721 tok)
+- `hide.tsv` — Кандидати за спиране от продажба (manually_hidden) — аксесоари за дребна бяла техника. (~308 tok)
+- `honest.md` — Честна сметка: какво Е и какво НЕ Е свършено (2026-09-18) (~690 tok)
+- `questions.md` — Отворени въпроси — искат твое решение, не ги местя сам (~472 tok)
+- `step1_result.md` — ## Стъпка 1 — РЕЗУЛТАТ СЛЕД ПУСКАНЕ ✅ 2026-09-18 12:55 (~425 tok)
+- `step2_analysis.md` — Анализ за стъпка 2 (2026-09-18) (~848 tok)
+- `step2a_result.md` — ## Стъпка 2а — РЕЗУЛТАТ ✅ 2026-09-18 13:16 (~476 tok)
+- `step2b.md` — ## Стъпка 2б — предложение (2026-09-18) (~806 tok)
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -11,7 +23,7 @@
 - `MEMORY.md` — Memory Index (~512 tok)
 - `personal_offer_flow.md` — Declares stored (~373 tok)
 - `prod_db_readonly_access.md` (~236 tok)
-- `project_most_api.md` (~136 tok)
+- `project_most_api.md` (~361 tok)
 - `search_visibility_findings.md` (~376 tok)
 - `session_2026_06_03.md` — Backend (`tech-store-api`) (~574 tok)
 - `session_2026_08_19_tekra.md` (~525 tok)
@@ -188,8 +200,11 @@
 - `BLOG_PLAN.md` — План: Блог функционалност (~1556 tok)
 - `blog-article-template.html` (~5142 tok)
 - `categories_202605130941.sql` (~14427 tok)
-- `CATEGORY_CLEANUP_PLAN.md` — Одит и план: категоризация на продуктите (Фаза 5) (~2276 tok)
+- `CATEGORY_CLEANUP_PLAN.md` — Одит и план: категоризация на продуктите (Фаза 5) (~2635 tok)
+- `CATEGORY_MAPPING_OPEN_QUESTIONS.md` — Отворени въпроси от обхода продукт по продукт (~1906 tok)
 - `CATEGORY_MAPPING_PLAN.md` — План: CareTech Категорийна Йерархия + Distributor Mapping (~7659 tok)
+- `CATEGORY_MAPPING_RESULT.md` — Мапване на продукти по категории — продукт по продукт (~3082 tok)
+- `CATEGORY_REPRODUCIBILITY_PLAN.md` — План: възпроизводима категорийна структура (~1173 tok)
 - `CLAUDE.md` — OpenWolf (~57 tok)
 - `COMPARE_PLAN.md` — План: Функционалност за Сравнение на Продукти (~1975 tok)
 - `database_backup_script.txt` (~121 tok)
@@ -364,12 +379,19 @@
 - `45_disable_logistics_filters.sql` — ============================================================================= (~837 tok)
 - `46_final_filter_cleanup.sql` — ============================================================================= (~909 tok)
 - `47_fix_most_prices_to_eur.sql` — ============================================================================ (~3178 tok)
+- `48_make_tablets_visible.sql` — ============================================================================ (~1852 tok)
+- `49_move_water_cooling_under_components.sql` — ============================================================================ (~1527 tok)
 - `5_vali_filters_by_option_count.sql` — Вмъква Vali filter данни за 206 категории (~8000 tok)
+- `50_retire_home_appliances.sql` — ============================================================================ (~1868 tok)
+- `51_migrate_products_from_hidden_categories.sql` — ============================================================================ (~2750 tok)
+- `52_map_products_to_correct_categories.sql` — ============================================================================ (~72643 tok)
+- `53_rename_category_165.sql` — Преименува кат. 165 „Защитни фолиа / стъкла за телефони" → „Защитни фолиа и стъкла", защото скрипт 52 слага в нея и протектори за таблети и конзоли. Пипа САМО name_bg/name_en на един ред; slug остава (ползва се за рутиране). Изисква едновременна промяна в CategoryReorganizationService:683 и MostSyncService:124-125 — иначе POST /reorganize прави дубликат (~1500 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
 - `8_asbis_filters.sql` — Auto-select Asbis is_filter=true по option_count 2-50, с blacklist на packaging/global параметри (~600 tok)
 - `9_hide_empty_categories.sql` — Итеративно скрива категории без видими продукти (show=false); работи рекурсивно нагоре (leaf → parent) (~500 tok)
+- `hide_candidates_appliance_accessories.tsv` — 27 кандидата за `manually_hidden`: дребна домакинска техника и аксесоарите ѝ (AENO, EUREKA, PRESTIGIO, домакински вентилатори, мини хладилник). НЕ се изпълнява от скрипт 52 (~640 tok)
 - `mismatched_products_analysis.md` — Анализ на грешно категоризирани продукти (~13125 tok)
 
 ## src/
@@ -396,7 +418,7 @@
 - `JacksonConfig.java` — Configuration: JacksonConfig (~470 tok)
 - `JwtAuthenticationFilter.java` — Component: JwtAuthenticationFilter (~1305 tok)
 - `OpenApiConfig.java` — Configuration: OpenApiConfig (~712 tok)
-- `RestTemplateConfig.java` — Configuration: RestTemplateConfig (~765 tok)
+- `RestTemplateConfig.java` — Два bean-а с timeout: `asbisRestTemplate` и `mostRestTemplate` (180s response / 15s connect). Използват се с изричен `@Qualifier` в конструктора. НЕ бъркай с `@Primary new RestTemplate()` в WebConfig:18, който няма никакъв timeout (~1183 tok)
 - `S3Config.java` — Configuration: S3Config (~289 tok)
 - `SearchConfig.java` — Seconds a single search query may run before the driver cancels it. (~610 tok)
 - `SearchIndexManager.java` — app.search.postgresql.performance-test was already in application.yml but nothing (~4263 tok)
@@ -642,7 +664,7 @@
 - `Parameter.java` — Entity: Parameter (~544 tok)
 - `ParameterOption.java` — Entity: ParameterOption (~260 tok)
 - `PersonalOffer.java` — Entity: PersonalOffer (~665 tok)
-- `Product.java` — True when an admin hid this product from the admin panel. The sync recomputes (~2836 tok)
+- `Product.java` — True when an admin hid this product from the admin panel. The sync recomputes (~2993 tok)
 - `ProductFlag.java` — Entity: ProductFlag (~231 tok)
 - `ProductParameter.java` — Entity: ProductParameter (~266 tok)
 - `Review.java` — Entity: Review (~219 tok)
@@ -733,21 +755,21 @@
 - `BlogPostService.java` — Service: BlogPostService (~3776 tok)
 - `BlogTagService.java` — Service: BlogTagService (~1138 tok)
 - `CartService.java` — Service: CartService (~1754 tok)
-- `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~13424 tok)
+- `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~12606 tok)
 - `CategoryService.java` — Service: CategoryService (~4270 tok)
 - `CronJobService.java` — Nightly cron (1am). Sync Vali→Tekra→Most→Asbis. Failures logged with Markers.CRITICAL (→ Slack). (~806 tok)
 - `EmailService.java` — Service for sending email notifications (~5028 tok)
 - `FileUploadService.java` — Service: FileUploadService (~7260 tok)
 - `ImageMigrationService.java` — Service: ImageMigrationService (~1434 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
-- `MostApiService.java` — Test API connectivity (~3806 tok)
+- `MostApiService.java` — Тегли и парсва MOST XML feed-а (~17 MB, ~6100 продукта), кеш 10 мин. `fetchXmlWithRetry()` ХВЪРЛЯ `ExternalApiException` при празно тяло/HTTP грешка/счупен XML — вече не връща празен списък. 4 опита, backoff 5→10→20s. `@Qualifier("mostRestTemplate")` (~4936 tok)
 - `OrderService.java` — Creates a new order (~8683 tok)
 - `ParameterService.java` — Service: ParameterService (~9601 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3484 tok)
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Returns the given category ID plus all descendant IDs (recursive). (~2597 tok)
-- `ProductService.java` — Service: ProductService (~13811 tok)
+- `ProductService.java` — Service: ProductService (~14074 tok)
 - `ReviewService.java` — Service: ReviewService (~946 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
@@ -765,9 +787,9 @@
 
 ## src/main/java/com/techstore/service/sync/
 
-- `AsbisSyncService.java` — AsbisSyncService (~14164 tok)
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~15696 tok)
-- `TekraSyncService.java` — Service: TekraSyncService (~23855 tok)
+- `AsbisSyncService.java` — AsbisSyncService (~14814 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~17476 tok)
+- `TekraSyncService.java` — Service: TekraSyncService (~23955 tok)
 - `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15844 tok)
 
 ## src/main/java/com/techstore/util/
@@ -787,7 +809,7 @@
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` (~2828 tok)
+- `application.yml` (~2973 tok)
 - `logback-spring.xml` (~249 tok)
 
 ## src/main/resources/db/
@@ -821,6 +843,7 @@
 - `V34__increase_discount_precision.sql` — Increase discount column precision to support fractional percentages (~53 tok)
 - `V35__add_deleted_flag_to_products.sql` — Soft-delete support for products. (~80 tok)
 - `V36__add_manually_hidden_to_products.sql` — Separates "an admin deliberately hid this product" from "the sync hid it". (~571 tok)
+- `V37__add_manually_categorized_to_products.sql` — Маркира продукти, чиято категория е определена ръчно (админ панел или скрипт 52). (~237 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)
@@ -853,7 +876,12 @@
 
 ## src/test/java/com/techstore/service/
 
+- `MostApiServiceTest.java` — 11 теста с Mockito за провалите на MOST feed-а: празно/null тяло, connection error, изчерпани опити, възстановяване след преходен отказ, HTTP статус, счупен XML, изключен feed, кеширане на успех и НЕкеширане на провал (~1999 tok)
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
+
+## src/test/java/com/techstore/service/sync/
+
+- `MostCategoryResolutionTest.java` — The Most feed carries 222 distinct (category, subcategory) pairs against only 29 (~2405 tok)
 
 ## src/test/java/com/techstore/util/
 

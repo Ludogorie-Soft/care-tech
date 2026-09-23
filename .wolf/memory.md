@@ -3545,3 +3545,115 @@
 | 14:16 | Session end: 121 writes across 39 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~187044 tok |
 | 14:19 | Created ../../../../../../tmp/honest.md | — | ~736 |
 | 14:19 | ЧЕСТНА СМЕТКА по въпрос на потребителя: НЕ сме обходили продуктите поединично. Работено с правила на ниво категория; 341 от 7469 видими продукта са местени, ~95% непоглеждани. Груповото преместване на "Мрежови продукти" внесе суич и кабел в "USB хъбове". Първоначалното оплакване (грешна ВИДИМА категория) е адресирано само частично | CATEGORY_CLEANUP_PLAN.md | предложен модел: Claude API batch класификация с confidence, както при параметрите | ~14k |
+| 14:20 | Session end: 122 writes across 40 files (prod_db_readonly_access.md, search_visibility_findings.md, MEMORY.md, SEARCH_AUDIT_PLAN.md, 47_fix_most_prices_to_eur.sql) | 18 reads | ~187832 tok |
+
+## Session: 2026-09-18 14:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:29 | Created ../../../../../../tmp/fixes.tsv | — | ~1721 |
+| 14:38 | Created ../../../../../../tmp/hide.tsv | — | ~308 |
+| 14:44 | Created ../../../../../../tmp/questions.md | — | ~504 |
+| 14:54 | Created src/main/resources/db/migration/V37__add_manually_categorized_to_products.sql | — | ~237 |
+| 14:54 | Edited src/main/java/com/techstore/entity/Product.java | expanded (+11 lines) | ~192 |
+| 14:54 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 condition(s) | ~100 |
+| 14:54 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | added 1 condition(s) | ~101 |
+| 14:55 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | added 1 condition(s) | ~98 |
+| 14:55 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | added 1 condition(s) | ~161 |
+| 14:55 | Edited src/main/java/com/techstore/service/ProductService.java | inline fix | ~14 |
+| 14:55 | Edited src/main/java/com/techstore/service/ProductService.java | added 1 condition(s) | ~291 |
+| 15:00 | Created CATEGORY_MAPPING_OPEN_QUESTIONS.md | — | ~888 |
+| 15:02 | Created CATEGORY_MAPPING_RESULT.md | — | ~1482 |
+| 15:40 | Обход продукт по продукт: 7371 видими продукта срещу 222 категории → 1105 поправки; V37 manually_categorized + защити в MOST/TEKRA/ASBIS sync + ProductService.applyAdminCategory; скрипт 52 | scripts/52_map_products_to_correct_categories.sql, V37, Product.java, 3 sync сервиза, ProductService.java, CATEGORY_MAPPING_RESULT.md | компилира, 90/90 теста, валидиран read-only срещу прод | ~200k |
+| 15:03 | Session end: 13 writes across 11 files (fixes.tsv, hide.tsv, questions.md, V37__add_manually_categorized_to_products.sql, Product.java) | 3 reads | ~9368 tok |
+
+## Session: 2026-09-18 17:04
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-18 17:30
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:51 | Edited scripts/52_map_products_to_correct_categories.sql | 8→12 lines | ~198 |
+| 17:52 | Edited scripts/52_map_products_to_correct_categories.sql | 10→15 lines | ~250 |
+| 17:54 | Created CATEGORY_MAPPING_RESULT.md | — | ~2434 |
+| 18:24 | Created scripts/hide_candidates_appliance_accessories.tsv | — | ~482 |
+| 22:14 | Created CATEGORY_MAPPING_OPEN_QUESTIONS.md | — | ~1597 |
+| 23:40 | Обход на 14 565 невидими-но-застрашени продукта, продукт по продукт | /tmp/todo_sorted.txt | 3 032 поправки | ~410000 |
+| 23:45 | Кръстосана проверка по 20 сигнала върху ПЪЛНИ имена от прода | /tmp/unfixed_full.tsv | 0 нови находки | ~9000 |
+| 23:50 | Валидация на скрития набор срещу прод (read-only) | /tmp/val2.sql | 0 грешки, 3 031 ОК | ~1200 |
+| 23:55 | Сливане: 1 114 видими + 3 032 скрити = 4 146 | scripts/52_map_products_to_correct_categories.sql | 4 289 реда, guard 4146 | ~3500 |
+| 23:58 | Обновени отчетът и отворените въпроси | CATEGORY_MAPPING_RESULT.md, CATEGORY_MAPPING_OPEN_QUESTIONS.md | — | ~4000 |
+| 00:05 | mvn compile + test с JAVA_HOME=zulu-17 | pom.xml | 90/90, BUILD SUCCESS (~17 мин) | ~600 |
+| 23:53 | Session end: 5 writes across 4 files (52_map_products_to_correct_categories.sql, CATEGORY_MAPPING_RESULT.md, hide_candidates_appliance_accessories.tsv, CATEGORY_MAPPING_OPEN_QUESTIONS.md) | 3 reads | ~5315 tok |
+| 11:56 | Edited scripts/52_map_products_to_correct_categories.sql | 10→11 lines | ~172 |
+| 11:56 | Edited CATEGORY_MAPPING_RESULT.md | 7→8 lines | ~114 |
+| 11:57 | Edited CATEGORY_MAPPING_RESULT.md | 7→7 lines | ~49 |
+| 11:57 | Edited CATEGORY_MAPPING_RESULT.md | 8→9 lines | ~158 |
+| 11:57 | Edited CATEGORY_MAPPING_RESULT.md | expanded (+25 lines) | ~603 |
+| 11:57 | Edited CATEGORY_MAPPING_RESULT.md | 20→25 lines | ~335 |
+| 11:58 | Edited CATEGORY_MAPPING_OPEN_QUESTIONS.md | expanded (+15 lines) | ~298 |
+| 00:40 | Препроверка на 7 371 видими продукта с ПЪЛНИ имена (3 метода) | /tmp/vis_full.tsv | 52 нови поправки | ~180000 |
+| 00:55 | Валидация на 52-те срещу прод; слети в скрипт 52 | scripts/52_map_products_to_correct_categories.sql | 4 198 реда, guard 4198 | ~2500 |
+| 01:00 | Обновени отчет и отворени въпроси (нова т.9, счупени имена) | CATEGORY_MAPPING_*.md | — | ~3000 |
+| 11:59 | Session end: 12 writes across 4 files (52_map_products_to_correct_categories.sql, CATEGORY_MAPPING_RESULT.md, hide_candidates_appliance_accessories.tsv, CATEGORY_MAPPING_OPEN_QUESTIONS.md) | 4 reads | ~7167 tok |
+| 12:02 | Edited CATEGORY_MAPPING_OPEN_QUESTIONS.md | expanded (+10 lines) | ~352 |
+| 12:02 | Edited CATEGORY_MAPPING_RESULT.md | 2→3 lines | ~52 |
+| 12:03 | Edited CATEGORY_MAPPING_RESULT.md | 1→6 lines | ~85 |
+| 01:20 | По решение на потребителя: 6 защитни фолиа ACER за таблет → кат.165 | scripts/52_map_products_to_correct_categories.sql | 4 204 реда, guard 4204 | ~2500 |
+| 12:03 | Session end: 15 writes across 4 files (52_map_products_to_correct_categories.sql, CATEGORY_MAPPING_RESULT.md, hide_candidates_appliance_accessories.tsv, CATEGORY_MAPPING_OPEN_QUESTIONS.md) | 4 reads | ~7691 tok |
+| 12:05 | Edited scripts/52_map_products_to_correct_categories.sql | 2→2 lines | ~41 |
+| 12:06 | Edited scripts/52_map_products_to_correct_categories.sql | 4→9 lines | ~157 |
+| 12:06 | Edited CATEGORY_MAPPING_RESULT.md | 2→6 lines | ~84 |
+| 12:06 | Edited CATEGORY_MAPPING_RESULT.md | expanded (+11 lines) | ~200 |
+| 12:06 | Edited CATEGORY_MAPPING_OPEN_QUESTIONS.md | expanded (+6 lines) | ~436 |
+| 01:35 | По решение: Switch протектори + Nokia Glass Edge → кат.165 (правило: всички протектори) | scripts/52_map_products_to_correct_categories.sql | 4 208 реда, guard 4208 | ~3000 |
+| 12:07 | Session end: 20 writes across 4 files (52_map_products_to_correct_categories.sql, CATEGORY_MAPPING_RESULT.md, hide_candidates_appliance_accessories.tsv, CATEGORY_MAPPING_OPEN_QUESTIONS.md) | 4 reads | ~8674 tok |
+| 12:13 | Created scripts/53_rename_category_165.sql | — | ~1378 |
+| 12:13 | Edited src/main/java/com/techstore/service/CategoryReorganizationService.java | 1→5 lines | ~113 |
+| 12:13 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 2→6 lines | ~127 |
+| 12:15 | Edited scripts/53_rename_category_165.sql | expanded (+6 lines) | ~350 |
+| 12:15 | Edited src/test/java/com/techstore/service/sync/MostCategoryResolutionTest.java | modified toleratesNullName() | ~323 |
+| 12:21 | Edited CATEGORY_MAPPING_OPEN_QUESTIONS.md | 1→3 lines | ~54 |
+| 01:55 | Проверка кой код държи името на кат.165 твърдо кодирано | CategoryReorganizationService, MostSyncService | 2 места, и двете поправени | ~8000 |
+| 02:00 | Създаден scripts/53_rename_category_165.sql + 5 нови теста | scripts/53_*.sql, MostCategoryResolutionTest | парсва read-only срещу прод | ~4000 |
+
+## Session: 2026-09-21 12:28
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:35 | Тестовете минават с 5-те нови case-а за протектори | MostCategoryResolutionTest | 95/95 BUILD SUCCESS (беше 90) | ~600 |
+| 12:36 | Логнат bug-525 (твърдо кодирани имена на категории) | .wolf/buglog.json | — | ~700 |
+| 12:31 | Created scripts/52a_add_manually_categorized_column.sql | — | ~1215 |
+| 13:05 | Диагноза на P0001 от скрипт 52: прод е на Flyway V36, V37 идва с деплоя | flyway_schema_history (read-only) | предпазителят е сработил правилно | ~900 |
+| 13:08 | Създаден scripts/52a_add_manually_categorized_column.sql | scripts/52a_*.sql | DO блокът парсва срещу прод | ~1400 |
+| 12:32 | Session end: 1 writes across 1 files (52a_add_manually_categorized_column.sql) | 0 reads | ~1302 tok |
+
+## Session: 2026-09-23 13:06
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:20 | Верификация на 52+53 срещу прод (read-only): V37 приложена, 4208/4208 на място | — | всички 8 проверки чисти | ~1500 |
+| 10:22 | Изтрит scripts/52a_add_manually_categorized_column.sql (излишен) | scripts/, .wolf/anatomy.md | — | ~200 |
+| 13:11 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/project_most_api.md | — | ~355 |
+| 10:15 | Диагноза защо MOST feed-ът дава 0 продукта | MostApiService.java, MostSyncService.java, sync_logs | URL-ът е ОК; тих провал + без retry | ~3500 |
+| 13:11 | Session end: 1 writes across 1 files (project_most_api.md) | 2 reads | ~7216 tok |
+| 13:17 | Edited src/main/java/com/techstore/config/RestTemplateConfig.java | modified mostRestTemplate() | ~501 |
+| 13:17 | Edited src/main/resources/application.yml | expanded (+8 lines) | ~154 |
+| 13:17 | Edited src/main/java/com/techstore/service/MostApiService.java | added 2 import(s) | ~100 |
+| 13:17 | Edited src/main/java/com/techstore/service/MostApiService.java | expanded (+9 lines) | ~198 |
+| 13:18 | Edited src/main/java/com/techstore/service/MostApiService.java | added 1 condition(s) | ~981 |
+| 13:18 | Edited src/main/java/com/techstore/service/MostApiService.java | modified catch() | ~132 |
+| 13:18 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | updateSyncLogSimple() → SyncException() | ~135 |
+| 13:18 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 condition(s) | ~103 |
+| 13:18 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 condition(s) | ~87 |
+| 13:18 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | added 1 import(s) | ~34 |
+| 13:19 | Edited src/main/java/com/techstore/service/MostApiService.java | error() → size() | ~268 |
+| 13:19 | Created src/test/java/com/techstore/service/MostApiServiceTest.java | — | ~1999 |
+| 10:45 | Поправени 3 неща по MOST sync: хвърляне вместо празен списък, FAILED при 0, mostRestTemplate + retry | MostApiService, MostSyncService, RestTemplateConfig, application.yml | компилира чисто | ~6000 |
+| 10:50 | Нов MostApiServiceTest — 11 теста | src/test/.../MostApiServiceTest.java | 11/11 минават | ~2500 |
+| 10:58 | Пълен test suite след трите поправки | — | 106/106 BUILD SUCCESS (беше 95) | ~800 |
+| 13:25 | Session end: 13 writes across 6 files (project_most_api.md, RestTemplateConfig.java, application.yml, MostApiService.java, MostSyncService.java) | 6 reads | ~23113 tok |
+| 13:27 | Edited src/main/java/com/techstore/service/ProductService.java | modified updateProductFieldsFromRest() | ~40 |

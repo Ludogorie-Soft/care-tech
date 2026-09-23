@@ -8353,6 +8353,363 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-18T14:30:00.000Z"
+    },
+    {
+      "id": "bug-510",
+      "timestamp": "2026-09-18T11:54:52.743Z",
+      "error_message": "Wrong condition in logic",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Condition was: if (isNew)",
+      "fix": "Changed to: if (isNew || !Boolean.TRUE.equals(product.getManuallyC)",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T11:54:52.743Z"
+    },
+    {
+      "id": "bug-511",
+      "timestamp": "2026-09-18T11:55:29.949Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T11:55:29.949Z"
+    },
+    {
+      "id": "bug-511",
+      "timestamp": "2026-09-18T15:40:00Z",
+      "error_message": "Ръчни корекции на категория се губят след нощната синхронизация",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "MostSyncService:1018 и TekraSyncService:1124/:1375 присвояват категория безусловно при всеки прогон; AsbisSyncService:663 - винаги когато мапингът от feed-а успее. Само ValiSyncService задава категория единствено при създаване.",
+      "fix": "Нова колона products.manually_categorized (V37) по модела на manually_hidden (V36). Трите sync сервиза прескачат присвояването при вдигнат флаг. ProductService.applyAdminCategory вдига флага при реална смяна на категория от админ панела.",
+      "tags": [
+        "sync",
+        "categories",
+        "most",
+        "tekra",
+        "asbis",
+        "manually_categorized",
+        "phase5"
+      ],
+      "related_bugs": [
+        "bug-496",
+        "bug-510"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T15:40:00Z"
+    },
+    {
+      "id": "bug-513",
+      "timestamp": "2026-09-18T14:51:40.154Z",
+      "error_message": "Significant refactor of ",
+      "file": "scripts/52_map_products_to_correct_categories.sql",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 8→12 lines (7 removed) | Also: -- Кофите, които се изпразват — коренови категории; AND p.deleted=false AND p.image_url<>'')          ",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "sql"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-18T14:52:11.858Z"
+    },
+    {
+      "id": "bug-514",
+      "timestamp": "2026-09-18T23:30:00Z",
+      "error_message": "grep връща празно / „Binary file matches\" върху работен файл с български имена",
+      "file": "/tmp/todo_sorted.txt, /tmp/c66.txt",
+      "root_cause": "Имената бяха отрязани с left(name, 56), което среже многобайтов кирилски знак наполовина. Полученият невалиден UTF-8 кара BSD grep да третира файла като двоичен и да не печата съвпадения.",
+      "fix": "LC_ALL=C и grep -a при всяка работа с такива файлове; за трайно чистене — iconv -f UTF-8 -t UTF-8 -c. По-добре: не режи по байтове, режи по знаци или вземай пълните имена.",
+      "tags": [
+        "utf-8",
+        "grep",
+        "bsd",
+        "truncation",
+        "encoding"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-18T23:30:00Z"
+    },
+    {
+      "id": "bug-515",
+      "timestamp": "2026-09-18T23:35:00Z",
+      "error_message": "Кат. 179 „Геймърски аксесоари\" изглеждаше чиста при сканиране, а съдържаше 61 стола, 9 бюра, 22 мишки и 17 клавиатури",
+      "file": "/tmp/todo_sorted.txt",
+      "root_cause": "Сканирах съкратени на 56 знака имена. При геймърската периферия името е само модел (CORSAIR K70 MAX RGB Magnetic-Mechanical...) и класифициращата дума пада след 56-ия знак.",
+      "fix": "Изтеглих пълните имена от прода (left(name,160)) за кат. 179 и прегледах наново; после пуснах кръстосана проверка по 20 сигнала върху пълни имена за целия скрит набор.",
+      "tags": [
+        "categorization",
+        "truncation",
+        "false-negative",
+        "sweep"
+      ],
+      "related_bugs": [
+        "bug-514"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T23:35:00Z"
+    },
+    {
+      "id": "bug-516",
+      "timestamp": "2026-09-18T23:20:00Z",
+      "error_message": "psql: ERROR: syntax error at or near \"—\"",
+      "file": "/tmp/val2.sql",
+      "root_cause": "Генерирах VALUES списък направо от .tsv файла, който съдържаше редове-коментари, започващи с #. Те влязоха в SQL-а като текст.",
+      "fix": "Филтрирай с grep -av '^#' и awk 'NF>=2 && $1 ~ /^[0-9]+$/ && $2 ~ /^[0-9]+$/' преди да генерираш SQL от работен файл.",
+      "tags": [
+        "sql",
+        "codegen",
+        "tsv",
+        "validation"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-18T23:20:00Z"
+    },
+    {
+      "id": "bug-517",
+      "timestamp": "2026-09-19T00:00:00Z",
+      "error_message": "mvn compile: Fatal error compiling: java.lang.ExceptionInInitializerError: com.sun.tools.javac.code.TypeTag :: UNKNOWN",
+      "file": "pom.xml",
+      "root_cause": "Системният java е OpenJDK 21.0.12; версията на Lombok в проекта не поддържа javac от 21. pom.xml иска Java 17.",
+      "fix": "export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home преди mvn. Компилира и минава 90/90.",
+      "tags": [
+        "maven",
+        "lombok",
+        "jdk",
+        "toolchain",
+        "build"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "bug-518",
+      "timestamp": "2026-09-21T08:56:54.881Z",
+      "error_message": "Significant refactor of ",
+      "file": "CATEGORY_MAPPING_RESULT.md",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 7→8 lines (2 removed) | Also: ### 2. Първият проход четеше СЪКРАТЕНИ имена; проход не видя. Кръстосаната проверка по-горе също",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-21T08:57:31.250Z"
+    },
+    {
+      "id": "bug-519",
+      "timestamp": "2026-09-21T08:58:26.221Z",
+      "error_message": "Significant refactor of ",
+      "file": "CATEGORY_MAPPING_OPEN_QUESTIONS.md",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 10→25 lines (7 removed) | Also: ## 9. Защитни фолиа за таблети — няма къде; Скрипт 52 мести 41 калъфа ASUS/ACER от „Аксесоари ",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-21T09:02:00.183Z"
+    },
+    {
+      "id": "bug-518",
+      "timestamp": "2026-09-21T00:45:00Z",
+      "error_message": "41 калъфа за таблет останаха в кат.47 след пълния обход на видимите продукти",
+      "file": "scripts/52_map_products_to_correct_categories.sql",
+      "root_cause": "Обход A четеше имената съкратени на 56 знака И разчиташе на текстов филтър по ключова дума. Имената на ASUS/ACER калъфите са само модели (ASUS TRICOVER ME180A BLACK) — нито 'калъф', нито 'case', нито 'tablet'. Нито съкращаването, нито филтърът ги показва.",
+      "fix": "Отделен метод: извади всички имена без кирилица И без общо съществително за вид продукт → 830 видими продукта в 18 категории → ръчен преглед. Оттам 41-те калъфа. Добавени в скрипт 52 (кат. 41).",
+      "tags": [
+        "categorization",
+        "false-negative",
+        "opaque-names",
+        "method"
+      ],
+      "related_bugs": [
+        "bug-515"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-21T00:45:00Z"
+    },
+    {
+      "id": "bug-521",
+      "timestamp": "2026-09-21T09:05:52.646Z",
+      "error_message": "Wrong reference: 3032 should be 3033",
+      "file": "scripts/52_map_products_to_correct_categories.sql",
+      "root_cause": "Used \"3032\" instead of \"3033\"",
+      "fix": "Changed 3032 → 3033",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "sql"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-21T09:05:52.646Z"
+    },
+    {
+      "id": "bug-522",
+      "timestamp": "2026-09-21T09:06:16.012Z",
+      "error_message": "Significant refactor of ",
+      "file": "scripts/52_map_products_to_correct_categories.sql",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 4→9 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "sql"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-21T09:06:16.012Z"
+    },
+    {
+      "id": "bug-523",
+      "timestamp": "2026-09-21T09:06:40.690Z",
+      "error_message": "Significant refactor of ",
+      "file": "CATEGORY_MAPPING_RESULT.md",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 4→15 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-21T09:06:40.690Z"
+    },
+    {
+      "id": "bug-524",
+      "timestamp": "2026-09-21T09:15:27.064Z",
+      "error_message": "Significant refactor of ",
+      "file": "scripts/53_rename_category_165.sql",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 14→20 lines (9 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "sql"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-21T09:15:27.064Z"
+    },
+    {
+      "id": "bug-525",
+      "timestamp": "2026-09-21T12:35:00Z",
+      "error_message": "6 ACER защитни фолиа за таблет стояха в кат. 47 „Аксесоари за лаптопи/таблети\" вместо в 165; преименуването на 165 щеше да ги върне там при следващия MOST sync",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "MostSyncService:124-125 държи overrides „protect film\" и „screen protector\" с ТВЪРДО КОДИРАНО целево име, което се резолвва по categories.name_bg (MostSyncService:986). Същото и в CategoryReorganizationService:683 (VALI_SUBCATEGORIES), където reorganizeValiCategories СЪЗДАВА категорията, ако не я намери по име — значи разминаване код/база в КОЯТА И ДА Е посока води до видим празен дубликат при ръчен POST /reorganize.",
+      "fix": "Двата override-а пренасочени към „Защитни фолиа и стъкла\" + същото име в VALI_SUBCATEGORIES; scripts/53_rename_category_165.sql преименува реда в базата; 5 параметризирани теста в MostCategoryResolutionTest (95/95 минават). Правило при преименуване на категория: първо grep-ни името като литерал в src/, после пиши скрипта, и НЕ викай POST /reorganize между деплоя на кода и пускането на скрипта.",
+      "tags": [
+        "categories",
+        "rename",
+        "hardcoded-name",
+        "most-sync",
+        "vali-reorganize",
+        "duplicate-category",
+        "phase5"
+      ],
+      "related_bugs": [
+        "bug-514",
+        "bug-515"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-21T12:35:00Z"
+    },
+    {
+      "id": "bug-526",
+      "timestamp": "2026-09-21T13:05:00Z",
+      "error_message": "SQL Error [P0001]: ERROR: ПРЕКЪСНАТО: колоната manually_categorized липсва. Деплойни миграция V37 и кода преди този скрипт.",
+      "file": "scripts/52_map_products_to_correct_categories.sql",
+      "root_cause": "НЕ е дефект — предпазителят от Секция A сработи правилно. Продукцията е на Flyway V36 (flyway_schema_history: installed_rank 35, version 36, 2026-09-18). V37 се прилага при СТАРТИРАНЕ на приложението, т.е. чак при деплой на кода. Потребителят пусна скрипт 52 от GUI клиента преди деплоя.",
+      "fix": "Обяснен редът на деплой + създаден scripts/52a_add_manually_categorized_column.sql за случая, в който 52 трябва да тръгне преди деплоя. DDL-ът е ДУМА ПО ДУМА същият като V37 (и двата стейтмънта с IF NOT EXISTS), затова Flyway после минава като no-op без checksum проблем. Ключово предупреждение: колоната сама по себе си не пази нищо — чете я само новият код, затова между скрипт 52 и деплоя не бива да мине нощен sync.",
+      "tags": [
+        "flyway",
+        "v37",
+        "manually_categorized",
+        "phase5",
+        "deploy-order",
+        "guard-working-as-intended",
+        "script-52"
+      ],
+      "related_bugs": [
+        "bug-525"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-21T13:05:00Z"
+    },
+    {
+      "id": "bug-527",
+      "timestamp": "2026-09-23T10:15:00Z",
+      "error_message": "MOST_PRODUCTS = 0 обработени на 2026-09-23 01:50, status SUCCESS, error_message 'No products found'",
+      "file": "src/main/java/com/techstore/service/MostApiService.java",
+      "root_cause": "getAllProducts() (MostApiService:92-95) връща ПРАЗЕН списък при всяка Exception — HTTP грешка, timeout, парс грешка. MostSyncService:852-854 приема празния списък за валиден резултат и записва LOG_STATUS_SUCCESS. Тоест прекъснат fetch е неразличим от празен feed. Освен това MOST ползва гол new RestTemplate() (WebConfig.java:18) — БЕЗ timeout и БЕЗ retry, докато ASBIS има asbisRestTemplate с timeout 300s и 5 опита (application.yml:288-290). Един-единствен преходен отказ отменя цялата нощна синхронизация.",
+      "fix": "ПОПРАВЕНО (3 промени). (1) MostApiService.fetchXmlWithRetry() хвърля ExternalApiException вместо да връща празен списък — празно тяло, HTTP грешка и счупен XML вече са провали; parseProductsFromXML също хвърля. (2) MostSyncService хвърля SyncException при 0 продукта и в трите метода (продукти, производители, параметри) — външният catch логва LOG_STATUS_FAILED и препраща, което вдига CRITICAL в CronJobService → Slack. (3) Нов bean mostRestTemplate (RestTemplateConfig) с timeout 180s/connect 15s вместо голия @Primary new RestTemplate(); retry 4 опита с backoff 5→10→20s по образеца на ASBIS. testConnection() вече не преглъща — endpoint-ът връща истинската причина. 11 нови теста в MostApiServiceTest.",
+      "tags": [
+        "most-sync",
+        "silent-failure",
+        "no-retry",
+        "resttemplate",
+        "sync-logs",
+        "false-success",
+        "fixed"
+      ],
+      "related_bugs": [
+        "bug-526"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-23T10:15:00Z"
+    },
+    {
+      "id": "bug-528",
+      "timestamp": "2026-09-23T10:18:04.482Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/MostApiService.java",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 37→82 lines (4 removed) | Also: * Test API connectivity; try {",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-23T10:19:18.506Z"
+    },
+    {
+      "id": "bug-529",
+      "timestamp": "2026-09-23T10:18:22.137Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-23T10:18:22.137Z"
     }
   ]
 }
