@@ -94,12 +94,18 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         // ── Fully public ────────────────────────────────────────────────────
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/products/**").permitAll()
                         .requestMatchers("/api/categories/**").permitAll()
                         .requestMatchers("/api/images/**").permitAll()
                         .requestMatchers("/api/cart/**").authenticated()
                         .requestMatchers("/api/manufacturers/**").permitAll()
-                        .requestMatchers("/api/parameters/**").permitAll()
+
+                        // ── Products & parameters: reads and the public search POSTs are open; every write is admin-only ──
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/products/search", "/api/products/categories/*/filter-facets",
+                                "/api/products/categories/*/filters", "/api/products/categories/*/filters/translate-legacy").permitAll()
+                        .requestMatchers("/api/products/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/parameters/**").permitAll()
+                        .requestMatchers("/api/parameters/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .requestMatchers("/api/speedy/**").permitAll()
                         .requestMatchers("/api/subscriptions/**").permitAll()
                         .requestMatchers("/api/contact/**").permitAll()

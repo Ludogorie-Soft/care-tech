@@ -358,6 +358,26 @@ public class MostSyncService {
         return targetCategoryName;
     }
 
+    /**
+     * Category names are not unique — "Слушалки" and "Мрежови кабели" each exist three times,
+     * once in the visible tree and twice in the invisible Asbis one. With a plain toMap the winner
+     * was whichever the repository happened to return first, so a product could land in a category
+     * nobody can browse to. Visible wins, then lowest id, which makes the choice deterministic as
+     * well as correct. Keyed by lower-cased, trimmed name_bg.
+     */
+    static Map<String, Category> indexCategoriesByName(List<Category> categories) {
+        return categories.stream()
+                .filter(c -> c.getNameBg() != null)
+                .sorted(Comparator
+                        .comparing((Category c) -> !Boolean.TRUE.equals(c.getShow()))
+                        .thenComparing(Category::getId))
+                .collect(Collectors.toMap(
+                        c -> c.getNameBg().toLowerCase().trim(),
+                        c -> c,
+                        (existing, duplicate) -> existing
+                ));
+    }
+
     static String resolveTargetCategoryName(String category, String subcategory) {
         if (category == null || category.isBlank()) {
             return null;
@@ -560,6 +580,10 @@ public class MostSyncService {
 
             Map<String, ParameterData> allParametersData = new HashMap<>();
 
+            // Same resolution as product sync, so parameters are linked to the category the product lands in.
+            // findByNameBg used to throw on non-unique names ("Монитори", "Процесори"...) and skip the product.
+            Map<String, Category> categoriesByName = indexCategoriesByName(categoryRepository.findAll());
+
             for (Map<String, Object> product : allProducts) {
                 try {
                     String categoryName = (String) product.get("category");
@@ -567,14 +591,13 @@ public class MostSyncService {
 
                     // Resolve category — if unmapped or missing, still collect parameters
                     Category category = null;
-                    String targetCategoryName = MOST_CATEGORY_MAPPING.get(categoryName);
+                    String targetCategoryName = resolveTargetCategoryName(categoryName, (String) product.get("subcategory"));
                     if (targetCategoryName == null) {
                         log.debug("Unknown Most category '{}' — collecting parameters without category", categoryName);
                     } else {
-                        Optional<Category> categoryOpt = categoryRepository.findByNameBg(targetCategoryName);
-                        if (categoryOpt.isPresent()) {
-                            category = categoryOpt.get();
-                        } else {
+                        targetCategoryName = applyLaptopNameOverride(targetCategoryName, (String) product.get("name"));
+                        category = categoriesByName.get(targetCategoryName.toLowerCase().trim());
+                        if (category == null) {
                             log.warn("Target category '{}' not found in database — collecting parameters without category",
                                     targetCategoryName);
                         }
@@ -731,21 +754,6 @@ public class MostSyncService {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS,
                     allParametersData.size(), created, 0, 0, message, startTime);
 
-            // Auto-enable filtering for newly created parameters that have 2–50 options.
-            // is_filter is left NULL by default; this query marks them as filterable
-            // so they appear in the filter panel without requiring a manual admin action.
-            try {
-                int isFilterUpdated = entityManager.createNativeQuery(
-                        "UPDATE category_parameters SET is_filter = true " +
-                        "WHERE is_filter IS NULL AND parameter_id IN (" +
-                        "  SELECT parameter_id FROM parameter_options " +
-                        "  GROUP BY parameter_id HAVING COUNT(*) BETWEEN 2 AND 50)")
-                        .executeUpdate();
-                log.info("Auto-set is_filter=true for {} category_parameter entries", isFilterUpdated);
-            } catch (Exception e) {
-                log.error("Failed to auto-set is_filter after MOST parameters sync: {}", e.getMessage());
-            }
-
             log.info("=== Most Parameters Sync Completed ===");
             log.info("   Unique parameters: {}", allParametersData.size());
             log.info("   Created: {}, Reused: {}", created, reused);
@@ -819,21 +827,9 @@ public class MostSyncService {
                     ));
             log.info("Loaded {} manufacturers", manufacturerIdsByName.size());
 
-            // Category names are not unique — "Слушалки" and "Мрежови кабели" each exist
-            // three times, once in the visible tree and twice in the invisible Asbis one.
-            // With a plain toMap the winner was whichever the repository happened to return
-            // first, so a product could land in a category nobody can browse to. Visible
-            // wins, then lowest id, which makes the choice deterministic as well as correct.
-            Map<String, Long> categoryIdsByName = categoryRepository.findAll().stream()
-                    .filter(c -> c.getNameBg() != null)
-                    .sorted(Comparator
-                            .comparing((Category c) -> !Boolean.TRUE.equals(c.getShow()))
-                            .thenComparing(Category::getId))
-                    .collect(Collectors.toMap(
-                            c -> c.getNameBg().toLowerCase().trim(),
-                            Category::getId,
-                            (existing, duplicate) -> existing
-                    ));
+            Map<String, Long> categoryIdsByName = indexCategoriesByName(categoryRepository.findAll())
+                    .entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getId()));
             log.info("Loaded {} categories", categoryIdsByName.size());
 
             Map<String, Long> parameterIdsByMostKey = parameterRepository.findAll().stream()
@@ -925,25 +921,18 @@ public class MostSyncService {
             // Catch-all: ensure category_parameters rows exist for every parameter
             // that actually landed on a MOST product. REQUIRES_NEW per-product transactions
             // do NOT update category_parameters, so some associations may be missing.
+            // Links are inserted with is_filter = false: a supplier parameter never becomes a filter on its own.
+            // The column defaults to TRUE, which used to turn every new link into a visible, often duplicate, group.
             try {
                 int cpInserted = entityManager.createNativeQuery(
-                        "INSERT INTO category_parameters (category_id, parameter_id) " +
-                        "SELECT DISTINCT pr.category_id, pp.parameter_id " +
+                        "INSERT INTO category_parameters (category_id, parameter_id, is_filter) " +
+                        "SELECT DISTINCT pr.category_id, pp.parameter_id, false " +
                         "FROM product_parameters pp " +
                         "JOIN products pr ON pr.id = pp.product_id " +
                         "WHERE pr.platform = 'MOST' " +
                         "ON CONFLICT (category_id, parameter_id) DO NOTHING")
                         .executeUpdate();
                 log.info("MOST catch-all: inserted {} missing category_parameters rows", cpInserted);
-
-                // Auto-enable filtering for newly linked parameters
-                int isFilterUpdated = entityManager.createNativeQuery(
-                        "UPDATE category_parameters SET is_filter = true " +
-                        "WHERE is_filter IS NULL AND parameter_id IN (" +
-                        "  SELECT parameter_id FROM parameter_options " +
-                        "  GROUP BY parameter_id HAVING COUNT(*) BETWEEN 2 AND 50)")
-                        .executeUpdate();
-                log.info("MOST catch-all: auto-set is_filter=true for {} entries", isFilterUpdated);
             } catch (Exception e) {
                 log.error("Failed MOST catch-all category_parameters sync: {}", e.getMessage());
             }

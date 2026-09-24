@@ -465,19 +465,6 @@ public class AsbisSyncService {
                 }
             }
 
-            // Auto-enable filtering for newly created parameters that have 2–50 options.
-            try {
-                int isFilterUpdated = entityManager.createNativeQuery(
-                        "UPDATE category_parameters SET is_filter = true " +
-                        "WHERE is_filter IS NULL AND parameter_id IN (" +
-                        "  SELECT parameter_id FROM parameter_options " +
-                        "  GROUP BY parameter_id HAVING COUNT(*) BETWEEN 2 AND 50)")
-                        .executeUpdate();
-                log.info("Auto-set is_filter=true for {} category_parameter entries", isFilterUpdated);
-            } catch (Exception e) {
-                log.error("Failed to auto-set is_filter after ASBIS parameters sync: {}", e.getMessage());
-            }
-
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS,
                     allParametersData.size(), created, 0, 0,
                     String.format("Created: %d, Reused: %d, Options: %d", created, reused, optionsCreated),
@@ -707,26 +694,19 @@ public class AsbisSyncService {
             // Catch-all: ensure category_parameters rows exist for every parameter
             // that actually landed on an ASBIS product. Some products may have parameters
             // linked to categories not covered by syncAsbisParameters (e.g. remapped categories).
+            // Links are inserted with is_filter = false: a supplier parameter never becomes a filter on its own.
+            // The column defaults to TRUE, which used to turn every new link into a visible, often duplicate, group.
             try {
                 entityManager.flush();
                 int cpInserted = entityManager.createNativeQuery(
-                        "INSERT INTO category_parameters (category_id, parameter_id) " +
-                        "SELECT DISTINCT pr.category_id, pp.parameter_id " +
+                        "INSERT INTO category_parameters (category_id, parameter_id, is_filter) " +
+                        "SELECT DISTINCT pr.category_id, pp.parameter_id, false " +
                         "FROM product_parameters pp " +
                         "JOIN products pr ON pr.id = pp.product_id " +
                         "WHERE pr.platform = 'ASBIS' " +
                         "ON CONFLICT (category_id, parameter_id) DO NOTHING")
                         .executeUpdate();
                 log.info("ASBIS catch-all: inserted {} missing category_parameters rows", cpInserted);
-
-                // Auto-enable filtering for newly linked parameters
-                int isFilterUpdated = entityManager.createNativeQuery(
-                        "UPDATE category_parameters SET is_filter = true " +
-                        "WHERE is_filter IS NULL AND parameter_id IN (" +
-                        "  SELECT parameter_id FROM parameter_options " +
-                        "  GROUP BY parameter_id HAVING COUNT(*) BETWEEN 2 AND 50)")
-                        .executeUpdate();
-                log.info("ASBIS catch-all: auto-set is_filter=true for {} entries", isFilterUpdated);
             } catch (Exception e) {
                 log.error("Failed ASBIS catch-all category_parameters sync: {}", e.getMessage());
             }

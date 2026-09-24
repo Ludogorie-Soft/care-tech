@@ -9,6 +9,7 @@ import com.techstore.enums.ProductStatus;
 import com.techstore.repository.*;
 import com.techstore.service.ValiApiService;
 import com.techstore.util.LogHelper;
+import com.techstore.util.Markers;
 import com.techstore.util.SyncHelper;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -373,6 +374,7 @@ public class ValiSyncService {
             Map<Long, ParameterData> allParametersData = new HashMap<>();
 
             int categoryCounter = 0;
+            int failedCategories = 0;
             for (Category category : valiCategories) {
                 categoryCounter++;
 
@@ -405,9 +407,15 @@ public class ValiSyncService {
                     }
 
                 } catch (Exception e) {
+                    failedCategories++;
                     log.error("Error fetching parameters for category {}: {}",
                             category.getExternalId(), e.getMessage());
                 }
+            }
+
+            if (failedCategories > 0) {
+                log.error(Markers.CRITICAL, "Vali parameters: {} of {} category fetches failed — "
+                        + "their parameters were not refreshed this run", failedCategories, valiCategories.size());
             }
 
             log.info("Collected {} unique parameters (by externalId) across all categories",
@@ -525,39 +533,26 @@ public class ValiSyncService {
                 }
             }
 
-            // Deletion logic moved to the end of the transaction
+            // Parameters missing from this run are kept on purpose. A partial fetch used to delete them
+            // with a cascade to options, product values and category links (2026-06-02: 1169 rows).
             Set<Long> currentValiExternalIds = allParametersData.keySet();
-            List<Parameter> orphaned = allExistingParams.stream()
+            long stale = allExistingParams.stream()
                     .filter(p -> p.getPlatform() == Platform.VALI)
                     .filter(p -> p.getExternalId() != null)
                     .filter(p -> !currentValiExternalIds.contains(p.getExternalId()))
-                    .filter(p -> !"ADMIN".equalsIgnoreCase(p.getLastModifiedBy()))
-                    // Protect parameters that have been adopted by other platforms —
-                    // deleting them would destroy ASBIS/MOST/TEKRA specs as well
-                    .filter(p -> p.getAsbisKey() == null)
-                    .filter(p -> p.getMostKey() == null)
-                    .filter(p -> p.getTekraKey() == null)
-                    .collect(Collectors.toList());
+                    .count();
 
-            if (!orphaned.isEmpty()) {
-                log.info("Removing {} parameters no longer present in Vali API", orphaned.size());
-                List<Long> orphanedIds = orphaned.stream()
-                        .map(Parameter::getId)
-                        .collect(Collectors.toList());
-                parameterRepository.deleteAllByIdInBatch(orphanedIds);
-            }
-
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS,
-                    allParametersData.size(), created, 0, 0,
-                    String.format("Created: %d, Reused: %d, Options: %d, Deleted: %d",
-                            created, reused, optionsCreated, orphaned.size()),
+            logHelper.updateSyncLogSimple(syncLog, failedCategories > 0 ? LOG_STATUS_FAILED : LOG_STATUS_SUCCESS,
+                    allParametersData.size(), created, 0, failedCategories,
+                    String.format("Created: %d, Reused: %d, Options: %d, Stale (kept): %d, Failed categories: %d",
+                            created, reused, optionsCreated, stale, failedCategories),
                     startTime);
 
             log.info("=== Parameters Sync V4.1 Completed ===");
             log.info("   Unique parameters: {}", allParametersData.size());
             log.info("   Created: {}, Reused: {}", created, reused);
             log.info("   Options created: {}", optionsCreated);
-            log.info("   Parameters deleted: {}", orphaned.size());
+            log.info("   Stale parameters kept: {}, failed category fetches: {}", stale, failedCategories);
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
@@ -571,8 +566,10 @@ public class ValiSyncService {
                                           Map<String, ParameterOption> globalOptionsCache) {
         int created = 0;
 
-        Map<String, ParameterOption> normalizedNameCache = new java.util.HashMap<>();
-
+        // Every Vali option keeps its own row, keyed by its external id. Merging same-name options here
+        // was in-memory only: product sync resolves options by external id from the DB, so the product
+        // values of every merged option were silently dropped. Same-name values are unified in the
+        // canonical filter layer instead.
         for (ParameterOptionRequestDto apiOption : apiOptions) {
             try {
                 Long externalId = apiOption.getExternalId();
@@ -592,18 +589,11 @@ public class ValiSyncService {
                         if (currentNameEn != null) existing.setNameEn(currentNameEn);
                         parameterOptionRepository.save(existing);
                     }
-                    normalizedNameCache.put(normalizeOptionValue(existing.getNameBg()), existing);
                     continue;
                 }
 
                 String nameBg = extractOptionNameBg(apiOption);
                 if (nameBg == null || nameBg.isEmpty()) {
-                    continue;
-                }
-
-                String normalizedNameBg = normalizeOptionValue(nameBg);
-                if (normalizedNameCache.containsKey(normalizedNameBg)) {
-                    globalOptionsCache.put(optKey, normalizedNameCache.get(normalizedNameBg));
                     continue;
                 }
 
@@ -616,7 +606,6 @@ public class ValiSyncService {
 
                 option = parameterOptionRepository.save(option);
                 globalOptionsCache.put(optKey, option);
-                normalizedNameCache.put(normalizedNameBg, option);
                 created++;
 
             } catch (Exception e) {
@@ -671,15 +660,6 @@ public class ValiSyncService {
                 .map(n -> n.getText())
                 .findFirst()
                 .orElse(null);
-    }
-
-    private String normalizeOptionValue(String value) {
-        if (value == null) return null;
-        return value.trim()
-                .replaceAll("\\s+", " ")
-                .toUpperCase()
-                .replaceAll("(\\d)\\s+([A-ZА-Я])", "$1$2")
-                .replaceAll("([A-ZА-Я])\\s+(\\d)", "$1$2");
     }
 
     private static final int FILTER_MIN_OPTIONS = 2;

@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +39,7 @@ public class ParameterController {
 
     private final ParameterService parameterService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping
     public ResponseEntity<ParameterResponseDto> createParameter(
             @Valid @RequestBody ParameterRequestDto requestDto,
@@ -48,6 +50,7 @@ public class ParameterController {
         return ResponseEntity.status(HttpStatus.CREATED).body(parameter);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PutMapping(value = "/{id}")
     public ResponseEntity<ParameterResponseDto> updateParameter(
             @PathVariable("id") Long id,
@@ -59,6 +62,7 @@ public class ParameterController {
         return ResponseEntity.ok(parameter);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteParameter(@PathVariable @NotNull Long id) {
         log.info("Deleting parameter with ID: {}", id);
@@ -96,6 +100,7 @@ public class ParameterController {
     }
 
     @Operation(summary = "Toggle is_filter flag for a parameter within a specific category")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/category/{categoryId}/{parameterId}/filter")
     public ResponseEntity<Boolean> toggleCategoryParameterFilter(
             @PathVariable @NotNull Long categoryId,
@@ -106,6 +111,7 @@ public class ParameterController {
         return ResponseEntity.ok(newValue);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @DeleteMapping("/{parameterId}/options/{optionId}")
     public ResponseEntity<Void> deleteParameterOption(
             @PathVariable Long parameterId,

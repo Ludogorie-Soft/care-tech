@@ -1,9 +1,13 @@
 package com.techstore.service.sync;
 
+import com.techstore.entity.Category;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -178,5 +182,29 @@ class MostCategoryResolutionTest {
     @DisplayName("an unmapped LAN subcategory still falls back to the old destination")
     void unmappedLanStillFallsBack() {
         assertEquals("Мрежов хардуер", MostSyncService.resolveTargetCategoryName("LAN", "Something New"));
+    }
+
+    @Test
+    @DisplayName("a non-unique category name resolves to the visible copy, then the lowest id")
+    void nonUniqueCategoryNameResolvesToVisibleThenLowestId() {
+        // Parameter sync used findByNameBg, which throws on a non-unique name — 15 of the Most
+        // targets ("Монитори", "Процесори"...) are, so those products' parameters were skipped.
+        Map<String, Category> index = MostSyncService.indexCategoriesByName(List.of(
+                category(517L, "Монитори", false),
+                category(50L, "Монитори", true),
+                category(964L, "Монитори", true),
+                category(12L, "Процесори", false),
+                category(7L, "Процесори", false)));
+
+        assertEquals(50L, index.get("монитори").getId());
+        assertEquals(7L, index.get("процесори").getId());
+    }
+
+    private static Category category(Long id, String nameBg, boolean visible) {
+        Category c = new Category();
+        c.setId(id);
+        c.setNameBg(nameBg);
+        c.setShow(visible);
+        return c;
     }
 }

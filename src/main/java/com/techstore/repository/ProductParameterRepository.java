@@ -24,7 +24,11 @@ public interface ProductParameterRepository extends JpaRepository<ProductParamet
             "WHERE p.category_id = :categoryId " +
             "  AND p.active      = true " +
             "  AND p.show_flag   = true " +
-            "  AND p.status IN ('AVAILABLE','LIMITED_QUANTITY') " +
+            // Same product conditions as ProductSearchRepository.getFilteredFacets, so the sidebar
+            // never lists a group or option whose products the facet counts and search can't see.
+            "  AND p.status      = 'AVAILABLE' " +
+            "  AND p.deleted     = false " +
+            "  AND (p.image_url IS NOT NULL AND p.image_url <> '') " +
             "  AND cp.is_filter IS TRUE " +
             "ORDER BY COALESCE(param.filter_order, param.sort_order) ASC",
             nativeQuery = true)

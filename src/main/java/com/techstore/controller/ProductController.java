@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -207,6 +208,7 @@ public class ProductController {
         return ResponseEntity.ok(relatedProducts);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Create product", description = "Create a new product with required images in single operation")
     public ResponseEntity<ProductResponseDTO> createProduct(
@@ -225,6 +227,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Update product with image management", description = "Update product and manage images in single operation")
     public ResponseEntity<ProductResponseDTO> updateProduct(
@@ -242,6 +245,7 @@ public class ProductController {
         return ResponseEntity.ok(updatedProduct);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete product", description = "Soft delete a product (Admin only)")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
@@ -251,6 +255,7 @@ public class ProductController {
     }
 
     @Hidden
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Add image to existing product", description = "Add single image to existing product")
     public ResponseEntity<ProductImageUploadResponseDTO> addImageToProduct(
@@ -264,6 +269,7 @@ public class ProductController {
     }
 
     @Hidden
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @DeleteMapping("/{id}/images")
     @Operation(summary = "Delete product image", description = "Delete specific image from product")
     public ResponseEntity<Void> deleteProductImage(
@@ -276,6 +282,7 @@ public class ProductController {
     }
 
     @Hidden
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PutMapping(value = "/{id}/images/reorder")
     @Operation(summary = "Reorder product images", description = "Reorder existing product images")
     public ResponseEntity<ProductResponseDTO> reorderProductImages(

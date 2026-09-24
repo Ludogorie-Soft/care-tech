@@ -162,37 +162,29 @@ public class ValiApiService {
     }
 
     /**
-     * Get parameters by category (no pagination available)
+     * Get parameters by category (no pagination available).
+     * An empty list means Vali has no parameters for the category (container categories).
+     * A failed request throws, so the caller can tell a broken fetch apart from "no parameters".
      */
     public List<ParameterRequestDto> getParametersByCategory(Long categoryId) {
         log.debug("Fetching parameters for category: {}", categoryId);
         String fullUrl = baseUrl + "/parameters/" + categoryId;
 
-        try {
-            List<ParameterRequestDto> parameters = webClient.get()
-                    .uri(fullUrl)
-                    .headers(h -> h.addAll(createHeaders()))
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<ParameterRequestDto>>() {})
-                    .timeout(Duration.ofMillis(timeout))
-                    .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
-                    .onErrorResume(DataBufferLimitException.class, ex -> {
-                        log.error("Response too large for category {}: {}", categoryId, ex.getMessage());
-                        return Mono.just(List.of());
-                    })
-                    .onErrorResume(WebClientResponseException.class, ex -> {
-                        log.warn("Error fetching parameters for category {}: {} - {}",
-                                categoryId, ex.getStatusCode(), ex.getResponseBodyAsString());
-                        return Mono.just(List.of());
-                    })
-                    .block();
+        List<ParameterRequestDto> parameters = webClient.get()
+                .uri(fullUrl)
+                .headers(h -> h.addAll(createHeaders()))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<ParameterRequestDto>>() {})
+                .timeout(Duration.ofMillis(timeout))
+                .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay))
+                        .filter(throwable -> !(throwable instanceof WebClientResponseException.NotFound)))
+                .onErrorResume(WebClientResponseException.NotFound.class, ex -> {
+                    log.warn("Vali has no parameter list for category {} (404)", categoryId);
+                    return Mono.just(List.of());
+                })
+                .block();
 
-            return parameters != null ? parameters : List.of();
-
-        } catch (Exception e) {
-            log.error("Unexpected error fetching parameters for category {}: {}", categoryId, e.getMessage());
-            return List.of();
-        }
+        return parameters != null ? parameters : List.of();
     }
 
     /**
