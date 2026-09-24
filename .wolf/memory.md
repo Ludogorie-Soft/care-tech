@@ -3808,3 +3808,7 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 20:30 | Комит партида 9 (a65e33c) + openwolf (40b8f45) | git | ok | ~500 |
 | 21:20 | Партида 10: скрипт 55_10 (стойки, настолни PC, проектори, хъбове, CCTV, UPS батерии; 8 категории, 36 групи); CapacityGb: 0 GB → празно | scripts/55_filters_curated_10_…sql, CapacityGbParser, тест | приложено локално, rebuild diff 0; скриптът временно повреден от замяна по първо съвпадение и възстановен | ~16000 |
 | 17:08 | Session end: 10 writes across 10 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~49748 tok |
+| 17:12 | Created scripts/55_filters_curated_11_small_categories.sql | — | ~5451 |
+| 21:35 | Комит партида 10 (82a768c) + openwolf (1498ce2) | git | ok | ~500 |
+| 22:05 | Партида 11 (малки категории): скрипт 55_11, 8 категории, 28 групи; без Java промени | scripts/55_filters_curated_11_small_categories.sql | приложено локално, rebuild diff 0; куриране 71/226 категории = 81% от видимите продукти | ~9000 |
+| 17:14 | Session end: 11 writes across 11 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~55588 tok |
