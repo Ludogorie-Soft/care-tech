@@ -9221,6 +9221,39 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-24T18:50:00Z"
+    },
+    {
+      "id": "bug-559",
+      "timestamp": "2026-09-24T21:20:00Z",
+      "error_message": "psql: VALUES lists must all be the same length (55_10) след Python замяна",
+      "file": "scripts/55_filters_curated_10_mounts_pcs_surveillance.sql",
+      "root_cause": "Замяна s[start:end] с s.index(): началният низ („('projector-brightness', 'До 3 000 lm',“) съвпадна първо в т. 3 (стойности), крайният — в т. 4 (правила) → изтрит блок между секциите. Същият клас грешка като в партида 3.",
+      "fix": "Липсващият блок е вмъкнат обратно; скриптът се провали атомарно (ON_ERROR_STOP + BEGIN), нищо не е записано",
+      "tags": [
+        "python",
+        "string-replace",
+        "first-occurrence",
+        "sql-script"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-24T21:20:00Z"
+    },
+    {
+      "id": "bug-560",
+      "timestamp": "2026-09-24T21:20:00Z",
+      "error_message": "Проектори: яркост 24%, „Лампа“ дава LED/Laser/UHP, а не лумени",
+      "file": "scripts/55_filters_curated_10_mounts_pcs_surveillance.sql",
+      "root_cause": "MOST държи лумените в „Brightness“ („4,000 (standard), 3,200 (eco) ANSI lumens“); „Лампа“ е технологията на светлината",
+      "fix": "„Brightness“ → яркост (само standard, `(lumens?|lm)(?!s)(?! ?\\(eco)`); „Лампа“ → източник на светлина",
+      "tags": [
+        "filters",
+        "most",
+        "projector"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T21:20:00Z"
     }
   ]
 }
