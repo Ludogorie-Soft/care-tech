@@ -9187,6 +9187,40 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-24T17:55:00Z"
+    },
+    {
+      "id": "bug-557",
+      "timestamp": "2026-09-24T18:50:00Z",
+      "error_message": "POST /api/admin/filters/rebuild → 409 Data integrity constraint violation: invalid regular expression: parentheses () not balanced",
+      "file": "scripts/55_filters_curated_07_networking.sql",
+      "root_cause": "При редакция на правило (махане на „|fast ethernet“) остана една излишна „)“; един невалиден израз проваля целия rebuild (атомарен → старите данни остават, но и нощният rebuild би спрял)",
+      "fix": "Поправен израз + DO блок в скрипта, който компилира всички негови regex (`PERFORM '' ~* pattern`) преди COMMIT",
+      "tags": [
+        "filters",
+        "regex",
+        "rebuild",
+        "guard"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T18:50:00Z"
+    },
+    {
+      "id": "bug-558",
+      "timestamp": "2026-09-24T18:50:00Z",
+      "error_message": "Гигабитови суичове излизат като „100 Mbps“",
+      "file": "scripts/55_filters_curated_07_networking.sql",
+      "root_cause": "VALI записва „Стандарти“ като отделни опции; опцията „802.3u 100BASE-TX Fast Ethernet“ сама изглежда като 100-мегабитов суич",
+      "fix": "100 Mbps само от „10/100“ без гигабит или „100 Mb“; 802.3u/100Base/Fast Ethernet не се четат",
+      "tags": [
+        "filters",
+        "supplier-data",
+        "vali",
+        "multi-option"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T18:50:00Z"
     }
   ]
 }

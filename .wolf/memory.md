@@ -3791,3 +3791,8 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 17:20 | Комит партида 5 (e445558) + openwolf (acae948) | git | ok | ~500 |
 | 17:55 | Партида 6 (аудио): скрипт 55_06, 7 категории, 34 групи; без Java промени | scripts/55_filters_curated_06_audio.sql | приложено локално, rebuild diff 0 | ~12000 |
 | 15:47 | Session end: 6 writes across 6 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~23521 tok |
+| 15:53 | Created scripts/55_filters_curated_07_networking.sql | — | ~5661 |
+| 18:05 | Комит партида 6 (2799694) + openwolf (d2aca24) | git | ok | ~500 |
+| 18:50 | Партида 7 (мрежово): скрипт 55_07, 6 категории, 27 групи; WifiStandardParser, PortCountParser + 31 теста; regex guard преди COMMIT | scripts/55_filters_curated_07_networking.sql, parser/*, FilterValueParsersTest | приложено локално, rebuild diff 0 | ~15000 |
+| 16:02 | Session end: 7 writes across 7 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~29587 tok |
+| 16:03 | Session end: 7 writes across 7 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~29587 tok |

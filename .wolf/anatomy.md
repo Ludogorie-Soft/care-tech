@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T12:44:47.517Z
-> Files: 719 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T12:53:17.492Z
+> Files: 721 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -400,9 +400,11 @@
 - `55_filters_curated_04_cameras_batteries_consumables.sql` — Курация партида 4: IP камери(100), Батерии(199), Тонери(86), Мастила(87); 15 свойства, 22 групи; размер на батерия от синоними (LR6=AA=E91), ресурс на касета на диапазони (PAGE_YIELD); „Съвместими модели“ НЕ е източник за марка (VALI грешки „EPSON:“ при Canon); изисква 55_01 и 55_02 (~9500 tok)
 - `55_filters_curated_04_cameras_batteries_consumables.sql` — ============================================================================ (~8051 tok)
 - `55_filters_curated_05_memory_storage.sql` — Курация партида 5: Памети за лаптоп(7), HDD 3.5"(16), Твърди дискове(235), Външни дискове(55), Външни SSD(56), USB памети(57), Флаш памети(321), Карти памет(150); 8 нови свойства, 33 групи; скорост на четене на диапазони (READ_MBS); предназначение на HDD само от серията/кода в името (VALI „Тип хард диск“ е грешен) (~9000 tok)
-- `55_filters_curated_06_audio.sql` — Курация партида 6 (аудио): Bluetooth слушалки(159), Геймърски слушалки(171), Слушалки(66), Тапи(67), Звукови системи(59), Преносими тонколони(120), Микрофони(65); 15 свойства, 34 групи; време на работа и мощност в диапазони (regex); VALI „Mощност RMS“ с латинско M; „Behind the ear“ на VALI не се чете (~9000 tok)
 - `55_filters_curated_05_memory_storage.sql` — ============================================================================ (~5987 tok)
+- `55_filters_curated_06_audio.sql` — Курация партида 6 (аудио): Bluetooth слушалки(159), Геймърски слушалки(171), Слушалки(66), Тапи(67), Звукови системи(59), Преносими тонколони(120), Микрофони(65); 15 свойства, 34 групи; време на работа и мощност в диапазони (regex); VALI „Mощност RMS“ с латинско M; „Behind the ear“ на VALI не се чете (~9000 tok)
+- `55_filters_curated_07_networking.sql` — Курация партида 7 (мрежово): Безжични рутери(107), Access Point(102), Суичове неуправляеми(109)/управляеми(110), Мрежови карти(111), Мрежови кабели(135); 15 свойства, 27 групи; Wi-Fi поколение (WIFI_GEN), брой портове (PORT_COUNT); ленти като отделни стойности; guard, който компилира всички regex преди COMMIT (~9500 tok)
 - `55_filters_curated_06_audio.sql` — ============================================================================ (~6117 tok)
+- `55_filters_curated_07_networking.sql` — ============================================================================ (~5661 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
@@ -830,11 +832,13 @@
 - `MemoryMhzParser.java` — MEM_MHZ: DDR5-6000 / 6000MT/s / 3200MHz(PC4-…) → MHz, най-високата (~400 tok)
 - `PageYieldParser.java` — Page yield of a toner or ink cartridge, filed into a range ("3 000 – 5 999 стр."): the exact figure (~870 tok)
 - `PageYieldParser.java` — PAGE_YIELD: ресурс на тонер/мастило в 6 диапазона (from-0…from-10000); „Up to 10 200 pages“, „3150k“=3150, „2.5K“=2500; голо число само ако е целият текст (~700 tok)
+- `PortCountParser.java` — PORT_COUNT: брой портове на суич („16 портов“, „8-port“, „16 x 10/100/1000“, „16 (RJ-45)“); най-голямата група; <3 се игнорира (uplink/конвертор); номера на модели не се четат (~500 tok)
 - `ParsedValue.java` — record(normKey, labelBg, labelEn, number) (~120 tok)
 - `ParserSupport.java` — prepare(): lower, десетична запетая → точка, инчови знаци → "; plain(): 27.00 → "27" (~300 tok)
 - `PowerWattParser.java` — POWER_W: номинална мощност във W („850 W“, „850W 80+ Gold“) — първата стойност (~400 tok)
 - `ReadSpeedParser.java` — Read speed of a flash drive, memory card or external SSD in MB/s, filed into a range (~827 tok)
 - `ReadSpeedParser.java` — READ_MBS: скорост на четене в 5 диапазона (from-0…from-1001); взима частта с „read/четене“ („200MB/s read, 60MB/s write“ → 200); голо число само ако е целият текст; Gbps не се чете (~700 tok)
+- `WifiStandardParser.java` — WIFI_GEN: най-новото Wi-Fi поколение (802.11 букви, „Wi-Fi 6E“, класове AX3000/BE3600/AC1200/N300); ax + 6 GHz = 6E; ключове wifi4…wifi7, wifi6e (~600 tok)
 - `RefreshHzParser.java` — REFRESH_HZ: най-високата честота в текста (60/75 Hz → 75) (~400 tok)
 - `ResolutionParser.java` — RESOLUTION: 1920x1080 (x/×/х), FHD/QHD/WQHD/UWQHD/4K; „HD“ умишлено не (~600 tok)
 - `ResponseMsParser.java` — RESPONSE_MS: 1 ms (GTG) / 1ms MPRT / 0.5 мс → най-малкото време в ms (~400 tok)
