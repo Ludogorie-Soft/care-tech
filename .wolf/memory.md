@@ -3775,3 +3775,9 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 15:05 | Партида 3: скрипт 55_03 (8 категории, 43 групи), 4 нови парсера, CountParser сума | scripts/55_filters_curated_03_components_peripherals.sql, service/filter/parser/* | приложено локално, rebuild diff 0 | ~9000 |
 | 15:20 | Поправки след преглед: цвят по име (80+ Gold≠златист, A-RGB≠многоцветен), „Интерфейс USB“≠кабелна, FAN_MM без радиатори, група с 1 стойност се показва | 55_03, FanSizeParser, CategoryFilterService, тест | 168 парсер теста минават | ~5000 |
 | 14:56 | Session end: 1 writes across 1 files (CategoryFilterService.java) | 0 reads | ~108 tok |
+| 15:05 | Created src/main/java/com/techstore/service/filter/parser/PageYieldParser.java | — | ~870 |
+| 15:14 | Created scripts/55_filters_curated_04_cameras_batteries_consumables.sql | — | ~8051 |
+| 15:40 | Комит партида 3 (11dde67) + openwolf (21597ee) | git | ok | ~500 |
+| 16:10 | Партида 4: скрипт 55_04 (камери, батерии, тонери, мастила; 22 групи), PageYieldParser + 19 теста | scripts/55_filters_curated_04_…sql, PageYieldParser.java, FilterValueParsersTest | приложено локално, rebuild diff 0 | ~12000 |
+| 15:19 | Session end: 3 writes across 3 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql) | 0 reads | ~9666 tok |
+| 15:20 | Session end: 3 writes across 3 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql) | 0 reads | ~9666 tok |

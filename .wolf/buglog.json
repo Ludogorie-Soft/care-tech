@@ -9120,6 +9120,23 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-24T15:20:00Z"
+    },
+    {
+      "id": "bug-553",
+      "timestamp": "2026-09-24T16:10:00Z",
+      "error_message": "Мастилници Canon CLI521 излизат под марка Epson; Canon PGI-570 под HP",
+      "file": "scripts/55_filters_curated_04_cameras_batteries_consumables.sql",
+      "root_cause": "Грешни данни от VALI: „Съвместими модели“ = „EPSON:;PIXMA IP3600…“, „Марка принтер“ = HP за Canon касета",
+      "fix": "„Съвместими модели“ махнат като източник за марката; остават „Марка принтер“ + правила по име. PGI-570 (1 продукт) остава грешен — данните на доставчика печелят пред името",
+      "tags": [
+        "filters",
+        "supplier-data",
+        "vali",
+        "consumables"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T16:10:00Z"
     }
   ]
 }

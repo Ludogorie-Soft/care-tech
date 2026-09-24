@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T11:49:13.679Z
-> Files: 706 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T12:14:42.665Z
+> Files: 712 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -397,6 +397,8 @@
 - `55_filters_curated_01_monitors_colour.sql` — Курация партида 1: общ „Цвят“ (18 базови цвята, regex, split) + 10 групи за „Монитори“ (Диагонал, Резолюция, Честота, Матрица, Време за реакция, Яркост, Говорители, Височина, Цвят, Приложение); идемпотентен (~3828 tok)
 - `55_filters_curated_02_pc_components.sql` — Курация партида 2: Процесори(3), Дънни платки(2), Памети(6), SSD(17), Видео карти(8), Лаптопи(37); 24 свойства, scoped източници, английски MOST имена, правила по име (сокет по поколение/чипсет); сокет приема „115x“ и кирилско „АМ5“; идемпотентен по note '55 партида 2' (~7700 tok)
 - `55_filters_curated_03_components_peripherals.sql` — Курация партида 3: Захранвания(9), Кутии(11), Охладители(4), Вентилатори(12), Мишки(62/174), Клавиатури(61/172); 22 свойства, 43 групи; собствени (тесни) цветови правила по име — „80+ Gold“ не е цвят, „A-RGB“ не е многоцветен; „Интерфейс: USB“ не е кабелна; изисква 55_02 (~8000 tok)
+- `55_filters_curated_04_cameras_batteries_consumables.sql` — Курация партида 4: IP камери(100), Батерии(199), Тонери(86), Мастила(87); 15 свойства, 22 групи; размер на батерия от синоними (LR6=AA=E91), ресурс на касета на диапазони (PAGE_YIELD); „Съвместими модели“ НЕ е източник за марка (VALI грешки „EPSON:“ при Canon); изисква 55_01 и 55_02 (~9500 tok)
+- `55_filters_curated_04_cameras_batteries_consumables.sql` — ============================================================================ (~8051 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
@@ -814,17 +816,19 @@
 - `CapacityGbParser.java` — CAPACITY_GB: 2x8GB → 16, 1TB → 1000, 2048GB → 2000; етикети GB/TB/MB (~800 tok)
 - `CasLatencyParser.java` — CAS_CL: CL16 / CL 16-20-20 / 16-18-18-38 / „16“ → CL16 (~300 tok)
 - `CountParser.java` — COUNT: първото цяло число (ядра, нишки, слотове); сума „6+1“ → 7 (бутони на мишка) (~350 tok)
+- `DiagonalInchParser.java` — DIAGONAL_INCH: 27" / 27 inch / 27 инча / 68.6 cm → 27; инчове печелят пред cm (~600 tok)
 - `DpiParser.java` — DPI_MAX: най-високото DPI/CPI („1000/1400/1800“ → 1800, „100~10,000 CPI“ → 10000, „26K“ → 26000) (~400 tok)
 - `FanSizeParser.java` — FAN_MM: „120 x 120 x 25 mm“ → 120; 40–230 mm, по-големите са радиатори („240mm … 2x120mm“ → 120) (~450 tok)
-- `LengthMmParser.java` — LENGTH_MM: просвет в mm („до 410 mm“, „164.5 mm“, голо „410“) — първата стойност, цели mm (~400 tok)
-- `PowerWattParser.java` — POWER_W: номинална мощност във W („850 W“, „850W 80+ Gold“) — първата стойност (~400 tok)
-- `DiagonalInchParser.java` — DIAGONAL_INCH: 27" / 27 inch / 27 инча / 68.6 cm → 27; инчове печелят пред cm (~600 tok)
 - `FilterValueParser.java` — Интерфейс: code() + parse(textBg, textEn) → Optional<ParsedValue>; празно при двусмислен текст (~150 tok)
 - `FrequencyGhzParser.java` — FREQ_GHZ: най-високата честота в GHz („4.4G“ в имената, MHz над 1000) (~450 tok)
 - `GpuModelParser.java` — GPU_MODEL: RTX/GTX/GT, RX, Arc → „RTX 5060 Ti“; подредба NVIDIA→AMD→Intel по номер (~800 tok)
+- `LengthMmParser.java` — LENGTH_MM: просвет в mm („до 410 mm“, „164.5 mm“, голо „410“) — първата стойност, цели mm (~400 tok)
 - `MemoryMhzParser.java` — MEM_MHZ: DDR5-6000 / 6000MT/s / 3200MHz(PC4-…) → MHz, най-високата (~400 tok)
+- `PageYieldParser.java` — Page yield of a toner or ink cartridge, filed into a range ("3 000 – 5 999 стр."): the exact figure (~870 tok)
+- `PageYieldParser.java` — PAGE_YIELD: ресурс на тонер/мастило в 6 диапазона (from-0…from-10000); „Up to 10 200 pages“, „3150k“=3150, „2.5K“=2500; голо число само ако е целият текст (~700 tok)
 - `ParsedValue.java` — record(normKey, labelBg, labelEn, number) (~120 tok)
 - `ParserSupport.java` — prepare(): lower, десетична запетая → точка, инчови знаци → "; plain(): 27.00 → "27" (~300 tok)
+- `PowerWattParser.java` — POWER_W: номинална мощност във W („850 W“, „850W 80+ Gold“) — първата стойност (~400 tok)
 - `RefreshHzParser.java` — REFRESH_HZ: най-високата честота в текста (60/75 Hz → 75) (~400 tok)
 - `ResolutionParser.java` — RESOLUTION: 1920x1080 (x/×/х), FHD/QHD/WQHD/UWQHD/4K; „HD“ умишлено не (~600 tok)
 - `ResponseMsParser.java` — RESPONSE_MS: 1 ms (GTG) / 1ms MPRT / 0.5 мс → най-малкото време в ms (~400 tok)
