@@ -3796,3 +3796,7 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 18:50 | Партида 7 (мрежово): скрипт 55_07, 6 категории, 27 групи; WifiStandardParser, PortCountParser + 31 теста; regex guard преди COMMIT | scripts/55_filters_curated_07_networking.sql, parser/*, FilterValueParsersTest | приложено локално, rebuild diff 0 | ~15000 |
 | 16:02 | Session end: 7 writes across 7 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~29587 tok |
 | 16:03 | Session end: 7 writes across 7 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~29587 tok |
+| 16:11 | Created scripts/55_filters_curated_08_cables_charging.sql | — | ~5617 |
+| 19:00 | Комит партида 7 (bdda5b4) + openwolf (f50f818) | git | ok | ~500 |
+| 19:30 | Партида 8 (кабели и зареждане): скрипт 55_08, 7 категории, 26 групи; без Java промени | scripts/55_filters_curated_08_cables_charging.sql | приложено локално, rebuild diff 0; куриране: 47/226 категории = 65% от видимите продукти | ~9000 |
+| 16:14 | Session end: 8 writes across 8 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~35605 tok |
