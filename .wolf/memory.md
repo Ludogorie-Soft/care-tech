@@ -3812,3 +3812,8 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 21:35 | Комит партида 10 (82a768c) + openwolf (1498ce2) | git | ok | ~500 |
 | 22:05 | Партида 11 (малки категории): скрипт 55_11, 8 категории, 28 групи; без Java промени | scripts/55_filters_curated_11_small_categories.sql | приложено локално, rebuild diff 0; куриране 71/226 категории = 81% от видимите продукти | ~9000 |
 | 17:14 | Session end: 11 writes across 11 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~55588 tok |
+| 17:15 | Session end: 11 writes across 11 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~55588 tok |
+| 17:22 | Created scripts/55_filters_curated_12_devices.sql | — | ~7036 |
+| 22:15 | Комит партида 11 (71dda21) + openwolf (d7cdf53, 0687de1) | git | ok | ~500 |
+| 22:50 | Партида 12 (устройства): скрипт 55_12, 12 категории, 40 групи; без Java промени | scripts/55_filters_curated_12_devices.sql | приложено локално, rebuild diff 0 | ~14000 |
+| 17:24 | Session end: 12 writes across 12 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~63126 tok |
