@@ -9054,6 +9054,72 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-24T11:35:15.000Z"
+    },
+    {
+      "id": "bug-549",
+      "timestamp": "2026-09-24T15:20:00Z",
+      "error_message": "Захранвания: 61 продукта с цвят „Златист“, охладители/вентилатори „Многоцветен“ — цветът идва от името",
+      "file": "scripts/55_filters_curated_03_components_peripherals.sql",
+      "root_cause": "Цветовите правила по име бяха копие на правилата за параметри, където gold/bronze/platinum и rgb са цвят; в името те са 80 PLUS ниво и подсветка",
+      "fix": "Собствени тесни правила за цвят по име по групи категории (PC/KB/PSU); без gold/platinum/rgb; изключение за „… switch“; за захранвания само черно/бяло с lookbehind срещу „80+ White“",
+      "tags": [
+        "filters",
+        "colour",
+        "name-rules",
+        "curation"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T15:20:00Z"
+    },
+    {
+      "id": "bug-550",
+      "timestamp": "2026-09-24T15:20:00Z",
+      "error_message": "Безжични мишки и клавиатури излизат и като „Кабелна“ (72 мишки)",
+      "file": "scripts/55_filters_curated_03_components_peripherals.sql",
+      "root_cause": "(1) „жичн“ се съдържа в „безжична“; (2) „Интерфейс: USB“ / „USB 3.0 Plug“ описват приемника, не кабел",
+      "fix": "(?<!без)жичн / (?<!без)кабел; голото USB и „plug“ махнати от правилото за Кабелна; резервно правило по име „…USB“ без wireless/безжич/bluetooth/2.4G само за 61/62",
+      "tags": [
+        "filters",
+        "regex",
+        "connection",
+        "curation"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T15:20:00Z"
+    },
+    {
+      "id": "bug-551",
+      "timestamp": "2026-09-24T15:20:00Z",
+      "error_message": "Водни охладители с „Размер на вентилатора: 240 mm“",
+      "file": "src/main/java/com/techstore/service/filter/parser/FanSizeParser.java",
+      "root_cause": "Първата „… mm“ стойност в името е размерът на радиатора („240mm Liquid Cooler, 2x120mm Fans“); таванът беше 240",
+      "fix": "Обхождат се всички „… mm“ стойности и се взима първата в 40–230; 240/280/360 са радиатори",
+      "tags": [
+        "filters",
+        "parser",
+        "fan-size"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T15:20:00Z"
+    },
+    {
+      "id": "bug-552",
+      "timestamp": "2026-09-24T15:20:00Z",
+      "error_message": "Групите „12V-2x6 конектор: Да“ и „RGB подсветка: Да“ не се показват в панела",
+      "file": "src/main/java/com/techstore/service/filter/CategoryFilterService.java",
+      "root_cause": "Сървърът показваше група само при ≥2 стойности; флаг-свойствата имат една стойност",
+      "fix": "Група с 1 стойност се показва, ако стойността я нямат всички продукти в категорията (стеснява)",
+      "tags": [
+        "filters",
+        "serving",
+        "single-value"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T15:20:00Z"
     }
   ]
 }

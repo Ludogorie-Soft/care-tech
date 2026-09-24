@@ -3764,3 +3764,14 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 16:10 | Локален MOST sync срещу истинския фийд потвърди Фаза 0 поправката: +11 418 стойности, платки/процесори/SSD без параметри → 0 | /tmp/techstore-local/most.xml | ok | ~15k |
 | 16:30 | MOST губеше 6.5% от стойностите (>200 знака) → лимит 2000 | MostSyncService | платки „Тип памет“ 47% → 78% | ~8k |
 | 17:00 | Партида 2: V40 (правила по име), 5 нови парсера (COUNT, FREQ_GHZ, MEM_MHZ, CAS_CL, GPU_MODEL), scripts/55_02 (6 категории, 24 свойства), auto- slug префикс, filter_norm маха ™®©, AUTO без проза (ср. дължина ≤ 40) | V40, parser/*, FilterIndexService, scripts/55_01, 55_02 | покритие 90–100% по ключовите филтри в 7 курирани категории; 0 дубли; 456 несъпоставени | ~80k |
+| 14:38 | Session end: 20 writes across 17 files (buzzing-dancing-hare.md, SecurityConfig.java, ValiApiService.java, ValiSyncService.java, ProductParameterRepository.java) | 28 reads | ~193003 tok |
+| 14:45 | Created scripts/55_filters_curated_03_components_peripherals.sql | — | ~7525 |
+
+## Session: 2026-09-24 14:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:49 | Edited src/main/java/com/techstore/service/filter/CategoryFilterService.java | 1→4 lines | ~101 |
+| 15:05 | Партида 3: скрипт 55_03 (8 категории, 43 групи), 4 нови парсера, CountParser сума | scripts/55_filters_curated_03_components_peripherals.sql, service/filter/parser/* | приложено локално, rebuild diff 0 | ~9000 |
+| 15:20 | Поправки след преглед: цвят по име (80+ Gold≠златист, A-RGB≠многоцветен), „Интерфейс USB“≠кабелна, FAN_MM без радиатори, група с 1 стойност се показва | 55_03, FanSizeParser, CategoryFilterService, тест | 168 парсер теста минават | ~5000 |
+| 14:56 | Session end: 1 writes across 1 files (CategoryFilterService.java) | 0 reads | ~108 tok |
