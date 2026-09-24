@@ -3714,3 +3714,45 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 11:19 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | inline fix | ~10 |
 | 11:30 | „Код:“ празен за ASBIS/MOST/нови Tekra: sku в ProductResponseDTO (+ ProductService/AdminService), ProductPage productCode = model‖sku‖referenceNumber, скрит при празно; промо % закръглен (ProductPage, ProductCard). mvn test: 106/106; проверено в браузъра за 19000/33000/11066/2050/4464/29499 | ProductResponseDTO.java, ProductService.java, AdminService.java, care-tech-ui ProductPage.jsx, ProductCard.jsx | fixed, bug-531 | ~6000 |
 | 11:23 | Session end: 11 writes across 6 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json, ProductResponseDTO.java, AdminService.java) | 8 reads | ~9947 tok |
+| 11:24 | Session end: 11 writes across 6 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json, ProductResponseDTO.java, AdminService.java) | 8 reads | ~9947 tok |
+| 11:50 | Проверка на живо след deploy: API праща sku; „Код:“ OK за MOST 29499, ASBIS 19000, Tekra 33000, Vali 2050; /product/2050/2050 → slug URL; ССД категорията 0/20 линка /id/id; промо % закръглени | caretech.bg | verified | ~2000 |
+| 11:35 | Session end: 11 writes across 6 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json, ProductResponseDTO.java, AdminService.java) | 8 reads | ~9947 tok |
+
+## Session: 2026-09-24 11:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:52 | Created ../../../../.claude/plans/buzzing-dancing-hare.md | — | ~374 |
+| 12:17 | Created ../../../../.claude/plans/buzzing-dancing-hare.md | — | ~4209 |
+| 12:22 | Edited src/main/java/com/techstore/config/SecurityConfig.java | 7→12 lines | ~268 |
+| 12:23 | Edited src/main/java/com/techstore/service/ValiApiService.java | modified getParametersByCategory() | ~356 |
+| 12:24 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | removed 10 lines | ~13 |
+| 12:27 | Edited src/main/java/com/techstore/repository/ProductParameterRepository.java | 2→6 lines | ~110 |
+| 12:51 | Edited src/main/java/com/techstore/config/JwtAuthenticationFilter.java | modified isPublicEndpoint() | ~98 |
+
+## Session 2026-09-24 — одит параметри/филтри + Фаза 0
+| 11:00 | Одит параметри и филтри (3 Explore агента + прод read-only мерене + Plan агент) | план ~/.claude/plans/buzzing-dancing-hare.md | средно 23 групи/категория, макс 118; скриптове 40–46 никога не са комитнати; VALI изтри 1169 параметъра на 06.02 | ~250k |
+| 12:10 | Фаза 0.1 сигурност: /api/products/** и /api/parameters/** записи само за ADMIN + @PreAuthorize + JWT филтърът вече чете токена за /api/products | SecurityConfig, ParameterController, ProductController, JwtAuthenticationFilter | проверено локално anon 401 / user 403 / admin OK / публични 200 | ~15k |
+| 12:20 | Фаза 0.2–0.4 VALI: fetch хвърля, неуспешни категории → FAILED+CRITICAL, без hard delete, без in-memory сливане на опции | ValiApiService, ValiSyncService | компилира | ~10k |
+| 12:25 | Фаза 0.5 MOST: indexCategoriesByName (видими първо) + resolveTargetCategoryName в параметърния sync | MostSyncService, MostCategoryResolutionTest | 44+11 теста зелени | ~8k |
+| 12:28 | Фаза 0.6–0.7 catch-all INSERT с is_filter=false, мъртви IS NULL UPDATE-и махнати; групи = AVAILABLE+deleted+image | Asbis/Tekra/MostSyncService, ProductParameterRepository | компилира | ~6k |
+| 12:40 | Фаза 0.8 фронтенд: едноименни опции = една отметка с всички ids, ключ по parameterId | care-tech-ui paramSlice.js, Filter.jsx | проверено в браузъра (Монитори, 1 ms: 14=14) | ~20k |
+| 12:50 | Локална среда: postgres:15 на :5433 с каталожни данни от прод (без лични данни), бекенд на :8081 | /tmp/techstore-local | работи | ~10k |
+| 12:58 | Created src/main/resources/db/migration/V38__add_canonical_filter_layer.sql | — | ~2548 |
+| 12:58 | Created src/main/resources/db/migration/V39__seed_filter_junk_rules.sql | — | ~1215 |
+| 13:02 | Created src/main/java/com/techstore/service/filter/FilterRebuildResult.java | — | ~176 |
+| 13:03 | Created src/main/java/com/techstore/service/filter/FilterIndexService.java | — | ~8671 |
+| 13:04 | Edited src/main/java/com/techstore/service/filter/FilterIndexService.java | 1→2 lines | ~36 |
+| 13:20 | Фаза 1: V38 (каноничен слой) + V39 (HIDE/IGNORE по име), FilterIndexService rebuild, 4 парсера + 55 теста, FilterReportService, /api/admin/filters, rebuild в края на cron | service/filter/**, V38, V39, CronJobService | локално: 609 AUTO свойства, ср. 5.5 групи, макс 12, 0 дубли, 2-ри rebuild diff 0, 6–12 s | ~60k |
+| 13:35 | Smoke тест на курацията (числов диагонал, цвят със split+regex) хвана 2 дизайн бъга: origin в uniq индекса; едноименни кандидати в една категория | V38, FilterIndexService | поправени (bug-541/542) | ~15k |
+| 13:17 | Created src/main/java/com/techstore/service/filter/CategoryFilterService.java | — | ~4315 |
+| 14:10 | Фаза 2: POST /api/products/categories/{id}/filters (CategoryFilterService, кеш + disjunctive броене в паметта), /filters/translate-legacy, attributeFilters в searchProducts/fuzzy, displaySpecifications (DisplaySpecificationService) за продукт и карти, CategoryAliasResolver | service/filter/*, ProductSearchRepository, ProductSearchService, ProductService, DTOs, SecurityConfig | локално: броячи = search totals (29=29, 10=10, 51=29+22); alias 531→174 ок; HIDE маха 12 логистични реда | ~40k |
+| 14:15 | filter_value_key() за AUTO стойности (без интервали, ²→2, ^ махнат) | V38, FilterIndexService | 573 варианта слети (21860→21287), „178° / 178°“ = 88 | ~8k |
+| 14:50 | Фаза 3 фронтенд: fetchCategoryFilters/translateLegacyFilters/setCategoryFilterVisibility (paramSlice, requestId guard + abort), Category.jsx собственик на URL (f_<attr>), стари param_ линкове се превеждат, Filter.jsx пренаписан (групи по attributeId, админ око за скриване), MobileFilter pass-through, displaySpecs() в ProductCard/ProductPage/ComparePage, productSlice носи displaySpecifications | care-tech-ui | браузър срещу локален API: Монитори 12 групи без дубли; Черен 66=66, URL f_584=20664; param_5821 → f_143=4326 (1 ms, 22); PSU „Ефективност“ веднъж | ~45k |
+| 14:55 | Бекенд: админ видимост на група (PUT /api/admin/filters/categories/{c}/attributes/{a}/visibility → MANUAL ред), публичният /filters връща скритите групи само за ADMIN (по authorities) | CategoryFilterService, FilterAdminController, ProductSearchController | anon 401 / admin 204; скрита група оцелява rebuild | ~10k |
+| 13:48 | Created scripts/55_filters_curated_01_monitors_colour.sql | — | ~3828 |
+| 13:52 | Created scripts/54_filter_layer_verification.sql | — | ~1108 |
+| 15:30 | Фаза 4 партида 1: scripts/55 (общ Цвят + Монитори MANUAL 10 групи), нов парсер RESPONSE_MS, по-широк DIAGONAL_INCH (15.6-inch, 14 (inch), 15.6 in, 16 ``) | scripts/55, parser/* | локално: Монитори 115 → 10 групи, Диагонал 78%, Резолюция 85%; тонери Черен/Жълт/Магента/Циан; несъпоставени 196 → 148 | ~40k |
+| 15:35 | scripts/54 (проверка, само четене) | scripts/54 | локално: 0 дубли, 189 кат., ср. 5.5, макс 12 | ~5k |
+| 13:53 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/parameter_filters_canonical_layer.md | — | ~495 |
+| 13:55 | Session end: 16 writes across 14 files (buzzing-dancing-hare.md, SecurityConfig.java, ValiApiService.java, ValiSyncService.java, ProductParameterRepository.java) | 28 reads | ~184151 tok |

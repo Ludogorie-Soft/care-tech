@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T08:19:53.518Z
-> Files: 672 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T10:53:32.219Z
+> Files: 697 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -17,6 +17,7 @@
 
 ## ../../../../.claude/plans/
 
+- `buzzing-dancing-hare.md` — Параметри и филтри по категории: одит и план (~3946 tok)
 - `zippy-juggling-hearth.md` — Продуктови линкове `/product/{id}/{id}` вместо `/product/{slug}/{id}` (~1068 tok)
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -25,6 +26,7 @@
 - `euro_rate_convention.md` (~361 tok)
 - `feedback_showtoast_duration.md` — Declares type (~140 tok)
 - `MEMORY.md` — Memory Index (~512 tok)
+- `parameter_filters_canonical_layer.md` (~493 tok)
 - `personal_offer_flow.md` — Declares stored (~373 tok)
 - `prod_db_readonly_access.md` (~236 tok)
 - `project_most_api.md` (~361 tok)
@@ -391,6 +393,8 @@
 - `51_migrate_products_from_hidden_categories.sql` — ============================================================================ (~2750 tok)
 - `52_map_products_to_correct_categories.sql` — ============================================================================ (~72643 tok)
 - `53_rename_category_165.sql` — Преименува кат. 165 „Защитни фолиа / стъкла за телефони" → „Защитни фолиа и стъкла", защото скрипт 52 слага в нея и протектори за таблети и конзоли. Пипа САМО name_bg/name_en на един ред; slug остава (ползва се за рутиране). Изисква едновременна промяна в CategoryReorganizationService:683 и MostSyncService:124-125 — иначе POST /reorganize прави дубликат (~1500 tok)
+- `54_filter_layer_verification.sql` — САМО ЧЕТЕНЕ: критериите за приемане на каноничния филтърен слой (rebuild-ове, едноименни групи, групи на категория, покритие, опашка за курация, несъпоставени стойности, висящи правила, VALI без изтриване) (~1108 tok)
+- `55_filters_curated_01_monitors_colour.sql` — Курация партида 1: общ „Цвят“ (18 базови цвята, regex, split) + 10 групи за „Монитори“ (Диагонал, Резолюция, Честота, Матрица, Време за реакция, Яркост, Говорители, Височина, Цвят, Приложение); идемпотентен (~3828 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
@@ -421,13 +425,13 @@
 - `DatabaseConfig.java` — @Configuration (~428 tok)
 - `DebugController.java` — RestController: DebugController (5 endpoints). Class-level @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')"). (~4699 tok)
 - `JacksonConfig.java` — Configuration: JacksonConfig (~470 tok)
-- `JwtAuthenticationFilter.java` — Component: JwtAuthenticationFilter (~1305 tok)
+- `JwtAuthenticationFilter.java` — Component: JwtAuthenticationFilter (~1262 tok)
 - `OpenApiConfig.java` — Configuration: OpenApiConfig (~712 tok)
 - `RestTemplateConfig.java` — Два bean-а с timeout: `asbisRestTemplate` и `mostRestTemplate` (180s response / 15s connect). Използват се с изричен `@Qualifier` в конструктора. НЕ бъркай с `@Primary new RestTemplate()` в WebConfig:18, който няма никакъв timeout (~1183 tok)
 - `S3Config.java` — Configuration: S3Config (~289 tok)
 - `SearchConfig.java` — Seconds a single search query may run before the driver cancels it. (~610 tok)
 - `SearchIndexManager.java` — app.search.postgresql.performance-test was already in application.yml but nothing (~4263 tok)
-- `SecurityConfig.java` — Configuration: SecurityConfig (~2554 tok)
+- `SecurityConfig.java` — Configuration: SecurityConfig (~2685 tok)
 - `ShippingConfig.java` — Изчислява цената на доставка (~354 tok)
 - `SlugRegenerationRunner.java` — Component: SlugRegenerationRunner (~401 tok)
 - `SpeedyConfig.java` — Configuration: SpeedyConfig (~136 tok)
@@ -449,6 +453,7 @@
 - `CategoryReorganizationController.java` — CategoryReorganizationController (~979 tok)
 - `ContactController.java` — RestController: ContactController (2 endpoints) (~331 tok)
 - `FileUploadController.java` — RestController: FileUploadController (7 endpoints) (~831 tok)
+- `FilterAdminController.java` — /api/admin/filters: POST /rebuild?dryRun=, GET /report (ADMIN/SUPER_ADMIN) (~350 tok)
 - `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1992 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
 - `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~2282 tok)
@@ -501,6 +506,8 @@
 ## src/main/java/com/techstore/dto/filter/
 
 - `AdvancedFilterRequestDTO.java` — AdvancedFilterRequestDTO: hasSpecificationFilters, hasPriceFilter, hasTextSearch (~344 tok)
+- `CategoryFiltersRequest.java` — record(attributeFilters, manufacturers, minPrice, maxPrice, language) за POST /products/categories/{id}/filters (~200 tok)
+- `CategoryFiltersResponse.java` — record(categoryId, total, groups[Group(attributeId, slug, name, unit, type, visible, values)], manufacturers[Option(id, name, count, selected)]) (~300 tok)
 - `FilterOptionDTO.java` — FilterOptionDTO: isAvailable, getDisplayLabel (~228 tok)
 - `PriceRangeDTO.java` — PriceRangeDTO: getDefault, isValid, getFormattedMin, getFormattedMax + 3 more (~648 tok)
 - `RangeDTO.java` — RangeDTO: isValid, getFormattedRange, contains (~269 tok)
@@ -572,6 +579,7 @@
 - `CategoryResponseDTO.java` — Class: CategoryResponseDTO (~197 tok)
 - `CategoryStatisticsDto.java` — Class: CategoryStatisticsDto (~94 tok)
 - `CategorySummaryDTO.java` — Class: CategorySummaryDTO (~126 tok)
+- `DisplaySpecificationDto.java` — record(name, values) — ред от спецификацията за показване (~100 tok)
 - `FacetValue.java` — The ID of the parameter option (for filtering) (~210 tok)
 - `FavoriteCountResponseDto.java` — Class: FavoriteCountResponseDto (~108 tok)
 - `LoginResponseDTO.java` — Class: LoginResponseDTO (~107 tok)
@@ -740,7 +748,7 @@
 - `ParameterOptionRepository.java` — Repository: ParameterOptionRepository (~420 tok)
 - `ParameterRepository.java` — Repository: ParameterRepository. findParametersForAvailableProductsByCategory uses status = AVAILABLE (not <> NOT_AVAILABLE) (~1065 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
-- `ProductParameterRepository.java` — Repository: ProductParameterRepository (~478 tok)
+- `ProductParameterRepository.java` — Repository: ProductParameterRepository (~557 tok)
 - `ProductRepository.java` — The category a product already sits in. Returns the id rather than the entity so the (~3960 tok)
 - `ProductSearchRepository.java` — Guards against a pathological query turning into dozens of ANDed ILIKEs. (~11934 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
@@ -760,6 +768,7 @@
 - `BlogPostService.java` — Service: BlogPostService (~3776 tok)
 - `BlogTagService.java` — Service: BlogTagService (~1138 tok)
 - `CartService.java` — Service: CartService (~1754 tok)
+- `CategoryAliasResolver.java` — alias категория → целевата; alias към скрита цел остава на себе си (празна). Ползва се от ProductSearchService и CategoryFilterService (~350 tok)
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~12606 tok)
 - `CategoryService.java` — Service: CategoryService (~4270 tok)
 - `CronJobService.java` — Nightly cron (1am). Sync Vali→Tekra→Most→Asbis. Failures logged with Markers.CRITICAL (→ Slack). (~806 tok)
@@ -784,18 +793,37 @@
 - `TekraApiService.java` — Fetches Tekra categories (JSON) and products (XML); retryDelayMs=60_000 (3 attempts, exponential backoff); productsCache HashMap; getProductsRaw/getAllProductsForCategory (~4707 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
 - `UserService.java` — Service: UserService (~6466 tok)
-- `ValiApiService.java` — Get categories (no pagination available) (~9170 tok)
+- `ValiApiService.java` — Get categories (no pagination available) (~9094 tok)
 
 ## src/main/java/com/techstore/service/admin/
 
 - `AdminService.java` — Service: AdminService (~4141 tok)
+
+## src/main/java/com/techstore/service/filter/
+
+- `CategoryFilterService.java` — Serves the filter panel of a category from the canonical filter layer. (~4315 tok)
+- `DisplaySpecificationService.java` — displaySpecifications за продукт/карти: групира по каноничното свойство (filter_param_map), маха HIDE, дедуплицира стойности по filter_value_key; суровото specifications остава за админ формата (~1100 tok)
+- `FilterIndexService.java` — Rebuilds the canonical filter index (V38) from the raw supplier layer. (~8675 tok)
+- `FilterRebuildResult.java` — Outcome of one {@link FilterIndexService#rebuild} call. (~176 tok)
+- `FilterReportService.java` — Read-only отчет за каноничния слой: последни rebuild-ове, несъпоставени параметри по обхват, несъпоставени стойности, висящи правила, групи по категория (~900 tok)
+
+## src/main/java/com/techstore/service/filter/parser/
+
+- `CapacityGbParser.java` — CAPACITY_GB: 2x8GB → 16, 1TB → 1000, 2048GB → 2000; етикети GB/TB/MB (~800 tok)
+- `DiagonalInchParser.java` — DIAGONAL_INCH: 27" / 27 inch / 27 инча / 68.6 cm → 27; инчове печелят пред cm (~600 tok)
+- `FilterValueParser.java` — Интерфейс: code() + parse(textBg, textEn) → Optional<ParsedValue>; празно при двусмислен текст (~150 tok)
+- `ParsedValue.java` — record(normKey, labelBg, labelEn, number) (~120 tok)
+- `ParserSupport.java` — prepare(): lower, десетична запетая → точка, инчови знаци → "; plain(): 27.00 → "27" (~300 tok)
+- `RefreshHzParser.java` — REFRESH_HZ: най-високата честота в текста (60/75 Hz → 75) (~400 tok)
+- `ResolutionParser.java` — RESOLUTION: 1920x1080 (x/×/х), FHD/QHD/WQHD/UWQHD/4K; „HD“ умишлено не (~600 tok)
+- `ResponseMsParser.java` — RESPONSE_MS: 1 ms (GTG) / 1ms MPRT / 0.5 мс → най-малкото време в ms (~400 tok)
 
 ## src/main/java/com/techstore/service/sync/
 
 - `AsbisSyncService.java` — AsbisSyncService (~14814 tok)
 - `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~17476 tok)
 - `TekraSyncService.java` — Service: TekraSyncService (~23955 tok)
-- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15844 tok)
+- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15657 tok)
 
 ## src/main/java/com/techstore/util/
 
@@ -849,6 +877,8 @@
 - `V35__add_deleted_flag_to_products.sql` — Soft-delete support for products. (~80 tok)
 - `V36__add_manually_hidden_to_products.sql` — Separates "an admin deliberately hid this product" from "the sync hid it". (~571 tok)
 - `V37__add_manually_categorized_to_products.sql` — Маркира продукти, чиято категория е определена ръчно (админ панел или скрипт 52). (~237 tok)
+- `V38__add_canonical_filter_layer.sql` — Каноничен филтърен слой: filter_norm(), filter_attributes/values/attribute_sources/value_rules, category_filter_settings/filters + производни (filter_param_map, filter_option_map, product_filter_values, filter_unmapped_values, filter_rebuild_runs); uq_product_parameters_unique IF NOT EXISTS (~2600 tok)
+- `V39__seed_filter_junk_rules.sql` — Статични HIDE (логистика, идентификатори) и IGNORE (гаранция, тегло, размери, среда) правила по нормализирано име (~1500 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)
@@ -883,6 +913,10 @@
 
 - `MostApiServiceTest.java` — 11 теста с Mockito за провалите на MOST feed-а: празно/null тяло, connection error, изчерпани опити, възстановяване след преходен отказ, HTTP статус, счупен XML, изключен feed, кеширане на успех и НЕкеширане на провал (~1999 tok)
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
+
+## src/test/java/com/techstore/service/filter/parser/
+
+- `FilterValueParsersTest.java` — 55 теста за DIAGONAL_INCH, REFRESH_HZ, CAPACITY_GB, RESOLUTION с реални формати на доставчиците (~1500 tok)
 
 ## src/test/java/com/techstore/service/sync/
 

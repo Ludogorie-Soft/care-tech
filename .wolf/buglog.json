@@ -8757,6 +8757,202 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-24T08:19:19.186Z"
+    },
+    {
+      "id": "bug-532",
+      "timestamp": "2026-09-24T09:22:13.729Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/config/SecurityConfig.java",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 7→12 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T09:22:13.729Z"
+    },
+    {
+      "id": "bug-533",
+      "timestamp": "2026-09-24T09:53:35.000Z",
+      "error_message": "Анонимен посетител може да трие/създава/редактира продукти и параметри (/api/products/**, /api/parameters/** = permitAll за всички методи)",
+      "file": "src/main/java/com/techstore/config/SecurityConfig.java",
+      "root_cause": "URL правилата бяха permitAll без HttpMethod; ParameterController и ProductController нямаха @PreAuthorize. Освен това JwtAuthenticationFilter изобщо не четеше токена за /api/products, затова админските продуктови операции работеха само защото пътят беше отворен.",
+      "fix": "SecurityConfig: GET + POST /api/products/search и /categories/*/filter-facets са публични, всичко останало под /api/products/** и /api/parameters/** е hasAnyRole(ADMIN,SUPER_ADMIN); @PreAuthorize на 11 записващи метода; /api/products махнат от isPublicEndpoint в JwtAuthenticationFilter. Проверено локално: anon 401, user 403, admin стига до контролера, публичните четения 200 и с невалиден токен.",
+      "tags": [
+        "security",
+        "idor",
+        "permitAll",
+        "PreAuthorize",
+        "jwt",
+        "products",
+        "parameters"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T09:53:35.000Z"
+    },
+    {
+      "id": "bug-534",
+      "timestamp": "2026-09-24T09:53:35.000Z",
+      "error_message": "VALI parameter sync изтри 1169 параметъра на 2026-06-02 (sync_logs: Reused 619, Deleted 1169)",
+      "file": "src/main/java/com/techstore/service/sync/ValiSyncService.java",
+      "root_cause": "Sync-ът триеше всеки VALI параметър, липсващ в текущия отговор, без праг; ValiApiService.getParametersByCategory гълташе всяка грешка и връщаше празен списък, така че непълен fetch изглеждаше като 'параметрите изчезнаха'. Каскадата изтри опции, product_parameters и category_parameters (ръчната подредба на филтрите).",
+      "fix": "Твърдото изтриване е премахнато (остарелите се броят като 'Stale (kept)'). getParametersByCategory хвърля при грешка (404 = празно, без retry). Sync-ът брои неуспешните категории, логва CRITICAL и записва FAILED, без да хвърля, за да не спре продуктовия sync.",
+      "tags": [
+        "vali",
+        "sync",
+        "parameters",
+        "cascade",
+        "silent-failure",
+        "data-loss"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T09:53:35.000Z"
+    },
+    {
+      "id": "bug-535",
+      "timestamp": "2026-09-24T09:53:35.000Z",
+      "error_message": "VALI стойности на продукти изпадат мълчаливо при еднакви имена на опции",
+      "file": "src/main/java/com/techstore/service/sync/ValiSyncService.java",
+      "root_cause": "createOptionsForParameter сливаше опции с еднакво нормализирано име само в паметта (globalOptionsCache.put(optKey, existing)); продуктовият sync строи кеша от базата по paramExtId_optionExtId, затова сливаните опции липсваха и стойността отпадаше (notFoundCount).",
+      "fix": "Сливането е премахнато — всяка VALI опция пази собствен ред и external id. Уеднаквяването на стойности отива в каноничния филтърен слой. Неизползваният normalizeOptionValue е изтрит.",
+      "tags": [
+        "vali",
+        "options",
+        "sync",
+        "data-loss",
+        "cache"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T09:53:35.000Z"
+    },
+    {
+      "id": "bug-536",
+      "timestamp": "2026-09-24T09:53:35.000Z",
+      "error_message": "MOST parameter sync прескача всички параметри на продукти в категории с неуникално име",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "categoryRepository.findByNameBg връща Optional и хвърля при 2+ реда; 15 от 51 цели на MOST_CATEGORY_MAPPING са неуникални (Монитори, Процесори, Дънни платки...). Изключението се хващаше за целия продукт.",
+      "fix": "Изнесен static indexCategoriesByName (видими първо, после най-малко id) и ползван и в параметърния, и в продуктовия sync. Параметърният sync вече ползва resolveTargetCategoryName + applyLaptopNameOverride като продуктовия. Тест в MostCategoryResolutionTest.",
+      "tags": [
+        "most",
+        "sync",
+        "category",
+        "findByNameBg",
+        "non-unique"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T09:53:35.000Z"
+    },
+    {
+      "id": "bug-537",
+      "timestamp": "2026-09-24T09:53:35.000Z",
+      "error_message": "Всяка нова връзка категория-параметър от sync става видим (често дублиран) филтър",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "Общите INSERT INTO category_parameters в края на ASBIS/TEKRA/MOST вмъкваха само (category_id, parameter_id); колоната е NOT NULL DEFAULT TRUE, а последващото UPDATE ... WHERE is_filter IS NULL никога не намира редове. INSERT-ът заобикаля и пазача срещу едноименни параметри.",
+      "fix": "INSERT-ите записват is_filter=false изрично; мъртвите IS NULL UPDATE-и са премахнати (3 catch-all + 2 след параметърния sync).",
+      "tags": [
+        "asbis",
+        "tekra",
+        "most",
+        "category_parameters",
+        "is_filter",
+        "duplicates"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T09:53:35.000Z"
+    },
+    {
+      "id": "bug-538",
+      "timestamp": "2026-09-24T09:53:35.000Z",
+      "error_message": "Списъкът с групи филтри показва групи/опции, които броячите и търсенето не виждат",
+      "file": "src/main/java/com/techstore/repository/ProductParameterRepository.java",
+      "root_cause": "findParameterOptionsByCategoryAndActiveProducts ползваше status IN (AVAILABLE, LIMITED_QUANTITY) без deleted/image_url, а getFilteredFacets и searchProducts — само AVAILABLE + deleted=false + image_url.",
+      "fix": "Условията за продукт са подравнени с getFilteredFacets.",
+      "tags": [
+        "filters",
+        "facets",
+        "status",
+        "AVAILABLE"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T09:53:35.000Z"
+    },
+    {
+      "id": "bug-539",
+      "timestamp": "2026-09-24T09:53:35.000Z",
+      "error_message": "Продукти недостъпни през филтъра при едноименни опции; колизия на React ключове при едноименни групи",
+      "file": "care-tech-ui/src/redux/paramSlice.js",
+      "root_cause": "fetchCategoryParam дедуплицираше по name+externalId (externalId липсва в отговора) и пазеше само първото id; Filter.jsx ключуваше групите по име.",
+      "fix": "Едноименните опции в група стават една отметка с всички ids; Filter.jsx избира/маха всички ids наведнъж и в state, и в URL; броячът е max по ids (138 продукта имат и двете копия, 48 само едното — сумата брои двойно); групите са ключувани по parameterId. Проверено в браузъра на Монитори/„1 ms“: URL param_5821=150582,108657, 14 = 14.",
+      "tags": [
+        "frontend",
+        "filters",
+        "paramSlice",
+        "Filter.jsx",
+        "react-key",
+        "ids"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T09:53:35.000Z"
+    },
+    {
+      "id": "bug-540",
+      "timestamp": "2026-09-24T10:04:18.081Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/main/java/com/techstore/service/filter/FilterIndexService.java",
+      "root_cause": "Had \"parameterCombos\\\"",
+      "fix": "Changed to \"parameterCombos\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T10:04:18.081Z"
+    },
+    {
+      "id": "bug-541",
+      "timestamp": "2026-09-24T10:14:13.000Z",
+      "error_message": "Ръчно (MANUAL) правило за име не може да се добави, ако вече има AUTO правило за същото име (duplicate key uq_filter_attribute_sources)",
+      "file": "src/main/resources/db/migration/V38__add_canonical_filter_layer.sql",
+      "root_cause": "Уникалният индекс беше по (parameter_id, name_norm, platform, category_id) без origin, така че курацията не можеше да седне до AUTO правилото и да го надделее — хванато в локален smoke тест, преди V38 да стигне до прод.",
+      "fix": "origin е част от уникалния ключ; resolveParameterMap дава +32 на MANUAL, затова ръчното печели.",
+      "tags": [
+        "filters",
+        "canonical-layer",
+        "unique-index",
+        "V38"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T10:14:13.000Z"
+    },
+    {
+      "id": "bug-542",
+      "timestamp": "2026-09-24T10:14:13.000Z",
+      "error_message": "Една категория показва две групи „Диагонал“ (ръчно свойство + AUTO свойство от параметър със същото име)",
+      "file": "src/main/java/com/techstore/service/filter/FilterIndexService.java",
+      "root_cause": "selectCategoryFilters изключваше само имена, заети от вече записани MANUAL редове; два кандидата в един и същ INSERT с еднакво показвано име минаваха и двата.",
+      "fix": "Нов CTE one_per_name: DISTINCT ON (category_id, filter_norm(name_bg)) с предимство MANUAL, после покритие. Проверено: duplicateGroupNames = 0, втори rebuild diff 0.",
+      "tags": [
+        "filters",
+        "canonical-layer",
+        "duplicates",
+        "category_filters"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T10:14:13.000Z"
     }
   ]
 }
