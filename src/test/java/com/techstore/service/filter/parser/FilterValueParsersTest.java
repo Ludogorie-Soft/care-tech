@@ -130,7 +130,7 @@ class FilterValueParsersTest {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"", "DDR5", "8GB / 16GB", "0", "Kingston DataTraveler 3.0"})
+        @ValueSource(strings = {"", "DDR5", "8GB / 16GB", "0", "0 GB", "Kingston DataTraveler 3.0"})
         void leavesAmbiguousTextUnmapped(String text) {
             assertTrue(parser.parse(text, null).isEmpty());
         }

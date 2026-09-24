@@ -48,7 +48,11 @@ public class CapacityGbParser implements FilterValueParser {
         Set<BigDecimal> values = new TreeSet<>();
         Matcher m = SINGLE.matcher(text);
         while (m.find()) {
-            values.add(toGb(new BigDecimal(m.group(1)), m.group(2)).stripTrailingZeros());
+            BigDecimal gb = toGb(new BigDecimal(m.group(1)), m.group(2));
+            // "RAM: 0 GB" is a barebone without memory, not a capacity.
+            if (gb.signum() > 0) {
+                values.add(gb.stripTrailingZeros());
+            }
         }
         if (values.isEmpty()) {
             Matcher bare = BARE.matcher(text);
