@@ -3800,3 +3800,7 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 19:00 | Комит партида 7 (bdda5b4) + openwolf (f50f818) | git | ok | ~500 |
 | 19:30 | Партида 8 (кабели и зареждане): скрипт 55_08, 7 категории, 26 групи; без Java промени | scripts/55_filters_curated_08_cables_charging.sql | приложено локално, rebuild diff 0; куриране: 47/226 категории = 65% от видимите продукти | ~9000 |
 | 16:14 | Session end: 8 writes across 8 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~35605 tok |
+| 16:26 | Created scripts/55_filters_curated_09_accessories.sql | — | ~6449 |
+| 19:40 | Комит партида 8 (e14cc97) + openwolf (16ec8af) | git | ok | ~500 |
+| 20:20 | Партида 9 (аксесоари): скрипт 55_09, 8 категории, 28 групи; без Java промени; поправени размери на падове (първа мярка) | scripts/55_filters_curated_09_accessories.sql | приложено локално, rebuild diff 0 | ~12000 |
+| 16:30 | Session end: 9 writes across 9 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~42515 tok |
