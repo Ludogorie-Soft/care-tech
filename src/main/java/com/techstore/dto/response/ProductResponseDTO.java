@@ -17,6 +17,7 @@ public class ProductResponseDTO {
     private Long id;
     private String referenceNumber;
     private String model;
+    private String sku;
     private String barcode;
     private String nameEn;
     private String nameBg;

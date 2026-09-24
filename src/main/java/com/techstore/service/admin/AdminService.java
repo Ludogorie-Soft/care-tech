@@ -127,6 +127,7 @@ public class AdminService {
 
         dto.setReferenceNumber(product.getReferenceNumber());
         dto.setModel(product.getModel());
+        dto.setSku(product.getSku());
         dto.setBarcode(product.getBarcode());
 
         dto.setPriceClient(product.getPriceClient());

@@ -1048,6 +1048,7 @@ public class ProductService {
         dto.setSlug(p.getSlug());
         dto.setReferenceNumber(p.getReferenceNumber());
         dto.setModel(p.getModel());
+        dto.setSku(p.getSku());
         dto.setBarcode(p.getBarcode());
         dto.setPriceClient(p.getPriceClient());
         dto.setPricePartner(p.getPricePartner());
