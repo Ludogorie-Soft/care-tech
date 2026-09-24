@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T12:14:42.665Z
-> Files: 712 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T12:30:46.969Z
+> Files: 716 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -398,7 +398,9 @@
 - `55_filters_curated_02_pc_components.sql` — Курация партида 2: Процесори(3), Дънни платки(2), Памети(6), SSD(17), Видео карти(8), Лаптопи(37); 24 свойства, scoped източници, английски MOST имена, правила по име (сокет по поколение/чипсет); сокет приема „115x“ и кирилско „АМ5“; идемпотентен по note '55 партида 2' (~7700 tok)
 - `55_filters_curated_03_components_peripherals.sql` — Курация партида 3: Захранвания(9), Кутии(11), Охладители(4), Вентилатори(12), Мишки(62/174), Клавиатури(61/172); 22 свойства, 43 групи; собствени (тесни) цветови правила по име — „80+ Gold“ не е цвят, „A-RGB“ не е многоцветен; „Интерфейс: USB“ не е кабелна; изисква 55_02 (~8000 tok)
 - `55_filters_curated_04_cameras_batteries_consumables.sql` — Курация партида 4: IP камери(100), Батерии(199), Тонери(86), Мастила(87); 15 свойства, 22 групи; размер на батерия от синоними (LR6=AA=E91), ресурс на касета на диапазони (PAGE_YIELD); „Съвместими модели“ НЕ е източник за марка (VALI грешки „EPSON:“ при Canon); изисква 55_01 и 55_02 (~9500 tok)
+- `55_filters_curated_05_memory_storage.sql` — Курация партида 5: Памети за лаптоп(7), HDD 3.5"(16), Твърди дискове(235), Външни дискове(55), Външни SSD(56), USB памети(57), Флаш памети(321), Карти памет(150); 8 нови свойства, 33 групи; скорост на четене на диапазони (READ_MBS); предназначение на HDD само от серията/кода в името (VALI „Тип хард диск“ е грешен) (~9000 tok)
 - `55_filters_curated_04_cameras_batteries_consumables.sql` — ============================================================================ (~8051 tok)
+- `55_filters_curated_05_memory_storage.sql` — ============================================================================ (~5987 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
@@ -813,7 +815,7 @@
 
 ## src/main/java/com/techstore/service/filter/parser/
 
-- `CapacityGbParser.java` — CAPACITY_GB: 2x8GB → 16, 1TB → 1000, 2048GB → 2000; етикети GB/TB/MB (~800 tok)
+- `CapacityGbParser.java` — CAPACITY_GB: 2x8GB → 16, 1TB → 1000, 2048GB → 2000; голо „128“ (целият текст) → 128 GB; „150MB/s“ не е капацитет; етикети GB/TB/MB (~850 tok)
 - `CasLatencyParser.java` — CAS_CL: CL16 / CL 16-20-20 / 16-18-18-38 / „16“ → CL16 (~300 tok)
 - `CountParser.java` — COUNT: първото цяло число (ядра, нишки, слотове); сума „6+1“ → 7 (бутони на мишка) (~350 tok)
 - `DiagonalInchParser.java` — DIAGONAL_INCH: 27" / 27 inch / 27 инча / 68.6 cm → 27; инчове печелят пред cm (~600 tok)
@@ -829,6 +831,8 @@
 - `ParsedValue.java` — record(normKey, labelBg, labelEn, number) (~120 tok)
 - `ParserSupport.java` — prepare(): lower, десетична запетая → точка, инчови знаци → "; plain(): 27.00 → "27" (~300 tok)
 - `PowerWattParser.java` — POWER_W: номинална мощност във W („850 W“, „850W 80+ Gold“) — първата стойност (~400 tok)
+- `ReadSpeedParser.java` — Read speed of a flash drive, memory card or external SSD in MB/s, filed into a range (~827 tok)
+- `ReadSpeedParser.java` — READ_MBS: скорост на четене в 5 диапазона (from-0…from-1001); взима частта с „read/четене“ („200MB/s read, 60MB/s write“ → 200); голо число само ако е целият текст; Gbps не се чете (~700 tok)
 - `RefreshHzParser.java` — REFRESH_HZ: най-високата честота в текста (60/75 Hz → 75) (~400 tok)
 - `ResolutionParser.java` — RESOLUTION: 1920x1080 (x/×/х), FHD/QHD/WQHD/UWQHD/4K; „HD“ умишлено не (~600 tok)
 - `ResponseMsParser.java` — RESPONSE_MS: 1 ms (GTG) / 1ms MPRT / 0.5 мс → най-малкото време в ms (~400 tok)

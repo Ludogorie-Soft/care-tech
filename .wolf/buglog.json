@@ -9137,6 +9137,39 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-24T16:10:00Z"
+    },
+    {
+      "id": "bug-554",
+      "timestamp": "2026-09-24T17:05:00Z",
+      "error_message": "Карта памет „Kingston 512GB microSDXC … 150MB/s“ остава без капацитет",
+      "file": "src/main/java/com/techstore/service/filter/parser/CapacityGbParser.java",
+      "root_cause": "SINGLE четеше „150MB/s“ като втори капацитет (0.146 GB) → две стойности → празно",
+      "fix": "Отрицателно look-ahead за „/s“ след единицата; голо число като целия текст = GB („Капацитет (GB)“: 128)",
+      "tags": [
+        "filters",
+        "parser",
+        "capacity"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T17:05:00Z"
+    },
+    {
+      "id": "bug-555",
+      "timestamp": "2026-09-24T17:05:00Z",
+      "error_message": "IronWolf/SkyHawk/WD Gold излизат като „Настолен компютър“ във филтъра за предназначение",
+      "file": "scripts/55_filters_curated_05_memory_storage.sql",
+      "root_cause": "VALI „Тип хард диск“ е грешен и многозначен (IronWolf = NAS + Настолен; SkyHawk = Настолен)",
+      "fix": "„Тип хард диск“ не е източник; предназначението идва от серията и кода на модела в името (ST…VN/VX/NM/DM, WD…EF/PUR/KRYZ)",
+      "tags": [
+        "filters",
+        "supplier-data",
+        "vali",
+        "hdd"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T17:05:00Z"
     }
   ]
 }
