@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "care-tech-ui",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/user/Documents/projects/care-tech-ui && BROWSER=none PORT=3000 npm start"],
+      "port": 3000
+    }
+  ]
+}

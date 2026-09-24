@@ -3657,3 +3657,48 @@
 | 10:58 | Пълен test suite след трите поправки | — | 106/106 BUILD SUCCESS (беше 95) | ~800 |
 | 13:25 | Session end: 13 writes across 6 files (project_most_api.md, RestTemplateConfig.java, application.yml, MostApiService.java, MostSyncService.java) | 6 reads | ~23113 tok |
 | 13:27 | Edited src/main/java/com/techstore/service/ProductService.java | modified updateProductFieldsFromRest() | ~40 |
+| 13:31 | Session end: 14 writes across 7 files (project_most_api.md, RestTemplateConfig.java, application.yml, MostApiService.java, MostSyncService.java) | 7 reads | ~37229 tok |
+| 13:32 | Session end: 14 writes across 7 files (project_most_api.md, RestTemplateConfig.java, application.yml, MostApiService.java, MostSyncService.java) | 7 reads | ~37229 tok |
+| 10:25 | Session end: 14 writes across 7 files (project_most_api.md, RestTemplateConfig.java, application.yml, MostApiService.java, MostSyncService.java) | 7 reads | ~37229 tok |
+| 09:30 | Проверка след снощния прогон: 4208/4208 удържаха, MOST се вдигна (5511) | sync_logs, products (read-only) | чисто | ~2500 |
+| 09:35 | Логнат bug-528 (LENOVO GAN CHAR в грешна категория) | .wolf/buglog.json | — | ~600 |
+| 10:33 | Session end: 14 writes across 7 files (project_most_api.md, RestTemplateConfig.java, application.yml, MostApiService.java, MostSyncService.java) | 7 reads | ~37229 tok |
+
+## Обобщение на сесията (2026-09-21 → 2026-09-24)
+
+**Фаза 5 — категории.** Скрипт 52 (4 208 продукта) и 53 (преименуване на кат. 165)
+минаха на продукция. V37 добави `products.manually_categorized`; пазачи в MOST,
+TEKRA и ASBIS + `ProductService.applyAdminCategory`. Проверено след нощния прогон
+на 24.09: 4 208/4 208 на място, 1 908 от тях пипнати от sync-а без промяна на
+категорията. Пазачът работи.
+
+**MOST feed.** Диагностициран тихият провал от 23.09 (0 продукта, логнато като
+SUCCESS). URL-ът беше верен — преходен мрежов отказ, издаден от `duration_ms`
+592 ms срещу ~70 000 ms. Три поправки: хвърляне вместо празен списък, `FAILED`
+при 0 продукта, собствен `mostRestTemplate` с timeout и retry. 11 нови теста.
+Новите пътища за провал още НЕ са задействани — нощта на 24.09 мина успешно.
+
+**Къмитнато и бутнато:** b85fd48, 7198ea6, 7d4445b → origin/v2 (общо 24 къмита,
+цялата дъга на фаза 5 беше стояла непушната).
+
+**Отворено:** bug-528 (`GAN CHAR` в грешна категория), безкрайният цикъл в
+`AsbisApiService`, 9-те въпроса в CATEGORY_MAPPING_OPEN_QUESTIONS.md.
+| 10:36 | Session end: 14 writes across 7 files (project_most_api.md, RestTemplateConfig.java, application.yml, MostApiService.java, MostSyncService.java) | 7 reads | ~37229 tok |
+
+## Session: 2026-09-24 10:37
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:39 | Created ../../../../.claude/plans/zippy-juggling-hearth.md | — | ~1140 |
+| 10:40 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | inline fix | ~14 |
+| 10:40 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | CSS: replace | ~158 |
+| 10:40 | Created .claude/launch.json | — | ~76 |
+| 10:55 | Диагноза /product/{id}/{id}: productSlice fetchProducts/filterProducts изпускат slug; добавен slug + пренасочване на стари линкове в ProductPage; проверено в браузъра (категория, филтър, редирект, Back, slug с ø) | care-tech-ui/src/redux/productSlice.js, care-tech-ui/src/pages/ProductPage.jsx | fixed, bug-530 | ~4000 |
+| 10:43 | Session end: 4 writes across 3 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json) | 6 reads | ~5557 tok |
+| 11:05 | Commit на slug поправката във фронтенда в нов клон fix/product-slug-links (не е push-нат) | care-tech-ui: productSlice.js, ProductPage.jsx | 4e1d9b5 | ~300 |
+| 10:51 | Session end: 4 writes across 3 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json) | 6 reads | ~5557 tok |
+| 11:10 | Fast-forward merge на fix/product-slug-links в main на care-tech-ui (не е push-нат). Фронтендът работи на main; v2 е клонът на backend-а | care-tech-ui | main @ 4e1d9b5 | ~200 |
+| 10:54 | Session end: 4 writes across 3 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json) | 6 reads | ~5557 tok |
+| 11:15 | Push на care-tech-ui main към origin (d5fcf49..4e1d9b5) — slug поправката е в GitHub | care-tech-ui | pushed | ~100 |
+| 10:58 | Session end: 4 writes across 3 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json) | 6 reads | ~5557 tok |
+| 10:58 | Session end: 4 writes across 3 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json) | 6 reads | ~5557 tok |

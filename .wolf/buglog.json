@@ -217,7 +217,9 @@
         "asbis",
         "tekra"
       ],
-      "related_bugs": [],
+      "related_bugs": [
+        "bug-530"
+      ],
       "occurrences": 1,
       "last_seen": "2026-05-20"
     },
@@ -8710,6 +8712,28 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-23T10:18:22.137Z"
+    },
+    {
+      "id": "bug-530",
+      "timestamp": "2026-09-24T07:40:22.081Z",
+      "error_message": "Продуктови линкове без заглавие: https://www.caretech.bg/product/2050/2050, /product/10912/10912 — всеки продукт, отворен от страница на категория (напр. Компютърни компоненти → ССД) или от филтрите в нея",
+      "file": "../../care-tech-ui/src/redux/productSlice.js",
+      "root_cause": "fetchProducts и filterProducts в productSlice.js преработват всеки продукт в нов обект с изрично изброени полета и изпускат `slug`. Backend-ът го връща (ProductSearchResult.slug), а в базата няма празни slug-ове (0 от 26 612). ProductCard строи линка с `p?.slug || p?.id`, затова пада на ID-то. Преработката е от 2025-09-18, а slug е добавен в DTO-то на 2025-11-06 и никога не е добавен в нея. bug-011 е приел погрешно, че причината са празни slug-ове в базата.",
+      "fix": "Добавен `slug: p.slug || \"\"` в двете преработки в productSlice.js. ProductPage.jsx: useEffect пренасочва стари /product/{id}/{id} линкове към /product/{slug}/{id} с navigate(..., {replace:true}); пренасочва само когато String(item.id) === productId, за да не върне към стария продукт при преход продукт→продукт.",
+      "tags": [
+        "product",
+        "slug",
+        "url",
+        "frontend",
+        "redux",
+        "productSlice",
+        "seo"
+      ],
+      "related_bugs": [
+        "bug-011"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T07:40:22.081Z"
     }
   ]
 }

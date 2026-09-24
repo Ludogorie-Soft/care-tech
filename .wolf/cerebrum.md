@@ -585,3 +585,22 @@ spring-retry — не посягай към `@Retryable`. VALI ползва WebC
 записват `LOG_STATUS_FAILED` и правят `throw`. Затова е достатъчно дадена грешка
 просто да се хвърли — логването и Slack известието (`Markers.CRITICAL` в
 `CronJobService`) идват сами. Не дублирай `updateSyncLogSimple` преди `throw`.
+
+### [2026-09-24] MOST feed-ът се тегли ДВА пъти на нощ
+`MostApiService` кешира 10 минути (`CACHE_DURATION_MS`), но `syncMostParameters`
+върви ~23 минути. Затова: MANUFACTURERS тегли (fetch #1), PARAMETERS хваща кеша,
+а PRODUCTS стартира 23 мин по-късно — кешът вече е изтекъл и тегли пак.
+Два пъти по 17 MB. Не е счупено, но ако се пипа кешът, това е причината.
+
+## Do-Not-Repeat (продуктови линкове, 2026-09-24)
+- [2026-09-24] `care-tech-ui/src/redux/productSlice.js` → `fetchProducts` и `filterProducts` изброяват полетата на продукта изрично. Ново поле в backend `ProductSearchResult` трябва да се добави и там, иначе се губи тихо. Точно така `slug` е липсвал от 2025-11 до 2026-09 и е дал линкове `/product/{id}/{id}` (bug-530).
+- [2026-09-24] При URL `/product/{id}/{id}` първо провери дали API отговорът съдържа `slug`, преди да пипаш базата. bug-011 е „оправил“ празни slug-ове със SQL, а истинската причина е била във фронтенда.
+- [2026-09-24] Ефект в `ProductPage`, който сравнява `item` с URL параметрите, ТРЯБВА да проверява `String(item.id) === productId`. При преход продукт→продукт `item` за кратко е старият продукт и иначе ще пренасочи обратно към него.
+
+## Key Learnings (продуктови URL-и, 2026-09-24)
+- `ProductPage` зарежда продукта само по `productId`; `productSlug` е козметичен. Canonical е `${feURL}/product/${item.slug}/${item.id}`. Стари `/id/id` линкове се пренасочват към slug-адреса с `navigate(..., {replace:true})`.
+- 74 slug-а в прод съдържат не-ASCII символи (`ø`, `è`, `δ`), но нито един не съдържа `/ % ? #`. React Router 7 декодира `useParams`, затова сравнението с `item.slug` работи и за тях.
+- `.claude/launch.json` → конфигурация `care-tech-ui` стартира фронтенда на :3000 (сочи към прод API `https://www.caretech.bg`) за проверка в браузъра.
+
+## User Preferences (git клонове, 2026-09-24)
+- Backend (`tech-store-api`) се работи на клон `v2`. Фронтендът (`care-tech-ui`) се работи на `main` и там няма `v2`. Когато потребителят каже „push-ни в v2“, става дума за backend-а. Преди push в клон, който не съществува, питай, а не го създавай.

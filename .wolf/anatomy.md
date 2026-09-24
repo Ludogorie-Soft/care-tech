@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-23T10:27:55.202Z
-> Files: 670 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T07:40:57.192Z
+> Files: 672 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -14,6 +14,10 @@
 - `step2_analysis.md` — Анализ за стъпка 2 (2026-09-18) (~848 tok)
 - `step2a_result.md` — ## Стъпка 2а — РЕЗУЛТАТ ✅ 2026-09-18 13:16 (~476 tok)
 - `step2b.md` — ## Стъпка 2б — предложение (2026-09-18) (~806 tok)
+
+## ../../../../.claude/plans/
+
+- `zippy-juggling-hearth.md` — Продуктови линкове `/product/{id}/{id}` вместо `/product/{slug}/{id}` (~1068 tok)
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
@@ -100,7 +104,7 @@
 - `OurClients.jsx` — clients (~2724 tok)
 - `OurServices.jsx` — OurServices — renders form (~3552 tok)
 - `Policy.jsx` — sections (~4978 tok)
-- `ProductPage.jsx` — EURO_RATE (~10260 tok)
+- `ProductPage.jsx` — EURO_RATE (~10407 tok)
 - `ReturnPolicyPage.jsx` — sections (~4896 tok)
 - `SearchPage.jsx` — SearchPage (~2180 tok)
 
@@ -230,6 +234,7 @@
 
 ## .claude/
 
+- `launch.json` — Preview конфигурация „care-tech-ui“: стартира фронтенда на :3000 (сочи към прод API) (~76 tok)
 - `settings.json` (~441 tok)
 - `settings.local.json` (~96 tok)
 
