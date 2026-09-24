@@ -507,13 +507,74 @@ class FilterValueParsersTest {
         }
     }
 
+    @Nested
+    @DisplayName("WIFI_GEN")
+    class WifiStandard {
+        private final WifiStandardParser parser = new WifiStandardParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "802.11 a/b/g/n/ac                             | wifi5",
+                "802.11 a/b/g/n/ac/ax                          | wifi6",
+                "802.11 a/b/g/n/ac/ax/be                       | wifi7",
+                "802.11 b/g/n                                  | wifi4",
+                "IEEE 802.11ac/a/n @5GHz;IEEE 802.11b/g/n @2.4GHz | wifi5",
+                "IEEE 802.11ax 6GHz;IEEE 802.11ac/a/n/ax 5GHz;IEEE 802.11b/g/n/ax 2.4GHz | wifi6e",
+                "WiFi 7                                        | wifi7",
+                "Безжичен рутер TP-Link Archer C50 AC1200, 2.4/5 GHz, 300 - 867 Mbps | wifi5",
+                "TENDA TX12L PRO AX3000 WIFI6                  | wifi6",
+                "TENDA TE3L BE3600 GB WI-FI 7                  | wifi7",
+                "UBIQUITI UniFi U6 Enterprise, Access Point, WiFi 6E | wifi6e",
+                "Мрежова карта Intel Wi-Fi 6E AX211 Gig+2230 2x2 AX R2 6GHz+ AX211.NGWG | wifi6e",
+                "TP-Link TL-WR840N N300                        | wifi4",
+        })
+        void readsTheNewestGeneration(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "2.4 GHz", "TENDA NOVA MW3(2-PACK) MESH", "Суич D-Link DGS-1008D/E, 8 портов"})
+        void leavesOtherTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("PORT_COUNT")
+    class PortCount {
+        private final PortCountParser parser = new PortCountParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "16 x 10/100/1000M PoE                         | 16",
+                "16 x RJ-45                                    | 16",
+                "24x10/100/1000Base-T                          | 24",
+                "24x 100/1000Mbps PoE; 4x Gigabit combo (RJ-45/SFP) | 24",
+                "16 (RJ-45)                                    | 16",
+                "Суич ZYXEL GS1100-16, 16 портов, Gigabit, за монтиране в шкаф | 16",
+                "Суич D-Link GO-SW-5G, 5 портов 10/100/1000, Gigabit, Desktop | 5",
+                "Imou 8-port Gigabit Switch                    | 8",
+                "Суич 8-портов ZyXEL GS1920-8HPV2, Gigabit, управляем, PoE | 8",
+        })
+        void readsThePortCount(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "2× 1.25G SFP", "1 x 1000Base-LX SC port", "UBIQUITI UniFi Switch Pro 8 PoE",
+                "Инжектор D-Link DPE-101GI, Gigabit, 15,4W"})
+        void leavesOtherTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
     @Test
     void everyParserHasADistinctCode() {
-        assertEquals(16, java.util.stream.Stream.of(new DiagonalInchParser(), new RefreshHzParser(),
+        assertEquals(18, java.util.stream.Stream.of(new DiagonalInchParser(), new RefreshHzParser(),
                 new CapacityGbParser(), new ResolutionParser(), new ResponseMsParser(), new CountParser(),
                 new FrequencyGhzParser(), new MemoryMhzParser(), new CasLatencyParser(), new GpuModelParser(),
                 new PowerWattParser(), new FanSizeParser(), new DpiParser(), new LengthMmParser(),
-                new PageYieldParser(), new ReadSpeedParser())
+                new PageYieldParser(), new ReadSpeedParser(), new WifiStandardParser(), new PortCountParser())
                 .map(FilterValueParser::code).distinct().count());
         assertTrue(Optional.ofNullable(new DiagonalInchParser().code()).isPresent());
     }
