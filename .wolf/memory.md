@@ -3756,3 +3756,11 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 15:35 | scripts/54 (проверка, само четене) | scripts/54 | локално: 0 дубли, 189 кат., ср. 5.5, макс 12 | ~5k |
 | 13:53 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/parameter_filters_canonical_layer.md | — | ~495 |
 | 13:55 | Session end: 16 writes across 14 files (buzzing-dancing-hare.md, SecurityConfig.java, ValiApiService.java, ValiSyncService.java, ProductParameterRepository.java) | 28 reads | ~184151 tok |
+| 14:04 | Created src/main/resources/db/migration/V40__add_filter_name_rules.sql | — | ~428 |
+| 14:15 | Created scripts/55_filters_curated_02_pc_components.sql | — | ~7660 |
+| 14:18 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 4→6 lines | ~98 |
+| 14:19 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 3→6 lines | ~77 |
+| 15:50 | Комити: бекенд v2 (c0c5f71, 40c0832, fa54ead, 5c170c4), фронтенд main (39c3f39) — без push | — | ok | ~5k |
+| 16:10 | Локален MOST sync срещу истинския фийд потвърди Фаза 0 поправката: +11 418 стойности, платки/процесори/SSD без параметри → 0 | /tmp/techstore-local/most.xml | ok | ~15k |
+| 16:30 | MOST губеше 6.5% от стойностите (>200 знака) → лимит 2000 | MostSyncService | платки „Тип памет“ 47% → 78% | ~8k |
+| 17:00 | Партида 2: V40 (правила по име), 5 нови парсера (COUNT, FREQ_GHZ, MEM_MHZ, CAS_CL, GPU_MODEL), scripts/55_02 (6 категории, 24 свойства), auto- slug префикс, filter_norm маха ™®©, AUTO без проза (ср. дължина ≤ 40) | V40, parser/*, FilterIndexService, scripts/55_01, 55_02 | покритие 90–100% по ключовите филтри в 7 курирани категории; 0 дубли; 456 несъпоставени | ~80k |

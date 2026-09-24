@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T10:53:32.219Z
-> Files: 697 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T11:19:10.037Z
+> Files: 699 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -394,7 +394,9 @@
 - `52_map_products_to_correct_categories.sql` — ============================================================================ (~72643 tok)
 - `53_rename_category_165.sql` — Преименува кат. 165 „Защитни фолиа / стъкла за телефони" → „Защитни фолиа и стъкла", защото скрипт 52 слага в нея и протектори за таблети и конзоли. Пипа САМО name_bg/name_en на един ред; slug остава (ползва се за рутиране). Изисква едновременна промяна в CategoryReorganizationService:683 и MostSyncService:124-125 — иначе POST /reorganize прави дубликат (~1500 tok)
 - `54_filter_layer_verification.sql` — САМО ЧЕТЕНЕ: критериите за приемане на каноничния филтърен слой (rebuild-ове, едноименни групи, групи на категория, покритие, опашка за курация, несъпоставени стойности, висящи правила, VALI без изтриване) (~1108 tok)
+- `55_filters_curated_02_pc_components.sql` — Курация партида 2: Процесори, Дънни платки, Памети, SSD, Видео карти, Лаптопи (24 свойства, правила по име, английски имена на MOST като IGNORE); идемпотентен
 - `55_filters_curated_01_monitors_colour.sql` — Курация партида 1: общ „Цвят“ (18 базови цвята, regex, split) + 10 групи за „Монитори“ (Диагонал, Резолюция, Честота, Матрица, Време за реакция, Яркост, Говорители, Височина, Цвят, Приложение); идемпотентен (~3828 tok)
+- `55_filters_curated_02_pc_components.sql` — ============================================================================ (~7660 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
@@ -809,6 +811,11 @@
 
 ## src/main/java/com/techstore/service/filter/parser/
 
+- `CountParser.java` — COUNT: първото цяло число (ядра, нишки, слотове) (~300 tok)
+- `FrequencyGhzParser.java` — FREQ_GHZ: най-високата честота в GHz („4.4G“ в имената, MHz над 1000) (~450 tok)
+- `MemoryMhzParser.java` — MEM_MHZ: DDR5-6000 / 6000MT/s / 3200MHz(PC4-…) → MHz, най-високата (~400 tok)
+- `CasLatencyParser.java` — CAS_CL: CL16 / CL 16-20-20 / 16-18-18-38 / „16“ → CL16 (~300 tok)
+- `GpuModelParser.java` — GPU_MODEL: RTX/GTX/GT, RX, Arc → „RTX 5060 Ti“; подредба NVIDIA→AMD→Intel по номер (~800 tok)
 - `CapacityGbParser.java` — CAPACITY_GB: 2x8GB → 16, 1TB → 1000, 2048GB → 2000; етикети GB/TB/MB (~800 tok)
 - `DiagonalInchParser.java` — DIAGONAL_INCH: 27" / 27 inch / 27 инча / 68.6 cm → 27; инчове печелят пред cm (~600 tok)
 - `FilterValueParser.java` — Интерфейс: code() + parse(textBg, textEn) → Optional<ParsedValue>; празно при двусмислен текст (~150 tok)
@@ -821,7 +828,7 @@
 ## src/main/java/com/techstore/service/sync/
 
 - `AsbisSyncService.java` — AsbisSyncService (~14814 tok)
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~17476 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~17394 tok)
 - `TekraSyncService.java` — Service: TekraSyncService (~23955 tok)
 - `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15657 tok)
 
@@ -877,9 +884,11 @@
 - `V35__add_deleted_flag_to_products.sql` — Soft-delete support for products. (~80 tok)
 - `V36__add_manually_hidden_to_products.sql` — Separates "an admin deliberately hid this product" from "the sync hid it". (~571 tok)
 - `V37__add_manually_categorized_to_products.sql` — Маркира продукти, чиято категория е определена ръчно (админ панел или скрипт 52). (~237 tok)
+- `V40__add_filter_name_rules.sql` — filter_name_rules (regex или парсер върху името на продукта; само ако параметрите мълчат) + filter_norm маха ™®© (~700 tok)
 - `V38__add_canonical_filter_layer.sql` — Каноничен филтърен слой: filter_norm(), filter_attributes/values/attribute_sources/value_rules, category_filter_settings/filters + производни (filter_param_map, filter_option_map, product_filter_values, filter_unmapped_values, filter_rebuild_runs); uq_product_parameters_unique IF NOT EXISTS (~2600 tok)
 - `V39__seed_filter_junk_rules.sql` — Статични HIDE (логистика, идентификатори) и IGNORE (гаранция, тегло, размери, среда) правила по нормализирано име (~1500 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
+- `V40__add_filter_name_rules.sql` — V40: Filter values taken from the product name. (~428 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)
 - `V7__set_category_parameter_filters_by_usage.sql` — V7: Industry-standard per-category filter configuration (~3966 tok)

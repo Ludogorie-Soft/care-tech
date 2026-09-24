@@ -8953,6 +8953,107 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-24T10:14:13.000Z"
+    },
+    {
+      "id": "bug-543",
+      "timestamp": "2026-09-24T11:35:15.000Z",
+      "error_message": "MOST губи 6.5% от стойностите на свойствата си (4469 от 68603), вкл. „Memory type“ на всяка дънна платка",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "extractMostParameters изхвърляше всяка стойност над 200 знака. MOST пише „Memory type“, „Interface“, „Connectors“, „Storage“, „Graphics“ като дълъг текст — точно полетата с DDR4/DDR5, Wi-Fi, портове. Колоната parameter_options.name_bg е TEXT, ограничението не е техническо.",
+      "fix": "MAX_PROPERTY_VALUE_LENGTH = 2000. Локално: „Тип памет“ при дънните платки 47% → 78% покритие. ASBIS (AsbisSyncService:367) и TEKRA (:1680) имат същото ограничение от 200 — неизмерено, без фийдовете им.",
+      "tags": [
+        "most",
+        "sync",
+        "data-loss",
+        "parameters",
+        "length-limit"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T11:35:15.000Z"
+    },
+    {
+      "id": "bug-544",
+      "timestamp": "2026-09-24T11:35:15.000Z",
+      "error_message": "MOST дънни платки/процесори/SSD без спецификации в базата, въпреки че фийдът ги съдържа",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Потвърждение на bug-536 с реални данни: findByNameBg хвърляше за неуникални имена („Дънни платки“, „Процесори“) и параметърният sync прескачаше всички свойства на тези продукти. Във фийда 401/402 платки и 193/195 процесора имат <property>.",
+      "fix": "Поправено във Фаза 0 (indexCategoriesByName). Локален sync срещу истинския фийд: +28 параметъра, +5437 опции, +11 418 стойности; платки без параметри 122 → 0, процесори 74 → 0, SSD 59 → 1.",
+      "tags": [
+        "most",
+        "sync",
+        "category",
+        "verification"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T11:35:15.000Z"
+    },
+    {
+      "id": "bug-545",
+      "timestamp": "2026-09-24T11:35:15.000Z",
+      "error_message": "AUTO свойство заема slug, нужен на ръчно („chipset“) — скрипт 55_02 спира на проверката",
+      "file": "src/main/java/com/techstore/service/filter/FilterIndexService.java",
+      "root_cause": "AUTO slug-овете идват от имената на параметрите, вкл. английските имена на MOST/ASBIS („Chipset“), и се сблъскват с ръчните английски slug-ове.",
+      "fix": "AUTO slug-овете получават префикс „auto-“; ръчните остават чисти. Хванато локално преди деплой.",
+      "tags": [
+        "filters",
+        "slug",
+        "canonical-layer"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T11:35:15.000Z"
+    },
+    {
+      "id": "bug-546",
+      "timestamp": "2026-09-24T11:35:15.000Z",
+      "error_message": "„AMD Ryzen™ 7 7735HS“ и „NVIDIA® GeForce RTX™ 5060“ не се разпознават от правилата и парсерите",
+      "file": "src/main/resources/db/migration/V40__add_filter_name_rules.sql",
+      "root_cause": "Знаците ™®© разделят думите: „ryzen™ 7“, „rtx™ 5060“. Нито filter_norm, нито ParserSupport.prepare ги махаха.",
+      "fix": "filter_norm (CREATE OR REPLACE във V40) и ParserSupport.prepare махат ™®©. Серия процесор при лаптопи 56% → 94%, модел на видео карта 86% → 93%.",
+      "tags": [
+        "filters",
+        "normalization",
+        "trademark",
+        "parsers"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T11:35:15.000Z"
+    },
+    {
+      "id": "bug-547",
+      "timestamp": "2026-09-24T11:35:15.000Z",
+      "error_message": "AUTO групи с проза като опции („Вход AC“, „Информация за вентилатора“, „I/O“, „Слотове за устройства“)",
+      "file": "src/main/java/com/techstore/service/filter/FilterIndexService.java",
+      "root_cause": "След вдигането на лимита на MOST дългите текстове станаха стойности; автоматичният избор гледаше само брой стойности и покритие.",
+      "fix": "MAX_AUTO_LABEL_LENGTH = 40: AUTO свойство не се създава и не се избира за категория, ако средната дължина на стойностите му е над 40 знака. Ръчните не се засягат. Локално 980 → 937 AUTO групи.",
+      "tags": [
+        "filters",
+        "auto",
+        "heuristic",
+        "most"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T11:35:15.000Z"
+    },
+    {
+      "id": "bug-548",
+      "timestamp": "2026-09-24T11:35:15.000Z",
+      "error_message": "Локалният бекенд продължава със стария клас след mvn compile (devtools)",
+      "file": "local dev (spring-boot-devtools)",
+      "root_cause": "Devtools рестартира два пъти (изтриване, после добавяне на класове) и понякога остава на старата версия; също така рестартът убива дълъг sync по средата (MOST продуктовият sync спря на 5000/5511).",
+      "fix": "За проверка след промяна в кода — пълен рестарт на процеса; не компилирай, докато върви sync. Признак: статистиката на rebuild не се променя след промяна, която трябва да я промени.",
+      "tags": [
+        "local-env",
+        "devtools",
+        "verification"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T11:35:15.000Z"
     }
   ]
 }
