@@ -201,6 +201,8 @@ class FilterValueParsersTest {
                 "Total Cores: 14;# of Performance-cores: 6         | 14",
                 "4 x DIMM                                           | 4",
                 "16 (8P+8E)                                         | 16",
+                "6+1                                                | 7",
+                "2+1                                                | 3",
         })
         void readsTheFirstWholeNumber(String text, String expected) {
             assertEquals(expected, key(parser, text));
@@ -340,11 +342,107 @@ class FilterValueParsersTest {
         }
     }
 
+    @Nested
+    @DisplayName("POWER_W")
+    class PowerWatt {
+        private final PowerWattParser parser = new PowerWattParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "850 W                                         | 850",
+                "1300W, Power Good Signal: 100-150ms           | 1300",
+                "750W : ATX 3.1                                | 750",
+                "SEASONIC FOCUS GX-850 (2024) 850W 80+ Gold    | 850",
+        })
+        void readsTheRatedPower(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "80+ Gold", "50W", "38Wh"})
+        void leavesOtherTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("FAN_MM")
+    class FanSize {
+        private final FanSizeParser parser = new FanSizeParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "120 x 120 x 25 mm            | 120",
+                "140 x 140 x 25 mm            | 140",
+                "120 mm                       | 120",
+                "1  x 120мм*120мм*25мм        | 120",
+                "ARCTIC P12 PWM PST 120mm     | 120",
+                "DeepCool LE520, 240mm CPU Liquid Cooler, 2x120mm ARGB PWM Fans | 120",
+        })
+        void readsTheFanSize(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "4-Pin (PWM)", "25 mm", "CORSAIR NAUTILUS 240, 240mm Radiator"})
+        void leavesOtherTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("DPI_MAX")
+    class Dpi {
+        private final DpiParser parser = new DpiParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "1000/1400/1800 DPI     | 1800",
+                "100~10,000 CPI         | 10000",
+                "26000 dpi              | 26000",
+                "1000;1600;2400         | 2400",
+                "26K DPI                | 26000",
+        })
+        void readsTheHighestSensitivity(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "Оптичен", "5"})
+        void leavesOtherTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("LENGTH_MM")
+    class LengthMm {
+        private final LengthMmParser parser = new LengthMmParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "до 410 mm     | 410",
+                "410 мм        | 410",
+                "164.5 mm      | 165",
+                "до 165        | 165",
+        })
+        void readsTheClearance(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "ATX", "5 mm"})
+        void leavesOtherTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
     @Test
     void everyParserHasADistinctCode() {
-        assertEquals(10, java.util.stream.Stream.of(new DiagonalInchParser(), new RefreshHzParser(),
+        assertEquals(14, java.util.stream.Stream.of(new DiagonalInchParser(), new RefreshHzParser(),
                 new CapacityGbParser(), new ResolutionParser(), new ResponseMsParser(), new CountParser(),
-                new FrequencyGhzParser(), new MemoryMhzParser(), new CasLatencyParser(), new GpuModelParser())
+                new FrequencyGhzParser(), new MemoryMhzParser(), new CasLatencyParser(), new GpuModelParser(),
+                new PowerWattParser(), new FanSizeParser(), new DpiParser(), new LengthMmParser())
                 .map(FilterValueParser::code).distinct().count());
         assertTrue(Optional.ofNullable(new DiagonalInchParser().code()).isPresent());
     }

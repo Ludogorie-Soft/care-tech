@@ -240,7 +240,10 @@ public class CategoryFilterService {
                     .map(v -> new CategoryFiltersResponse.Option(v.id(), v.label(english),
                             counts.getOrDefault(v.id(), 0L), selected.contains(v.id())))
                     .toList();
-            if (!g.visible() || options.size() >= 2 || options.stream().anyMatch(CategoryFiltersResponse.Option::selected)) {
+            // A single value is still a filter when only part of the category has it ("RGB подсветка: Да").
+            boolean narrows = options.size() >= 2
+                    || (options.size() == 1 && base.get(options.get(0).id()) < data.products().size());
+            if (!g.visible() || narrows || options.stream().anyMatch(CategoryFiltersResponse.Option::selected)) {
                 groups.add(new CategoryFiltersResponse.Group(g.id(), g.slug(), g.label(english), g.unit(),
                         g.valueType(), g.visible(), options));
             }
