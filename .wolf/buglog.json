@@ -9254,6 +9254,23 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-24T21:20:00Z"
+    },
+    {
+      "id": "bug-561",
+      "timestamp": "2026-09-24T23:25:00Z",
+      "error_message": "Категории с 2–8 продукта („Процесори“ 322, „Иригатори“, „3D Принтери“) показват по 12 автоматични групи, вкл. „Ново име на аксесоар“, „ABS 920“",
+      "file": "src/main/java/com/techstore/service/filter/FilterIndexService.java",
+      "root_cause": "Одобреният план предвиждаше 5 групи при под 10 продукта; реализиран беше само плоският лимит 12. ASBIS служебни полета не бяха в V39.",
+      "fix": "`CASE WHEN cs.n < :smallCategoryProducts THEN :maxGroupsSmall ELSE :maxGroups END` (app.filters.auto.small-category-products=10, max-groups-small=5) + V41 HIDE/IGNORE",
+      "tags": [
+        "filters",
+        "auto",
+        "plan-gap",
+        "asbis"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T23:25:00Z"
     }
   ]
 }

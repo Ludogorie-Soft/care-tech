@@ -3817,3 +3817,7 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 22:15 | Комит партида 11 (71dda21) + openwolf (d7cdf53, 0687de1) | git | ok | ~500 |
 | 22:50 | Партида 12 (устройства): скрипт 55_12, 12 категории, 40 групи; без Java промени | scripts/55_filters_curated_12_devices.sql | приложено локално, rebuild diff 0 | ~14000 |
 | 17:24 | Session end: 12 writes across 12 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~63126 tok |
+| 17:25 | Session end: 12 writes across 12 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~63126 tok |
+| 17:28 | Created src/main/resources/db/migration/V41__seed_more_filter_junk_rules.sql | — | ~419 |
+| 23:00 | Комит партида 12 (3720278) + openwolf (051c569) | git | ok | ~500 |
+| 23:25 | Лимит 5 AUTO групи за категории под 10 продукта (беше в плана, не беше реализиран); V41 junk правила; задача за дублирани категории (Процесори 3/322, Монитори 50/249, IP камери 100/964, NVR 962/240) | FilterIndexService.java, V41__seed_more_filter_junk_rules.sql | AUTO групи 873 → 328, средно 3.8 на категория; 351 теста | ~6000 |
