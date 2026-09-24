@@ -37,6 +37,9 @@ public class ProductResponseDTO {
     private CategorySummaryDTO category;
     private ManufacturerSummaryDto manufacturer;
     private List<ProductParameterResponseDto> specifications;
+
+    /** Specifications for display: merged per filter attribute, de-duplicated, without logistics fields. */
+    private List<DisplaySpecificationDto> displaySpecifications;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean onSale;

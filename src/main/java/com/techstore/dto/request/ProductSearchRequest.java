@@ -36,7 +36,11 @@ public class ProductSearchRequest {
     @Builder.Default
     private int size = 20;
 
+    /** Legacy raw-parameter filters: parameter id -> option ids. Kept while old links are translated. */
     private Map<Long, List<Long>> filters;
+
+    /** Canonical filters (V38): filter attribute id -> filter value ids. */
+    private Map<Long, List<Long>> attributeFilters;
 
     private Boolean featured;
     private Boolean onSale;

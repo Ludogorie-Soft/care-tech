@@ -1,5 +1,6 @@
 package com.techstore.service;
 
+import com.techstore.service.filter.FilterIndexService;
 import com.techstore.service.sync.AsbisSyncService;
 import com.techstore.service.sync.MostSyncService;
 import com.techstore.service.sync.TekraSyncService;
@@ -21,6 +22,7 @@ public class CronJobService {
     private final TekraSyncService tekraSyncService;
     private final MostSyncService mostSyncService;
     private final AsbisSyncService asbisSyncService;
+    private final FilterIndexService filterIndexService;
 
     @Scheduled(cron = "0 0 1 * * ?")
     public void syncApis() {
@@ -78,6 +80,13 @@ public class CronJobService {
 
         } catch (Exception e) {
             log.error(Markers.CRITICAL, "Scheduled Asbis synchronization failed", e);
+        }
+
+        // --- Filter index --- rebuilt from whatever the syncs above left, even when one of them failed.
+        try {
+            filterIndexService.rebuild("CRON", false);
+        } catch (Exception e) {
+            log.error(Markers.CRITICAL, "Scheduled filter index rebuild failed", e);
         }
 
         log.info("Scheduled synchronization finished at {}", LocalDateTime.now());

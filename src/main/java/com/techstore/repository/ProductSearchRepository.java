@@ -33,6 +33,10 @@ public class ProductSearchRepository {
     /** Guards against a pathological query turning into dozens of ANDed ILIKEs. */
     private static final int MAX_QUERY_WORDS = 6;
 
+    // Upper bounds for the canonical filter clause; a category shows at most 12 groups.
+    private static final int MAX_ATTRIBUTE_FILTERS = 20;
+    private static final int MAX_VALUES_PER_ATTRIBUTE = 50;
+
     /** The text FTS indexes — matches the expression in V5__update_fts_combined_index.sql. */
     private static final String FTS_VECTOR =
             "to_tsvector('simple', coalesce(p.name_bg, '') || ' ' || coalesce(p.name_en, '') || ' ' || " +
@@ -253,6 +257,8 @@ public class ProductSearchRepository {
             }
         }
 
+        appendAttributeFilters(whereClause, params, request.getAttributeFilters(), "af");
+
         sql.append(whereClause);
         countSql.append(whereClause);
 
@@ -393,6 +399,33 @@ public class ProductSearchRepository {
      * ProductSearchService.sanitizeQuery already strips backslashes, this is defence in
      * depth for any other caller.
      */
+    /**
+     * Canonical filter clause (V38): one EXISTS per filter attribute, values within an attribute OR-ed,
+     * attributes AND-ed. Capped so a crafted request cannot build an arbitrarily large query.
+     */
+    private static void appendAttributeFilters(StringBuilder where, Map<String, Object> params,
+                                               Map<Long, List<Long>> attributeFilters, String prefix) {
+        if (attributeFilters == null || attributeFilters.isEmpty()) {
+            return;
+        }
+        int i = 0;
+        for (Map.Entry<Long, List<Long>> filter : attributeFilters.entrySet()) {
+            List<Long> values = filter.getValue();
+            if (filter.getKey() == null || values == null || values.isEmpty()) {
+                continue;
+            }
+            if (i == MAX_ATTRIBUTE_FILTERS) {
+                break;
+            }
+            where.append("AND EXISTS (SELECT 1 FROM product_filter_values pfv WHERE pfv.product_id = p.id ")
+                    .append("AND pfv.attribute_id = :").append(prefix).append("Attr").append(i)
+                    .append(" AND pfv.value_id IN (:").append(prefix).append("Vals").append(i).append(")) ");
+            params.put(prefix + "Attr" + i, filter.getKey());
+            params.put(prefix + "Vals" + i, values.stream().limit(MAX_VALUES_PER_ATTRIBUTE).toList());
+            i++;
+        }
+    }
+
     private String escapeLikeWildcards(String value) {
         return value.replace("\\", "\\\\")
                 .replace("%", "\\%")
@@ -780,6 +813,7 @@ public class ProductSearchRepository {
                 i++;
             }
         }
+        appendAttributeFilters(scope, params, request.getAttributeFilters(), "fzAf");
 
         String sql = "SELECT p.id, p.name_bg, p.name_en, p.description_bg, p.description_en, " +
                 "p.model, p.reference_number, p.final_price, p.discount, p.featured, p.status, " +

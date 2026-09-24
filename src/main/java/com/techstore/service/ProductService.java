@@ -16,6 +16,7 @@ import com.techstore.exception.ValidationException;
 import com.techstore.mapper.ManufacturerMapper;
 import com.techstore.mapper.ParameterMapper;
 import com.techstore.repository.*;
+import com.techstore.service.filter.DisplaySpecificationService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,7 @@ public class ProductService {
     private final ParameterOptionRepository parameterOptionRepository;
     private final S3Service s3Service;
     private final ParameterMapper parameterMapper;
+    private final DisplaySpecificationService displaySpecificationService;
     private final ManufacturerMapper manufacturerMapper;
     private final ProductParameterRepository productParameterRepository;
     private final CacheManager cacheManager;
@@ -291,7 +293,10 @@ public class ProductService {
                 || !Boolean.TRUE.equals(product.getShow())) {
             throw new ResourceNotFoundException("Product not found with id: " + id);
         }
-        return convertToResponseDTO(product, lang);
+        ProductResponseDTO dto = convertToResponseDTO(product, lang);
+        dto.setDisplaySpecifications(displaySpecificationService.forProducts(List.of(id), lang)
+                .getOrDefault(id, List.of()));
+        return dto;
     }
 
     @Transactional(readOnly = true)

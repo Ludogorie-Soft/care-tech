@@ -1,9 +1,14 @@
 package com.techstore.controller;
 
+import com.techstore.dto.filter.CategoryFiltersRequest;
+import com.techstore.dto.filter.CategoryFiltersResponse;
 import com.techstore.dto.request.ProductSearchRequest;
 import com.techstore.dto.response.FacetValue;
 import com.techstore.dto.response.ProductSearchResponse;
 import com.techstore.service.ProductSearchService;
+import com.techstore.service.filter.CategoryFilterService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +27,7 @@ import java.util.Map;
 public class ProductSearchController {
 
     private final ProductSearchService searchService;
+    private final CategoryFilterService categoryFilterService;
 
     @PostMapping("/search")
     public ResponseEntity<ProductSearchResponse> searchProducts(
@@ -89,6 +95,29 @@ public class ProductSearchController {
                 categoryId, request.getFilters() != null ? request.getFilters().size() : 0);
         Map<String, List<FacetValue>> facets = searchService.getFilteredFacets(categoryId, request, language);
         return ResponseEntity.ok(facets);
+    }
+
+    /** Filter panel of a category from the canonical filter layer (groups, values, counts). */
+    @PostMapping("/categories/{categoryId}/filters")
+    public ResponseEntity<CategoryFiltersResponse> getCategoryFilters(
+            @PathVariable Long categoryId,
+            @RequestBody(required = false) CategoryFiltersRequest request) {
+        return ResponseEntity.ok(categoryFilterService.getFilters(categoryId, request, isAdmin()));
+    }
+
+    /** From the token's authorities, so the call that runs on every filter click costs no user lookup. */
+    private static boolean isAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()) || "ROLE_SUPER_ADMIN".equals(a.getAuthority()));
+    }
+
+    /** Translates a pre-V38 {@code param_<id>=<optionIds>} selection into canonical attribute filters. */
+    @PostMapping("/categories/{categoryId}/filters/translate-legacy")
+    public ResponseEntity<Map<Long, List<Long>>> translateLegacyFilters(
+            @PathVariable Long categoryId,
+            @RequestBody Map<Long, List<Long>> legacyFilters) {
+        return ResponseEntity.ok(categoryFilterService.translateLegacy(categoryId, legacyFilters));
     }
 
     @GetMapping("/categories/{categoryId}/products")

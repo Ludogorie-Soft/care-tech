@@ -28,6 +28,9 @@ public class ProductSearchResult {
     private Float score;
     private int status;
     private List<ProductParameterResponseDto>specifications;
+
+    /** Specifications for display: merged per filter attribute, de-duplicated, without logistics fields. */
+    private List<DisplaySpecificationDto> displaySpecifications;
     private String slug;
     private String platform;
 }

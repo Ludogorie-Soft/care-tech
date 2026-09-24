@@ -1,10 +1,13 @@
 package com.techstore.service;
 
 import com.techstore.dto.request.ProductSearchRequest;
+import com.techstore.dto.response.DisplaySpecificationDto;
 import com.techstore.dto.response.FacetValue;
 import com.techstore.dto.response.ProductSearchResponse;
+import com.techstore.dto.response.ProductSearchResult;
 import com.techstore.repository.CategoryRepository;
 import com.techstore.repository.ProductSearchRepository;
+import com.techstore.service.filter.DisplaySpecificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,6 +27,8 @@ public class ProductSearchService {
 
     private final ProductSearchRepository searchRepository;
     private final CategoryRepository categoryRepository;
+    private final DisplaySpecificationService displaySpecificationService;
+    private final CategoryAliasResolver categoryAliasResolver;
 
     public ProductSearchResponse searchProducts(ProductSearchRequest request) {
         long startTime = System.currentTimeMillis();
@@ -52,6 +57,8 @@ public class ProductSearchService {
                 log.debug("No results for '{}', attempting fuzzy search", request.getQuery());
                 response = searchRepository.searchProductsFuzzy(request);
             }
+
+            addDisplaySpecifications(response, request.getLanguage());
 
             // Set actual search time
             long searchTime = System.currentTimeMillis() - startTime;
@@ -212,12 +219,17 @@ public class ProductSearchService {
         return searchProducts(request);
     }
 
-    /** If the category is an alias, returns the target category's ID; otherwise returns the same ID. */
+    private void addDisplaySpecifications(ProductSearchResponse response, String language) {
+        if (response.getProducts() == null || response.getProducts().isEmpty()) {
+            return;
+        }
+        Map<Long, List<DisplaySpecificationDto>> specs = displaySpecificationService.forProducts(
+                response.getProducts().stream().map(ProductSearchResult::getId).toList(), language);
+        response.getProducts().forEach(p -> p.setDisplaySpecifications(specs.getOrDefault(p.getId(), List.of())));
+    }
+
     private Long resolveAliasId(Long categoryId) {
-        if (categoryId == null) return null;
-        return categoryRepository.findById(categoryId)
-                .map(c -> c.getAliasOf() != null ? c.getAliasOf().getId() : c.getId())
-                .orElse(categoryId);
+        return categoryAliasResolver.resolve(categoryId);
     }
 
     private List<String> resolveAliasCategories(List<String> categories) {
