@@ -113,6 +113,9 @@ class FilterValueParsersTest {
                 "16G             | 16",
                 "8G (1x8GB)      | 8",
                 "2X32G           | 64",
+                "128             | 128",
+                "1000            | 1000",
+                "Kingston 512GB microSDXC Canvas Select Plus Gen3 150MB/s A1 Card + Adapter | 512",
         })
         void readsCapacityInGigabytes(String text, String expected) {
             assertEquals(expected, key(parser, text));
@@ -127,7 +130,7 @@ class FilterValueParsersTest {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"", "DDR5", "8GB / 16GB"})
+        @ValueSource(strings = {"", "DDR5", "8GB / 16GB", "0", "Kingston DataTraveler 3.0"})
         void leavesAmbiguousTextUnmapped(String text) {
             assertTrue(parser.parse(text, null).isEmpty());
         }
@@ -470,13 +473,47 @@ class FilterValueParsersTest {
         }
     }
 
+    @Nested
+    @DisplayName("READ_MBS")
+    class ReadSpeed {
+        private final ReadSpeedParser parser = new ReadSpeedParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "До 150 Mb/s                                   | from-101",
+                "70 Mb/s                                       | from-0",
+                "1000 Mb/s                                     | from-501",
+                "200MB/s read, 60MB/s write                    | from-101",
+                "Read 100MB/s;Write N/A                        | from-0",
+                "Up to : 90MB/s (Read) ; 40MB/s (Write)        | from-0",
+                "Read up to 1,050MB;Write up to 1,000MB        | from-1001",
+                "2,000MB/s read, 2,000MB/s write               | from-1001",
+                "Write 40MB/s, Read 400MB/s                    | from-201",
+                "150 MB/sec                                    | from-101",
+                "до 190                                        | from-101",
+                "17~20                                         | from-0",
+                "150MB/s read, UHS-I speed class, U3, V30      | from-101",
+                "Kingston 512GB microSDXC Canvas Select Plus Gen3 150MB/s A1 Card + Adapter | from-101",
+                "SanDisk 8Tb Extreme Pro Portable 1050 Mb.s read/write, USB 3.2 Gen2,IP55 | from-1001",
+        })
+        void readsTheSpeedRange(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "UHS-I", "10 Gbps", "USB 3.2 Gen 2", "Карта памет TEAM micro SDHC, 16GB"})
+        void leavesOtherTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
     @Test
     void everyParserHasADistinctCode() {
-        assertEquals(15, java.util.stream.Stream.of(new DiagonalInchParser(), new RefreshHzParser(),
+        assertEquals(16, java.util.stream.Stream.of(new DiagonalInchParser(), new RefreshHzParser(),
                 new CapacityGbParser(), new ResolutionParser(), new ResponseMsParser(), new CountParser(),
                 new FrequencyGhzParser(), new MemoryMhzParser(), new CasLatencyParser(), new GpuModelParser(),
                 new PowerWattParser(), new FanSizeParser(), new DpiParser(), new LengthMmParser(),
-                new PageYieldParser())
+                new PageYieldParser(), new ReadSpeedParser())
                 .map(FilterValueParser::code).distinct().count());
         assertTrue(Optional.ofNullable(new DiagonalInchParser().code()).isPresent());
     }

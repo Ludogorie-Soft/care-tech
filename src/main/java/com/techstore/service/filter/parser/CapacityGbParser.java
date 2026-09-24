@@ -19,7 +19,10 @@ public class CapacityGbParser implements FilterValueParser {
 
     // "g" alone counts as GB: memory is written "16G" and "8G (1x8GB)" as often as "16GB".
     private static final Pattern KIT = Pattern.compile("(\\d{1,2})\\s*[x×х]\\s*(\\d+(?:\\.\\d+)?)\\s*(gb|tb|гб|тб|g)(?![a-zа-я])");
-    private static final Pattern SINGLE = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*(mb|gb|tb|мб|гб|тб|g)(?![a-zа-я])");
+    // "150MB/s" is a speed, not a capacity.
+    private static final Pattern SINGLE = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*(mb|gb|tb|мб|гб|тб|g)(?![a-zа-я]|/s)");
+    // A bare number is GB only as the whole text: the unit is then in the parameter name ("Капацитет (GB)").
+    private static final Pattern BARE = Pattern.compile("^\\s*(\\d{1,5})\\s*$");
     private static final BigDecimal THOUSAND = new BigDecimal("1000");
     private static final BigDecimal KIBI = new BigDecimal("1024");
 
@@ -46,6 +49,12 @@ public class CapacityGbParser implements FilterValueParser {
         Matcher m = SINGLE.matcher(text);
         while (m.find()) {
             values.add(toGb(new BigDecimal(m.group(1)), m.group(2)).stripTrailingZeros());
+        }
+        if (values.isEmpty()) {
+            Matcher bare = BARE.matcher(text);
+            if (bare.find() && Integer.parseInt(bare.group(1)) > 0) {
+                values.add(new BigDecimal(bare.group(1)));
+            }
         }
         return values.size() == 1 ? Optional.of(value(values.iterator().next())) : Optional.empty();
     }
