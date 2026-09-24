@@ -9170,6 +9170,23 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-24T17:05:00Z"
+    },
+    {
+      "id": "bug-556",
+      "timestamp": "2026-09-24T17:55:00Z",
+      "error_message": "Hama Freedom Lit (On-Ear) и Maxell тапи излизат като „Отворени / с клипс“",
+      "file": "scripts/55_filters_curated_06_audio.sql",
+      "root_cause": "VALI „Тип слушалки: Behind the ear“ се дава и на наушници върху ухото, и на тапи",
+      "fix": "„Behind the ear“ не се съпоставя; типът идва от името (On-Ear, тапи, TWS)",
+      "tags": [
+        "filters",
+        "supplier-data",
+        "vali",
+        "audio"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T17:55:00Z"
     }
   ]
 }

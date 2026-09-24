@@ -3787,3 +3787,7 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 17:05 | Партида 5: скрипт 55_05 (памети и носители, 8 категории, 33 групи), ReadSpeedParser, CapacityGb (голо число, без MB/s) | scripts/55_filters_curated_05_memory_storage.sql, parser/*, FilterValueParsersTest | приложено локално, rebuild diff 0, 212 парсер теста | ~14000 |
 | 15:34 | Session end: 5 writes across 5 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~16967 tok |
 | 15:35 | Session end: 5 writes across 5 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~16967 tok |
+| 15:44 | Created scripts/55_filters_curated_06_audio.sql | — | ~6117 |
+| 17:20 | Комит партида 5 (e445558) + openwolf (acae948) | git | ok | ~500 |
+| 17:55 | Партида 6 (аудио): скрипт 55_06, 7 категории, 34 групи; без Java промени | scripts/55_filters_curated_06_audio.sql | приложено локално, rebuild diff 0 | ~12000 |
+| 15:47 | Session end: 6 writes across 6 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~23521 tok |
