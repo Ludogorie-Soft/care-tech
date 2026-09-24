@@ -12,6 +12,7 @@
 --
 -- КОГА СЕ ПУСКА
 --   1) след деплой на V38/V39 и на кода с FilterIndexService;
+--   1б) изисква V40 (правила по име на продукта);
 --   2) след ПЪРВИЯ rebuild (POST /api/admin/filters/rebuild или нощния cron),
 --      защото ползва автоматичните свойства „Яркост“ и „Приложение“;
 --   3) след скрипта: POST /api/admin/filters/rebuild — едва тогава промяната
@@ -47,6 +48,7 @@ END $$;
 -- ── 0. Предишно пускане на тази партида ──────────────────────────────────────
 DELETE FROM filter_attribute_sources WHERE note = '55 партида 1';
 DELETE FROM filter_value_rules WHERE note = '55 партида 1';
+DELETE FROM filter_name_rules WHERE note = '55 партида 1';
 DELETE FROM category_filters WHERE category_id = 50 AND origin = 'MANUAL';
 
 -- ── 1. Свойства ──────────────────────────────────────────────────────────────
@@ -62,7 +64,8 @@ VALUES
     ('response-time',      'Време за реакция',          'Response time', 'NUMERIC', 'ms',  'RESPONSE_MS',   NULL, FALSE, 50, 'MANUAL'),
     ('aspect-ratio',       'Съотношение',               'Aspect ratio',  'ENUM',    NULL,  NULL,            NULL, FALSE, 60, 'MANUAL'),
     ('built-in-speakers',  'Вградени говорители',       'Speakers',      'ENUM',    NULL,  NULL,            NULL, FALSE, 80, 'MANUAL'),
-    ('height-adjustment',  'Регулиране на височината',  'Height adjust', 'ENUM',    NULL,  NULL,            NULL, FALSE, 90, 'MANUAL')
+    ('height-adjustment',  'Регулиране на височината',  'Height adjust', 'ENUM',    NULL,  NULL,            NULL, FALSE, 90, 'MANUAL'),
+    ('curved-screen',      'Извит екран',               'Curved',        'ENUM',    NULL,  NULL,            NULL, FALSE, 35, 'MANUAL')
 ON CONFLICT (slug) DO UPDATE
     SET name_bg = EXCLUDED.name_bg, name_en = EXCLUDED.name_en, value_type = EXCLUDED.value_type,
         unit = EXCLUDED.unit, parser = EXCLUDED.parser, split_pattern = EXCLUDED.split_pattern,
@@ -74,7 +77,7 @@ DECLARE taken TEXT;
 BEGIN
     SELECT string_agg(slug, ', ') INTO taken FROM filter_attributes
     WHERE slug IN ('colour', 'screen-diagonal', 'screen-resolution', 'refresh-rate', 'panel-type',
-                   'response-time', 'aspect-ratio', 'built-in-speakers', 'height-adjustment')
+                   'response-time', 'aspect-ratio', 'built-in-speakers', 'height-adjustment', 'curved-screen')
       AND origin <> 'MANUAL';
     IF taken IS NOT NULL THEN
         RAISE EXCEPTION 'Slug зает от AUTO свойство: % — смени slug-а в скрипта.', taken;
@@ -98,6 +101,11 @@ FROM (VALUES
     ('refresh-rate',      'Честота на опресняване',                  NULL),
     ('refresh-rate',      'Максимална скорост на видео-опресняване', NULL),
     ('response-time',     'Време за реакция',                        NULL),
+    ('response-time',     'Response time',                           NULL),
+    ('aspect-ratio',      'Screen aspect ratio',                     NULL),
+    ('curved-screen',     'Curvature',                               NULL),
+    ('curved-screen',     'Радиус на кривата',                       NULL),
+    ('curved-screen',     'Радиус на кривина',                       NULL),
     ('panel-type',        'Тип на матрицата',                        NULL),
     ('panel-type',        'Вид матрица',                             NULL),
     ('aspect-ratio',      'Формат на картината',                     NULL),
@@ -132,7 +140,8 @@ FROM (VALUES
     ('aspect-ratio', '16:9', '16:9', 1),   ('aspect-ratio', '16:10', '16:10', 2),
     ('aspect-ratio', '21:9', '21:9', 3),   ('aspect-ratio', '32:9', '32:9', 4),
     ('built-in-speakers', 'Да', 'Yes', 1), ('built-in-speakers', 'Не', 'No', 2),
-    ('height-adjustment', 'Да', 'Yes', 1), ('height-adjustment', 'Не', 'No', 2)
+    ('height-adjustment', 'Да', 'Yes', 1), ('height-adjustment', 'Не', 'No', 2),
+    ('curved-screen', 'Да', 'Yes', 1),     ('curved-screen', 'Не', 'No', 2)
 ) AS v(slug, bg, en, ord)
 JOIN filter_attributes a ON a.slug = v.slug AND a.origin = 'MANUAL'
 ON CONFLICT (attribute_id, norm_key) DO UPDATE
@@ -162,21 +171,23 @@ FROM (VALUES
     ('colour', 'Кафяв',       '(кафяв|кафяв[аои]|brown|wood|walnut|oak|maple|chocolate|coffee|taupe)'),
     ('colour', 'Бежов',       '(бежов|бежов[аои]|натурал(ен|н[аои])|beige|sand|khaki|cream)'),
     ('colour', 'Златист',     '(златист|златист[аои]|златен|златн[аои]|gold|golden|brass|bronze)'),
-    ('colour', 'Прозрачен',   '(прозрачен|прозрачн[аои]|transparent|clear|translucent)'),
+    ('colour', 'Прозрачен',   '(прозрачен|прозрачн[аои]|transparent|clear)'),
     ('colour', 'Многоцветен', '([мm]ногоцветен|[мm]ногоцветн[аои]|цветн[аои]|rgb|multicolou?r|multi-colou?r|tri-colou?r|rainbow)'),
     ('colour', 'Магента',     '(магента|magenta|пурпурен|пурпурн[аои])'),
     ('colour', 'Циан',        '(циан|cyan)'),
     ('panel-type', 'IPS',     '(ips|ads|pls|ahva)'),
     ('panel-type', 'VA',      '(va|mva|pva)'),
     ('panel-type', 'TN',      '(tn)'),
-    ('aspect-ratio', '16:9',  '(16 ?: ?9)'),
+    ('aspect-ratio', '16:9',  '(16 ?: ?0?9)'),
     ('aspect-ratio', '16:10', '(16 ?: ?10)'),
     ('aspect-ratio', '21:9',  '(21 ?: ?9)'),
     ('aspect-ratio', '32:9',  '(32 ?: ?9)'),
     ('built-in-speakers', 'Не', '(не|no|няма)'),
     ('built-in-speakers', 'Да', '(да|yes|вграден|вградени|[0-9]+(\.[0-9]+)? ?w)'),
     ('height-adjustment', 'Не', '(не|no)'),
-    ('height-adjustment', 'Да', '(да|yes|[0-9]+ ?(mm|мм)|височина|височината|height)')
+    ('height-adjustment', 'Да', '(да|yes|[0-9]+ ?(mm|мм)|височина|височината|height)'),
+    ('curved-screen', 'Не', '(не|no|not|none|n/a|flat|плосък)'),
+    ('curved-screen', 'Да', '(да|yes|[0-9]{3,4} ?r|r ?[0-9]{3,4}|[0-9]{3,4} ?мм|[0-9]{3,4} ?mm|curved|извит)')
 ) AS r(slug, value, words)
 JOIN filter_attributes a ON a.slug = r.slug AND a.origin = 'MANUAL'
 JOIN filter_values v ON v.attribute_id = a.id AND v.norm_key = filter_norm(r.value);
@@ -194,6 +205,12 @@ FROM (VALUES ('Наклон'), ('Tilt')) AS r(raw)
 JOIN filter_attributes a ON a.slug = 'height-adjustment' AND a.origin = 'MANUAL'
 JOIN filter_values v ON v.attribute_id = a.id AND v.norm_key = 'не';
 
+-- Извитите монитори — по името, когато параметрите мълчат („… 27'' FHD CURVED“).
+INSERT INTO filter_name_rules (attribute_id, category_id, pattern, value_id, note)
+SELECT a.id, 50, '(curved|извит)', v.id, '55 партида 1'
+FROM filter_attributes a JOIN filter_values v ON v.attribute_id = a.id AND v.norm_key = 'да'
+WHERE a.slug = 'curved-screen' AND a.origin = 'MANUAL';
+
 -- ── 5. Филтрите на „Монитори“ ────────────────────────────────────────────────
 -- MANUAL: rebuild-ът не добавя AUTO групи тук. „Яркост“ и „Приложение“ са
 -- AUTO свойства (от имената на параметрите) — ползват се такива, каквито са.
@@ -204,6 +221,7 @@ INSERT INTO category_filters (category_id, attribute_id, sort_order, visible, or
 SELECT 50, a.id, f.ord, TRUE, 'MANUAL'
 FROM (VALUES
     ('slug', 'screen-diagonal',   10), ('slug', 'screen-resolution', 20), ('slug', 'refresh-rate', 30),
+    ('slug', 'curved-screen',     35),
     ('slug', 'panel-type',        40), ('slug', 'response-time',     50),
     ('auto', 'яркост',            70), ('slug', 'built-in-speakers', 80), ('slug', 'height-adjustment', 90),
     ('slug', 'colour',           100), ('auto', 'приложение',       110)
@@ -217,8 +235,8 @@ DO $$
 DECLARE n INT;
 BEGIN
     SELECT count(*) INTO n FROM category_filters WHERE category_id = 50 AND origin = 'MANUAL';
-    IF n <> 10 THEN
-        RAISE EXCEPTION 'Очаквах 10 групи за „Монитори“, получих % — липсва AUTO „Яркост“ или „Приложение“?', n;
+    IF n <> 11 THEN
+        RAISE EXCEPTION 'Очаквах 11 групи за „Монитори“, получих % — липсва AUTO „Яркост“ или „Приложение“?', n;
     END IF;
     RAISE NOTICE 'Партида 1 записана: % групи за „Монитори“. Следва POST /api/admin/filters/rebuild.', n;
 END $$;
