@@ -437,12 +437,46 @@ class FilterValueParsersTest {
         }
     }
 
+    @Nested
+    @DisplayName("PAGE_YIELD")
+    class PageYield {
+        private final PageYieldParser parser = new PageYieldParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "4000                                          | from-3000",
+                "Up to 10 200 pages                            | from-10000",
+                "Up to 2 500 pages (ISO/IEC 19752)             | from-1000",
+                "3,100 pages                                   | from-3000",
+                "519 Pages                                     | from-500",
+                "200                                           | from-0",
+                "15 ml, Up to 400 pages of A4 documents        | from-0",
+                "400 pages (А4) / 4973 photos (10x15cm)        | from-0",
+                "Тонер касета Ricoh IM C300, 17000 копия, IMC300, Черен | from-10000",
+                "Тонер касета UPRINT CF230X, HP LJ Pro M203/M227, 3500 k, Черен | from-3000",
+                "HP Color Pro M255/ Pro MFP M282/ 283, 3150k, Black | from-3000",
+                "CANON 708 BLACK 2.5K                          | from-1000",
+                "CANON 710H (12K)                              | from-10000",
+        })
+        void readsTheYieldRange(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "9 ml", "5.6 ml", "CANON 729 CYAN", "Тонер касета UPRINT MLT-D116L, SAMSUNG, Черен",
+                "CANON CLI-551XL CYAN"})
+        void leavesOtherTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
     @Test
     void everyParserHasADistinctCode() {
-        assertEquals(14, java.util.stream.Stream.of(new DiagonalInchParser(), new RefreshHzParser(),
+        assertEquals(15, java.util.stream.Stream.of(new DiagonalInchParser(), new RefreshHzParser(),
                 new CapacityGbParser(), new ResolutionParser(), new ResponseMsParser(), new CountParser(),
                 new FrequencyGhzParser(), new MemoryMhzParser(), new CasLatencyParser(), new GpuModelParser(),
-                new PowerWattParser(), new FanSizeParser(), new DpiParser(), new LengthMmParser())
+                new PowerWattParser(), new FanSizeParser(), new DpiParser(), new LengthMmParser(),
+                new PageYieldParser())
                 .map(FilterValueParser::code).distinct().count());
         assertTrue(Optional.ofNullable(new DiagonalInchParser().code()).isPresent());
     }
