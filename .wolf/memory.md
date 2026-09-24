@@ -3702,3 +3702,15 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 11:15 | Push на care-tech-ui main към origin (d5fcf49..4e1d9b5) — slug поправката е в GitHub | care-tech-ui | pushed | ~100 |
 | 10:58 | Session end: 4 writes across 3 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json) | 6 reads | ~5557 tok |
 | 10:58 | Session end: 4 writes across 3 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json) | 6 reads | ~5557 tok |
+| 11:07 | Session end: 4 writes across 3 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json) | 6 reads | ~5557 tok |
+| 11:08 | Session end: 4 writes across 3 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json) | 6 reads | ~5557 tok |
+| 11:18 | Session end: 4 writes across 3 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json) | 7 reads | ~5557 tok |
+| 11:19 | Edited src/main/java/com/techstore/dto/response/ProductResponseDTO.java | 2→3 lines | ~21 |
+| 11:19 | Edited src/main/java/com/techstore/service/admin/AdminService.java | 2→3 lines | ~34 |
+| 11:19 | Edited src/main/java/com/techstore/service/ProductService.java | 2→3 lines | ~29 |
+| 11:19 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | CSS: first | ~100 |
+| 11:19 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | inline fix | ~6 |
+| 11:19 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | 3→5 lines | ~54 |
+| 11:19 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | inline fix | ~10 |
+| 11:30 | „Код:“ празен за ASBIS/MOST/нови Tekra: sku в ProductResponseDTO (+ ProductService/AdminService), ProductPage productCode = model‖sku‖referenceNumber, скрит при празно; промо % закръглен (ProductPage, ProductCard). mvn test: 106/106; проверено в браузъра за 19000/33000/11066/2050/4464/29499 | ProductResponseDTO.java, ProductService.java, AdminService.java, care-tech-ui ProductPage.jsx, ProductCard.jsx | fixed, bug-531 | ~6000 |
+| 11:23 | Session end: 11 writes across 6 files (zippy-juggling-hearth.md, ProductPage.jsx, launch.json, ProductResponseDTO.java, AdminService.java) | 8 reads | ~9947 tok |

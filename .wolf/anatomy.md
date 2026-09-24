@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T07:40:57.192Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T08:19:53.518Z
 > Files: 672 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
@@ -104,7 +104,7 @@
 - `OurClients.jsx` — clients (~2724 tok)
 - `OurServices.jsx` — OurServices — renders form (~3552 tok)
 - `Policy.jsx` — sections (~4978 tok)
-- `ProductPage.jsx` — EURO_RATE (~10407 tok)
+- `ProductPage.jsx` — EURO_RATE (~10468 tok)
 - `ReturnPolicyPage.jsx` — sections (~4896 tok)
 - `SearchPage.jsx` — SearchPage (~2180 tok)
 
@@ -590,7 +590,7 @@
 - `ProductImageResponseDto.java` — Class: ProductImageResponseDto (~61 tok)
 - `ProductImageUploadResponseDTO.java` — Class: ProductImageUploadResponseDTO (~121 tok)
 - `ProductParameterResponseDto.java` — Class: ProductParameterResponseDto (~162 tok)
-- `ProductResponseDTO.java` — Class: ProductResponseDTO (~382 tok)
+- `ProductResponseDTO.java` — Class: ProductResponseDTO (~388 tok)
 - `ProductSearchResponse.java` — Class: ProductSearchResponse (~156 tok)
 - `ProductSearchResult.java` — Class: ProductSearchResult (~221 tok)
 - `ProductSummaryDto.java` — Class: ProductSummaryDto (~95 tok)
@@ -774,7 +774,7 @@
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Returns the given category ID plus all descendant IDs (recursive). (~2597 tok)
-- `ProductService.java` — Service: ProductService (~14074 tok)
+- `ProductService.java` — Service: ProductService (~14083 tok)
 - `ReviewService.java` — Service: ReviewService (~946 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
@@ -788,7 +788,7 @@
 
 ## src/main/java/com/techstore/service/admin/
 
-- `AdminService.java` — Service: AdminService (~4131 tok)
+- `AdminService.java` — Service: AdminService (~4141 tok)
 
 ## src/main/java/com/techstore/service/sync/
 

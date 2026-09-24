@@ -8734,6 +8734,29 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-24T07:40:22.081Z"
+    },
+    {
+      "id": "bug-531",
+      "timestamp": "2026-09-24T08:19:19.186Z",
+      "error_message": "Клиент: „От Асбис не идва код/модел на продукта, стои празно… дори продукти от Текра виждам без код. Когато има промо, процентите застават точно срещу „Код:““ (напр. Imou Bullet 3, id 19000)",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "„Код:“ показваше само referenceNumber. ASBIS (920 видими) и MOST (1 595) никога не го попълват; Tekra спря с 5d7371b (2026-05-20), затова 62 нови Tekra са празни. Моделът го има, но в различни полета: ASBIS/Tekra → model, MOST → само sku, а ProductResponseDTO изобщо не пращаше sku. `item.code` не съществува. При празен код промо значката застава до „Код:“ и изглежда като стойност. Значката показваше и суров discount (-16.21797%).",
+      "fix": "Backend: sku в ProductResponseDTO + dto.setSku в ProductService и AdminService.convertToResponseDTO. Frontend ProductPage: productCode = model || sku || referenceNumber за надписа, JSON-LD sku и TBI sku; „Код:“ се рендерира само при стойност. Math.round на промо % в ProductPage и ProductCard.",
+      "tags": [
+        "product",
+        "code",
+        "model",
+        "sku",
+        "asbis",
+        "most",
+        "tekra",
+        "promo",
+        "ProductPage",
+        "ProductResponseDTO"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-24T08:19:19.186Z"
     }
   ]
 }
