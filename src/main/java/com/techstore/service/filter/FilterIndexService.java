@@ -72,6 +72,13 @@ public class FilterIndexService {
     @Value("${app.filters.auto.max-groups:12}")
     private int maxGroups;
 
+    /** A category with fewer visible products than this gets {@link #maxGroupsSmall} automatic groups. */
+    @Value("${app.filters.auto.small-category-products:10}")
+    private int smallCategoryProducts;
+
+    @Value("${app.filters.auto.max-groups-small:5}")
+    private int maxGroupsSmall;
+
     /**
      * Uses the auto-configured {@link JdbcTemplate}: the search template carries a 15 s query timeout
      * that a full rebuild must not be cut off by.
@@ -599,7 +606,8 @@ public class FilterIndexService {
                 WITH candidates AS (
                     SELECT t.category_id, t.attribute_id, t.products, a.origin, a.sort_order, filter_norm(a.name_bg) AS name,
                            round(t.products::numeric / cs.n, 4) AS coverage,
-                           COALESCE(st.max_groups, :maxGroups)
+                           COALESCE(st.max_groups,
+                                    CASE WHEN cs.n < :smallCategoryProducts THEN :maxGroupsSmall ELSE :maxGroups END)
                              - (SELECT count(*) FROM category_filters m
                                 WHERE m.category_id = t.category_id AND m.origin = 'MANUAL' AND m.visible) AS slots
                     FROM tmp_coverage t
@@ -639,6 +647,8 @@ public class FilterIndexService {
                 WHERE rn <= slots""",
                 new MapSqlParameterSource()
                         .addValue("maxGroups", maxGroups)
+                        .addValue("smallCategoryProducts", smallCategoryProducts)
+                        .addValue("maxGroupsSmall", maxGroupsSmall)
                         .addValue("maxValues", maxAutoValues)
                         .addValue("maxLabelLength", MAX_AUTO_LABEL_LENGTH)
                         .addValue("minCoverage", minCoverage));
