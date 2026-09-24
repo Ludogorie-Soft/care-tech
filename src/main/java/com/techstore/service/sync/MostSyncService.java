@@ -70,6 +70,9 @@ public class MostSyncService {
     @Value("${most.exchange.usd-to-eur:0}")
     private BigDecimal usdToEurRate;
 
+    // parameter_options.name_bg is TEXT; the cap only guards against runaway values.
+    private static final int MAX_PROPERTY_VALUE_LENGTH = 2000;
+
     // Products whose MOST category maps to "Лаптопи" but whose name reveals they are accessories.
     // Checked in order — first match wins.
     private static final List<String[]> LAPTOP_CATEGORY_NAME_OVERRIDES;
@@ -1218,8 +1221,10 @@ public class MostSyncService {
                 continue;
             }
 
+            // 200 used to be the cap and silently dropped 6.5% of the feed's values — among them
+            // "Memory type" of every motherboard, which is where DDR4/DDR5 is. Only runaway text is cut now.
             String trimmedValue = value.trim();
-            if (trimmedValue.length() > 200) {
+            if (trimmedValue.length() > MAX_PROPERTY_VALUE_LENGTH) {
                 continue;
             }
 
