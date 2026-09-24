@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 @Component
 public class RefreshHzParser implements FilterValueParser {
 
-    private static final Pattern HZ = Pattern.compile("(\\d{2,3})\\s*(?:hz|хц|херц)");
+    private static final Pattern HZ = Pattern.compile("(\\d{2,3})\\s*\\(?\\s*(?:hz|хц|херц)");
     private static final Pattern BARE = Pattern.compile("^\\s*(\\d{2,3})\\s*$");
 
     @Override

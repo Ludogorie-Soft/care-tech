@@ -17,8 +17,9 @@ import java.util.regex.Pattern;
 @Component
 public class CapacityGbParser implements FilterValueParser {
 
-    private static final Pattern KIT = Pattern.compile("(\\d{1,2})\\s*[x×х]\\s*(\\d+(?:\\.\\d+)?)\\s*(gb|tb|гб|тб)(?![a-zа-я])");
-    private static final Pattern SINGLE = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*(mb|gb|tb|мб|гб|тб)(?![a-zа-я])");
+    // "g" alone counts as GB: memory is written "16G" and "8G (1x8GB)" as often as "16GB".
+    private static final Pattern KIT = Pattern.compile("(\\d{1,2})\\s*[x×х]\\s*(\\d+(?:\\.\\d+)?)\\s*(gb|tb|гб|тб|g)(?![a-zа-я])");
+    private static final Pattern SINGLE = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*(mb|gb|tb|мб|гб|тб|g)(?![a-zа-я])");
     private static final BigDecimal THOUSAND = new BigDecimal("1000");
     private static final BigDecimal KIBI = new BigDecimal("1024");
 
@@ -53,6 +54,7 @@ public class CapacityGbParser implements FilterValueParser {
         return switch (unit) {
             case "tb", "тб" -> number.multiply(THOUSAND);
             case "mb", "мб" -> number.divide(KIBI, 4, java.math.RoundingMode.HALF_UP);
+            // "g" and "gb" fall through to GB.
             default -> number;
         };
     }

@@ -10,8 +10,10 @@ final class ParserSupport {
     }
 
     /**
-     * Lower-cased text with decimal commas turned into points and the many inch marks suppliers use
-     * folded into a plain double quote. The Bulgarian text wins; the English one is the fallback.
+     * Lower-cased text without trademark signs, with decimal commas turned into points and the many
+     * inch marks suppliers use folded into a plain double quote — the same clean-up filter_norm() does
+     * in SQL ("GeForce RTX™ 5060" reads as "rtx 5060"). The Bulgarian text wins; the English one is the
+     * fallback.
      */
     static String prepare(String textBg, String textEn) {
         String text = textBg != null && !textBg.isBlank() ? textBg : textEn;
@@ -19,6 +21,7 @@ final class ParserSupport {
             return null;
         }
         return text.toLowerCase(Locale.ROOT)
+                .replaceAll("[™®©]", "")
                 .replaceAll("(\\d),(\\d)", "$1.$2")
                 .replace("''", "\"")
                 .replace("``", "\"")

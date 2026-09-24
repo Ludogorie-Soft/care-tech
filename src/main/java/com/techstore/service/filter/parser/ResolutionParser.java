@@ -35,6 +35,8 @@ public class ResolutionParser implements FilterValueParser {
         if (text == null) {
             return Optional.empty();
         }
+        // "2.560 x 1.600": thousands separators, not decimals.
+        text = text.replaceAll("(\\d)[.,](\\d{3})(?!\\d)", "$1$2");
 
         Set<String> pairs = new LinkedHashSet<>();
         Matcher m = PAIR.matcher(text);

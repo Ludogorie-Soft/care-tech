@@ -45,6 +45,12 @@ import java.util.stream.Collectors;
 @Service
 public class FilterIndexService {
 
+    /**
+     * An automatic group whose values average more than this many characters is a specification
+     * written as prose ("Input Voltage: 100-240V; Input Current: ..."), not a list of options.
+     */
+    private static final int MAX_AUTO_LABEL_LENGTH = 40;
+
     private static final String VISIBLE_PRODUCT = """
             active AND show_flag AND status = 'AVAILABLE' AND NOT deleted
             AND image_url IS NOT NULL AND image_url <> ''""";
@@ -203,7 +209,7 @@ public class FilterIndexService {
     /**
      * Creates an AUTO attribute for every unmapped parameter name that makes a usable filter in at
      * least one category: at least {@code minCoverage} of its visible products carry it, with 2 to
-     * {@code maxAutoValues} distinct values. The name rule it gets maps the name for every supplier,
+     * {@code maxAutoValues} distinct, short values. The name rule it gets maps the name for every supplier,
      * which is what merges "Цвят" from VALI, ASBIS, MOST and TEKRA into one group. Names covered by a
      * rule — including the IGNORE/HIDE junk rules — are never auto-created.
      */
@@ -222,7 +228,8 @@ public class FilterIndexService {
                 per_category AS (
                     SELECT u.name, v.category_id,
                            count(DISTINCT v.id) AS products,
-                           count(DISTINCT filter_norm(po.name_bg)) AS vals
+                           count(DISTINCT filter_norm(po.name_bg)) AS vals,
+                           avg(length(po.name_bg)) AS avg_label_length
                     FROM unmapped u
                     JOIN product_parameters pp ON pp.parameter_id = u.parameter_id
                     JOIN tmp_vis v ON v.id = pp.product_id AND v.category_id = u.category_id
@@ -234,12 +241,14 @@ public class FilterIndexService {
                 FROM per_category pc
                 JOIN category_size cs ON cs.category_id = pc.category_id
                 WHERE pc.vals BETWEEN 2 AND :maxValues
+                  AND pc.avg_label_length <= :maxLabelLength
                   AND pc.products >= 2
                   AND pc.products >= :minCoverage * cs.n
                 GROUP BY pc.name
                 ORDER BY pc.name""",
                 new MapSqlParameterSource()
                         .addValue("maxValues", maxAutoValues)
+                        .addValue("maxLabelLength", MAX_AUTO_LABEL_LENGTH)
                         .addValue("minCoverage", minCoverage),
                 String.class);
         if (names.isEmpty()) {
@@ -287,14 +296,19 @@ public class FilterIndexService {
         return created;
     }
 
+    /**
+     * "auto-" keeps generated slugs out of the curated namespace: a curated attribute can be called
+     * "chipset" even when a supplier parameter named "Chipset" produced an AUTO attribute first.
+     */
     private static String uniqueSlug(String name, Set<String> taken) {
         String base = SlugUtils.generateSlug(name);
         if (base.isEmpty()) {
             base = "attribute";
         }
-        if (base.length() > 110) {
-            base = base.substring(0, 110);
+        if (base.length() > 100) {
+            base = base.substring(0, 100);
         }
+        base = "auto-" + base;
         String slug = base;
         for (int i = 2; taken.contains(slug); i++) {
             slug = base + "-" + i;
@@ -469,6 +483,7 @@ public class FilterIndexService {
                 JOIN filter_option_map fom ON fom.parameter_option_id = pp.parameter_option_id
                                           AND fom.attribute_id = m.attribute_id""");
         jdbc.execute("CREATE INDEX ON tmp_pfv (product_id, attribute_id, value_id)");
+        int nameDerived = addNameDerivedValues();
         jdbc.execute("ANALYZE tmp_pfv");
 
         int deleted = jdbc.update("""
@@ -484,7 +499,75 @@ public class FilterIndexService {
         Map<String, Object> stats = new LinkedHashMap<>();
         stats.put("productValuesInserted", inserted);
         stats.put("productValuesDeleted", deleted);
+        stats.put("nameDerivedValues", nameDerived);
         return stats;
+    }
+
+    /**
+     * Values from the product name (V40) for products none of whose parameters gave the attribute a
+     * value — a supplier that sends the socket always wins over the name. Regex rules run in SQL;
+     * parser rules run the attribute's NUMERIC parser over the name.
+     */
+    private int addNameDerivedValues() {
+        if (Boolean.FALSE.equals(jdbc.queryForObject("SELECT EXISTS (SELECT 1 FROM filter_name_rules)", Boolean.class))) {
+            return 0;
+        }
+        jdbc.execute("""
+                CREATE TEMP TABLE tmp_param_attr ON COMMIT DROP AS
+                SELECT DISTINCT product_id, attribute_id FROM tmp_pfv""");
+        jdbc.execute("CREATE INDEX ON tmp_param_attr (product_id, attribute_id)");
+        jdbc.execute("""
+                CREATE TEMP TABLE tmp_names ON COMMIT DROP AS
+                SELECT id AS product_id, category_id, name_bg, filter_norm(name_bg) AS name_norm
+                FROM products
+                WHERE NOT deleted AND category_id IS NOT NULL AND name_bg IS NOT NULL""");
+        jdbc.execute("ANALYZE tmp_names");
+
+        int added = jdbc.update("""
+                INSERT INTO tmp_pfv (product_id, attribute_id, value_id)
+                SELECT DISTINCT n.product_id, r.attribute_id, r.value_id
+                FROM filter_name_rules r
+                JOIN tmp_names n ON r.category_id IS NULL OR n.category_id = r.category_id
+                WHERE NOT r.use_parser
+                  AND n.name_norm ~* r.pattern
+                  AND NOT EXISTS (SELECT 1 FROM tmp_param_attr t
+                                  WHERE t.product_id = n.product_id AND t.attribute_id = r.attribute_id)""");
+
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+                SELECT DISTINCT n.product_id, r.attribute_id, a.parser, n.name_bg
+                FROM filter_name_rules r
+                JOIN filter_attributes a ON a.id = r.attribute_id AND a.value_type = 'NUMERIC'
+                JOIN tmp_names n ON r.category_id IS NULL OR n.category_id = r.category_id
+                WHERE r.use_parser
+                  AND NOT EXISTS (SELECT 1 FROM tmp_param_attr t
+                                  WHERE t.product_id = n.product_id AND t.attribute_id = r.attribute_id)""");
+        if (rows.isEmpty()) {
+            return added;
+        }
+        List<Object[]> values = new ArrayList<>();
+        List<Object[]> mapped = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            FilterValueParser parser = parsers.get((String) row.get("parser"));
+            if (parser == null) {
+                continue;
+            }
+            long attributeId = ((Number) row.get("attribute_id")).longValue();
+            parser.parse((String) row.get("name_bg"), null).ifPresent(v -> {
+                values.add(new Object[]{attributeId, v.labelBg(), v.labelEn(), v.normKey(), v.number()});
+                mapped.add(new Object[]{((Number) row.get("product_id")).longValue(), attributeId, v.normKey()});
+            });
+        }
+        jdbc.batchUpdate("""
+                INSERT INTO filter_values (attribute_id, value_bg, value_en, norm_key, numeric_value, origin)
+                VALUES (?, ?, ?, ?, ?, 'AUTO')
+                ON CONFLICT (attribute_id, norm_key) DO NOTHING""", values);
+        jdbc.execute("CREATE TEMP TABLE tmp_name_numeric (product_id BIGINT, attribute_id BIGINT, norm_key TEXT) ON COMMIT DROP");
+        jdbc.batchUpdate("INSERT INTO tmp_name_numeric (product_id, attribute_id, norm_key) VALUES (?, ?, ?)", mapped);
+        return added + jdbc.update("""
+                INSERT INTO tmp_pfv (product_id, attribute_id, value_id)
+                SELECT n.product_id, n.attribute_id, v.id
+                FROM tmp_name_numeric n
+                JOIN filter_values v ON v.attribute_id = n.attribute_id AND v.norm_key = n.norm_key""");
     }
 
     // ── Step 6: AUTO filter groups per category ─────────────────────────────────────────────────────
@@ -500,9 +583,11 @@ public class FilterIndexService {
         jdbc.execute("""
                 CREATE TEMP TABLE tmp_coverage ON COMMIT DROP AS
                 SELECT v.category_id, f.attribute_id,
-                       count(DISTINCT f.product_id) AS products, count(DISTINCT f.value_id) AS vals
+                       count(DISTINCT f.product_id) AS products, count(DISTINCT f.value_id) AS vals,
+                       avg(length(fv.value_bg)) AS avg_label_length
                 FROM tmp_vis v
                 JOIN product_filter_values f ON f.product_id = v.id
+                JOIN filter_values fv ON fv.id = f.value_id
                 GROUP BY v.category_id, f.attribute_id""");
         jdbc.execute("""
                 CREATE TEMP TABLE tmp_prev_auto ON COMMIT DROP AS
@@ -525,7 +610,7 @@ public class FilterIndexService {
                     LEFT JOIN category_filter_settings st ON st.category_id = t.category_id
                     WHERE COALESCE(st.mode, 'AUTO') = 'AUTO'
                       AND t.vals >= 2 AND t.products >= 2
-                      AND (a.origin = 'MANUAL' OR t.vals <= :maxValues)
+                      AND (a.origin = 'MANUAL' OR (t.vals <= :maxValues AND t.avg_label_length <= :maxLabelLength))
                       AND (t.products >= COALESCE(st.min_coverage, :minCoverage) * cs.n
                            OR (t.products >= 0.8 * COALESCE(st.min_coverage, :minCoverage) * cs.n
                                AND EXISTS (SELECT 1 FROM tmp_prev_auto p
@@ -555,6 +640,7 @@ public class FilterIndexService {
                 new MapSqlParameterSource()
                         .addValue("maxGroups", maxGroups)
                         .addValue("maxValues", maxAutoValues)
+                        .addValue("maxLabelLength", MAX_AUTO_LABEL_LENGTH)
                         .addValue("minCoverage", minCoverage));
         return Map.of("autoCategoryFilters", inserted);
     }

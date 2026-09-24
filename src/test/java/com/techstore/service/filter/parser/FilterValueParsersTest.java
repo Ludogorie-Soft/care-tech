@@ -80,6 +80,7 @@ class FilterValueParsersTest {
                 "60 Hz / 75 Hz (OC)    | 75",
                 "240 херца             | 240",
                 "75                    | 75",
+                "200 (Hz)              | 200",
         })
         void readsTheHighestRate(String text, String expected) {
             assertEquals(expected, key(parser, text));
@@ -109,6 +110,9 @@ class FilterValueParsersTest {
                 "2048 GB         | 2000",
                 "512 GB          | 512",
                 "512 MB          | 0.5",
+                "16G             | 16",
+                "8G (1x8GB)      | 8",
+                "2X32G           | 64",
         })
         void readsCapacityInGigabytes(String text, String expected) {
             assertEquals(expected, key(parser, text));
@@ -146,6 +150,7 @@ class FilterValueParsersTest {
                 "4K UHD                 | 3840x2160",
                 "WQHD                   | 2560x1440",
                 "UWQHD                  | 3440x1440",
+                "2.560 x 1.600          | 2560x1600",
         })
         void readsWidthByHeight(String text, String expected) {
             assertEquals(expected, key(parser, text));
@@ -185,10 +190,161 @@ class FilterValueParsersTest {
         }
     }
 
+    @Nested
+    @DisplayName("COUNT")
+    class Count {
+        private final CountParser parser = new CountParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "8                                                  | 8",
+                "Total Cores: 14;# of Performance-cores: 6         | 14",
+                "4 x DIMM                                           | 4",
+                "16 (8P+8E)                                         | 16",
+        })
+        void readsTheFirstWholeNumber(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "Dual channel", "1.5", "0"})
+        void leavesOtherTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("FREQ_GHZ")
+    class FrequencyGhz {
+        private final FrequencyGhzParser parser = new FrequencyGhzParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "5.3 GHz                                  | 5.3",
+                "5.70 Ghz                                 | 5.7",
+                "Base Clock:3.6GHz; Max Boost Clock:4GHz  | 4",
+                "AMD RYZEN 9 9900X 4.4G 64M BOX           | 4.4",
+                "I5-14600K 5.3GHZ 20MB BOX 1700           | 5.3",
+                "4400 MHz                                 | 4.4",
+        })
+        void readsTheHighestClock(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "AMD RYZEN 7 7800X3D BOX", "16GB", "20 GHz"})
+        void leavesOtherTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("MEM_MHZ")
+    class MemoryMhz {
+        private final MemoryMhzParser parser = new MemoryMhzParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "6000 MHz                                   | 6000",
+                "6000MT/s                                   | 6000",
+                "3200                                       | 3200",
+                "DDR5-6000                                  | 6000",
+                "KINGSTON FURY 32GB (2x16GB) DDR5 6000 CL30 | 6000",
+                "3200MHz(PC4-25600)/5600MHz(PC5-44800)      | 5600",
+                "LPDDR5X-7500                               | 7500",
+        })
+        void readsTheSpeed(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "DDR5", "16 GB", "25600"})
+        void leavesOtherTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("CAS_CL")
+    class CasLatency {
+        private final CasLatencyParser parser = new CasLatencyParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "CL16            | 16",
+                "CL 16-20-20     | 16",
+                "CL16-18-18-38   | 16",
+                "16-18-18-38     | 16",
+                "DDR5 6000 CL30  | 30",
+                "22              | 22",
+        })
+        void readsTheFirstTiming(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @Test
+        void labelsWithCl() {
+            assertEquals("CL30", parser.parse("CL30", null).orElseThrow().labelBg());
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "DDR5", "6000 MHz"})
+        void leavesOtherTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("GPU_MODEL")
+    class GpuModel {
+        private final GpuModelParser parser = new GpuModelParser();
+
+        @ParameterizedTest
+        @CsvSource(delimiter = '|', value = {
+                "NVIDIA GeForce RTX 5060 Ti 8GB    | rtx 5060 ti",
+                "GeForce RTX5060TI                 | rtx 5060 ti",
+                "RTX 4070 Ti SUPER                 | rtx 4070 ti super",
+                "GeForce RTX 4070 SUPER            | rtx 4070 super",
+                "Nvidia GeForce GT 1030            | gt 1030",
+                "GTX 1650                          | gtx 1650",
+                "AMD Radeon RX 7900 XTX            | rx 7900 xtx",
+                "Radeon RX 9070 XT                 | rx 9070 xt",
+                "AMD Radeon RX 7600                | rx 7600",
+                "Intel Arc B580                    | arc b580",
+                "GIGABYTE RTX 5060 GAMING OC 8G    | rtx 5060",
+                "NVIDIA® GeForce RTX™ 5060         | rtx 5060",
+        })
+        void readsTheChipModel(String text, String expected) {
+            assertEquals(expected, key(parser, text));
+        }
+
+        @Test
+        void labelsInShopNotation() {
+            assertEquals("RTX 4070 Ti Super", parser.parse("rtx 4070 ti super", null).orElseThrow().labelBg());
+            assertEquals("RX 7900 XTX", parser.parse("RX 7900 XTX", null).orElseThrow().labelBg());
+        }
+
+        @Test
+        void ordersNvidiaBeforeAmdAndByNumber() {
+            java.math.BigDecimal rtx3050 = parser.parse("RTX 3050", null).orElseThrow().number();
+            java.math.BigDecimal rtx5060 = parser.parse("RTX 5060", null).orElseThrow().number();
+            java.math.BigDecimal rx7600 = parser.parse("RX 7600", null).orElseThrow().number();
+            assertTrue(rtx3050.compareTo(rtx5060) < 0);
+            assertTrue(rtx5060.compareTo(rx7600) < 0);
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "AMD Radeon Graphics", "RTX 4060 / RTX 4070"})
+        void leavesAmbiguousTextUnmapped(String text) {
+            assertTrue(parser.parse(text, null).isEmpty());
+        }
+    }
+
     @Test
     void everyParserHasADistinctCode() {
-        assertEquals(5, java.util.stream.Stream.of(new DiagonalInchParser(), new RefreshHzParser(),
-                new CapacityGbParser(), new ResolutionParser(), new ResponseMsParser())
+        assertEquals(10, java.util.stream.Stream.of(new DiagonalInchParser(), new RefreshHzParser(),
+                new CapacityGbParser(), new ResolutionParser(), new ResponseMsParser(), new CountParser(),
+                new FrequencyGhzParser(), new MemoryMhzParser(), new CasLatencyParser(), new GpuModelParser())
                 .map(FilterValueParser::code).distinct().count());
         assertTrue(Optional.ofNullable(new DiagonalInchParser().code()).isPresent());
     }
