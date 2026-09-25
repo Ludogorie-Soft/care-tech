@@ -376,6 +376,9 @@ class FilterValueParsersTest {
                 "1300W, Power Good Signal: 100-150ms           | 1300",
                 "750W : ATX 3.1                                | 750",
                 "SEASONIC FOCUS GX-850 (2024) 850W 80+ Gold    | 850",
+                "3600 VA / 3600 W                              | 3600",
+                "10000 VA / 10000 W                            | 10000",
+                "1200VA / 840W                                 | 840",
         })
         void readsTheRatedPower(String text, String expected) {
             assertEquals(expected, key(parser, text));

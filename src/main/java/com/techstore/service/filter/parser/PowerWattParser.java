@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 @Component
 public class PowerWattParser implements FilterValueParser {
 
-    private static final Pattern WATT = Pattern.compile("(?<![\\d.])(\\d{2,4})\\s*(?:w|вт)(?![a-zа-я])");
+    private static final Pattern WATT = Pattern.compile("(?<![\\d.])(\\d{2,5})\\s*(?:w|вт)(?![a-zа-я])");
 
     @Override
     public String code() {
@@ -29,7 +29,8 @@ public class PowerWattParser implements FilterValueParser {
             return Optional.empty();
         }
         int watts = Integer.parseInt(m.group(1));
-        if (watts < 100 || watts > 3000) {
+        // Inverters go up to 15 kW; the cap of 3000 was written for PC power supplies.
+        if (watts < 100 || watts > 20000) {
             return Optional.empty();
         }
         String key = String.valueOf(watts);
