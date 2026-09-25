@@ -9404,6 +9404,24 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-25T15:30:00Z"
+    },
+    {
+      "id": "bug-569",
+      "timestamp": "2026-09-25T12:20:00Z",
+      "error_message": "Инверторите (77) с мощност 3600–15000 W остават в „Несъпоставени“ след партида 14",
+      "file": "src/main/java/com/techstore/service/filter/parser/PowerWattParser.java",
+      "root_cause": "POWER_W беше писан за захранвания: най-много 4 цифри и горна граница 3000 W",
+      "fix": "До 5 цифри и граница 20000 W; тестове за „3600 VA / 3600 W“, „10000 VA / 10000 W“, „1200VA / 840W“",
+      "tags": [
+        "filters",
+        "parser",
+        "power"
+      ],
+      "related_bugs": [
+        "bug-568"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-25T12:20:00Z"
     }
   ]
 }

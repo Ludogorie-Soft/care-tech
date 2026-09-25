@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 27094118,
-    "total_reads": 10227,
-    "total_writes": 17384,
+    "total_tokens_estimated": 27144524,
+    "total_reads": 10230,
+    "total_writes": 17390,
     "total_sessions": 94,
-    "anatomy_hits": 4791,
+    "anatomy_hits": 4794,
     "anatomy_misses": 4092,
-    "repeated_reads_blocked": 4325,
-    "estimated_savings_vs_bare_cli": 22499297
+    "repeated_reads_blocked": 4328,
+    "estimated_savings_vs_bare_cli": 22525922
   },
   "sessions": [
     {
@@ -166714,6 +166714,105 @@
       "id": "session-2026-09-25-1021",
       "started": "2026-09-25T07:21:56.286Z",
       "ended": "2026-09-25T08:45:02.267Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterIndexService.java",
+          "tokens_estimated": 8675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_13_unmapped_cleanup.sql",
+          "tokens_estimated": 4127,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_14_twins_and_long_tail.sql",
+          "tokens_estimated": 4000,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 8675,
+        "output_tokens_estimated": 8127,
+        "reads_count": 1,
+        "writes_count": 2,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-25-1021",
+      "started": "2026-09-25T07:21:56.286Z",
+      "ended": "2026-09-25T08:54:19.128Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterIndexService.java",
+          "tokens_estimated": 8675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_13_unmapped_cleanup.sql",
+          "tokens_estimated": 4127,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_14_twins_and_long_tail.sql",
+          "tokens_estimated": 4000,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 8675,
+        "output_tokens_estimated": 8127,
+        "reads_count": 1,
+        "writes_count": 2,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-25-1021",
+      "started": "2026-09-25T07:21:56.286Z",
+      "ended": "2026-09-25T08:58:28.713Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterIndexService.java",
+          "tokens_estimated": 8675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_13_unmapped_cleanup.sql",
+          "tokens_estimated": 4127,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_14_twins_and_long_tail.sql",
+          "tokens_estimated": 4000,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 8675,
+        "output_tokens_estimated": 8127,
+        "reads_count": 1,
+        "writes_count": 2,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-25-1021",
+      "started": "2026-09-25T07:21:56.286Z",
+      "ended": "2026-09-25T09:12:46.872Z",
       "reads": [
         {
           "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterIndexService.java",
