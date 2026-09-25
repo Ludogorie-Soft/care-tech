@@ -1,12 +1,10 @@
 package com.techstore.controller;
 
-import com.techstore.dto.request.ParameterOrderDto;
 import com.techstore.dto.request.ParameterRequestDto;
 import com.techstore.dto.response.ParameterResponseDto;
 import com.techstore.service.ParameterService;
 import com.techstore.service.ProductService;
 import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -97,18 +94,6 @@ public class ParameterController {
     ) {
         List<ParameterResponseDto> response = parameterService.getAllParameters(language);
         return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "Toggle is_filter flag for a parameter within a specific category")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @PatchMapping("/category/{categoryId}/{parameterId}/filter")
-    public ResponseEntity<Boolean> toggleCategoryParameterFilter(
-            @PathVariable @NotNull Long categoryId,
-            @PathVariable @NotNull Long parameterId) {
-
-        log.info("Toggling is_filter for category {} / parameter {}", categoryId, parameterId);
-        boolean newValue = parameterService.toggleCategoryParameterFilter(categoryId, parameterId);
-        return ResponseEntity.ok(newValue);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")

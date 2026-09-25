@@ -3,7 +3,6 @@ package com.techstore.controller;
 import com.techstore.dto.filter.CategoryFiltersRequest;
 import com.techstore.dto.filter.CategoryFiltersResponse;
 import com.techstore.dto.request.ProductSearchRequest;
-import com.techstore.dto.response.FacetValue;
 import com.techstore.dto.response.ProductSearchResponse;
 import com.techstore.service.ProductSearchService;
 import com.techstore.service.filter.CategoryFilterService;
@@ -33,8 +32,8 @@ public class ProductSearchController {
     public ResponseEntity<ProductSearchResponse> searchProducts(
             @RequestBody ProductSearchRequest request) {
 
-        log.info("Search request: query='{}', filters={}, page={}",
-                request.getQuery(), request.getFilters(), request.getPage());
+        log.info("Search request: query='{}', attributeFilters={}, page={}",
+                request.getQuery(), request.getAttributeFilters(), request.getPage());
 
         ProductSearchResponse response = searchService.searchProducts(request);
 
@@ -70,31 +69,6 @@ public class ProductSearchController {
                 .build();
 
         return searchProducts(request);
-    }
-
-    @GetMapping("/categories/{categoryId}/parameters")
-    public ResponseEntity<Map<String, List<FacetValue>>> getCategoryParameters(
-            @PathVariable Long categoryId,
-            @RequestParam(defaultValue = "bg") String language) {
-
-        log.info("Fetching parameters for category {} in language {}", categoryId, language);
-
-        Map<String, List<FacetValue>> parameters =
-                searchService.getAvailableParametersWithCountsForCategory(categoryId, language);
-
-        return ResponseEntity.ok(parameters);
-    }
-
-    @PostMapping("/categories/{categoryId}/filter-facets")
-    public ResponseEntity<Map<String, List<FacetValue>>> getFilteredFacets(
-            @PathVariable Long categoryId,
-            @RequestParam(defaultValue = "bg") String language,
-            @RequestBody ProductSearchRequest request) {
-
-        log.info("Filtered facets request for category {} with {} filters",
-                categoryId, request.getFilters() != null ? request.getFilters().size() : 0);
-        Map<String, List<FacetValue>> facets = searchService.getFilteredFacets(categoryId, request, language);
-        return ResponseEntity.ok(facets);
     }
 
     /** Filter panel of a category from the canonical filter layer (groups, values, counts). */

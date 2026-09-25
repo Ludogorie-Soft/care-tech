@@ -331,54 +331,6 @@ public class ProductService {
                 .stream().map(p -> convertToResponseDTO(p, lang)).toList();
     }
 
-    @Transactional(readOnly = true)
-    public Set<ProductParameterResponseDto> getProductsParametersByCategory(Long categoryId, String lang) {
-        Long resolvedId = resolveAliasId(categoryId);
-        List<Object[]> results = productParameterRepository.findParameterOptionsByCategoryAndActiveProducts(resolvedId);
-
-        Map<Long, ProductParameterResponseDto> resultMap = new HashMap<>();
-
-        for (Object[] row : results) {
-            Long parameterId = (Long) row[0];
-            String parameterNameEn = (String) row[1];
-            String parameterNameBg = (String) row[2];
-            Boolean isFilter = (Boolean) row[3];
-            Integer parameterOrder = (Integer) row[4];
-            Long optionId = ((Number) row[5]).longValue();
-            String optionNameEn = (String) row[6];
-            String optionNameBg = (String) row[7];
-            Integer optionOrder = (Integer) row[8];
-
-            ParameterOptionResponseDto optionDto = ParameterOptionResponseDto.builder()
-                    .id(optionId)
-                    .name("en".equals(lang) ? optionNameEn : optionNameBg)
-                    .order(optionOrder != null ? optionOrder : 0)
-                    .build();
-
-            resultMap.computeIfAbsent(parameterId, k -> ProductParameterResponseDto.builder()
-                            .parameterId(parameterId)
-                            .parameterNameEn(parameterNameEn)
-                            .parameterNameBg(parameterNameBg)
-                            .isFilter(isFilter)
-                            .order(parameterOrder)
-                            .options(new HashSet<>())
-                            .categoryId(categoryId)
-                            .build())
-                    .getOptions().add(optionDto);
-        }
-
-        resultMap.values().forEach(param -> {
-            Set<ParameterOptionResponseDto> uniqueOptions = param.getOptions().stream()
-                    .sorted(Comparator.comparing(ParameterOptionResponseDto::getOrder))
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-            param.setOptions(uniqueOptions);
-        });
-
-        return resultMap.values().stream()
-                .sorted(Comparator.comparing(ProductParameterResponseDto::getOrder))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
     @CacheEvict(value = "products", allEntries = true)
     public ProductResponseDTO updateProductWithImages(
             Long id,

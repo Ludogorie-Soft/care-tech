@@ -101,7 +101,7 @@ public class SecurityConfig {
 
                         // ── Products & parameters: reads and the public search POSTs are open; every write is admin-only ──
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/products/search", "/api/products/categories/*/filter-facets",
+                        .requestMatchers(HttpMethod.POST, "/api/products/search",
                                 "/api/products/categories/*/filters", "/api/products/categories/*/filters/translate-legacy").permitAll()
                         .requestMatchers("/api/products/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/parameters/**").permitAll()

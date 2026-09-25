@@ -2,7 +2,6 @@ package com.techstore.service;
 
 import com.techstore.dto.request.ProductSearchRequest;
 import com.techstore.dto.response.DisplaySpecificationDto;
-import com.techstore.dto.response.FacetValue;
 import com.techstore.dto.response.ProductSearchResponse;
 import com.techstore.dto.response.ProductSearchResult;
 import com.techstore.repository.CategoryRepository;
@@ -10,12 +9,10 @@ import com.techstore.repository.ProductSearchRepository;
 import com.techstore.service.filter.DisplaySpecificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -33,8 +30,8 @@ public class ProductSearchService {
     public ProductSearchResponse searchProducts(ProductSearchRequest request) {
         long startTime = System.currentTimeMillis();
 
-        log.debug("Searching products with query: '{}', language: {}, filters: {}",
-                request.getQuery(), request.getLanguage(), request.getFilters());
+        log.debug("Searching products with query: '{}', language: {}, attributeFilters: {}",
+                request.getQuery(), request.getLanguage(), request.getAttributeFilters());
 
         // Validation runs outside the catch below on purpose. Wrapping it meant a bad
         // page size or a backwards price range came back as a 500 "Search failed" instead
@@ -64,15 +61,13 @@ public class ProductSearchService {
             long searchTime = System.currentTimeMillis() - startTime;
             response.setSearchTime(searchTime);
 
-            log.debug("Search completed in {}ms, found {} products, {} facets",
-                    searchTime, response.getTotalElements(),
-                    response.getFacets() != null ? response.getFacets().size() : 0);
+            log.debug("Search completed in {}ms, found {} products", searchTime, response.getTotalElements());
 
             return response;
 
         } catch (Exception e) {
-            log.error("Search failed for query: '{}', filters: {}",
-                    request.getQuery(), request.getFilters(), e);
+            log.error("Search failed for query: '{}', attributeFilters: {}",
+                    request.getQuery(), request.getAttributeFilters(), e);
             throw new RuntimeException("Search failed", e);
         }
     }
@@ -122,44 +117,6 @@ public class ProductSearchService {
         }
 
         return sanitized;
-    }
-
-    // unless = don't cache an empty result. The repository swallows its own errors and
-    // returns an empty map, and the cache has a one hour TTL, so a single transient
-    // failure used to leave a category with no filters for the rest of the hour. An
-    // empty map is cheap enough to recompute.
-    @Cacheable(value = "categoryParametersWithCounts", key = "#categoryId + '_' + #language",
-            unless = "#result == null || #result.isEmpty()")
-    public Map<String, List<FacetValue>> getAvailableParametersWithCountsForCategory(
-            Long categoryId, String language) {
-        try {
-            log.debug("Fetching parameters with counts for category: {}, language: {}", categoryId, language);
-
-            Long resolvedId = resolveAliasId(categoryId);
-            Map<String, List<FacetValue>> parameters =
-                    searchRepository.getAvailableParametersWithCountsForCategory(resolvedId, language);
-
-            log.debug("Found {} parameters with counts for category {}", parameters.size(), categoryId);
-            return parameters;
-
-        } catch (Exception e) {
-            log.error("Failed to get parameters with counts for category: {}", categoryId, e);
-            return Collections.emptyMap();
-        }
-    }
-
-    public Map<String, List<FacetValue>> getFilteredFacets(
-            Long categoryId, ProductSearchRequest request, String language) {
-        try {
-            if (request.getLanguage() == null) {
-                request.setLanguage(language);
-            }
-            Long resolvedId = resolveAliasId(categoryId);
-            return searchRepository.getFilteredFacets(resolvedId, request, language);
-        } catch (Exception e) {
-            log.error("Failed to get filtered facets for category: {}", categoryId, e);
-            return Collections.emptyMap();
-        }
     }
 
     public ProductSearchResponse searchByCategory(String categoryId, String language, int page, int size, String sortBy) {

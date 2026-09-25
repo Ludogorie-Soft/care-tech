@@ -1,7 +1,6 @@
 package com.techstore.service;
 
 import com.techstore.dto.request.ParameterOptionRequestDto;
-import com.techstore.dto.request.ParameterOrderDto;
 import com.techstore.dto.request.ParameterRequestDto;
 import com.techstore.dto.response.ParameterResponseDto;
 import com.techstore.entity.Category;
@@ -93,108 +92,6 @@ public class ParameterService {
     }
 
     @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
-    @Transactional
-    public List<ParameterResponseDto> reorderParameters(Long categoryId, List<ParameterOrderDto> reorderDtos, String language) {
-        if (reorderDtos == null || reorderDtos.isEmpty()) {
-            throw new ValidationException("Reorder list cannot be empty.");
-        }
-
-        log.info("Reordering {} parameters for category ID: {}", reorderDtos.size(), categoryId);
-        // validateCategoryId(categoryId); // Ако е необходимо да се провери категорията
-
-        // 1. Извличаме всички параметри, които трябва да бъдат пренаредени
-        Set<Long> parameterIds = reorderDtos.stream()
-                .map(ParameterOrderDto::getParameterId)
-                .collect(Collectors.toSet());
-
-        List<Parameter> parameters = parameterRepository.findAllById(parameterIds);
-        if (parameters.size() != parameterIds.size()) {
-            // Проверка за невалидни ID-та
-            String missingIds = parameterIds.stream()
-                    .filter(id -> parameters.stream().noneMatch(p -> p.getId().equals(id)))
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(", "));
-            throw new ValidationException("One or more parameter IDs are invalid: " + missingIds);
-        }
-
-        // 2. Индексираме DTO-тата по ID за бърз достъп до новия 'order'
-        Map<Long, Integer> newOrderMap = reorderDtos.stream()
-                .collect(Collectors.toMap(ParameterOrderDto::getParameterId, ParameterOrderDto::getNewOrder));
-
-        // 3. Обновяваме 'order' полето
-        for (Parameter parameter : parameters) {
-            Integer newOrder = newOrderMap.get(parameter.getId());
-
-            // Допълнителна проверка: Уверете се, че параметърът е асоцииран с дадената категория
-            boolean isInCategory = parameter.getCategories().stream()
-                    .anyMatch(c -> c.getId().equals(categoryId));
-
-            if (!isInCategory) {
-                log.warn("Parameter {} is not associated with category {}", parameter.getId(), categoryId);
-                throw new ValidationException(String.format("Parameter %d is not part of category %d", parameter.getId(), categoryId));
-            }
-
-            parameter.setOrder(newOrder);
-        }
-
-        // 4. Записваме промените и изчистваме кеша
-        List<Parameter> saved = parameterRepository.saveAll(parameters);
-
-        log.info("Successfully reordered {} parameters for category {}", saved.size(), categoryId);
-
-        return saved.stream()
-                .map(p -> toResponseDto(p, language))
-                .collect(Collectors.toList());
-    }
-
-    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
-    @Transactional
-    public boolean toggleCategoryParameterFilter(Long categoryId, Long parameterId) {
-        validateCategoryId(categoryId);
-        validateParameterId(parameterId);
-
-        findCategoryByIdOrThrow(categoryId);
-        findParameterByIdOrThrow(parameterId);
-
-        Boolean current = parameterRepository.getCategoryParameterFilter(categoryId, parameterId);
-        if (current == null) {
-            throw new ValidationException(
-                    String.format("No category-parameter link found for category %d and parameter %d",
-                            categoryId, parameterId));
-        }
-
-        boolean newValue = !current;
-        parameterRepository.updateCategoryParameterFilter(categoryId, parameterId, newValue);
-
-        log.info("Toggled category_parameters.is_filter to {} for category {} / parameter {}",
-                newValue, categoryId, parameterId);
-        return newValue;
-    }
-
-    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
-    public ParameterResponseDto changeParameterVisibilityAsFilter(Long id) {
-        log.info("Updating parameter with ID: {}", id);
-
-        String context = ExceptionHelper.createErrorContext("updateParameter", "Parameter", id, null);
-
-        return ExceptionHelper.wrapDatabaseOperation(() -> {
-            validateParameterId(id);
-
-            Parameter existingParameter = findParameterByIdOrThrow(id);
-            if (existingParameter.getIsFilter()) {
-                existingParameter.setIsFilter(false);
-            } else {
-                existingParameter.setIsFilter(true);
-            }
-            Parameter updatedParameter = parameterRepository.save(existingParameter);
-
-            log.info("Parameter updated successfully with ID: {}", id);
-            return toResponseDto(updatedParameter, "bg");
-
-        }, context);
-    }
-
-    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
     public void deleteParameter(Long parameterId) {
         log.info("Deleting parameter with ID: {}", parameterId);
 
@@ -234,21 +131,8 @@ public class ParameterService {
                 parameter.setOptions(new HashSet<>(uniqueOptions));
             });
 
-            // Build per-category is_filter map from category_parameters table
-            Map<Long, Boolean> filterMap = parameterRepository.getCategoryParameterFilters(resolvedId)
-                    .stream()
-                    .collect(Collectors.toMap(
-                            row -> ((Number) row[0]).longValue(),
-                            row -> (Boolean) row[1]
-                    ));
-
             return parameters.stream()
-                    .map(p -> {
-                        ParameterResponseDto dto = toResponseDto(p, language);
-                        // Override with per-category is_filter (not the global Parameter.isFilter)
-                        dto.setIsFilter(filterMap.getOrDefault(p.getId(), false));
-                        return dto;
-                    })
+                    .map(p -> toResponseDto(p, language))
                     .toList();
         }, "fetch all parameters for category: " + categoryId);
     }

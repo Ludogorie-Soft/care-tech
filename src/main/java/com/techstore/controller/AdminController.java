@@ -205,13 +205,6 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping(value = "/parameters/filter-activate/{id}")
-    public ResponseEntity<ParameterResponseDto> updateParameterVisibilityAsFilter(
-            @PathVariable("id") Long id) {
-        ParameterResponseDto parameter = parameterService.changeParameterVisibilityAsFilter(id);
-        return ResponseEntity.ok(parameter);
-    }
-
     // ============ ORDER MANAGEMENT ENDPOINTS ============
 
     /**
@@ -230,18 +223,6 @@ public class AdminController {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<OrderResponseDTO> orders = orderService.getAllOrders(pageable);
         return ResponseEntity.ok(orders);
-    }
-
-    @PutMapping("/parameters/category/{categoryId}/reorder")
-    @Operation(summary = "Reorder parameters for a category")
-    public ResponseEntity<List<ParameterResponseDto>> reorderParameters(
-            @PathVariable Long categoryId,
-            @RequestBody @Valid List<ParameterOrderDto> reorderDtos,
-            @RequestParam(defaultValue = "en") String language) {
-
-        log.info("Admin request to reorder parameters for category ID: {}", categoryId);
-        List<ParameterResponseDto> updatedList = parameterService.reorderParameters(categoryId, reorderDtos, language);
-        return ResponseEntity.ok(updatedList);
     }
 
     /**
