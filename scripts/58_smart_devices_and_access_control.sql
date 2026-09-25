@@ -25,9 +25,9 @@
 --   Control“ — това име не съвпада с видима категория и преди, и след скрипта, така
 --   че новите такива продукти пак не се внасят автоматично.
 --
--- ЕДНА КОМАНДА: всичко е в един DO блок — или минава целият, или нищо. Така няма
---   отворена транзакция между командите (първият опит в DBeaver спря с 25P03
---   idle-in-transaction timeout и не записа нищо). Пусни с auto-commit или psql -f.
+-- ЕДНА КОМАНДА: всичко е в един DO блок — или минава целият, или нищо. Накрая има
+--   COMMIT: SQL редакторът на DBeaver може да е в Manual commit (режимът е за всеки
+--   редактор поотделно) и тогава без него записът се отменя след 60 s.
 --
 -- ЗАЩИТА ОТ SYNC: manually_categorized = TRUE за преместените продукти.
 -- Откат в края.
@@ -95,6 +95,10 @@ SELECT c.id, c.name_bg, c.parent_id, c.show_flag, c.sort_order,
        (SELECT count(*) FROM products p WHERE p.category_id = c.id AND p.active AND p.show_flag
                                         AND p.status = 'AVAILABLE' AND NOT p.deleted) AS visible_products
 FROM categories c WHERE c.id IN (500, 548) ORDER BY c.id;
+
+-- В DBeaver с Manual commit горното чака потвърждение и след 60 s сървърът го отменя
+-- (така се провалиха първите два опита). В auto-commit/psql COMMIT е безвреден.
+COMMIT;
 
 -- ============================================================================
 -- ОТКАТ:
