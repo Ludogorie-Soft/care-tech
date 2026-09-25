@@ -16,6 +16,7 @@ import com.techstore.repository.ParameterRepository;
 import com.techstore.repository.ProductRepository;
 import com.techstore.service.TekraApiService;
 import com.techstore.util.LogHelper;
+import com.techstore.util.Markers;
 import com.techstore.util.SyncHelper;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,9 @@ public class TekraSyncService {
     @Autowired
     @Lazy
     private TekraSyncService self;
+
+    /** Share of the available TEKRA products one run may mark unavailable before the read counts as incomplete. */
+    private static final double MAX_UNSEEN_SHARE = 0.25;
 
     @Transactional
     public void syncTekraCategories() {
@@ -733,11 +737,15 @@ public class TekraSyncService {
             log.info("Fetching products from all Tekra categories...");
             List<Map<String, Object>> allProducts = new ArrayList<>();
             Set<String> processedSkus = new HashSet<>();
+            // Per category slug, for the sync log: how many products the feed gave, and which could not be read.
+            Map<String, Integer> fetchedBySlug = new LinkedHashMap<>();
+            List<String> failedSlugs = new ArrayList<>();
 
             for (Category category : allCategories) {
                 try {
                     String categorySlug = category.getTekraSlug();
                     List<Map<String, Object>> categoryProducts = tekraApiService.getProductsRaw(categorySlug);
+                    fetchedBySlug.put(categorySlug, categoryProducts.size());
 
                     for (Map<String, Object> product : categoryProducts) {
                         String sku = getString(product, "sku");
@@ -749,14 +757,17 @@ public class TekraSyncService {
 
                     Thread.sleep(30_000); // 30 sec delay between categories to avoid rate limiting
                 } catch (HttpClientErrorException.TooManyRequests e) {
+                    failedSlugs.add(category.getTekraSlug());
                     log.warn("Tekra rate limit exhausted for category '{}'. Cooling down 3 minutes before next category.",
                             category.getTekraSlug());
-                    try { Thread.sleep(180_000); } catch (InterruptedException ie2) { Thread.currentThread().interrupt(); break; }
+                    try { Thread.sleep(180_000); } catch (InterruptedException ie2) { Thread.currentThread().interrupt(); failedSlugs.add("interrupted"); break; }
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
+                    failedSlugs.add("interrupted");
                     log.warn("Tekra sync interrupted during category fetch delay");
                     break;
                 } catch (Exception e) {
+                    failedSlugs.add(category.getTekraSlug());
                     log.error("Error fetching products for category '{}': {}", category.getTekraSlug(), e.getMessage());
                 }
             }
@@ -896,11 +907,26 @@ public class TekraSyncService {
             log.info("Analog: {}", analogCount);
             log.info("Undetermined: {}", undeterminedCount);
 
-            // Mark products absent from Tekra API as NOT_AVAILABLE
+            // Mark products absent from Tekra API as NOT_AVAILABLE — but only after a complete read. A category
+            // that could not be fetched would otherwise take all of its products off the shop for the night.
             int markedUnavailable = 0;
-            if (!processedSkus.isEmpty()) {
-                markedUnavailable = productRepository.markNotAvailableByPlatformSkuNotIn(Platform.TEKRA, processedSkus);
-                log.info("Marked {} TEKRA products as NOT_AVAILABLE (absent from Tekra API)", markedUnavailable);
+            String unseenGuard = null;
+            if (!failedSlugs.isEmpty()) {
+                log.warn("Tekra fetch failed for {} — skipping mark-unseen so their products stay as they are",
+                        failedSlugs);
+            } else if (!processedSkus.isEmpty()) {
+                // TEKRA can answer an exhausted rate limit with an empty page instead of a 429, which reads
+                // as a category that ended early. A read that would take a large share of the shop's TEKRA
+                // products off at once is treated as incomplete.
+                long available = productRepository.countByPlatformAndStatusNot(Platform.TEKRA, ProductStatus.NOT_AVAILABLE);
+                long disappearing = productRepository.countAvailableByPlatformSkuNotIn(Platform.TEKRA, processedSkus);
+                if (disappearing > available * MAX_UNSEEN_SHARE) {
+                    unseenGuard = String.format("%d of %d available products absent", disappearing, available);
+                    log.error(Markers.CRITICAL, "Tekra feed looks incomplete ({}) — skipping mark-unseen", unseenGuard);
+                } else {
+                    markedUnavailable = productRepository.markNotAvailableByPlatformSkuNotIn(Platform.TEKRA, processedSkus);
+                    log.info("Marked {} TEKRA products as NOT_AVAILABLE (absent from Tekra API)", markedUnavailable);
+                }
             } else {
                 log.warn("processedSkus is empty — skipping mark-unseen to prevent mass status reset");
             }
@@ -911,7 +937,9 @@ public class TekraSyncService {
                     totalProcessed, totalCreated, totalUpdated, digitalCount, analogCount,
                     skippedNoCategory + skippedNoManufacturer, recoveredByExistingCategory,
                     totalErrors, markedUnavailable
-            );
+            ) + ". Fetched: " + fetchedBySlug
+                    + (failedSlugs.isEmpty() ? "" : ". FetchFailed: " + failedSlugs + " (mark-unseen skipped)")
+                    + (unseenGuard == null ? "" : ". Incomplete feed: " + unseenGuard + " (mark-unseen skipped)");
 
             int deduplicated = productRepository.deduplicateCrossPlatformBySku();
             log.info("Cross-platform deduplication: hidden {} higher-priced duplicates", deduplicated);

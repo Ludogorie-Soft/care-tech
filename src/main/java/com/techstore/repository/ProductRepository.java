@@ -219,6 +219,13 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
            "WHERE p.platform = :platform AND p.sku IS NOT NULL AND p.sku NOT IN :knownSkus")
     int markNotAvailableByPlatformSkuNotIn(@Param("platform") Platform platform, @Param("knownSkus") Collection<String> knownSkus);
 
+    /** What {@link #markNotAvailableByPlatformSkuNotIn} would take off the shop: available products not in the feed. */
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.platform = :platform AND p.sku IS NOT NULL " +
+           "AND p.status <> com.techstore.enums.ProductStatus.NOT_AVAILABLE AND p.sku NOT IN :knownSkus")
+    long countAvailableByPlatformSkuNotIn(@Param("platform") Platform platform, @Param("knownSkus") Collection<String> knownSkus);
+
+    long countByPlatformAndStatusNot(Platform platform, ProductStatus status);
+
     List<Product> findByPlatformAndExternalIdNotNull(Platform platform);
 
     /**

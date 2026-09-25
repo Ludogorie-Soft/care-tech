@@ -39,9 +39,25 @@ public class TekraApiService {
     @Value("${tekra.api.enabled:false}")
     private boolean tekraApiEnabled;
 
+    /** TEKRA answers 429 after a handful of quick requests, so pages of one category are spaced out. */
+    @Value("${tekra.api.page-delay-ms:10000}")
+    private long pageDelayMs;
+
+    /** First wait after a 429, doubled on each retry; TEKRA locks for longer periods. */
+    @Value("${tekra.api.retry-delay-ms:60000}")
+    private long retryDelayMs;
+
     private final Map<String, List<Map<String, Object>>> productsCache = new HashMap<>();
     private long cacheTimestamp = 0;
-    private static final long CACHE_DURATION_MS = 5 * 60 * 1000;
+    // Long enough for the nightly products sync to reuse what the parameters sync just read: with paging,
+    // a second read of every category doubles the requests TEKRA rate-limits, and the two syncs would see
+    // different feeds.
+    private static final long CACHE_DURATION_MS = 30 * 60 * 1000;
+
+    /** Products per page asked of the feed; a page of TEKRA holds at most 100. */
+    static final int PAGE_SIZE = 100;
+    /** Guards against a feed that never stops sending new products; far above any category today. */
+    static final int MAX_PAGES = 30;
 
     /**
      * Get categories using JSON parsing (categories return JSON)
@@ -222,7 +238,8 @@ public class TekraApiService {
             }
 
         } catch (Exception e) {
-            log.error("Error parsing products XML", e);
+            // An empty list here read as "the category has no products", and the sync then hid them all.
+            throw new IllegalStateException("Tekra products XML could not be parsed", e);
         }
 
         return products;
@@ -349,55 +366,6 @@ public class TekraApiService {
         }
     }
 
-    public List<Map<String, Object>> getAllProductsForCategory(String categorySlug) {
-        if (!tekraApiEnabled) {
-            log.warn("Tekra API is disabled");
-            return new ArrayList<>();
-        }
-
-        try {
-            log.info("Fetching all products for category: {}", categorySlug);
-
-            // ✅ ОПРОСТЕНО: Tekra API връща ВСИЧКИ продукти на първата страница
-            String url = UriComponentsBuilder.fromHttpUrl(baseUrl)
-                    .queryParam("action", "browse")
-                    .queryParam("catSlug", categorySlug)
-                    .queryParam("page", 1)
-                    .queryParam("perPage", 1000)  // Голямо число
-                    .queryParam("allProducts", 0)
-                    .queryParam("in_stock", 1)
-                    .queryParam("out_of_stock", 1)
-                    .queryParam("order", "bestsellers")
-                    .queryParam("feed", 1)
-                    .queryParam("access_token_feed", accessToken)
-                    .toUriString();
-
-            String xmlResponse = restTemplate.getForObject(url, String.class);
-
-            if (xmlResponse == null) {
-                log.error("Received null XML response");
-                return new ArrayList<>();
-            }
-
-            List<Map<String, Object>> products = parseProductsFromXML(xmlResponse);
-
-            log.info("Fetched {} products for category: {}", products.size(), categorySlug);
-
-            // Update cache
-            productsCache.put(categorySlug, products);
-            cacheTimestamp = System.currentTimeMillis();
-
-            return products;
-
-        } catch (Exception e) {
-            log.error("Error fetching products for category {}", categorySlug, e);
-            return new ArrayList<>();
-        }
-    }
-
-    /**
-     * Clear the products cache (call this before starting a full sync)
-     */
     public void clearCache() {
         productsCache.clear();
         cacheTimestamp = 0;
@@ -412,7 +380,12 @@ public class TekraApiService {
     }
 
     /**
-     * Get products with caching support (updated version)
+     * Every product of a TEKRA category, page by page. Only the first page used to be read, so no
+     * category went past 100 products — "IP системи" has 391. Paging stops at a short page, or at a
+     * page that brings no new SKU (what TEKRA ignoring {@code page} would look like).
+     *
+     * @throws RuntimeException when a page cannot be read. A partial list is not returned: the product
+     *                          sync marks every product it did not see as unavailable.
      */
     public List<Map<String, Object>> getProductsRaw(String categorySlug) {
         if (!tekraApiEnabled) {
@@ -426,18 +399,55 @@ public class TekraApiService {
             return productsCache.get(categorySlug);
         }
 
-        int maxRetries = 3;
-        long retryDelayMs = 60_000; // 60 seconds initial backoff (Tekra locks for longer periods)
+        List<Map<String, Object>> products = new ArrayList<>();
+        Set<String> skus = new HashSet<>();
 
-        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+        for (int page = 1; page <= MAX_PAGES; page++) {
+            if (page > 1) {
+                pause(pageDelayMs);
+            }
+            List<Map<String, Object>> pageProducts = fetchProductsPage(categorySlug, page);
+
+            int newSkus = 0;
+            for (Map<String, Object> product : pageProducts) {
+                Object sku = product.get("sku");
+                if (sku == null || skus.add(sku.toString())) {
+                    products.add(product);
+                    if (sku != null) newSkus++;
+                }
+            }
+            log.info("Tekra category '{}': page {} gave {} products, {} new", categorySlug, page,
+                    pageProducts.size(), newSkus);
+
+            if (pageProducts.size() < PAGE_SIZE || newSkus == 0) {
+                break;
+            }
+            if (page == MAX_PAGES) {
+                log.warn("Tekra category '{}': stopped after {} pages with more to come", categorySlug, MAX_PAGES);
+            }
+        }
+
+        productsCache.put(categorySlug, products);
+        cacheTimestamp = System.currentTimeMillis();
+
+        log.info("Extracted {} products for Tekra category '{}' (cached)", products.size(), categorySlug);
+        return products;
+    }
+
+    private List<Map<String, Object>> fetchProductsPage(String categorySlug, int page) {
+        int maxRetries = 3;
+        long delayMs = retryDelayMs;
+
+        for (int attempt = 1; ; attempt++) {
             try {
-                log.info("Fetching products for category: {} (attempt {}/{})", categorySlug, attempt, maxRetries);
+                log.info("Fetching products for category: {}, page {} (attempt {}/{})",
+                        categorySlug, page, attempt, maxRetries);
 
                 String url = UriComponentsBuilder.fromHttpUrl(baseUrl)
                         .queryParam("action", "browse")
                         .queryParam("catSlug", categorySlug)
-                        .queryParam("page", 1)
-                        .queryParam("perPage", 100)
+                        .queryParam("page", page)
+                        .queryParam("perPage", PAGE_SIZE)
                         .queryParam("allProducts", 0)
                         .queryParam("in_stock", 1)
                         .queryParam("out_of_stock", 1)
@@ -447,35 +457,33 @@ public class TekraApiService {
                         .toUriString();
 
                 String xmlResponse = restTemplate.getForObject(url, String.class);
-
                 if (xmlResponse == null) {
-                    log.error("Received null XML response from Tekra API for products");
-                    return new ArrayList<>();
+                    throw new IllegalStateException(
+                            "Empty response from Tekra for category '" + categorySlug + "', page " + page);
                 }
-
-                List<Map<String, Object>> products = parseProductsFromXML(xmlResponse);
-
-                productsCache.put(categorySlug, products);
-                cacheTimestamp = System.currentTimeMillis();
-
-                log.info("Extracted {} products from Tekra XML response (cached)", products.size());
-                return products;
+                return parseProductsFromXML(xmlResponse);
 
             } catch (HttpClientErrorException.TooManyRequests e) {
-                if (attempt < maxRetries) {
-                    log.warn("Tekra API rate limited (429) for category '{}', attempt {}/{}. Waiting {} ms before retry.",
-                            categorySlug, attempt, maxRetries, retryDelayMs);
-                    try { Thread.sleep(retryDelayMs); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); return new ArrayList<>(); }
-                    retryDelayMs *= 2;
-                } else {
-                    log.error("Tekra API still returning 429 after {} attempts for category '{}'", maxRetries, categorySlug);
+                if (attempt >= maxRetries) {
+                    log.error("Tekra API still returning 429 after {} attempts for category '{}', page {}",
+                            maxRetries, categorySlug, page);
                     throw e; // propagate so caller can apply cooldown before next category
                 }
-            } catch (Exception e) {
-                log.error("Error fetching products from Tekra API for category '{}'", categorySlug, e);
-                return new ArrayList<>();
+                log.warn("Tekra API rate limited (429) for category '{}', page {}, attempt {}/{}. Waiting {} ms before retry.",
+                        categorySlug, page, attempt, maxRetries, delayMs);
+                pause(delayMs);
+                delayMs *= 2;
             }
         }
-        return new ArrayList<>();
+    }
+
+    private static void pause(long millis) {
+        if (millis <= 0) return;
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while waiting for the Tekra API", e);
+        }
     }
 }
