@@ -750,7 +750,7 @@ spring-retry — не посягай към `@Retryable`. VALI ползва WebC
 ## Key Learnings (Фаза 6 — почистване на стария слой за филтри, 2026-09-25)
 - **Филтрите в магазина идват САМО от каноничния слой:** `POST /api/products/categories/{id}/filters`, търсене с `attributeFilters`, стари `param_` линкове през `…/filters/translate-legacy`. Старите `/products/parameters/category`, `/categories/{id}/parameters`, `/filter-facets`, `filter-activate`, `PATCH …/filter`, `…/reorder` и полето `filters` в търсенето са махнати (клон `v2-phase6-cleanup`).
 - **`is_filter` / `filter_order` / `sort_order` остават в базата** (sync-овете ги пишат, `sort_order` подрежда спецификациите), но нищо в магазина не чете `is_filter`.
-- **Суровите `/api/parameters/**` (GET по категория, CRUD, DELETE опция) остават** — ползват ги ProductForm, ParameterSelector и страницата „Параметри на доставчиците“ (`src/pages/admin/Params/`; `CreateFilterForm` и `ParamsModal` се внасят от ProductForm).
+- **Старата страница „Параметри на доставчиците“ (`src/pages/admin/Params/`) е махната** заедно с DELETE `/api/parameters/{id}` и `/api/parameters/{p}/options/{o}` (само тя ги ползваше). Остават GET `/api/parameters/category/{id}`, POST и PUT `/api/parameters` — за ProductForm и ParameterSelector; `ParamsModal` и `CreateParameterForm` са преместени в `src/pages/admin/Products/`. Суровият слой се пипа само от sync-а; филтрите се настройват в „Филтри“.
 - **Защита на остарял SQL скрипт: `BEGIN;` + `DO $$ BEGIN RAISE EXCEPTION … END $$;` най-отгоре** — проваля транзакцията, така че и psql без ON_ERROR_STOP, и собствен `COMMIT;` по-надолу (той става ROLLBACK) не записват нищо. Само коментар не е защита.
 
 ## Decision Log (2026-09-25)
