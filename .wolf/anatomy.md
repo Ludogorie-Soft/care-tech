@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-25T05:56:25.626Z
-> Files: 754 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-25T06:11:22.432Z
+> Files: 758 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -784,7 +784,7 @@
 - `ParameterRepository.java` — Repository: ParameterRepository. findParametersForAvailableProductsByCategory uses status = AVAILABLE (not <> NOT_AVAILABLE) (~1065 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~557 tok)
-- `ProductRepository.java` — The category a product already sits in. Returns the id rather than the entity so the (~3960 tok)
+- `ProductRepository.java` — The category a product already sits in. Returns the id rather than the entity so the …; markNotAvailableByPlatformSkuNotIn + countAvailableByPlatformSkuNotIn / countByPlatformAndStatusNot (защита на mark-unseen) (~4100 tok)
 - `ProductSearchRepository.java` — Guards against a pathological query turning into dozens of ANDed ILIKEs. (~11934 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
@@ -825,7 +825,7 @@
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
 - `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8765 tok)
 - `TbiLeasingService.java` — TBI Fusion Pay integration: registerApplication (AES encrypt → TBI API), processStatusWebhook, getStatistics, admin queries (~350 tok)
-- `TekraApiService.java` — Fetches Tekra categories (JSON) and products (XML); retryDelayMs=60_000 (3 attempts, exponential backoff); productsCache HashMap; getProductsRaw (page 1, perPage=100!)/getAllProductsForCategory; putText пази повторени prop_* тагове като List (~4900 tok)
+- `TekraApiService.java` — Fetches Tekra categories (JSON) and products (XML); getProductsRaw чете страница по страница (PAGE_SIZE 100, спира при къса страница/без нови SKU/MAX_PAGES 30; пауза tekra.api.page-delay-ms 10s; 429 retry tekra.api.retry-delay-ms 60s×2, 3 опита); неуспешна страница/счупен XML → изключение (не частичен списък); кеш 30 мин; putText пази повторени prop_* като List (~5200 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
 - `UserService.java` — Service: UserService (~6466 tok)
 - `ValiApiService.java` — Get categories (no pagination available) (~9094 tok)
@@ -969,8 +969,10 @@
 ## src/test/java/com/techstore/service/
 
 - `MostApiServiceTest.java` — 11 теста с Mockito за провалите на MOST feed-а: празно/null тяло, connection error, изчерпани опити, възстановяване след преходен отказ, HTTP статус, счупен XML, изключен feed, кеширане на успех и НЕкеширане на провал (~1999 tok)
-- `TekraApiServiceXmlTest.java` — Парсване на TEKRA фийда: повторен prop_* таг → списък, други тагове → последната стойност, escaped <br/> остава текст (~600 tok)
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
+- `TekraApiServicePagingTest.java` — Paging of the TEKRA product feed. Only page 1 used to be read, so no category went past 100 (~1473 tok)
+- `TekraApiServiceXmlTest.java` — Парсване на TEKRA фийда: повторен prop_* таг → списък, други тагове → последната стойност, escaped <br/> остава текст (~600 tok)
+- `TekraApiServicePagingTest.java` — Пагинация на TEKRA фийда с mock RestTemplate: всички страници, повторена страница (игнориран page), празна последна, малка категория, провал на страница, 429×3, счупен XML (7 теста) (~1500 tok)
 - `TekraApiServiceXmlTest.java` — Parsing of the TEKRA product feed ({@code action=browse&feed=1}). (~538 tok)
 
 ## src/test/java/com/techstore/service/filter/parser/

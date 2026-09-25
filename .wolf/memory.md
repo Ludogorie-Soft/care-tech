@@ -3853,3 +3853,6 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 08:56 | Created src/test/java/com/techstore/service/TekraApiServiceXmlTest.java | — | ~538 |
 | 10:30 | TEKRA т.2: повторени prop_* тагове → всички стойности, <br/> разделяне, „A,A“ свиване, лимит 200→2000, броячи в sync лога; merna = „бр.“ (скрита от V39); махнат мъртъв setTekraParametersToProductSimplified | TekraApiService, TekraSyncService, TekraFeedValues (нов), 2 нови теста | 370 теста минават | ~30k |
 | 08:59 | Session end: 3 writes across 3 files (TekraFeedValues.java, TekraFeedValuesTest.java, TekraApiServiceXmlTest.java) | 2 reads | ~31121 tok |
+| 09:11 | Created src/test/java/com/techstore/service/TekraApiServicePagingTest.java | — | ~1473 |
+| 11:30 | TEKRA пагинация: getProductsRaw страница по страница (спира при къса/без нови SKU/30), изключение при провал, mark-unseen се пропуска при неуспешна категория, Fetched/FetchFailed в sync_logs, кеш 30 мин; махнат getAllProductsForCategory | TekraApiService, TekraSyncService, TekraApiServicePagingTest (нов) | 377 теста минават; жива проверка на page семантиката чака изтичане на 429 | ~25k |
+| 09:17 | Session end: 4 writes across 4 files (TekraFeedValues.java, TekraFeedValuesTest.java, TekraApiServiceXmlTest.java, TekraApiServicePagingTest.java) | 2 reads | ~32699 tok |

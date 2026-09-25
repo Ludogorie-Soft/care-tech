@@ -9307,6 +9307,26 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-25T10:30:00Z"
+    },
+    {
+      "id": "bug-564",
+      "timestamp": "2026-09-25T11:30:00Z",
+      "error_message": "TEKRA синхронизацията тегли само първите 100 продукта на категория: Видеонаблюдение има 695 (IP системи 391), ние обработваме ~358 SKU на прогон; продуктите отвъд страница 1 се маркират NOT_AVAILABLE всяка нощ",
+      "file": "src/main/java/com/techstore/service/TekraApiService.java, src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "getProductsRaw правеше една заявка page=1&perPage=100 от създаването си (окт. 2025); getAllProductsForCategory (perPage=1000, „всички на първа страница“) не се ползваше. Грешка при теглене връщаше празен списък → mark-unseen скриваше продуктите на категорията.",
+      "fix": "Пагинация до къса страница / страница без нови SKU / 30 страници, 10 s между страниците; неуспешна страница или счупен XML хвърлят изключение; syncTekraProducts пропуска mark-unseen, ако някоя категория не е прочетена; sync_logs пише 'Fetched: {slug=N}' и 'FetchFailed'; кеш 5→30 мин, за да не се тегли два пъти. Премахнат неизползваният getAllProductsForCategory. Допълнително: ако mark-unseen би свалил >25% от наличните TEKRA продукти (празна страница при лимит изглежда като край), се пропуска с CRITICAL лог и 'Incomplete feed' в sync_logs (ProductRepository.countAvailableByPlatformSkuNotIn / countByPlatformAndStatusNot).",
+      "tags": [
+        "tekra",
+        "sync",
+        "pagination",
+        "mark-unseen",
+        "rate-limit"
+      ],
+      "related_bugs": [
+        "bug-563"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-25T11:30:00Z"
     }
   ]
 }
