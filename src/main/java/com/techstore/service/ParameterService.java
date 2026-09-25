@@ -6,7 +6,6 @@ import com.techstore.dto.response.ParameterResponseDto;
 import com.techstore.entity.Category;
 import com.techstore.entity.Parameter;
 import com.techstore.entity.ParameterOption;
-import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.DuplicateResourceException;
 import com.techstore.exception.ValidationException;
 import com.techstore.mapper.ParameterMapper;
@@ -91,26 +90,6 @@ public class ParameterService {
         }, context);
     }
 
-    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
-    public void deleteParameter(Long parameterId) {
-        log.info("Deleting parameter with ID: {}", parameterId);
-
-        String context = ExceptionHelper.createErrorContext("deleteParameter", "Parameter", parameterId, null);
-
-        ExceptionHelper.wrapDatabaseOperation(() -> {
-            validateParameterId(parameterId);
-
-            Parameter parameter = findParameterByIdOrThrow(parameterId);
-
-            validateParameterDeletion(parameter);
-
-            parameterRepository.delete(parameter);
-
-            log.info("Parameter deleted successfully with ID: {}", parameterId);
-            return null;
-        }, context);
-    }
-
     @Transactional(readOnly = true)
     @Cacheable(value = "parameters", key = "'category_all_' + #categoryId + '_' + #language")
     public List<ParameterResponseDto> findByCategory(Long categoryId, String language) {
@@ -160,56 +139,6 @@ public class ParameterService {
                                 .toList(),
                 "fetch all parameters"
         );
-    }
-
-    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
-    public void deleteParameterOption(Long parameterId, Long optionId) {
-        log.info("Deleting parameter option with ID: {} from parameter: {}", optionId, parameterId);
-
-        String context = ExceptionHelper.createErrorContext(
-                "deleteParameterOption", "ParameterOption", optionId,
-                "parameterId: " + parameterId);
-
-        ExceptionHelper.wrapDatabaseOperation(() -> {
-            validateParameterId(parameterId);
-
-            if (optionId == null || optionId <= 0) {
-                throw new ValidationException("Parameter option ID must be a positive number");
-            }
-
-            // ✅ Провери дали параметърът съществува
-            Parameter parameter = findParameterByIdOrThrow(parameterId);
-
-            // ✅ Намери опцията
-            ParameterOption option = parameterOptionRepository.findById(optionId)
-                    .orElseThrow(() -> new ValidationException(
-                            String.format("Parameter option with ID %d not found", optionId)));
-
-            // ✅ Провери дали опцията принадлежи на този параметър
-            if (!option.getParameter().getId().equals(parameterId)) {
-                throw new ValidationException(
-                        String.format("Parameter option %d does not belong to parameter %d",
-                                optionId, parameterId));
-            }
-
-            // ✅ Провери дали опцията се използва от продукти
-            long productUsages = option.getProductParameters() != null ?
-                    option.getProductParameters().size() : 0;
-
-            if (productUsages > 0) {
-                throw new BusinessLogicException(
-                        String.format("Cannot delete parameter option '%s' because it is used by %d products. " +
-                                        "Please remove it from products first.",
-                                getOptionDisplayName(option), productUsages));
-            }
-
-            // ✅ Изтрий опцията
-            parameterOptionRepository.delete(option);
-
-            log.info("Parameter option deleted successfully: ID {}, name: '{}'",
-                    optionId, getOptionDisplayName(option));
-            return null;
-        }, context);
     }
 
     public Page<ParameterResponseDto> findAllAdminParameters(Pageable pageable, String lang) {
@@ -349,30 +278,6 @@ public class ParameterService {
 
         if (!hasValidName) {
             throw new ValidationException("At least one parameter option name (EN or BG) must be provided");
-        }
-    }
-
-    private void validateParameterDeletion(Parameter parameter) {
-        if (parameter.getOptions() != null) {
-            long totalProductUsages = parameter.getOptions().stream()
-                    .mapToLong(option -> option.getProductParameters() != null ?
-                            option.getProductParameters().size() : 0)
-                    .sum();
-
-            if (totalProductUsages > 0) {
-                throw new BusinessLogicException(
-                        String.format("Cannot delete parameter '%s' because it is used by %d products. " +
-                                        "Please remove the parameter from products first.",
-                                getParameterDisplayName(parameter), totalProductUsages));
-            }
-        }
-
-        // ✅ Провери дали параметърът се използва в множество категории
-        if (parameter.getCategories() != null && parameter.getCategories().size() > 1) {
-            throw new BusinessLogicException(
-                    String.format("Cannot delete parameter '%s' because it is shared across %d categories. " +
-                                    "Please remove it from all categories first.",
-                            getParameterDisplayName(parameter), parameter.getCategories().size()));
         }
     }
 
@@ -706,16 +611,6 @@ public class ParameterService {
                     option.setNameEn(nameDto.getText().trim());
                 }
             }
-        }
-    }
-
-    private String getParameterDisplayName(Parameter parameter) {
-        if (StringUtils.hasText(parameter.getNameEn())) {
-            return parameter.getNameEn();
-        } else if (StringUtils.hasText(parameter.getNameBg())) {
-            return parameter.getNameBg();
-        } else {
-            return "Parameter ID: " + parameter.getId();
         }
     }
 

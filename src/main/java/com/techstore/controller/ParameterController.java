@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,14 +58,6 @@ public class ParameterController {
         return ResponseEntity.ok(parameter);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteParameter(@PathVariable @NotNull Long id) {
-        log.info("Deleting parameter with ID: {}", id);
-        parameterService.deleteParameter(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping(value = "/category/{categoryId}")
     public ResponseEntity<List<ParameterResponseDto>> getParametersByCategory(
             @PathVariable @NotNull Long categoryId,
@@ -94,17 +85,5 @@ public class ParameterController {
     ) {
         List<ParameterResponseDto> response = parameterService.getAllParameters(language);
         return ResponseEntity.ok(response);
-    }
-
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @DeleteMapping("/{parameterId}/options/{optionId}")
-    public ResponseEntity<Void> deleteParameterOption(
-            @PathVariable Long parameterId,
-            @PathVariable Long optionId) {
-
-        log.info("DELETE request for parameter option: parameterId={}, optionId={}", parameterId, optionId);
-        parameterService.deleteParameterOption(parameterId, optionId);
-        log.info("Parameter option deleted successfully: parameterId={}, optionId={}", parameterId, optionId);
-        return ResponseEntity.noContent().build();
     }
 }
