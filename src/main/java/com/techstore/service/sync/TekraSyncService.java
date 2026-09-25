@@ -463,6 +463,7 @@ public class TekraSyncService {
 
             Map<String, ParameterData> allParametersData = new HashMap<>();
             Set<String> processedSkus = new HashSet<>();
+            TekraFeedValues.Stats feedStats = new TekraFeedValues.Stats();
 
             for (Category category : tekraCategories) {
                 try {
@@ -476,11 +477,10 @@ public class TekraSyncService {
                         }
                         processedSkus.add(sku);
 
-                        Map<String, String> productParams = extractTekraParameters(product);
+                        Map<String, List<String>> productParams = extractTekraParameters(product, feedStats);
 
-                        for (Map.Entry<String, String> param : productParams.entrySet()) {
+                        for (Map.Entry<String, List<String>> param : productParams.entrySet()) {
                             String tekraKey = param.getKey();
-                            String paramValue = param.getValue();
 
                             String paramName = convertTekraParameterKeyToName(tekraKey);
 
@@ -498,7 +498,7 @@ public class TekraSyncService {
                             );
 
                             paramData.categories.add(category);
-                            paramData.values.add(paramValue);
+                            paramData.values.addAll(param.getValue());
                         }
                     }
 
@@ -612,8 +612,10 @@ public class TekraSyncService {
                 }
             }
 
-            String message = String.format("Parameters: %d created, %d reused. Options: %d created",
-                    created, reused, optionsCreated);
+            String message = String.format("Parameters: %d created, %d reused. Options: %d created. "
+                            + "Feed: %d repeated tags, %d multi-value properties, %d values over %d chars skipped",
+                    created, reused, optionsCreated, feedStats.repeatedTags, feedStats.multiValueProperties,
+                    feedStats.tooLongValues, TekraFeedValues.MAX_VALUE_LENGTH);
 
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS,
                     allParametersData.size(), created, 0, 0, message, startTime);
@@ -965,7 +967,8 @@ public class TekraSyncService {
             }
 
             // ✅ ТРЕТО: Провери параметри
-            Map<String, String> params = extractTekraParameters(rawProduct);
+            Map<String, String> params = new HashMap<>();
+            extractTekraParameters(rawProduct, null).forEach((key, values) -> params.put(key, String.join(", ", values)));
 
             if (params.containsKey("ip_kanali")) {
                 String value = params.get("ip_kanali");
@@ -1183,39 +1186,38 @@ public class TekraSyncService {
                     .setParameter("productId", product.getId())
                     .executeUpdate();
 
-            Map<String, String> parameterMappings = extractTekraParameters(rawProduct);
+            Map<String, List<String>> parameterMappings = extractTekraParameters(rawProduct, null);
             Set<String> seenKeys = new HashSet<>();
             int mappedCount = 0, notFoundCount = 0;
 
-            for (Map.Entry<String, String> paramEntry : parameterMappings.entrySet()) {
-                String parameterValue = paramEntry.getValue();
-                if (parameterValue == null || parameterValue.isBlank() || "-".equals(parameterValue.trim())) continue;
-
+            for (Map.Entry<String, List<String>> paramEntry : parameterMappings.entrySet()) {
                 Long parameterId = parameterIdsByTekraKey.get(paramEntry.getKey());
                 if (parameterId == null) { notFoundCount++; continue; }
 
                 Map<String, Long> optionMap = optionIdsByParamAndValue.get(parameterId);
                 if (optionMap == null) { notFoundCount++; continue; }
 
-                Long optionId = optionMap.get(normalizeName(parameterValue));
-                if (optionId == null) {
-                    // Fuzzy fallback: strip all whitespace (handles "16 GB" vs "16GB")
-                    String stripped = parameterValue.toLowerCase().replaceAll("\\s+", "");
-                    optionId = optionMap.entrySet().stream()
-                            .filter(e -> e.getKey().replaceAll("\\s+", "").equals(stripped))
-                            .map(Map.Entry::getValue)
-                            .findFirst().orElse(null);
+                for (String parameterValue : paramEntry.getValue()) {
+                    Long optionId = optionMap.get(normalizeName(parameterValue));
+                    if (optionId == null) {
+                        // Fuzzy fallback: strip all whitespace (handles "16 GB" vs "16GB")
+                        String stripped = parameterValue.toLowerCase().replaceAll("\\s+", "");
+                        optionId = optionMap.entrySet().stream()
+                                .filter(e -> e.getKey().replaceAll("\\s+", "").equals(stripped))
+                                .map(Map.Entry::getValue)
+                                .findFirst().orElse(null);
+                    }
+                    if (optionId == null) { notFoundCount++; continue; }
+
+                    if (!seenKeys.add(parameterId + ":" + optionId)) continue; // dedup
+
+                    ProductParameter pp = new ProductParameter();
+                    pp.setProduct(product);
+                    pp.setParameter(entityManager.getReference(Parameter.class, parameterId));
+                    pp.setParameterOption(entityManager.getReference(ParameterOption.class, optionId));
+                    entityManager.persist(pp);
+                    mappedCount++;
                 }
-                if (optionId == null) { notFoundCount++; continue; }
-
-                if (!seenKeys.add(parameterId + ":" + optionId)) continue; // dedup
-
-                ProductParameter pp = new ProductParameter();
-                pp.setProduct(product);
-                pp.setParameter(entityManager.getReference(Parameter.class, parameterId));
-                pp.setParameterOption(entityManager.getReference(ParameterOption.class, optionId));
-                entityManager.persist(pp);
-                mappedCount++;
             }
 
             if (notFoundCount > 0) {
@@ -1226,111 +1228,6 @@ public class TekraSyncService {
             log.error("ERROR setting Tekra parameters for product {}: {}", product.getSku(), e.getMessage());
             throw e;
         }
-    }
-
-    private void setTekraParametersToProductSimplified(
-            Product product,
-            Map<String, Object> rawProduct,
-            Map<String, Parameter> parametersByTekraKey,
-            Map<Long, Map<String, ParameterOption>> optionsByParameterId) {
-
-        try {
-            if (product.getCategory() == null) {
-                return;
-            }
-
-            Set<ProductParameter> existingProductParams = product.getProductParameters();
-            if (existingProductParams == null) {
-                existingProductParams = new HashSet<>();
-                product.setProductParameters(existingProductParams);
-            }
-
-            Set<ProductParameter> manualParameters = existingProductParams.stream()
-                    .filter(pp -> pp.getParameter() != null)
-                    .filter(pp -> isManualParameter(pp))
-                    .collect(Collectors.toSet());
-
-            Set<ProductParameter> autoParameters = new HashSet<>();
-            int mappedCount = 0;
-            int notFoundCount = 0;
-
-            Map<String, String> parameterMappings = extractTekraParameters(rawProduct);
-
-            for (Map.Entry<String, String> paramEntry : parameterMappings.entrySet()) {
-                try {
-                    String parameterKey = paramEntry.getKey();
-                    String parameterValue = paramEntry.getValue();
-
-                    if (parameterValue == null || parameterValue.trim().isEmpty() || "-".equals(parameterValue.trim())) {
-                        continue;
-                    }
-
-                    Parameter parameter = parametersByTekraKey.get(parameterKey);
-
-                    if (parameter == null) {
-                        notFoundCount++;
-                        log.debug("Parameter with tekraKey='{}' not found for product {}",
-                                parameterKey, product.getSku());
-                        continue;
-                    }
-
-                    Map<String, ParameterOption> parameterOptions = optionsByParameterId.get(parameter.getId());
-                    if (parameterOptions == null) {
-                        notFoundCount++;
-                        continue;
-                    }
-
-                    String normalizedValue = normalizeName(parameterValue);
-                    ParameterOption option = parameterOptions.get(normalizedValue);
-
-                    if (option == null) {
-                        // Fuzzy fallback: strip all whitespace (handles "16 GB" vs "16GB")
-                        String stripped = parameterValue.toLowerCase().replaceAll("\\s+", "");
-                        option = parameterOptions.entrySet().stream()
-                                .filter(e -> e.getKey().replaceAll("\\s+", "").equals(stripped))
-                                .map(Map.Entry::getValue)
-                                .findFirst().orElse(null);
-                    }
-
-                    if (option == null) {
-                        notFoundCount++;
-                        continue;
-                    }
-
-                    ProductParameter productParam = new ProductParameter();
-                    productParam.setProduct(product);
-                    productParam.setParameter(parameter);
-                    productParam.setParameterOption(option);
-                    autoParameters.add(productParam);
-
-                    mappedCount++;
-
-                } catch (Exception e) {
-                    notFoundCount++;
-                }
-            }
-
-            existingProductParams.clear();
-            existingProductParams.addAll(manualParameters);
-            existingProductParams.addAll(autoParameters);
-
-        } catch (Exception e) {
-            log.error("ERROR setting Tekra parameters for product {}: {}",
-                    product.getSku(), e.getMessage());
-        }
-    }
-
-    private boolean isManualParameter(ProductParameter productParameter) {
-        Parameter parameter = productParameter.getParameter();
-        if (parameter == null) return false;
-        // Only admin-touched parameters are considered manual — platform is irrelevant.
-        // Cross-platform parameters (e.g. created by Vali, reused by Tekra) must NOT be treated as manual.
-        return isAdminUser(parameter.getCreatedBy()) || isAdminUser(parameter.getLastModifiedBy());
-    }
-
-    private boolean isAdminUser(String username) {
-        if (username == null || username.isEmpty()) return false;
-        return "ADMIN".equalsIgnoreCase(username.trim()) || "admin".equalsIgnoreCase(username.trim());
     }
 
     @Transactional
@@ -1616,8 +1513,15 @@ public class TekraSyncService {
         );
     }
 
-    private Map<String, String> extractTekraParameters(Map<String, Object> rawProduct) {
-        Map<String, String> parameters = new HashMap<>();
+    /**
+     * Property key (without "prop_") → its values. A property can hold several values (see
+     * {@link TekraFeedValues}); each becomes its own parameter option.
+     *
+     * @param stats counts for the sync log, or {@code null}
+     */
+    private Map<String, List<String>> extractTekraParameters(Map<String, Object> rawProduct,
+                                                             TekraFeedValues.Stats stats) {
+        Map<String, List<String>> parameters = new HashMap<>();
 
         Set<String> systemFields = Set.of(
                 "id", "sku", "name", "model", "manufacturer",
@@ -1655,46 +1559,23 @@ public class TekraSyncService {
             String key = entry.getKey();
             Object value = entry.getValue();
 
-            if (value == null || key == null || key.trim().isEmpty()) {
+            if (value == null || key == null || key.trim().isEmpty() || systemFields.contains(key)) {
                 continue;
             }
 
-            if (systemFields.contains(key)) {
+            // Only a repeated prop_ tag becomes a list; the other lists are gallery and files.
+            boolean property = key.startsWith("prop_");
+            if (value instanceof Map || (value instanceof List && !property)) {
                 continue;
             }
 
-            if (value instanceof List || value instanceof Map) {
+            if (!property && !knownTekraParameters.contains(key) && !looksLikeParameter(key, value.toString().trim())) {
                 continue;
             }
 
-            String stringValue = value.toString().trim();
-
-            if (stringValue.isEmpty() || "null".equalsIgnoreCase(stringValue)) {
-                continue;
-            }
-
-            if (stringValue.startsWith("http://") || stringValue.startsWith("https://")) {
-                continue;
-            }
-
-            if (stringValue.length() > 200) {
-                continue;
-            }
-
-            if (knownTekraParameters.contains(key)) {
-                String paramKey = key.startsWith("prop_") ? key.substring(5) : key;
-                parameters.put(paramKey, stringValue);
-                continue;
-            }
-
-            if (key.startsWith("prop_")) {
-                String paramKey = key.substring(5);
-                parameters.put(paramKey, stringValue);
-                continue;
-            }
-
-            if (looksLikeParameter(key, stringValue)) {
-                parameters.put(key, stringValue);
+            List<String> values = TekraFeedValues.values(value, stats);
+            if (!values.isEmpty()) {
+                parameters.put(property ? key.substring(5) : key, values);
             }
         }
 

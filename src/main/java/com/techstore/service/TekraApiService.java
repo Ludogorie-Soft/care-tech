@@ -140,10 +140,13 @@ public class TekraApiService {
 
                     if (key.startsWith("prop_") && value != null) {
                         String parameterName = key.substring(5); // Remove "prop_" prefix
-                        String parameterValue = value.toString().trim();
+                        List<?> texts = value instanceof List<?> list ? list : List.of(value);
 
-                        if (!parameterValue.isEmpty()) {
-                            parametersMap.computeIfAbsent(parameterName, k -> new HashSet<>()).add(parameterValue);
+                        for (Object text : texts) {
+                            String parameterValue = text.toString().trim();
+                            if (!parameterValue.isEmpty()) {
+                                parametersMap.computeIfAbsent(parameterName, k -> new HashSet<>()).add(parameterValue);
+                            }
                         }
                     }
                 }
@@ -189,8 +192,7 @@ public class TekraApiService {
         return value != null ? value.toString().trim() : null;
     }
 
-    // NEW: XML parsing for products
-    private List<Map<String, Object>> parseProductsFromXML(String xmlResponse) {
+    List<Map<String, Object>> parseProductsFromXML(String xmlResponse) {
         List<Map<String, Object>> products = new ArrayList<>();
 
         try {
@@ -246,7 +248,7 @@ public class TekraApiService {
                     } else if ("files".equals(tagName)) {
                         product.put(tagName, extractFiles(childElement));
                     } else if (textContent != null && !textContent.trim().isEmpty()) {
-                        product.put(tagName, textContent.trim());
+                        putText(product, tagName, textContent.trim());
                     }
                 }
             }
@@ -257,6 +259,23 @@ public class TekraApiService {
         }
 
         return product;
+    }
+
+    /**
+     * A property tag ({@code prop_*}) can repeat inside one item, each occurrence a value of its own; they
+     * are kept as a list. Before, each occurrence overwrote the previous one and only the last value reached
+     * the shop. Other tags keep the last value, as they always did.
+     */
+    @SuppressWarnings("unchecked")
+    static void putText(Map<String, Object> product, String tagName, String text) {
+        Object previous = product.get(tagName);
+        if (previous == null || !tagName.startsWith("prop_")) {
+            product.put(tagName, text);
+        } else if (previous instanceof List<?> values) {
+            ((List<String>) values).add(text);
+        } else {
+            product.put(tagName, new ArrayList<>(List.of(previous.toString(), text)));
+        }
     }
 
     private List<String> extractGalleryImages(Element galleryElement) {
