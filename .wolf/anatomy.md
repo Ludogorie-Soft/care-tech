@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T14:28:06.601Z
-> Files: 735 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T14:45:44.184Z
+> Files: 747 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -132,6 +132,17 @@
 
 - `DashboardLayout.jsx` — convertStatsToMetrics (~2511 tok)
 - `Sidebar.jsx` — Sidebar (~1269 tok)
+
+## ../../care-tech-ui/src/pages/admin/Filters/
+
+- `AttributeEditor.jsx` — Section — renders table (~5392 tok)
+- `AttributesTab.jsx` — PARSERS — renders form (~1802 tok)
+- `CategoryFiltersTab.jsx` — percent — renders table (~2334 tok)
+- `CategoryPicker.jsx` — Categories with visible products, busiest first; MANUAL ones are curated. (~661 tok)
+- `filterAdminApi.js` — Filter admin — /api/admin/filters. Rule changes reach the shop with the next rebuild; (~1330 tok)
+- `FiltersLayout.jsx` — TABS (~1569 tok)
+- `RawParamsTab.jsx` — ACTION_LABELS — renders table (~2421 tok)
+- `UnmappedTab.jsx` — UnmappedRow — renders table (~1872 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Leasing/
 
@@ -474,6 +485,7 @@
 - `ContactController.java` — RestController: ContactController (2 endpoints) (~331 tok)
 - `FileUploadController.java` — RestController: FileUploadController (7 endpoints) (~831 tok)
 - `FilterAdminController.java` — /api/admin/filters: POST /rebuild?dryRun=, GET /report (ADMIN/SUPER_ADMIN) (~350 tok)
+- `FilterConfigController.java` — Админ API на филтрите (/api/admin/filters, ADMIN/SUPER_ADMIN): свойства, стойности, правила за стойности и по име, параметри на доставчиците (MAP/IGNORE/HIDE), преглед на израз, опашки (несъпоставени, сурови параметри), групи по категория (режим, добави, махни, подредба) (~1500 tok)
 - `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1992 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
 - `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~2282 tok)
@@ -528,6 +540,7 @@
 - `AdvancedFilterRequestDTO.java` — AdvancedFilterRequestDTO: hasSpecificationFilters, hasPriceFilter, hasTextSearch (~344 tok)
 - `CategoryFiltersRequest.java` — record(attributeFilters, manufacturers, minPrice, maxPrice, language) за POST /products/categories/{id}/filters (~200 tok)
 - `CategoryFiltersResponse.java` — record(categoryId, total, groups[Group(attributeId, slug, name, unit, type, visible, values)], manufacturers[Option(id, name, count, selected)]) (~300 tok)
+- `FilterConfigDto.java` — Вложени records за админ API на филтрите (AttributeSummary/Detail, Value, ValueRule, NameRule, Source, RawParameter, UnmappedValue, PreviewRow, CategoryConfig/Group, заявките) (~900 tok)
 - `FilterOptionDTO.java` — FilterOptionDTO: isAvailable, getDisplayLabel (~228 tok)
 - `PriceRangeDTO.java` — PriceRangeDTO: getDefault, isValid, getFormattedMin, getFormattedMax + 3 more (~648 tok)
 - `RangeDTO.java` — RangeDTO: isValid, getFormattedRange, contains (~269 tok)
@@ -822,6 +835,7 @@
 ## src/main/java/com/techstore/service/filter/
 
 - `CategoryFilterService.java` — Serves the filter panel of a category from the canonical filter layer. Група с 1 стойност се показва, ако стеснява (не всички продукти я имат) (~4650 tok)
+- `FilterConfigService.java` — Редакция на каноничния слой за админа (това, което правят 55_* скриптовете, без SQL). Всичко е MANUAL, бележка „admin <email>, <дата>“; regex се компилира от PostgreSQL преди запис; AUTO свойство при редакция става MANUAL; MANUAL режим „замразява“ текущите групи; махане на група в AUTO режим = скриване (~7000 tok)
 - `DisplaySpecificationService.java` — displaySpecifications за продукт/карти: групира по каноничното свойство (filter_param_map), маха HIDE, дедуплицира стойности по filter_value_key; суровото specifications остава за админ формата (~1100 tok)
 - `FilterIndexService.java` — Rebuilds the canonical filter index (V38) from the raw supplier layer. (~8675 tok)
 - `FilterRebuildResult.java` — Outcome of one {@link FilterIndexService#rebuild} call. (~176 tok)
@@ -916,8 +930,8 @@
 - `V39__seed_filter_junk_rules.sql` — Статични HIDE (логистика, идентификатори) и IGNORE (гаранция, тегло, размери, среда) правила по нормализирано име (~1500 tok)
 - `V4__add_filter_order_to_parameter.sql` — SQL: 1 alter(s) (~48 tok)
 - `V40__add_filter_name_rules.sql` — filter_name_rules (regex или парсер върху името на продукта; само ако параметрите мълчат) + filter_norm маха ™®© (~700 tok)
-- `V41__seed_more_filter_junk_rules.sql` — Още статични HIDE/IGNORE по име (след куриране на 83 категории): HIDE „ново име на аксесоар“, „съкратено описание“, „свързани продукти(1)“, грамове рециклирана пластмаса (ABS 920, TPU…); IGNORE съдържание/включени аксесоари, съвместими модели/принтери, бранд, продавач, серия. „Марка“ умишлено НЕ (франчайз при фигурките) (~500 tok)
 - `V40__add_filter_name_rules.sql` — V40: Filter values taken from the product name. (~428 tok)
+- `V41__seed_more_filter_junk_rules.sql` — Още статични HIDE/IGNORE по име (след куриране на 83 категории): HIDE „ново име на аксесоар“, „съкратено описание“, „свързани продукти(1)“, грамове рециклирана пластмаса (ABS 920, TPU…); IGNORE съдържание/включени аксесоари, съвместими модели/принтери, бранд, продавач, серия. „Марка“ умишлено НЕ (франчайз при фигурките) (~500 tok)
 - `V41__seed_more_filter_junk_rules.sql` — V41: More static IGNORE / HIDE rules, found after curating 83 categories (2026-09-24). (~419 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)
@@ -969,3 +983,5 @@
 
 - `application-test.properties` — ── Datasource — H2 in-memory (replaces PostgreSQL for context-load tests) ── (~907 tok)
 - `application.properties` — Overrides for ALL tests — resolves placeholders that have no default in application.yml (~40 tok)
+- `FilterConfigControllerTest.java` — @WebMvcTest: анонимен 401, USER 403, ADMIN 200, невалиден израз 400 (~500 tok)
+- `FilterConfigServiceTest.java` — validatePattern: съобщението на PostgreSQL без „ERROR:“, валиден израз минава, >500 знака се отказва без база (~400 tok)

@@ -3821,3 +3821,17 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 17:28 | Created src/main/resources/db/migration/V41__seed_more_filter_junk_rules.sql | — | ~419 |
 | 23:00 | Комит партида 12 (3720278) + openwolf (051c569) | git | ok | ~500 |
 | 23:25 | Лимит 5 AUTO групи за категории под 10 продукта (беше в плана, не беше реализиран); V41 junk правила; задача за дублирани категории (Процесори 3/322, Монитори 50/249, IP камери 100/964, NVR 962/240) | FilterIndexService.java, V41__seed_more_filter_junk_rules.sql | AUTO групи 873 → 328, средно 3.8 на категория; 351 теста | ~6000 |
+| 17:34 | Created src/main/java/com/techstore/dto/filter/FilterConfigDto.java | — | ~1278 |
+| 17:37 | Created src/main/java/com/techstore/service/filter/FilterConfigService.java | — | ~12067 |
+| 17:37 | Created src/main/java/com/techstore/controller/FilterConfigController.java | — | ~2136 |
+| 17:42 | Created ../../care-tech-ui/src/pages/admin/Filters/filterAdminApi.js | — | ~1330 |
+| 17:42 | Created ../../care-tech-ui/src/pages/admin/Filters/FiltersLayout.jsx | — | ~1569 |
+| 17:43 | Created ../../care-tech-ui/src/pages/admin/Filters/CategoryPicker.jsx | — | ~661 |
+| 17:43 | Created ../../care-tech-ui/src/pages/admin/Filters/CategoryFiltersTab.jsx | — | ~2334 |
+| 17:43 | Created ../../care-tech-ui/src/pages/admin/Filters/AttributesTab.jsx | — | ~1802 |
+| 17:44 | Created ../../care-tech-ui/src/pages/admin/Filters/AttributeEditor.jsx | — | ~5392 |
+| 17:45 | Created ../../care-tech-ui/src/pages/admin/Filters/UnmappedTab.jsx | — | ~1872 |
+| 17:45 | Created ../../care-tech-ui/src/pages/admin/Filters/RawParamsTab.jsx | — | ~2421 |
+| 23:30 | Комит т.1+2 (c307b1b, 57d2077); задача за дублирани категории (chip task_fbe37126) | git | ok | ~500 |
+| 00:40 | Фаза 5: FilterConfigService/Controller/Dto + 7 теста; фронтенд care-tech-ui src/pages/admin/Filters (4 таба, rebuild бар), маршрут /admin/dashboard/filters, менюто „Филтри“ | backend + care-tech-ui | 358 теста; проверено в браузъра срещу локалния бекенд; НЕ е комитнато | ~40000 |
+| 17:56 | Session end: 24 writes across 24 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~97541 tok |
