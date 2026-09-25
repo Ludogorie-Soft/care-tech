@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-25T09:30:21.910Z
-> Files: 771 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-25T09:40:35.785Z
+> Files: 773 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -435,9 +435,11 @@
 - `55_filters_curated_14_twins_and_long_tail.sql` — Партида 14: CCTV двойници 964←100, 249←50 (+диагонал от името), 240←962 (копира източници, правила по име, групи); дълга опашка 136 (Конектори F/RF), 77 (Мощност), 83 (6 групи, Двустранно Да/Не), 246 (Вид монтаж от името), 99 (Вид от името), 122 (tv-resolution), 178 (5 групи). Нови свойства scan-duplex, camera-mount-type, network-accessory-type (~4500 tok)
 - `55_filters_curated_14_twins_and_long_tail.sql` — ============================================================================ (~3734 tok)
 - `56_move_products_out_of_hidden_categories.sql` — Продължение на стъпка 2б: 67 видими продукта от скрити категории → видими цели (по id, с очаквана текуща категория), manually_categorized = TRUE, category_id_pre_phase5; откат по изричния списък. Дребната техника/смарт дом (29) НЕ влиза (~3500 tok)
-- `57_retire_remaining_home_appliances.sql` — Довършва скрипт 50: manually_hidden за всички продукти в 549/557/561/570/572/581/585/586/591/592 + видимите Aqara (500), Ubiquiti Access (548), Realme (325) — 32 продукта, 29 видими; 76 в 500 и 17 в 548 не са пипани (~2000 tok)
 - `56_move_products_out_of_hidden_categories.sql` — ============================================================================ (~2279 tok)
+- `57_retire_remaining_home_appliances.sql` — Довършва скрипт 50: manually_hidden за всички продукти в 549/557/561/570/572/581/585/586/591/592 + видимите Aqara (500), Ubiquiti Access (548), Realme (325) — 32 продукта, 29 видими; 76 в 500 и 17 в 548 не са пипани (~2000 tok)
+- `58_smart_devices_and_access_control.sql` — 13 продукта в съществуващи видими категории (камери/видеозвънци Aqara и IMOU → 100, комплект IMOU → 962, CANYON тракер → 166, Realme → 500); 548 → видима „Видеонаблюдение › Контрол на достъп“; 500 „Смарт устройства“ → видим корен (sort 21, името остава заради ASBIS мапинга); връща в продажба 6 продукта от скрипт 57 (~2800 tok)
 - `57_retire_remaining_home_appliances.sql` — ============================================================================ (~1161 tok)
+- `58_smart_devices_and_access_control.sql` — ============================================================================ (~1801 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
