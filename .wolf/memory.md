@@ -3835,3 +3835,12 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 23:30 | Комит т.1+2 (c307b1b, 57d2077); задача за дублирани категории (chip task_fbe37126) | git | ok | ~500 |
 | 00:40 | Фаза 5: FilterConfigService/Controller/Dto + 7 теста; фронтенд care-tech-ui src/pages/admin/Filters (4 таба, rebuild бар), маршрут /admin/dashboard/filters, менюто „Филтри“ | backend + care-tech-ui | 358 теста; проверено в браузъра срещу локалния бекенд; НЕ е комитнато | ~40000 |
 | 17:56 | Session end: 24 writes across 24 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~97541 tok |
+| 08:04 | Session end: 24 writes across 24 files (CategoryFilterService.java, PageYieldParser.java, 55_filters_curated_04_cameras_batteries_consumables.sql, ReadSpeedParser.java, 55_filters_curated_05_memory_storage.sql) | 0 reads | ~97541 tok |
+
+## Session: 2026-09-25 08:08
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 08:30 | Фаза 6 (клон v2-phase6-cleanup): махнати 6 стари endpoint-а за филтри (parameters/category, categories/{id}/parameters, filter-facets, filter-activate, PATCH …/filter, reorder), поле filters в търсенето, facets, FacetValue, ParameterOrderDto, isFilter в DTO-тата | ProductSearchController, ProductSearchService, ProductSearchRepository, ProductController, ProductService, ProductParameterRepository, ParameterController, AdminController, ParameterService, ParameterRepository, SecurityConfig, DTOs | 358 теста минават | ~25k |
+| 08:40 | Скриптове 40–46: шапка НЕ ПУСКАЙ + BEGIN/RAISE защита; проверено локално (45, 46, 40a не променят нищо) | scripts/40*–46*.sql | ok | ~4k |
+| 08:50 | Фронтенд (main): махнати мъртви thunk-ове (fetchCategoryParam, fetchFilterFacets, activeParameter, toggleCategoryParameterFilter, createOption, updateOption, reorderParameters), facets, AdminParameterList.jsx; старата страница → „Параметри на доставчиците“ | care-tech-ui src/redux/paramSlice.js, productSlice.js, Params/ParamsLayout.jsx | npm run build ok | ~8k |

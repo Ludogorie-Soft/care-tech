@@ -2,10 +2,10 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 26535708,
+    "total_tokens_estimated": 26730790,
     "total_reads": 10199,
-    "total_writes": 17289,
-    "total_sessions": 92,
+    "total_writes": 17337,
+    "total_sessions": 93,
     "anatomy_hits": 4763,
     "anatomy_misses": 4092,
     "repeated_reads_blocked": 4302,
@@ -165809,6 +165809,278 @@
         "output_tokens_estimated": 63126,
         "reads_count": 0,
         "writes_count": 12,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-09-24-1446",
+      "started": "2026-09-24T11:46:24.822Z",
+      "ended": "2026-09-24T14:56:25.821Z",
+      "reads": [],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/CategoryFilterService.java",
+          "tokens_estimated": 108,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/parser/PageYieldParser.java",
+          "tokens_estimated": 932,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_04_cameras_batteries_consumables.sql",
+          "tokens_estimated": 8626,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/parser/ReadSpeedParser.java",
+          "tokens_estimated": 886,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_05_memory_storage.sql",
+          "tokens_estimated": 6415,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_06_audio.sql",
+          "tokens_estimated": 6554,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_07_networking.sql",
+          "tokens_estimated": 6066,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_08_cables_charging.sql",
+          "tokens_estimated": 6018,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_09_accessories.sql",
+          "tokens_estimated": 6910,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_10_mounts_pcs_surveillance.sql",
+          "tokens_estimated": 7233,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_11_small_categories.sql",
+          "tokens_estimated": 5840,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_12_devices.sql",
+          "tokens_estimated": 7538,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/db/migration/V41__seed_more_filter_junk_rules.sql",
+          "tokens_estimated": 448,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/filter/FilterConfigDto.java",
+          "tokens_estimated": 1369,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterConfigService.java",
+          "tokens_estimated": 12928,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/FilterConfigController.java",
+          "tokens_estimated": 2289,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/filterAdminApi.js",
+          "tokens_estimated": 1330,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/FiltersLayout.jsx",
+          "tokens_estimated": 1569,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/CategoryPicker.jsx",
+          "tokens_estimated": 661,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/CategoryFiltersTab.jsx",
+          "tokens_estimated": 2334,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/AttributesTab.jsx",
+          "tokens_estimated": 1802,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/AttributeEditor.jsx",
+          "tokens_estimated": 5392,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/UnmappedTab.jsx",
+          "tokens_estimated": 1872,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/RawParamsTab.jsx",
+          "tokens_estimated": 2421,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 97541,
+        "reads_count": 0,
+        "writes_count": 24,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-09-24-1446",
+      "started": "2026-09-24T11:46:24.822Z",
+      "ended": "2026-09-25T05:04:14.152Z",
+      "reads": [],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/CategoryFilterService.java",
+          "tokens_estimated": 108,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/parser/PageYieldParser.java",
+          "tokens_estimated": 932,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_04_cameras_batteries_consumables.sql",
+          "tokens_estimated": 8626,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/parser/ReadSpeedParser.java",
+          "tokens_estimated": 886,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_05_memory_storage.sql",
+          "tokens_estimated": 6415,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_06_audio.sql",
+          "tokens_estimated": 6554,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_07_networking.sql",
+          "tokens_estimated": 6066,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_08_cables_charging.sql",
+          "tokens_estimated": 6018,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_09_accessories.sql",
+          "tokens_estimated": 6910,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_10_mounts_pcs_surveillance.sql",
+          "tokens_estimated": 7233,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_11_small_categories.sql",
+          "tokens_estimated": 5840,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_12_devices.sql",
+          "tokens_estimated": 7538,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/resources/db/migration/V41__seed_more_filter_junk_rules.sql",
+          "tokens_estimated": 448,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/dto/filter/FilterConfigDto.java",
+          "tokens_estimated": 1369,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterConfigService.java",
+          "tokens_estimated": 12928,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/controller/FilterConfigController.java",
+          "tokens_estimated": 2289,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/filterAdminApi.js",
+          "tokens_estimated": 1330,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/FiltersLayout.jsx",
+          "tokens_estimated": 1569,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/CategoryPicker.jsx",
+          "tokens_estimated": 661,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/CategoryFiltersTab.jsx",
+          "tokens_estimated": 2334,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/AttributesTab.jsx",
+          "tokens_estimated": 1802,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/AttributeEditor.jsx",
+          "tokens_estimated": 5392,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/UnmappedTab.jsx",
+          "tokens_estimated": 1872,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/src/pages/admin/Filters/RawParamsTab.jsx",
+          "tokens_estimated": 2421,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 97541,
+        "reads_count": 0,
+        "writes_count": 24,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 0
       }

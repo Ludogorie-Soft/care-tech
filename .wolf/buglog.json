@@ -9271,6 +9271,24 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-24T23:25:00Z"
+    },
+    {
+      "id": "bug-562",
+      "timestamp": "2026-09-25T08:40:00Z",
+      "error_message": "GET /api/products/categories/{id}/parameters — @Cacheable(\"categoryParametersWithCounts\") без регистриран кеш в статичния CaffeineCacheManager (CacheConfig.setCacheNames), вероятно грешка при всяко извикване",
+      "file": "src/main/java/com/techstore/service/ProductSearchService.java",
+      "root_cause": "Името на кеша липсва в CacheConfig, CacheInitializer и application.yml; статичен cache manager не създава кешове при поискване, а lookup-ът е извън try/catch на метода",
+      "fix": "Фаза 6: endpoint-ът, service и repository методите са махнати (никой не ги вика — фронтендът ползва POST /categories/{id}/filters)",
+      "tags": [
+        "cache",
+        "caffeine",
+        "legacy-filters",
+        "phase6",
+        "dead-endpoint"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-25T08:40:00Z"
     }
   ]
 }

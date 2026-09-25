@@ -746,3 +746,12 @@ spring-retry — не посягай към `@Retryable`. VALI ползва WebC
 - **Локален вход като админ в браузъра без парола:** redux-persist `persist:root` → `auth` = {user{role:'ADMIN'}, token} от `/tmp/techstore-local/admin.token` (локален тестов акаунт admin@local.test).
 - **`max-width` на `<td>` се игнорира при auto table layout** — ограничавай с вътрешен `<div className="max-w-xs break-all">`; дясната колона на grid трябва `min-w-0`.
 
+
+## Key Learnings (Фаза 6 — почистване на стария слой за филтри, 2026-09-25)
+- **Филтрите в магазина идват САМО от каноничния слой:** `POST /api/products/categories/{id}/filters`, търсене с `attributeFilters`, стари `param_` линкове през `…/filters/translate-legacy`. Старите `/products/parameters/category`, `/categories/{id}/parameters`, `/filter-facets`, `filter-activate`, `PATCH …/filter`, `…/reorder` и полето `filters` в търсенето са махнати (клон `v2-phase6-cleanup`).
+- **`is_filter` / `filter_order` / `sort_order` остават в базата** (sync-овете ги пишат, `sort_order` подрежда спецификациите), но нищо в магазина не чете `is_filter`.
+- **Суровите `/api/parameters/**` (GET по категория, CRUD, DELETE опция) остават** — ползват ги ProductForm, ParameterSelector и страницата „Параметри на доставчиците“ (`src/pages/admin/Params/`; `CreateFilterForm` и `ParamsModal` се внасят от ProductForm).
+- **Защита на остарял SQL скрипт: `BEGIN;` + `DO $$ BEGIN RAISE EXCEPTION … END $$;` най-отгоре** — проваля транзакцията, така че и psql без ON_ERROR_STOP, и собствен `COMMIT;` по-надолу (той става ROLLBACK) не записват нищо. Само коментар не е защита.
+
+## Decision Log (2026-09-25)
+- **Фаза 6 е в отделен клон `v2-phase6-cleanup`** — v2 (фази 0–5) може да се деплойне без нея; старите endpoint-и падат чак след като новият фронтенд е на живо (иначе старият фронтенд губи филтрите). Фронтенд промените на Фаза 6 са само мъртъв код → безопасни в main в произволен ред.
