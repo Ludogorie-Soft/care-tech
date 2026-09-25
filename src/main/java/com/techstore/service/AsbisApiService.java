@@ -262,14 +262,13 @@ public class AsbisApiService {
                 Object attrListObj = product.get("attrlist");
                 if (attrListObj instanceof Map) {
                     @SuppressWarnings("unchecked")
-                    Map<String, String> attrList = (Map<String, String>) attrListObj;
+                    Map<String, List<String>> attrList = (Map<String, List<String>>) attrListObj;
 
-                    for (Map.Entry<String, String> entry : attrList.entrySet()) {
-                        String paramName = entry.getKey();
-                        String paramValue = entry.getValue();
-
-                        if (paramValue != null && !paramValue.trim().isEmpty()) {
-                            parametersMap.computeIfAbsent(paramName, k -> new HashSet<>()).add(paramValue);
+                    for (Map.Entry<String, List<String>> entry : attrList.entrySet()) {
+                        for (String paramValue : entry.getValue()) {
+                            if (paramValue != null && !paramValue.trim().isEmpty()) {
+                                parametersMap.computeIfAbsent(entry.getKey(), k -> new HashSet<>()).add(paramValue);
+                            }
                         }
                     }
                 }
@@ -612,7 +611,7 @@ public class AsbisApiService {
                         NodeList attrListNodes = productElement.getElementsByTagName("AttrList");
                         if (attrListNodes.getLength() > 0) {
                             Element attrListElement = (Element) attrListNodes.item(0);
-                            Map<String, String> attributes = extractAttrList(attrListElement);
+                            Map<String, List<String>> attributes = extractAttrList(attrListElement);
                             product.put("attrlist", attributes);
                         }
 
@@ -667,8 +666,13 @@ public class AsbisApiService {
         return getAllProducts();
     }
 
-    private Map<String, String> extractAttrList(Element attrListElement) {
-        Map<String, String> attributes = new HashMap<>();
+    /**
+     * Attribute name → its values, in feed order. A name can repeat inside one product with a different
+     * value each time — "LAN" as "4 x 10Base-T/100Base-TX/1000Base-T" and "4 (RJ-45)", "Височина" of the
+     * earbud and of its case — 1,170 times in 669 products. A plain map kept only the last one.
+     */
+    static Map<String, List<String>> extractAttrList(Element attrListElement) {
+        Map<String, List<String>> attributes = new LinkedHashMap<>();
 
         NodeList elementNodes = attrListElement.getElementsByTagName("element");
         for (int i = 0; i < elementNodes.getLength(); i++) {
@@ -678,7 +682,10 @@ public class AsbisApiService {
                 String value = element.getAttribute("Value");
 
                 if (name != null && !name.isEmpty() && value != null && !value.isEmpty()) {
-                    attributes.put(name, value);
+                    List<String> values = attributes.computeIfAbsent(name, k -> new ArrayList<>());
+                    if (!values.contains(value)) {
+                        values.add(value);
+                    }
                 }
             }
         }

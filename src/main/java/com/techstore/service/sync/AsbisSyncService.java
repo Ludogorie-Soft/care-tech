@@ -361,15 +361,20 @@ public class AsbisSyncService {
                 }
 
                 @SuppressWarnings("unchecked")
-                Map<String, String> attrList = (Map<String, String>) product.getOrDefault("attrlist", Collections.emptyMap());
+                Map<String, List<String>> attrList =
+                        (Map<String, List<String>>) product.getOrDefault("attrlist", Collections.emptyMap());
 
-                for (Map.Entry<String, String> attr : attrList.entrySet()) {
+                for (Map.Entry<String, List<String>> attr : attrList.entrySet()) {
                     String attrName = attr.getKey();
-                    String attrValue = attr.getValue();
-                    if (attrName == null || attrName.isBlank() || attrValue == null || attrValue.isBlank()) continue;
+                    if (attrName == null || attrName.isBlank()) continue;
+
                     // 200 used to be the cap: 972 of the feed's 275,250 values (907 products), nearly all
                     // lists joined with <br/> such as "Поддържани процесорни цокли" of coolers. None is over 2000.
-                    if (attrValue.length() > MAX_ATTRIBUTE_VALUE_LENGTH) continue;
+                    List<String> attrValues = attr.getValue().stream()
+                            .filter(v -> v != null && !v.isBlank() && v.length() <= MAX_ATTRIBUTE_VALUE_LENGTH)
+                            .map(String::trim)
+                            .toList();
+                    if (attrValues.isEmpty()) continue;
 
                     String asbisKey = generateAsbisKey(attrName);
                     final Category finalCategory = category;
@@ -384,7 +389,7 @@ public class AsbisSyncService {
                     });
 
                     if (finalCategory != null) paramData.categories.add(finalCategory);
-                    paramData.values.add(attrValue.trim());
+                    paramData.values.addAll(attrValues);
                 }
             }
 
@@ -797,12 +802,11 @@ public class AsbisSyncService {
         Map<String, Parameter> targetParams = new LinkedHashMap<>();
         Map<String, ParameterOption> targetOptions = new LinkedHashMap<>();
 
-        Map<String, String> attrList = (Map<String, String>) asbisProduct.getOrDefault("attrlist", Collections.emptyMap());
+        Map<String, List<String>> attrList =
+                (Map<String, List<String>>) asbisProduct.getOrDefault("attrlist", Collections.emptyMap());
 
-        for (Map.Entry<String, String> attr : attrList.entrySet()) {
+        for (Map.Entry<String, List<String>> attr : attrList.entrySet()) {
             String attrName = attr.getKey();
-            String attrValue = attr.getValue();
-            if (attrValue == null || attrValue.isBlank()) continue;
 
             String asbisKey = generateAsbisKey(attrName);
             Parameter parameter = paramsByAsbisKey.get(asbisKey);
@@ -811,25 +815,29 @@ public class AsbisSyncService {
             Map<String, ParameterOption> paramOptions = optionsByParameterId.get(parameter.getId());
             if (paramOptions == null) continue;
 
-            String normalizedValue = normalizeName(attrValue);
-            ParameterOption option = paramOptions.get(normalizedValue);
-            if (option == null) {
-                // Fuzzy fallback: strip all whitespace and compare (handles "16 GB" vs "16GB")
-                String stripped = attrValue.toLowerCase().replaceAll("\\s+", "");
-                option = paramOptions.entrySet().stream()
-                        .filter(e -> e.getKey().replaceAll("\\s+", "").equals(stripped))
-                        .map(Map.Entry::getValue)
-                        .findFirst().orElse(null);
-            }
-            if (option == null) {
-                log.debug("No option match for attr '{}' value '{}' on product {}",
-                        attrName, attrValue, product.getAsbisCode());
-                continue;
-            }
+            for (String attrValue : attr.getValue()) {
+                if (attrValue == null || attrValue.isBlank()) continue;
 
-            String key = parameter.getId() + "-" + option.getId();
-            targetParams.put(key, parameter);
-            targetOptions.put(key, option);
+                String normalizedValue = normalizeName(attrValue);
+                ParameterOption option = paramOptions.get(normalizedValue);
+                if (option == null) {
+                    // Fuzzy fallback: strip all whitespace and compare (handles "16 GB" vs "16GB")
+                    String stripped = attrValue.toLowerCase().replaceAll("\\s+", "");
+                    option = paramOptions.entrySet().stream()
+                            .filter(e -> e.getKey().replaceAll("\\s+", "").equals(stripped))
+                            .map(Map.Entry::getValue)
+                            .findFirst().orElse(null);
+                }
+                if (option == null) {
+                    log.debug("No option match for attr '{}' value '{}' on product {}",
+                            attrName, attrValue, product.getAsbisCode());
+                    continue;
+                }
+
+                String key = parameter.getId() + "-" + option.getId();
+                targetParams.put(key, parameter);
+                targetOptions.put(key, option);
+            }
         }
 
         // Remove only entries no longer in target (preserve admin-set parameters).
