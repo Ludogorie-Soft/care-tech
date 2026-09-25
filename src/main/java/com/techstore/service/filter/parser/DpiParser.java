@@ -29,6 +29,9 @@ public class DpiParser implements FilterValueParser {
             return Optional.empty();
         }
         text = text.replaceAll("(\\d)[.,](\\d{3})(?!\\d)", "$1$2");
+        // "44 000 dpi": a space as thousands separator, only right before the unit — a plain space
+        // also separates the steps in "400 800 1600 dpi".
+        text = text.replaceAll("(?<!\\d)(\\d{1,2})[\\s\\u00a0\\u202f](\\d{3})(?=\\s*(?:dpi|cpi))", "$1$2");
         int max = 0;
         Matcher k = KILO.matcher(text);
         while (k.find()) {

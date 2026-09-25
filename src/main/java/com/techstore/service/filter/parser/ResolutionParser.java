@@ -17,9 +17,10 @@ import java.util.regex.Pattern;
 public class ResolutionParser implements FilterValueParser {
 
     private static final Pattern PAIR = Pattern.compile("(\\d{3,4})\\s*[x×х*]\\s*(\\d{3,4})");
-    // Longest names first: "uwqhd" contains "wqhd", which contains "qhd".
+    // Longest names first: "uwqhd" contains "wqhd", which contains "qhd". "2.8k" and "2.5k" are the
+    // laptop names for 2880x1800 and 2560x1600.
     private static final String[][] NAMES = {
-            {"uwqhd", "3440x1440"}, {"wqhd", "2560x1440"}, {"qhd", "2560x1440"}, {"2k", "2560x1440"},
+            {"2.8k", "2880x1800"}, {"2.5k", "2560x1600"}, {"uwqhd", "3440x1440"}, {"wqhd", "2560x1440"}, {"qhd", "2560x1440"}, {"2k", "2560x1440"},
             {"4k", "3840x2160"}, {"uhd", "3840x2160"}, {"full hd", "1920x1080"}, {"fullhd", "1920x1080"},
             {"fhd", "1920x1080"}, {"1080p", "1920x1080"},
     };

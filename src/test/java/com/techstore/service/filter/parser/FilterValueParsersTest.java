@@ -81,6 +81,8 @@ class FilterValueParsersTest {
                 "240 херца             | 240",
                 "75                    | 75",
                 "200 (Hz)              | 200",
+                "610 Hz                | 610",
+                "1000 Hz               | 1000",
         })
         void readsTheHighestRate(String text, String expected) {
             assertEquals(expected, key(parser, text));
@@ -154,6 +156,9 @@ class FilterValueParsersTest {
                 "WQHD                   | 2560x1440",
                 "UWQHD                  | 3440x1440",
                 "2.560 x 1.600          | 2560x1600",
+                "2.8K                   | 2880x1800",
+                "2.8K OLED              | 2880x1800",
+                "2.5K                   | 2560x1600",
         })
         void readsWidthByHeight(String text, String expected) {
             assertEquals(expected, key(parser, text));
@@ -257,6 +262,8 @@ class FilterValueParsersTest {
                 "KINGSTON FURY 32GB (2x16GB) DDR5 6000 CL30 | 6000",
                 "3200MHz(PC4-25600)/5600MHz(PC5-44800)      | 5600",
                 "LPDDR5X-7500                               | 7500",
+                "3200Mbps                                   | 3200",
+                "5600 Mbps                                  | 5600",
         })
         void readsTheSpeed(String text, String expected) {
             assertEquals(expected, key(parser, text));
@@ -318,6 +325,15 @@ class FilterValueParsersTest {
                 "Intel Arc B580                    | arc b580",
                 "GIGABYTE RTX 5060 GAMING OC 8G    | rtx 5060",
                 "NVIDIA® GeForce RTX™ 5060         | rtx 5060",
+                "NVIDIA GeForce RTXTM 4050 with 6 GB | rtx 4050",
+                "NVIDIA GeForce 3060 Ti            | rtx 3060 ti",
+                "GeForce 210                       | geforce 210",
+                "NVIDIA RTX A1000                  | rtx a1000",
+                "NVIDIA GeForce RTX PRO 6000       | rtx pro 6000",
+                "Nvidia RTX PRO 1000 Blackwell Laptop GPU 8GB GDDR7 | rtx pro 1000",
+                "Intel Arc Pro B60 GPU             | arc pro b60",
+                "AMD Radeon AI PRO R9700           | radeon ai pro r9700",
+                "AMD Radeon PRO W7900              | radeon pro w7900",
         })
         void readsTheChipModel(String text, String expected) {
             assertEquals(expected, key(parser, text));
@@ -327,6 +343,10 @@ class FilterValueParsersTest {
         void labelsInShopNotation() {
             assertEquals("RTX 4070 Ti Super", parser.parse("rtx 4070 ti super", null).orElseThrow().labelBg());
             assertEquals("RX 7900 XTX", parser.parse("RX 7900 XTX", null).orElseThrow().labelBg());
+            assertEquals("RTX PRO 6000", parser.parse("NVIDIA RTX PRO 6000", null).orElseThrow().labelBg());
+            assertEquals("Arc Pro B60", parser.parse("intel arc pro b60", null).orElseThrow().labelBg());
+            assertEquals("Radeon AI PRO R9700", parser.parse("AMD Radeon AI PRO R9700", null).orElseThrow().labelBg());
+            assertEquals("GTX 1660", parser.parse("GeForce 1660", null).orElseThrow().labelBg());
         }
 
         @Test
@@ -405,6 +425,9 @@ class FilterValueParsersTest {
                 "26000 dpi              | 26000",
                 "1000;1600;2400         | 2400",
                 "26K DPI                | 26000",
+                "44 000 dpi             | 44000",
+                "16 000 DPI             | 16000",
+                "400 800 1600 dpi       | 1600",
         })
         void readsTheHighestSensitivity(String text, String expected) {
             assertEquals(expected, key(parser, text));

@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public class MemoryMhzParser implements FilterValueParser {
 
     private static final Pattern SPEED = Pattern.compile(
-            "(?:ddr\\d[a-z]?[- ]?(\\d{4}))|(?:(\\d{3,5})\\s*(?:mhz|mt/s|мхц))");
+            "(?:ddr\\d[a-z]?[- ]?(\\d{4}))|(?:(\\d{3,5})\\s*(?:mhz|mt/s|mts|mbps|мхц))");
     private static final Pattern BARE = Pattern.compile("^\\s*(\\d{4})\\s*$");
 
     @Override

@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 @Component
 public class RefreshHzParser implements FilterValueParser {
 
-    private static final Pattern HZ = Pattern.compile("(\\d{2,3})\\s*\\(?\\s*(?:hz|хц|херц)");
+    private static final Pattern HZ = Pattern.compile("(\\d{2,4})\\s*\\(?\\s*(?:hz|хц|херц)");
     private static final Pattern BARE = Pattern.compile("^\\s*(\\d{2,3})\\s*$");
 
     @Override
@@ -32,7 +32,8 @@ public class RefreshHzParser implements FilterValueParser {
         if (max == null) {
             max = highest(BARE, text);
         }
-        if (max == null || max < 24 || max > 600) {
+        // Esports monitors reach 610 Hz and 1000 Hz; the old cap of 600 left them unmapped.
+        if (max == null || max < 24 || max > 1000) {
             return Optional.empty();
         }
         String key = String.valueOf(max);
