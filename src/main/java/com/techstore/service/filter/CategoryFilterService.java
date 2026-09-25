@@ -60,6 +60,11 @@ public class CategoryFilterService {
         cache.invalidateAll();
     }
 
+    /** After an admin change to the groups of one category. */
+    public void evict(Long categoryId) {
+        cache.invalidate(resolveAlias(categoryId));
+    }
+
     /**
      * @param includeHidden also return groups switched off for the category (admins toggle them back)
      */
