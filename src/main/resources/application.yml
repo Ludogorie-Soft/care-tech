@@ -40,7 +40,6 @@ spring:
             - parameterOptions
             - categoriesByExternalId
             - manufacturersByExternalId
-            - parametersByCategory
             - productsByCategory
         caffeine:
             spec: maximumSize=10000,expireAfterWrite=1h,expireAfterAccess=30m

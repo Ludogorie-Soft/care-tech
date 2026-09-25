@@ -704,13 +704,11 @@ public class AsbisSyncService {
             // Catch-all: ensure category_parameters rows exist for every parameter
             // that actually landed on an ASBIS product. Some products may have parameters
             // linked to categories not covered by syncAsbisParameters (e.g. remapped categories).
-            // Links are inserted with is_filter = false: a supplier parameter never becomes a filter on its own.
-            // The column defaults to TRUE, which used to turn every new link into a visible, often duplicate, group.
             try {
                 entityManager.flush();
                 int cpInserted = entityManager.createNativeQuery(
-                        "INSERT INTO category_parameters (category_id, parameter_id, is_filter) " +
-                        "SELECT DISTINCT pr.category_id, pp.parameter_id, false " +
+                        "INSERT INTO category_parameters (category_id, parameter_id) " +
+                        "SELECT DISTINCT pr.category_id, pp.parameter_id " +
                         "FROM product_parameters pp " +
                         "JOIN products pr ON pr.id = pp.product_id " +
                         "WHERE pr.platform = 'ASBIS' " +

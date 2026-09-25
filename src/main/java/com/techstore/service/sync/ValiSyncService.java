@@ -662,9 +662,6 @@ public class ValiSyncService {
                 .orElse(null);
     }
 
-    private static final int FILTER_MIN_OPTIONS = 2;
-    private static final int FILTER_MAX_OPTIONS = 50;
-
     private Parameter createParameterFromExternal(ParameterRequestDto extParameter) {
         Parameter parameter = new Parameter();
         parameter.setExternalId(extParameter.getExternalId());
@@ -682,9 +679,6 @@ public class ValiSyncService {
                 }
             });
         }
-
-        int optionCount = extParameter.getOptions() != null ? extParameter.getOptions().size() : 0;
-        parameter.setIsFilter(optionCount >= FILTER_MIN_OPTIONS && optionCount <= FILTER_MAX_OPTIONS);
 
         return parameter;
     }

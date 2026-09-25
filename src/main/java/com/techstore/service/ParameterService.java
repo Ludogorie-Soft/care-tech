@@ -17,8 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -37,7 +35,7 @@ public class ParameterService {
     private final ParameterOptionRepository parameterOptionRepository;
     private final CategoryRepository categoryRepository;
 
-    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
+    @CacheEvict(value = "parameters", allEntries = true)
     public ParameterResponseDto createParameter(ParameterRequestDto requestDto, String language) {
         log.info("Creating parameter for category ID: {}", requestDto.getCategoryId());
 
@@ -65,7 +63,7 @@ public class ParameterService {
         }, context);
     }
 
-    @CacheEvict(value = {"parameters", "parametersByCategory"}, allEntries = true)
+    @CacheEvict(value = "parameters", allEntries = true)
     public ParameterResponseDto updateParameter(Long id, ParameterRequestDto requestDto, String language) {
         log.info("Updating parameter with ID: {}", id);
 
@@ -139,11 +137,6 @@ public class ParameterService {
                                 .toList(),
                 "fetch all parameters"
         );
-    }
-
-    public Page<ParameterResponseDto> findAllAdminParameters(Pageable pageable, String lang) {
-        return parameterRepository.findByCreatedByOrderByCreatedAtDesc("ADMIN", pageable)
-                .map(p -> toResponseDto(p, lang));
     }
 
     // ✅ Helper method

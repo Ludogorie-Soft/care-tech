@@ -68,20 +68,6 @@ public class AdminController {
         return ResponseEntity.ok(productsPage);
     }
 
-    @GetMapping("parameters/pageable")
-    public ResponseEntity<Page<ParameterResponseDto>> getAllAdminParameters(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDirection,
-            @RequestParam(defaultValue = "bg") String lang) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
-        Page<ParameterResponseDto> parametersPage = parameterService.findAllAdminParameters(pageable, lang);
-
-        return ResponseEntity.ok(parametersPage);
-    }
-
     @PostMapping("/categories")
     public ResponseEntity<CategoryResponseDTO> createCategory(
             @Valid @RequestBody CategoryRequestDto requestDTO) {

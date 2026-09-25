@@ -3,8 +3,6 @@ package com.techstore.repository;
 import com.techstore.entity.Category;
 import com.techstore.entity.Parameter;
 import com.techstore.enums.Platform;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,7 +17,6 @@ public interface ParameterRepository extends JpaRepository<Parameter, Long> {
 
     List<Parameter> findByCategories_IdAndPlatform(Long categoryId, Platform platform);
 
-    Page<Parameter> findByCreatedByOrderByCreatedAtDesc(String createdBy, Pageable pageable);
 
     @Query("SELECT DISTINCT p FROM Parameter p " +
             "JOIN FETCH p.categories c " +
