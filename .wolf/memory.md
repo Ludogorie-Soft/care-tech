@@ -3889,3 +3889,9 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 11:58 | Session end: 2 writes across 2 files (55_filters_curated_13_unmapped_cleanup.sql, 55_filters_curated_14_twins_and_long_tail.sql) | 1 reads | ~16802 tok |
 | 12:20 | Прод след повторно пускане: V42 приложена (09:07 UTC), колоните ги няма; rebuild #4 SUCCESS 32.8 s; партида 14 — всички 10 категории; 93 MANUAL категории; 0 дублирани; 15 професионални GPU разпознати; „Несъпоставени“ 7 (инвертори >3000 W, обектив 1.65 mm, A6). POWER_W парсер: до 20 000 W / 5 цифри + 3 теста (405 теста) — не е комитнато | прод (само четене), PowerWattParser | ok | ~6k |
 | 12:12 | Session end: 2 writes across 2 files (55_filters_curated_13_unmapped_cleanup.sql, 55_filters_curated_14_twins_and_long_tail.sql) | 1 reads | ~16802 tok |
+| 12:13 | Session end: 2 writes across 2 files (55_filters_curated_13_unmapped_cleanup.sql, 55_filters_curated_14_twins_and_long_tail.sql) | 1 reads | ~16802 tok |
+| 12:26 | Created scripts/56_move_products_out_of_hidden_categories.sql | — | ~2279 |
+| 13:00 | Прод: POWER_W деплой + rebuild #6 OK (30 s), инвертори 3600–15000 W мапнати, „Несъпоставени“ 2 (1.65 mm, A6). Вариант Б: скрипт 56 мести 67 видими продукта от 20 скрити категории във видими (тестван локално 67/67); 29 домакински/смарт дом продукта — въпрос (решение от скрипт 50) | scripts/56_move_products_out_of_hidden_categories.sql | чака пускане в прод | ~25k |
+| 12:28 | Session end: 3 writes across 3 files (55_filters_curated_13_unmapped_cleanup.sql, 55_filters_curated_14_twins_and_long_tail.sql, 56_move_products_out_of_hidden_categories.sql) | 1 reads | ~19244 tok |
+| 12:30 | Created scripts/57_retire_remaining_home_appliances.sql | — | ~1161 |
+| 13:20 | Скрипт 57: спиране от продажба на 32 продукта (29 видими) дребна техника/смарт дом, manually_hidden като скрипт 50; прод избор проверен (32/29), локален тест 32/32 | scripts/57_retire_remaining_home_appliances.sql | чака пускане в прод | ~8k |
