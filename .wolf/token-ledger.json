@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 27242034,
-    "total_reads": 10235,
-    "total_writes": 17407,
+    "total_tokens_estimated": 27286868,
+    "total_reads": 10237,
+    "total_writes": 17417,
     "total_sessions": 94,
-    "anatomy_hits": 4799,
+    "anatomy_hits": 4801,
     "anatomy_misses": 4092,
-    "repeated_reads_blocked": 4333,
-    "estimated_savings_vs_bare_cli": 22570297
+    "repeated_reads_blocked": 4335,
+    "estimated_savings_vs_bare_cli": 22588047
   },
   "sessions": [
     {
@@ -167038,6 +167038,102 @@
         "output_tokens_estimated": 11813,
         "reads_count": 1,
         "writes_count": 4,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-25-1021",
+      "started": "2026-09-25T07:21:56.286Z",
+      "ended": "2026-09-25T09:43:49.456Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterIndexService.java",
+          "tokens_estimated": 8675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_13_unmapped_cleanup.sql",
+          "tokens_estimated": 4127,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_14_twins_and_long_tail.sql",
+          "tokens_estimated": 4000,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/56_move_products_out_of_hidden_categories.sql",
+          "tokens_estimated": 2442,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/57_retire_remaining_home_appliances.sql",
+          "tokens_estimated": 1244,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/58_smart_devices_and_access_control.sql",
+          "tokens_estimated": 1929,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 8675,
+        "output_tokens_estimated": 13742,
+        "reads_count": 1,
+        "writes_count": 5,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-25-1021",
+      "started": "2026-09-25T07:21:56.286Z",
+      "ended": "2026-09-25T09:47:59.457Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterIndexService.java",
+          "tokens_estimated": 8675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_13_unmapped_cleanup.sql",
+          "tokens_estimated": 4127,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_14_twins_and_long_tail.sql",
+          "tokens_estimated": 4000,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/56_move_products_out_of_hidden_categories.sql",
+          "tokens_estimated": 2442,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/57_retire_remaining_home_appliances.sql",
+          "tokens_estimated": 1244,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/58_smart_devices_and_access_control.sql",
+          "tokens_estimated": 1929,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 8675,
+        "output_tokens_estimated": 13742,
+        "reads_count": 1,
+        "writes_count": 5,
         "repeated_reads_blocked": 1,
         "anatomy_lookups": 1
       }

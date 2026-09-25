@@ -9422,6 +9422,24 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-25T12:20:00Z"
+    },
+    {
+      "id": "bug-570",
+      "timestamp": "2026-09-25T14:30:00Z",
+      "error_message": "SQL Error [25P03]: FATAL: terminating connection due to idle-in-transaction timeout — при пускане на скрипт 58 в DBeaver; нищо не е записано",
+      "file": "scripts/58_smart_devices_and_access_control.sql",
+      "root_cause": "Многокомандна транзакция (BEGIN … COMMIT) + SET idle_in_transaction_session_timeout = '60s': в GUI клиент пауза между командите (диалог за грешка/потвърждение) задържа транзакцията отворена > 60 s и сървърът прекъсва връзката; истинската грешка не се вижда",
+      "fix": "Целият скрипт в един DO блок (една команда, атомарна, без BEGIN/COMMIT); GET DIAGNOSTICS за броячите; при грешка DBeaver показва истинското съобщение. Проверено локално: минава, откатът работи, повторното пускане спира на проверката.",
+      "tags": [
+        "sql",
+        "dbeaver",
+        "transaction",
+        "idle-in-transaction",
+        "scripts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-25T14:30:00Z"
     }
   ]
 }
