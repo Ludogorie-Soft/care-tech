@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 26861606,
-    "total_reads": 10208,
-    "total_writes": 17353,
+    "total_tokens_estimated": 26930770,
+    "total_reads": 10214,
+    "total_writes": 17364,
     "total_sessions": 93,
-    "anatomy_hits": 4772,
+    "anatomy_hits": 4778,
     "anatomy_misses": 4092,
-    "repeated_reads_blocked": 4310,
-    "estimated_savings_vs_bare_cli": 22243132
+    "repeated_reads_blocked": 4314,
+    "estimated_savings_vs_bare_cli": 22340152
   },
   "sessions": [
     {
@@ -166283,6 +166283,131 @@
         "output_tokens_estimated": 4535,
         "reads_count": 3,
         "writes_count": 5,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-09-25-0808",
+      "started": "2026-09-25T05:08:49.455Z",
+      "ended": "2026-09-25T06:26:33.984Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/TekraApiService.java",
+          "tokens_estimated": 4707,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/TekraSyncService.java",
+          "tokens_estimated": 23955,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/DisplaySpecificationService.java",
+          "tokens_estimated": 1100,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/TekraFeedValues.java",
+          "tokens_estimated": 982,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/sync/TekraFeedValuesTest.java",
+          "tokens_estimated": 900,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/TekraApiServiceXmlTest.java",
+          "tokens_estimated": 577,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/TekraApiServicePagingTest.java",
+          "tokens_estimated": 1578,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/filter/DisplaySpecificationLinesTest.java",
+          "tokens_estimated": 498,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 29762,
+        "output_tokens_estimated": 4535,
+        "reads_count": 3,
+        "writes_count": 5,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-09-25-0808",
+      "started": "2026-09-25T05:08:49.455Z",
+      "ended": "2026-09-25T06:32:23.987Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/TekraApiService.java",
+          "tokens_estimated": 4707,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/TekraSyncService.java",
+          "tokens_estimated": 23955,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/DisplaySpecificationService.java",
+          "tokens_estimated": 1100,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/TekraFeedValues.java",
+          "tokens_estimated": 982,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/sync/TekraFeedValuesTest.java",
+          "tokens_estimated": 900,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/TekraApiServiceXmlTest.java",
+          "tokens_estimated": 577,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/TekraApiServicePagingTest.java",
+          "tokens_estimated": 1578,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/filter/DisplaySpecificationLinesTest.java",
+          "tokens_estimated": 498,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/AsbisApiServiceAttrListTest.java",
+          "tokens_estimated": 570,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 29762,
+        "output_tokens_estimated": 5105,
+        "reads_count": 3,
+        "writes_count": 6,
         "repeated_reads_blocked": 2,
         "anatomy_lookups": 3
       }

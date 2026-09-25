@@ -9347,6 +9347,26 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-25T12:30:00Z"
+    },
+    {
+      "id": "bug-566",
+      "timestamp": "2026-09-25T13:15:00Z",
+      "error_message": "ASBIS: повторено име на атрибут в един продукт пази само последната стойност (1170 случая в 669 продукта — Височина/Дълбочина/Ширина/Номинално тегло на слушалка и кутия, LAN/WAN тип и брой портове, USB тип C, Включени аксесоари)",
+      "file": "src/main/java/com/techstore/service/AsbisApiService.java, src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "extractAttrList пълнеше HashMap<String,String> → put() презаписва; в XML елементите имат само Name и Value, без група",
+      "fix": "extractAttrList → LinkedHashMap<String, List<String>> с различните стойности в реда от фийда; syncAsbisParameters и setAsbisParametersToProduct създават/свързват по една опция на стойност; extractParameters (debug) също чете списъка",
+      "tags": [
+        "asbis",
+        "sync",
+        "parameters",
+        "multi-value"
+      ],
+      "related_bugs": [
+        "bug-563",
+        "bug-565"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-25T13:15:00Z"
     }
   ]
 }

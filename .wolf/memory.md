@@ -3860,3 +3860,7 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 09:22 | Created src/test/java/com/techstore/service/filter/DisplaySpecificationLinesTest.java | — | ~465 |
 | 12:30 | ASBIS лимит 200→2000 (измерено: 972 стойности/907 продукта, 0 над 2000) + спецификациите делят <br/>/</br> на редове и махат b/strong/a/img тагове (606 видими продукта с буквални тагове) | AsbisSyncService, DisplaySpecificationService, DisplaySpecificationLinesTest (нов) | 382 теста минават | ~20k |
 | 09:25 | Session end: 5 writes across 5 files (TekraFeedValues.java, TekraFeedValuesTest.java, TekraApiServiceXmlTest.java, TekraApiServicePagingTest.java, DisplaySpecificationLinesTest.java) | 3 reads | ~34297 tok |
+| 09:26 | Session end: 5 writes across 5 files (TekraFeedValues.java, TekraFeedValuesTest.java, TekraApiServiceXmlTest.java, TekraApiServicePagingTest.java, DisplaySpecificationLinesTest.java) | 3 reads | ~34297 tok |
+| 09:29 | Created src/test/java/com/techstore/service/AsbisApiServiceAttrListTest.java | — | ~532 |
+| 13:15 | ASBIS повторени имена на атрибути: extractAttrList → Map<име, List<стойност>>, по една опция на стойност в параметрите и продуктите (1170 случая / 669 продукта) | AsbisApiService, AsbisSyncService, AsbisApiServiceAttrListTest (нов) | 383 теста минават | ~12k |
+| 09:32 | Session end: 6 writes across 6 files (TekraFeedValues.java, TekraFeedValuesTest.java, TekraApiServiceXmlTest.java, TekraApiServicePagingTest.java, DisplaySpecificationLinesTest.java) | 3 reads | ~34867 tok |

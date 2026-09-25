@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-25T06:22:20.706Z
-> Files: 760 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-25T06:29:40.339Z
+> Files: 762 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -797,7 +797,7 @@
 ## src/main/java/com/techstore/service/
 
 - `AbandonedCartService.java` — Service: AbandonedCartService (~624 tok)
-- `AsbisApiService.java` — Extract categories from Asbis products (~8797 tok)
+- `AsbisApiService.java` — Extract categories from Asbis products; extractAttrList → Map<име, List<стойност>> (повторени имена пазят всички стойности) (~8797 tok)
 - `AuthService.java` — Service: AuthService (~6388 tok)
 - `BlogCategoryService.java` — Service: BlogCategoryService (~1917 tok)
 - `BlogPostService.java` — Service: BlogPostService (~3776 tok)
@@ -871,7 +871,7 @@
 
 ## src/main/java/com/techstore/service/sync/
 
-- `AsbisSyncService.java` — AsbisSyncService; MAX_ATTRIBUTE_VALUE_LENGTH 2000 (беше 200) при създаване на опции (~14850 tok)
+- `AsbisSyncService.java` — AsbisSyncService; MAX_ATTRIBUTE_VALUE_LENGTH 2000; attrlist е Map<име, List<стойност>> → по една опция на стойност (~14900 tok)
 - `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~17394 tok)
 - `TekraFeedValues.java` — Turns the text of one TEKRA feed property into the values it holds. (~917 tok)
 - `TekraFeedValues.java` — Стойностите на едно TEKRA свойство: повторен таг (List), разделяне по <br/>, „A,A“→„A“, лимит 2000 знака, Stats за sync лога (~900 tok)
@@ -968,6 +968,8 @@
 
 ## src/test/java/com/techstore/service/
 
+- `AsbisApiServiceAttrListTest.java` — ASBIS repeats an attribute name inside one product with a different value each time (1,170 times (~532 tok)
+- `AsbisApiServiceAttrListTest.java` — extractAttrList: повторено име пази всички различни стойности в реда от фийда (~450 tok)
 - `MostApiServiceTest.java` — 11 теста с Mockito за провалите на MOST feed-а: празно/null тяло, connection error, изчерпани опити, възстановяване след преходен отказ, HTTP статус, счупен XML, изключен feed, кеширане на успех и НЕкеширане на провал (~1999 tok)
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
 - `TekraApiServicePagingTest.java` — Paging of the TEKRA product feed. Only page 1 used to be read, so no category went past 100 (~1473 tok)
@@ -997,6 +999,6 @@
 
 - `application-test.properties` — ── Datasource — H2 in-memory (replaces PostgreSQL for context-load tests) ── (~907 tok)
 - `application.properties` — Overrides for ALL tests — resolves placeholders that have no default in application.yml (~40 tok)
-- `FilterConfigControllerTest.java` — @WebMvcTest: анонимен 401, USER 403, ADMIN 200, невалиден израз 400 (~500 tok)
 - `DisplaySpecificationLinesTest.java` — displayLines: <br/>-списъци на редове, тагове за форматиране, </br>, <a>/<img>, „<5 ms“ остава (5 теста) (~500 tok)
+- `FilterConfigControllerTest.java` — @WebMvcTest: анонимен 401, USER 403, ADMIN 200, невалиден израз 400 (~500 tok)
 - `FilterConfigServiceTest.java` — validatePattern: съобщението на PostgreSQL без „ERROR:“, валиден израз минава, >500 знака се отказва без база (~400 tok)
