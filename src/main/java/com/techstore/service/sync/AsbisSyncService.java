@@ -45,6 +45,9 @@ public class AsbisSyncService {
     private final SyncHelper syncHelper;
     private final LogHelper logHelper;
 
+    // parameter_options.name_bg is TEXT; the cap only guards against runaway values.
+    private static final int MAX_ATTRIBUTE_VALUE_LENGTH = 2000;
+
     // =========================================================
     // MANUFACTURERS
     // =========================================================
@@ -364,7 +367,9 @@ public class AsbisSyncService {
                     String attrName = attr.getKey();
                     String attrValue = attr.getValue();
                     if (attrName == null || attrName.isBlank() || attrValue == null || attrValue.isBlank()) continue;
-                    if (attrValue.length() > 200) continue;
+                    // 200 used to be the cap: 972 of the feed's 275,250 values (907 products), nearly all
+                    // lists joined with <br/> such as "Поддържани процесорни цокли" of coolers. None is over 2000.
+                    if (attrValue.length() > MAX_ATTRIBUTE_VALUE_LENGTH) continue;
 
                     String asbisKey = generateAsbisKey(attrName);
                     final Category finalCategory = category;
