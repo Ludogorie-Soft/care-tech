@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-25T07:53:39.328Z
-> Files: 764 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-25T08:37:45.395Z
+> Files: 766 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -429,9 +429,11 @@
 - `55_filters_curated_11_small_categories.sql` — Курация партида 11: Безжични адаптери(104), Смарт часовници(156), Охлаждащи поставки(43), Зарядни за лаптопи(42), Падове за мишки(64), Захранващи кабели(132), Софтуер(192), Стативи(147); 12 свойства, 28 групи; копира правила по име от 111/40/173/161/135; нова стойност „DC жак (барел)“ в „Конектори“ (~9000 tok)
 - `55_filters_curated_11_small_categories.sql` — ============================================================================ (~5451 tok)
 - `55_filters_curated_12_devices.sql` — Курация партида 12: Телевизори(139), Мобилни телефони(154), Таблети(744), eBook четци(124), UPS-и(73/74), МФУ(80), Геймпадове(177), Волани(175), Чекмеджета за дискове(18), Четци за карти(63), 3D консумативи(95); 19 нови свойства, 40 групи; копира правила по име от 171/55/129/41; нови стойности в „Функции“ и „Размер на диска“ (M.2) (~13000 tok)
-- `55_filters_curated_13_unmapped_cleanup.sql` — Партида 13: „Несъпоставени“ (1357 в прод) + етикети „Яркост“ (N cd/m², подредба по число, 330 cd/㎡). 60 шаблона (HVA=VA, VESA обърнат ред, таблет 2 знака след точката, Canon PGI/CLI, цветове, Nexus→Google, Ryzen AI…), нови стойности „Интегрирана графика“/1440p/610 и 1000 Hz, точни правила по отчета (note '55 партида 13 — по отчета', не се трият при повторно пускане). Локално: 1408 → 17 (~6000 tok)
 - `55_filters_curated_12_devices.sql` — ============================================================================ (~7036 tok)
+- `55_filters_curated_13_unmapped_cleanup.sql` — Партида 13: „Несъпоставени“ (1357 в прод) + етикети „Яркост“ (N cd/m², подредба по число, 330 cd/㎡). 60 шаблона (HVA=VA, VESA обърнат ред, таблет 2 знака след точката, Canon PGI/CLI, цветове, Nexus→Google, Ryzen AI…), нови стойности „Интегрирана графика“/1440p/610 и 1000 Hz, точни правила по отчета (note '55 партида 13 — по отчета', не се трият при повторно пускане). Локално: 1408 → 17 (~6000 tok)
+- `55_filters_curated_14_twins_and_long_tail.sql` — Партида 14: CCTV двойници 964←100, 249←50 (+диагонал от името), 240←962 (копира източници, правила по име, групи); дълга опашка 136 (Конектори F/RF), 77 (Мощност), 83 (6 групи, Двустранно Да/Не), 246 (Вид монтаж от името), 99 (Вид от името), 122 (tv-resolution), 178 (5 групи). Нови свойства scan-duplex, camera-mount-type, network-accessory-type (~4500 tok)
 - `55_filters_curated_13_unmapped_cleanup.sql` — ============================================================================ (~3852 tok)
+- `55_filters_curated_14_twins_and_long_tail.sql` — ============================================================================ (~3734 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
@@ -939,6 +941,7 @@
 - `V40__add_filter_name_rules.sql` — V40: Filter values taken from the product name. (~428 tok)
 - `V41__seed_more_filter_junk_rules.sql` — Още статични HIDE/IGNORE по име (след куриране на 83 категории): HIDE „ново име на аксесоар“, „съкратено описание“, „свързани продукти(1)“, грамове рециклирана пластмаса (ABS 920, TPU…); IGNORE съдържание/включени аксесоари, съвместими модели/принтери, бранд, продавач, серия. „Марка“ умишлено НЕ (франчайз при фигурките) (~500 tok)
 - `V41__seed_more_filter_junk_rules.sql` — V41: More static IGNORE / HIDE rules, found after curating 83 categories (2026-09-24). (~419 tok)
+- `V42__drop_legacy_filter_flags.sql` — V42: DROP parameters.is_filter, parameters.filter_order, category_parameters.is_filter (нищо не ги чете след фаза 6) (~150 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)
 - `V7__set_category_parameter_filters_by_usage.sql` — V7: Industry-standard per-category filter configuration (~3966 tok)

@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 27013306,
-    "total_reads": 10221,
-    "total_writes": 17377,
+    "total_tokens_estimated": 27094118,
+    "total_reads": 10227,
+    "total_writes": 17384,
     "total_sessions": 94,
-    "anatomy_hits": 4785,
+    "anatomy_hits": 4791,
     "anatomy_misses": 4092,
-    "repeated_reads_blocked": 4319,
-    "estimated_savings_vs_bare_cli": 22446047
+    "repeated_reads_blocked": 4325,
+    "estimated_savings_vs_bare_cli": 22499297
   },
   "sessions": [
     {
@@ -166566,6 +166566,179 @@
         "output_tokens_estimated": 4127,
         "reads_count": 1,
         "writes_count": 1,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-25-1021",
+      "started": "2026-09-25T07:21:56.286Z",
+      "ended": "2026-09-25T08:13:34.793Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterIndexService.java",
+          "tokens_estimated": 8675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_13_unmapped_cleanup.sql",
+          "tokens_estimated": 4127,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 8675,
+        "output_tokens_estimated": 4127,
+        "reads_count": 1,
+        "writes_count": 1,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-25-1021",
+      "started": "2026-09-25T07:21:56.286Z",
+      "ended": "2026-09-25T08:16:52.217Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterIndexService.java",
+          "tokens_estimated": 8675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_13_unmapped_cleanup.sql",
+          "tokens_estimated": 4127,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 8675,
+        "output_tokens_estimated": 4127,
+        "reads_count": 1,
+        "writes_count": 1,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-25-1021",
+      "started": "2026-09-25T07:21:56.286Z",
+      "ended": "2026-09-25T08:19:48.735Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterIndexService.java",
+          "tokens_estimated": 8675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_13_unmapped_cleanup.sql",
+          "tokens_estimated": 4127,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 8675,
+        "output_tokens_estimated": 4127,
+        "reads_count": 1,
+        "writes_count": 1,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-25-1021",
+      "started": "2026-09-25T07:21:56.286Z",
+      "ended": "2026-09-25T08:20:39.562Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterIndexService.java",
+          "tokens_estimated": 8675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_13_unmapped_cleanup.sql",
+          "tokens_estimated": 4127,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 8675,
+        "output_tokens_estimated": 4127,
+        "reads_count": 1,
+        "writes_count": 1,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-25-1021",
+      "started": "2026-09-25T07:21:56.286Z",
+      "ended": "2026-09-25T08:21:42.645Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterIndexService.java",
+          "tokens_estimated": 8675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_13_unmapped_cleanup.sql",
+          "tokens_estimated": 4127,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 8675,
+        "output_tokens_estimated": 4127,
+        "reads_count": 1,
+        "writes_count": 1,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-09-25-1021",
+      "started": "2026-09-25T07:21:56.286Z",
+      "ended": "2026-09-25T08:45:02.267Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/filter/FilterIndexService.java",
+          "tokens_estimated": 8675,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_13_unmapped_cleanup.sql",
+          "tokens_estimated": 4127,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_14_twins_and_long_tail.sql",
+          "tokens_estimated": 4000,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 8675,
+        "output_tokens_estimated": 8127,
+        "reads_count": 1,
+        "writes_count": 2,
         "repeated_reads_blocked": 1,
         "anatomy_lookups": 1
       }

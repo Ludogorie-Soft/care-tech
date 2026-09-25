@@ -3876,3 +3876,12 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 10:53 | Created scripts/55_filters_curated_13_unmapped_cleanup.sql | — | ~3852 |
 | 14:30 | Партида 13 (скрипт 55_13): „Яркост“ етикети/подредба + „Несъпоставени“ (1357 в прод); локално 1408 → 17, 0 дублирани групи, повторно пускане безопасно; локалните бекенд и база спрени след теста | scripts/55_filters_curated_13_unmapped_cleanup.sql | чака пускане в прод + rebuild | ~60k |
 | 10:59 | Session end: 1 writes across 1 files (55_filters_curated_13_unmapped_cleanup.sql) | 1 reads | ~12802 tok |
+| 11:13 | Session end: 1 writes across 1 files (55_filters_curated_13_unmapped_cleanup.sql) | 1 reads | ~12802 tok |
+| 11:16 | Session end: 1 writes across 1 files (55_filters_curated_13_unmapped_cleanup.sql) | 1 reads | ~12802 tok |
+| 11:19 | Партида 13 в прод (потребителят): 60 шаблона + 1240 точни правила; rebuild #3 SUCCESS 29.4 s; „Несъпоставени“ 1357 → 17; 0 дублирани групи; „Яркост“ на живо N cd/m² по ред; „Интегрирана графика“ 31 при лаптопите | прод (само четене) | ok | ~5k |
+| 11:19 | Session end: 1 writes across 1 files (55_filters_curated_13_unmapped_cleanup.sql) | 1 reads | ~12802 tok |
+| 11:20 | Session end: 1 writes across 1 files (55_filters_curated_13_unmapped_cleanup.sql) | 1 reads | ~12802 tok |
+| 11:21 | Session end: 1 writes across 1 files (55_filters_curated_13_unmapped_cleanup.sql) | 1 reads | ~12802 tok |
+| 11:37 | Created scripts/55_filters_curated_14_twins_and_long_tail.sql | — | ~3734 |
+| 15:30 | „Направи всички“: парсери (DPI интервал, Mbps, 610/1000 Hz, 2.8K, професионални GPU) + 19 теста; V42 трие is_filter/filter_order, махнат GET admin/parameters/pageable и кешът parametersByCategory; партида 14 (CCTV двойници + 7 категории от опашката) тествана локално; скрити категории с видими продукти — въпрос към потребителя | parser/*, V42, AdminController, ParameterService/Repository, Cache*, application.yml, sync services, 55_14 | 402 теста; локално rebuild OK, 0 дублирани групи | ~80k |
+| 11:45 | Session end: 2 writes across 2 files (55_filters_curated_13_unmapped_cleanup.sql, 55_filters_curated_14_twins_and_long_tail.sql) | 1 reads | ~16802 tok |
