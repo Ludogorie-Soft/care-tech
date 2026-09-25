@@ -3856,3 +3856,7 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 09:11 | Created src/test/java/com/techstore/service/TekraApiServicePagingTest.java | — | ~1473 |
 | 11:30 | TEKRA пагинация: getProductsRaw страница по страница (спира при къса/без нови SKU/30), изключение при провал, mark-unseen се пропуска при неуспешна категория, Fetched/FetchFailed в sync_logs, кеш 30 мин; махнат getAllProductsForCategory | TekraApiService, TekraSyncService, TekraApiServicePagingTest (нов) | 377 теста минават; жива проверка на page семантиката чака изтичане на 429 | ~25k |
 | 09:17 | Session end: 4 writes across 4 files (TekraFeedValues.java, TekraFeedValuesTest.java, TekraApiServiceXmlTest.java, TekraApiServicePagingTest.java) | 2 reads | ~32699 tok |
+| 09:18 | Session end: 4 writes across 4 files (TekraFeedValues.java, TekraFeedValuesTest.java, TekraApiServiceXmlTest.java, TekraApiServicePagingTest.java) | 2 reads | ~32699 tok |
+| 09:22 | Created src/test/java/com/techstore/service/filter/DisplaySpecificationLinesTest.java | — | ~465 |
+| 12:30 | ASBIS лимит 200→2000 (измерено: 972 стойности/907 продукта, 0 над 2000) + спецификациите делят <br/>/</br> на редове и махат b/strong/a/img тагове (606 видими продукта с буквални тагове) | AsbisSyncService, DisplaySpecificationService, DisplaySpecificationLinesTest (нов) | 382 теста минават | ~20k |
+| 09:25 | Session end: 5 writes across 5 files (TekraFeedValues.java, TekraFeedValuesTest.java, TekraApiServiceXmlTest.java, TekraApiServicePagingTest.java, DisplaySpecificationLinesTest.java) | 3 reads | ~34297 tok |

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-25T06:11:22.432Z
-> Files: 758 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-25T06:22:20.706Z
+> Files: 760 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -837,7 +837,7 @@
 ## src/main/java/com/techstore/service/filter/
 
 - `CategoryFilterService.java` — Serves the filter panel of a category from the canonical filter layer. Група с 1 стойност се показва, ако стеснява (не всички продукти я имат) (~4650 tok)
-- `DisplaySpecificationService.java` — displaySpecifications за продукт/карти: групира по каноничното свойство (filter_param_map), маха HIDE, дедуплицира стойности по filter_value_key; суровото specifications остава за админ формата (~1100 tok)
+- `DisplaySpecificationService.java` — displayLines: дели по <br/>, <br>, </br> и маха b/strong/a/img… тагове (ASBIS списъци); displaySpecifications за продукт/карти: групира по каноничното свойство (filter_param_map), маха HIDE, дедуплицира стойности по filter_value_key; суровото specifications остава за админ формата (~1100 tok)
 - `FilterConfigService.java` — Редакция на каноничния слой за админа (това, което правят 55_* скриптовете, без SQL). Всичко е MANUAL, бележка „admin <email>, <дата>“; regex се компилира от PostgreSQL преди запис; AUTO свойство при редакция става MANUAL; MANUAL режим „замразява“ текущите групи; махане на група в AUTO режим = скриване (~7000 tok)
 - `FilterIndexService.java` — Rebuilds the canonical filter index (V38) from the raw supplier layer. (~8675 tok)
 - `FilterRebuildResult.java` — Outcome of one {@link FilterIndexService#rebuild} call. (~176 tok)
@@ -871,7 +871,7 @@
 
 ## src/main/java/com/techstore/service/sync/
 
-- `AsbisSyncService.java` — AsbisSyncService (~14814 tok)
+- `AsbisSyncService.java` — AsbisSyncService; MAX_ATTRIBUTE_VALUE_LENGTH 2000 (беше 200) при създаване на опции (~14850 tok)
 - `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~17394 tok)
 - `TekraFeedValues.java` — Turns the text of one TEKRA feed property into the values it holds. (~917 tok)
 - `TekraFeedValues.java` — Стойностите на едно TEKRA свойство: повторен таг (List), разделяне по <br/>, „A,A“→„A“, лимит 2000 знака, Stats за sync лога (~900 tok)
@@ -971,9 +971,13 @@
 - `MostApiServiceTest.java` — 11 теста с Mockito за провалите на MOST feed-а: празно/null тяло, connection error, изчерпани опити, възстановяване след преходен отказ, HTTP статус, счупен XML, изключен feed, кеширане на успех и НЕкеширане на провал (~1999 tok)
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
 - `TekraApiServicePagingTest.java` — Paging of the TEKRA product feed. Only page 1 used to be read, so no category went past 100 (~1473 tok)
-- `TekraApiServiceXmlTest.java` — Парсване на TEKRA фийда: повторен prop_* таг → списък, други тагове → последната стойност, escaped <br/> остава текст (~600 tok)
 - `TekraApiServicePagingTest.java` — Пагинация на TEKRA фийда с mock RestTemplate: всички страници, повторена страница (игнориран page), празна последна, малка категория, провал на страница, 429×3, счупен XML (7 теста) (~1500 tok)
+- `TekraApiServiceXmlTest.java` — Парсване на TEKRA фийда: повторен prop_* таг → списък, други тагове → последната стойност, escaped <br/> остава текст (~600 tok)
 - `TekraApiServiceXmlTest.java` — Parsing of the TEKRA product feed ({@code action=browse&feed=1}). (~538 tok)
+
+## src/test/java/com/techstore/service/filter/
+
+- `DisplaySpecificationLinesTest.java` — ASBIS sends feature lists joined with {@code <br/>} and wrapped in {@code <b>}; the product page (~465 tok)
 
 ## src/test/java/com/techstore/service/filter/parser/
 
@@ -994,4 +998,5 @@
 - `application-test.properties` — ── Datasource — H2 in-memory (replaces PostgreSQL for context-load tests) ── (~907 tok)
 - `application.properties` — Overrides for ALL tests — resolves placeholders that have no default in application.yml (~40 tok)
 - `FilterConfigControllerTest.java` — @WebMvcTest: анонимен 401, USER 403, ADMIN 200, невалиден израз 400 (~500 tok)
+- `DisplaySpecificationLinesTest.java` — displayLines: <br/>-списъци на редове, тагове за форматиране, </br>, <a>/<img>, „<5 ms“ остава (5 теста) (~500 tok)
 - `FilterConfigServiceTest.java` — validatePattern: съобщението на PostgreSQL без „ERROR:“, валиден израз минава, >500 знака се отказва без база (~400 tok)

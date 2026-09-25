@@ -9327,6 +9327,26 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-09-25T11:30:00Z"
+    },
+    {
+      "id": "bug-565",
+      "timestamp": "2026-09-25T12:30:00Z",
+      "error_message": "ASBIS: стойности на атрибути над 200 знака не стават опции (972 от 275 250, 907 продукта — напр. „Поддържани процесорни цокли“ при охладителите); 606 видими ASBIS продукта показват буквални <br/>/<b> в спецификациите",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java, src/main/java/com/techstore/service/filter/DisplaySpecificationService.java",
+      "root_cause": "Твърд лимит 200 в syncAsbisParameters (същият като при MOST/TEKRA); ASBIS праща списъци, слепени с <br/>, </br>, <b>, а страницата показва стойностите като текст (дели само по ';')",
+      "fix": "MAX_ATTRIBUTE_VALUE_LENGTH = 2000 (измерено: нито една стойност над 2000); DisplaySpecificationService.displayLines дели по </?br/?> на редове и маха тагове за форматиране (b, strong, a, img…); след почистване 0 от 13 239 стойности с '<' съдържат таг",
+      "tags": [
+        "asbis",
+        "sync",
+        "length-limit",
+        "specifications",
+        "html"
+      ],
+      "related_bugs": [
+        "bug-563"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-09-25T12:30:00Z"
     }
   ]
 }
