@@ -3847,3 +3847,4 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 08:29 | Push: care-tech v2 (ee892c1..abc2924), нов клон v2-phase6-cleanup; care-tech-ui main (5d276f9..9024d39) | — | ok | ~1k |
 | 09:20 | Махната старата страница „Параметри на доставчиците“: фронтенд (ParamsLayout, OptionsDropdown, OptionModalContent, маршрут, sidebar; ParamsModal + CreateParameterForm → admin/Products; thunk-ове deleteParameter/deleteOption/fetchParameterById), бекенд (DELETE параметър и опция + validateParameterDeletion) в v2-phase6-cleanup | care-tech-ui App.js, Sidebar.jsx, paramSlice.js, Products/*; ParameterController, ParameterService | build ok, 358 теста | ~6k |
 | 08:38 | v2 fast-forward до v2-phase6-cleanup (c4e54fa) и push; клонът v2-phase6-cleanup остава (вече е равен на v2) | — | ok | ~1k |
+| 08:39 | Изтрит клон v2-phase6-cleanup (локално и в origin; изцяло във v2) | — | ok | ~0.5k |
