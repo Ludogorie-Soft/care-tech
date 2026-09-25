@@ -3864,3 +3864,15 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 09:29 | Created src/test/java/com/techstore/service/AsbisApiServiceAttrListTest.java | — | ~532 |
 | 13:15 | ASBIS повторени имена на атрибути: extractAttrList → Map<име, List<стойност>>, по една опция на стойност в параметрите и продуктите (1170 случая / 669 продукта) | AsbisApiService, AsbisSyncService, AsbisApiServiceAttrListTest (нов) | 383 теста минават | ~12k |
 | 09:32 | Session end: 6 writes across 6 files (TekraFeedValues.java, TekraFeedValuesTest.java, TekraApiServiceXmlTest.java, TekraApiServicePagingTest.java, DisplaySpecificationLinesTest.java) | 3 reads | ~34867 tok |
+| 09:35 | Session end: 6 writes across 6 files (TekraFeedValues.java, TekraFeedValuesTest.java, TekraApiServiceXmlTest.java, TekraApiServicePagingTest.java, DisplaySpecificationLinesTest.java) | 3 reads | ~34867 tok |
+| 09:59 | Жива проверка на TEKRA page=1/2 (ip-sistemi): и двете HTTP 200 + празен <items/> → непроверимо локално; проверка след деплоя през sync_logs | — | неуспешна проверка | ~1k |
+| 09:59 | Session end: 6 writes across 6 files (TekraFeedValues.java, TekraFeedValuesTest.java, TekraApiServiceXmlTest.java, TekraApiServicePagingTest.java, DisplaySpecificationLinesTest.java) | 3 reads | ~34867 tok |
+
+## Session: 2026-09-25 10:21
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:50 | ДЕПЛОЙ в прод (потребителят): V38–V41 приложени 07:26 UTC, 2 rebuild-а SUCCESS (38–43 s), 83 MANUAL категории, 0 дублирани групи, средно 3.1 / макс 12 групи (преди 23/118); 11/11 броячи = търсене на живо; стар param_ линк → f_563 на живо | прод (само четене), caretech.bg | ok | ~15k |
+| 10:53 | Created scripts/55_filters_curated_13_unmapped_cleanup.sql | — | ~3852 |
+| 14:30 | Партида 13 (скрипт 55_13): „Яркост“ етикети/подредба + „Несъпоставени“ (1357 в прод); локално 1408 → 17, 0 дублирани групи, повторно пускане безопасно; локалните бекенд и база спрени след теста | scripts/55_filters_curated_13_unmapped_cleanup.sql | чака пускане в прод + rebuild | ~60k |
+| 10:59 | Session end: 1 writes across 1 files (55_filters_curated_13_unmapped_cleanup.sql) | 1 reads | ~12802 tok |
