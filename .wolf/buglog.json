@@ -9289,6 +9289,24 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-25T08:40:00Z"
+    },
+    {
+      "id": "bug-563",
+      "timestamp": "2026-09-25T10:30:00Z",
+      "error_message": "TEKRA: повторен <prop_x> таг в един продукт оставя само последната стойност; стойности, разделени с <br/>, са една опция; стойности над 200 знака се изпускат",
+      "file": "src/main/java/com/techstore/service/TekraApiService.java, src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "extractProductFromXMLElement правеше product.put(tag, text) → презапис; extractTekraParameters връщаше Map<String,String> (една стойност на ключ) и прескачаше >200 знака (същият лимит като при MOST, a8e7d46)",
+      "fix": "putText пази повторените prop_* тагове като List; нов TekraFeedValues разделя по <br/>, свива „A,A“, лимит 2000; extractTekraParameters → Map<key, List<value>>, по една product_parameters опция на стойност; броячите отиват в sync_logs съобщението на TEKRA_PARAMETERS. Мъртвият setTekraParametersToProductSimplified е махнат.",
+      "tags": [
+        "tekra",
+        "sync",
+        "parameters",
+        "multi-value",
+        "length-limit"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-25T10:30:00Z"
     }
   ]
 }

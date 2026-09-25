@@ -3848,3 +3848,8 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 09:20 | Махната старата страница „Параметри на доставчиците“: фронтенд (ParamsLayout, OptionsDropdown, OptionModalContent, маршрут, sidebar; ParamsModal + CreateParameterForm → admin/Products; thunk-ове deleteParameter/deleteOption/fetchParameterById), бекенд (DELETE параметър и опция + validateParameterDeletion) в v2-phase6-cleanup | care-tech-ui App.js, Sidebar.jsx, paramSlice.js, Products/*; ParameterController, ParameterService | build ok, 358 теста | ~6k |
 | 08:38 | v2 fast-forward до v2-phase6-cleanup (c4e54fa) и push; клонът v2-phase6-cleanup остава (вече е равен на v2) | — | ok | ~1k |
 | 08:39 | Изтрит клон v2-phase6-cleanup (локално и в origin; изцяло във v2) | — | ok | ~0.5k |
+| 08:54 | Created src/main/java/com/techstore/service/sync/TekraFeedValues.java | — | ~917 |
+| 08:56 | Created src/test/java/com/techstore/service/sync/TekraFeedValuesTest.java | — | ~840 |
+| 08:56 | Created src/test/java/com/techstore/service/TekraApiServiceXmlTest.java | — | ~538 |
+| 10:30 | TEKRA т.2: повторени prop_* тагове → всички стойности, <br/> разделяне, „A,A“ свиване, лимит 200→2000, броячи в sync лога; merna = „бр.“ (скрита от V39); махнат мъртъв setTekraParametersToProductSimplified | TekraApiService, TekraSyncService, TekraFeedValues (нов), 2 нови теста | 370 теста минават | ~30k |
+| 08:59 | Session end: 3 writes across 3 files (TekraFeedValues.java, TekraFeedValuesTest.java, TekraApiServiceXmlTest.java) | 2 reads | ~31121 tok |

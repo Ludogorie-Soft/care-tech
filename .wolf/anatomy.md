@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-24T14:45:44.184Z
-> Files: 747 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-25T05:56:25.626Z
+> Files: 754 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -393,11 +393,11 @@
 - `36_fix_tekra_product_categories.sql` — Премества 42 NVR продукта cat238→cat962; 42 Comelit IP камери cat100→cat964 (NDAA). По name ILIKE matching. (~576 tok)
 - `4_reorder_subcategories.sql` — Пренарежда подкатегориите (sort_order) (~4734 tok)
 - `40_consolidate_vali_parameters.sql` — НЕ ПУСКАЙ: заменен от каноничния слой (сливане на VALI параметри, 13k реда); започва с BEGIN + RAISE. (~120000 tok)
+- `40a_preflight_dedup.sql` — НЕ ПУСКАЙ: заменен от каноничния слой; започва с BEGIN + RAISE, който проваля транзакцията. (~427 tok)
 - `41_consolidate_asbis_parameters.sql` — НЕ ПУСКАЙ: заменен от каноничния слой (сливане на ASBIS/MOST параметри); започва с BEGIN + RAISE. (~22000 tok)
 - `42_cleanup_is_filter.sql` — НЕ ПУСКАЙ: заменен от каноничния слой (is_filter=false по имена); започва с BEGIN + RAISE. (~600 tok)
-- `44_post_consolidation_cleanup.sql` — НЕ ПУСКАЙ: заменен от каноничния слой (is_filter преизчисляване); започва с BEGIN + RAISE. (~700 tok)
-- `40a_preflight_dedup.sql` — НЕ ПУСКАЙ: заменен от каноничния слой; започва с BEGIN + RAISE, който проваля транзакцията. (~427 tok)
 - `43_crossplatform_parameter_merges.sql` — НЕ ПУСКАЙ: заменен от каноничния слой; започва с BEGIN + RAISE, който проваля транзакцията. (~9330 tok)
+- `44_post_consolidation_cleanup.sql` — НЕ ПУСКАЙ: заменен от каноничния слой (is_filter преизчисляване); започва с BEGIN + RAISE. (~700 tok)
 - `45_disable_logistics_filters.sql` — НЕ ПУСКАЙ: заменен от каноничния слой; започва с BEGIN + RAISE, който проваля транзакцията. (~837 tok)
 - `46_final_filter_cleanup.sql` — НЕ ПУСКАЙ: заменен от каноничния слой; започва с BEGIN + RAISE, който проваля транзакцията. (~909 tok)
 - `47_fix_most_prices_to_eur.sql` — ============================================================================ (~3178 tok)
@@ -825,7 +825,7 @@
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
 - `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8765 tok)
 - `TbiLeasingService.java` — TBI Fusion Pay integration: registerApplication (AES encrypt → TBI API), processStatusWebhook, getStatistics, admin queries (~350 tok)
-- `TekraApiService.java` — Fetches Tekra categories (JSON) and products (XML); retryDelayMs=60_000 (3 attempts, exponential backoff); productsCache HashMap; getProductsRaw/getAllProductsForCategory (~4707 tok)
+- `TekraApiService.java` — Fetches Tekra categories (JSON) and products (XML); retryDelayMs=60_000 (3 attempts, exponential backoff); productsCache HashMap; getProductsRaw (page 1, perPage=100!)/getAllProductsForCategory; putText пази повторени prop_* тагове като List (~4900 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
 - `UserService.java` — Service: UserService (~6466 tok)
 - `ValiApiService.java` — Get categories (no pagination available) (~9094 tok)
@@ -837,8 +837,8 @@
 ## src/main/java/com/techstore/service/filter/
 
 - `CategoryFilterService.java` — Serves the filter panel of a category from the canonical filter layer. Група с 1 стойност се показва, ако стеснява (не всички продукти я имат) (~4650 tok)
-- `FilterConfigService.java` — Редакция на каноничния слой за админа (това, което правят 55_* скриптовете, без SQL). Всичко е MANUAL, бележка „admin <email>, <дата>“; regex се компилира от PostgreSQL преди запис; AUTO свойство при редакция става MANUAL; MANUAL режим „замразява“ текущите групи; махане на група в AUTO режим = скриване (~7000 tok)
 - `DisplaySpecificationService.java` — displaySpecifications за продукт/карти: групира по каноничното свойство (filter_param_map), маха HIDE, дедуплицира стойности по filter_value_key; суровото specifications остава за админ формата (~1100 tok)
+- `FilterConfigService.java` — Редакция на каноничния слой за админа (това, което правят 55_* скриптовете, без SQL). Всичко е MANUAL, бележка „admin <email>, <дата>“; regex се компилира от PostgreSQL преди запис; AUTO свойство при редакция става MANUAL; MANUAL режим „замразява“ текущите групи; махане на група в AUTO режим = скриване (~7000 tok)
 - `FilterIndexService.java` — Rebuilds the canonical filter index (V38) from the raw supplier layer. (~8675 tok)
 - `FilterRebuildResult.java` — Outcome of one {@link FilterIndexService#rebuild} call. (~176 tok)
 - `FilterReportService.java` — Read-only отчет за каноничния слой: последни rebuild-ове, несъпоставени параметри по обхват, несъпоставени стойности, висящи правила, групи по категория (~900 tok)
@@ -873,7 +873,9 @@
 
 - `AsbisSyncService.java` — AsbisSyncService (~14814 tok)
 - `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~17394 tok)
-- `TekraSyncService.java` — Service: TekraSyncService (~23955 tok)
+- `TekraFeedValues.java` — Turns the text of one TEKRA feed property into the values it holds. (~917 tok)
+- `TekraFeedValues.java` — Стойностите на едно TEKRA свойство: повторен таг (List), разделяне по <br/>, „A,A“→„A“, лимит 2000 знака, Stats за sync лога (~900 tok)
+- `TekraSyncService.java` — Service: TekraSyncService; extractTekraParameters → Map<key, List<value>> (една опция на стойност) (~23500 tok)
 - `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15657 tok)
 
 ## src/main/java/com/techstore/util/
@@ -967,7 +969,9 @@
 ## src/test/java/com/techstore/service/
 
 - `MostApiServiceTest.java` — 11 теста с Mockito за провалите на MOST feed-а: празно/null тяло, connection error, изчерпани опити, възстановяване след преходен отказ, HTTP статус, счупен XML, изключен feed, кеширане на успех и НЕкеширане на провал (~1999 tok)
+- `TekraApiServiceXmlTest.java` — Парсване на TEKRA фийда: повторен prop_* таг → списък, други тагове → последната стойност, escaped <br/> остава текст (~600 tok)
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
+- `TekraApiServiceXmlTest.java` — Parsing of the TEKRA product feed ({@code action=browse&feed=1}). (~538 tok)
 
 ## src/test/java/com/techstore/service/filter/parser/
 
@@ -976,6 +980,8 @@
 ## src/test/java/com/techstore/service/sync/
 
 - `MostCategoryResolutionTest.java` — The Most feed carries 222 distinct (category, subcategory) pairs against only 29 (~2405 tok)
+- `TekraFeedValuesTest.java` — Повторени тагове, <br/>, „A,A“, лимит 2000, боклук (10 теста) (~900 tok)
+- `TekraFeedValuesTest.java` — One TEKRA property can hold several values; each has to become its own option. Before, a repeated (~840 tok)
 
 ## src/test/java/com/techstore/util/
 
