@@ -9440,6 +9440,90 @@
       "related_bugs": [],
       "occurrences": 2,
       "last_seen": "2026-09-25T14:30:00Z"
+    },
+    {
+      "id": "bug-571",
+      "timestamp": "2026-09-28T09:00:00Z",
+      "error_message": "sync_logs VALI_PARAMETERS status FAILED every night since 2026-09-26: 'Failed categories: 8'",
+      "file": "src/main/java/com/techstore/service/ValiApiService.java",
+      "root_cause": "VALI removed its STEM section (external ids 698-705, our hidden categories 222-229, 28 products). /parameters/{id} and /products/by_category/{id}/full answer HTTP 400 {\"error\":\"Invalid category id\"}. Since Phase 0 a non-404 error counts as a failed category; and retryWhen(Retry.backoff(5, 5s)) retries 400s too (~155 s per category), ~20 min wasted in each of the two VALI syncs.",
+      "fix": "ValiApiService.isRetryable: 4xx other than 429 are not retried (also DataBufferLimitException); isCategoryGone (400 + 'Invalid category id') → getParametersByCategory throws SupplierCategoryGoneException, getProductsByCategory returns empty list with a warn. ValiSyncService counts them as 'Removed by Vali: [...]' — not failed, status SUCCESS. Tests: ValiApiServiceRetryTest (7). Needs deploy.",
+      "tags": [
+        "vali",
+        "sync",
+        "retry",
+        "false-failure",
+        "stem"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-09-28T10:30:00Z"
+    },
+    {
+      "id": "bug-572",
+      "timestamp": "2026-09-28T09:00:00Z",
+      "error_message": "TEKRA_PRODUCTS 'Skipped: 122' every night - feed products never imported",
+      "file": "src/main/java/com/techstore/service/sync/TekraSyncService.java",
+      "root_cause": "findMostSpecificCategory matches only by category_path built from feed names. No category for mrezhovo-oborudvane/aktivno/* (89: Omada by TP-Link 60, DAHUA 29), videonablyudenie/tvardi-diskove (8; our cat 235 path is videonablyudenie/hdd), zahranvaniya-i-baterii/* (10, ANDGOOD); 15 ATTE Power products in 'Системи за пренос' lack a manufacturer row (return -2).",
+      "fix": "OPEN - needs user decision on target categories and manufacturers.",
+      "tags": [
+        "tekra",
+        "category-mapping",
+        "manufacturer",
+        "skipped"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-09-28T09:00:00Z"
+    },
+    {
+      "id": "bug-573",
+      "timestamp": "2026-09-28T05:40:22.298Z",
+      "error_message": "Wrong reference: repository should be exception",
+      "file": "src/main/java/com/techstore/service/sync/ValiSyncService.java",
+      "root_cause": "Used \"repository\" instead of \"exception\"",
+      "fix": "Changed repository → exception",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-28T05:40:22.298Z"
+    },
+    {
+      "id": "bug-574",
+      "timestamp": "2026-09-28T05:55:36.648Z",
+      "error_message": "Significant refactor of ",
+      "file": "scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 6→9 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "sql"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-28T05:55:36.648Z"
+    },
+    {
+      "id": "bug-573",
+      "timestamp": "2026-09-28T10:30:00Z",
+      "error_message": "psql: ERROR: record \"r\" is not assigned yet (script 55_15 local test)",
+      "file": "scripts/55_filters_curated_15_brightness_and_unmapped.sql",
+      "root_cause": "A PL/pgSQL RECORD variable named r inside the DO block shadowed the SQL table alias r (VALUES ... AS r(...), filter_value_rules r) in every statement of the block.",
+      "fix": "Renamed the loop variable to compiled; never name DO-block variables like table aliases used in the block.",
+      "tags": [
+        "plpgsql",
+        "do-block",
+        "variable-shadowing",
+        "sql-script"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-28T10:30:00Z"
     }
   ]
 }

@@ -3914,3 +3914,42 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 13:04 | Session end: 5 writes across 5 files (55_filters_curated_13_unmapped_cleanup.sql, 55_filters_curated_14_twins_and_long_tail.sql, 56_move_products_out_of_hidden_categories.sql, 57_retire_remaining_home_appliances.sql, 58_smart_devices_and_access_control.sql) | 1 reads | ~22417 tok |
 | 15:25 | Rebuild #9 след скрипт 58: SUCCESS 36 s; 10 от 13 преместени продукта с филтърни стойности; „Смарт устройства“ с 2 авто групи (Тип, Характеристики); 0 дублирани; „Несъпоставени“ 4 (2 нови от камерите — списъци с функции без звук в „Звук“, за „Игнорирай“ в админа) | прод (само четене) | ok | ~4k |
 | 13:05 | Session end: 5 writes across 5 files (55_filters_curated_13_unmapped_cleanup.sql, 55_filters_curated_14_twins_and_long_tail.sql, 56_move_products_out_of_hidden_categories.sql, 57_retire_remaining_home_appliances.sql, 58_smart_devices_and_access_control.sql) | 1 reads | ~22417 tok |
+| 13:05 | Session end: 5 writes across 5 files (55_filters_curated_13_unmapped_cleanup.sql, 55_filters_curated_14_twins_and_long_tail.sql, 56_move_products_out_of_hidden_categories.sql, 57_retire_remaining_home_appliances.sql, 58_smart_devices_and_access_control.sql) | 1 reads | ~22417 tok |
+| 14:05 | Session end: 5 writes across 5 files (55_filters_curated_13_unmapped_cleanup.sql, 55_filters_curated_14_twins_and_long_tail.sql, 56_move_products_out_of_hidden_categories.sql, 57_retire_remaining_home_appliances.sql, 58_smart_devices_and_access_control.sql) | 1 reads | ~22417 tok |
+
+## Session: 2026-09-25 14:18
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-25 14:19
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-09-28 08:24
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 09:00 | Read-only nightly check (sync_logs 09-25..28, filter_rebuild_runs, TEKRA feed + categories, VALI /parameters probe) | prod DB, tekra.bg, vali.bg | TEKRA root-only feed 480 (as before); 122 TEKRA skipped (mapping/mfr); VALI 8 STEM cats 400 → false FAILED + ~20 min retries; unmapped 4→63; MOST EN params → hidden AUTO 741–746; 45 ASBIS new in 500 | ~40k |
+| 09:05 | Logged bug-571 (VALI 400 retries), bug-572 (TEKRA skipped 122); cerebrum learnings | .wolf/buglog.json, .wolf/cerebrum.md | open, awaiting user decision | ~2k |
+| 08:39 | Created src/main/java/com/techstore/exception/SupplierCategoryGoneException.java | — | ~152 |
+| 08:40 | Edited src/main/java/com/techstore/service/ValiApiService.java | added 1 condition(s) | ~678 |
+| 08:40 | Edited src/main/java/com/techstore/service/ValiApiService.java | added 1 condition(s) | ~280 |
+| 08:40 | Edited src/main/java/com/techstore/service/ValiApiService.java | added 1 import(s) | ~37 |
+| 08:40 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | modified removed() | ~79 |
+| 08:40 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | modified catch() | ~153 |
+| 08:40 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | modified format() | ~90 |
+| 08:40 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | added 1 import(s) | ~37 |
+| 08:40 | Created src/test/java/com/techstore/service/ValiApiServiceRetryTest.java | — | ~1626 |
+| 08:50 | Created scripts/55_filters_curated_15_brightness_and_unmapped.sql | — | ~3685 |
+| 08:52 | Edited scripts/55_filters_curated_15_brightness_and_unmapped.sql | expanded (+11 lines) | ~230 |
+| 08:54 | Created scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql | — | ~1268 |
+| 08:55 | Edited scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql | expanded (+8 lines) | ~259 |
+| 08:55 | Edited scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql | inline fix | ~12 |
+| 08:55 | Edited scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql | 6→9 lines | ~158 |
+| 10:05 | VALI: no retry on 4xx, 400 'Invalid category id' → SupplierCategoryGoneException / 'Removed by Vali' (SUCCESS) | ValiApiService, ValiSyncService, SupplierCategoryGoneException, ValiApiServiceRetryTest | 7/7 tests pass | ~6k |
+| 10:20 | Batch 15: Brightness→Яркост in 50/249 + cd/m² patterns, 63 unmapped → 24 values + 39 drops, console AUTO groups | scripts/55_filters_curated_15_brightness_and_unmapped.sql | prod read-only simulation OK; local fixture run ×3 idempotent | ~12k |
+| 10:30 | Script 59: 41 watches → 156, 92 cameras → 100 from 500; protect 5 CANYON | scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql | prod counts 41/92 verified; local tx test + rollback OK | ~6k |
+| 10:30 | pg_dump prod→local denied by PII classifier; used read-only simulation + synthetic fixture instead | — | noted in cerebrum | ~1k |
+| 09:02 | Session end: 15 writes across 6 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 3 reads | ~22660 tok |

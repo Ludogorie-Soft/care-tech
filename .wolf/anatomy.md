@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-25T09:40:35.785Z
-> Files: 773 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-28T05:55:36.625Z
+> Files: 778 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -434,12 +434,16 @@
 - `55_filters_curated_13_unmapped_cleanup.sql` — ============================================================================ (~3852 tok)
 - `55_filters_curated_14_twins_and_long_tail.sql` — Партида 14: CCTV двойници 964←100, 249←50 (+диагонал от името), 240←962 (копира източници, правила по име, групи); дълга опашка 136 (Конектори F/RF), 77 (Мощност), 83 (6 групи, Двустранно Да/Не), 246 (Вид монтаж от името), 99 (Вид от името), 122 (tv-resolution), 178 (5 групи). Нови свойства scan-duplex, camera-mount-type, network-accessory-type (~4500 tok)
 - `55_filters_curated_14_twins_and_long_tail.sql` — ============================================================================ (~3734 tok)
+- `55_filters_curated_15_brightness_and_unmapped.sql` — Партида 15 (2026-09-28), един DO блок + COMMIT: MOST „Brightness“ → „Яркост“ само в 50/249 (правило за име по категория), шаблони „N cd/m²“ по първото число (typ./sdr/min…typ, 1,300, nits), нови 275/380 cd/m²; 63-те несъпоставени → 24 стойности (HDD 5,400, портове, 144 Hz, 1/5/8 ms, DDR4/5, Micro-ATX, Class 10, 12+4 pin, проектори по родна резолюция, нови A6 и 1.65 mm) + 39 без стойност; „Гейминг конзоли“: не → Без оптично устройство, 512 GB, N/A; маха стари drop правила, засенчващи новите (~4200 tok)
+- `55_filters_curated_15_brightness_and_unmapped.sql` — ============================================================================ (~3898 tok)
 - `56_move_products_out_of_hidden_categories.sql` — Продължение на стъпка 2б: 67 видими продукта от скрити категории → видими цели (по id, с очаквана текуща категория), manually_categorized = TRUE, category_id_pre_phase5; откат по изричния списък. Дребната техника/смарт дом (29) НЕ влиза (~3500 tok)
 - `56_move_products_out_of_hidden_categories.sql` — ============================================================================ (~2279 tok)
 - `57_retire_remaining_home_appliances.sql` — Довършва скрипт 50: manually_hidden за всички продукти в 549/557/561/570/572/581/585/586/591/592 + видимите Aqara (500), Ubiquiti Access (548), Realme (325) — 32 продукта, 29 видими; 76 в 500 и 17 в 548 не са пипани (~2000 tok)
-- `58_smart_devices_and_access_control.sql` — 13 продукта в съществуващи видими категории (камери/видеозвънци Aqara и IMOU → 100, комплект IMOU → 962, CANYON тракер → 166, Realme → 500); 548 → видима „Видеонаблюдение › Контрол на достъп“; 500 „Смарт устройства“ → видим корен (sort 21, името остава заради ASBIS мапинга); връща в продажба 6 продукта от скрипт 57 (~2800 tok)
 - `57_retire_remaining_home_appliances.sql` — ============================================================================ (~1161 tok)
+- `58_smart_devices_and_access_control.sql` — 13 продукта в съществуващи видими категории (камери/видеозвънци Aqara и IMOU → 100, комплект IMOU → 962, CANYON тракер → 166, Realme → 500); 548 → видима „Видеонаблюдение › Контрол на достъп“; 500 „Смарт устройства“ → видим корен (sort 21, името остава заради ASBIS мапинга); връща в продажба 6 продукта от скрипт 57 (~2800 tok)
 - `58_smart_devices_and_access_control.sql` — ============================================================================ (~1801 tok)
+- `59_smart_watches_and_cameras_out_of_smart_devices.sql` — От 500 „Смарт устройства“ по име: 41 часовника/гривни → 156 „Смарт часовници“, 92 камери/звънци → 100 „IP камери“ (без соларния панел и Aqara Cube); граници на броя 41–60 / 92–120; защитава 5 по-рано преместени часовника CANYON (manually_categorized); един DO блок + COMMIT (~1900 tok)
+- `59_smart_watches_and_cameras_out_of_smart_devices.sql` — ============================================================================ (~1447 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
@@ -757,11 +761,13 @@
 - `BusinessLogicException.java` — Class: BusinessLogicException (~52 tok)
 - `DuplicateResourceException.java` — Class: DuplicateResourceException (~54 tok)
 - `ExternalApiException.java` — ExternalApiException: getStatusCode, getResponseBody (~209 tok)
+- `SupplierCategoryGoneException.java` — доставчикът вече няма наша категория (VALI: HTTP 400 „Invalid category id“); getCategoryId. Не е провален fetch (~120 tok)
 - `GlobalExceptionHandler.java` — RestController: GlobalExceptionHandler (~5811 tok)
 - `InsufficientStockException.java` — Class: InsufficientStockException (~54 tok)
 - `InvalidCredentialsException.java` — Class: InvalidCredentialsException (~55 tok)
 - `InvalidTokenException.java` — Class: InvalidTokenException (~52 tok)
 - `ResourceNotFoundException.java` — Class: ResourceNotFoundException (~54 tok)
+- `SupplierCategoryGoneException.java` — The supplier no longer has a category we still carry — its API rejects the id outright. Not a failed (~152 tok)
 - `SyncException.java` — Class: SyncException (~75 tok)
 - `TokenExpiredException.java` — Class: TokenExpiredException (~52 tok)
 - `UnauthorizedException.java` — Class: UnauthorizedException (~51 tok)
@@ -838,7 +844,7 @@
 - `TekraApiService.java` — Fetches Tekra categories (JSON) and products (XML); getProductsRaw чете страница по страница (PAGE_SIZE 100, спира при къса страница/без нови SKU/MAX_PAGES 30; пауза tekra.api.page-delay-ms 10s; 429 retry tekra.api.retry-delay-ms 60s×2, 3 опита); неуспешна страница/счупен XML → изключение (не частичен списък); кеш 30 мин; putText пази повторени prop_* като List (~5200 tok)
 - `UserFavoriteService.java` — Service: UserFavoriteService (~3795 tok)
 - `UserService.java` — Service: UserService (~6466 tok)
-- `ValiApiService.java` — Get categories (no pagination available) (~9094 tok)
+- `ValiApiService.java` — VALI REST клиент (WebClient). isRetryable: 4xx (без 429) не се повтарят; isCategoryGone: 400 „Invalid category id“ → getParametersByCategory хвърля SupplierCategoryGoneException, getProductsByCategory връща празен списък (~9508 tok)
 
 ## src/main/java/com/techstore/service/admin/
 
@@ -886,7 +892,7 @@
 - `TekraFeedValues.java` — Turns the text of one TEKRA feed property into the values it holds. (~917 tok)
 - `TekraFeedValues.java` — Стойностите на едно TEKRA свойство: повторен таг (List), разделяне по <br/>, „A,A“→„A“, лимит 2000 знака, Stats за sync лога (~900 tok)
 - `TekraSyncService.java` — Service: TekraSyncService; extractTekraParameters → Map<key, List<value>> (една опция на стойност) (~23500 tok)
-- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15657 tok)
+- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15745 tok)
 
 ## src/main/java/com/techstore/util/
 
@@ -985,8 +991,10 @@
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
 - `TekraApiServicePagingTest.java` — Paging of the TEKRA product feed. Only page 1 used to be read, so no category went past 100 (~1473 tok)
 - `TekraApiServicePagingTest.java` — Пагинация на TEKRA фийда с mock RestTemplate: всички страници, повторена страница (игнориран page), празна последна, малка категория, провал на страница, 429×3, счупен XML (7 теста) (~1500 tok)
+- `ValiApiServiceRetryTest.java` — WebClient със stub exchangeFunction: 400 „Invalid category id“ → SupplierCategoryGoneException с 1 заявка, 404 → празен списък, 503/502 → retry, 500 → хвърля след retry, 401 → 1 заявка; продукти на изчезнала категория → празен списък (7 теста) (~1300 tok)
 - `TekraApiServiceXmlTest.java` — Парсване на TEKRA фийда: повторен prop_* таг → списък, други тагове → последната стойност, escaped <br/> остава текст (~600 tok)
 - `TekraApiServiceXmlTest.java` — Parsing of the TEKRA product feed ({@code action=browse&feed=1}). (~538 tok)
+- `ValiApiServiceRetryTest.java` — From 2026-09-26 Vali answers the ids of its removed STEM section with HTTP 400 {"error":"Invalid cat (~1626 tok)
 
 ## src/test/java/com/techstore/service/filter/
 
