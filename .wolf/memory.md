@@ -3962,3 +3962,9 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 09:14 | Created scripts/55_filters_curated_16_smart_devices_leftovers.sql | — | ~1653 |
 | 12:40 | Batch 16: IGNORE 2 junk AUTO groups in 500, camera-lens 2.3 mm, 2 drops | scripts/55_filters_curated_16_smart_devices_leftovers.sql | prod read-only simulation OK; local tx ×2 idempotent | ~4k |
 | 09:14 | Session end: 16 writes across 7 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 3 reads | ~24431 tok |
+| 09:17 | Session end: 16 writes across 7 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 3 reads | ~24431 tok |
+| 09:19 | Session end: 16 writes across 7 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 3 reads | ~24431 tok |
+| 09:22 | Session end: 16 writes across 7 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 3 reads | ~24431 tok |
+| 09:25 | Session end: 16 writes across 7 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 3 reads | ~24431 tok |
+| 12:30 | Prod after batch 16 + rebuild #14 (35 s): unmapped 0, 0 dup groups, 500 shows only „Тип продукт“, lens 2.3 mm has its product | prod read-only | verified | ~2k |
+| 09:28 | Session end: 16 writes across 7 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 3 reads | ~24431 tok |
