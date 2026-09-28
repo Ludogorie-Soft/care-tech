@@ -9524,6 +9524,39 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-28T10:30:00Z"
+    },
+    {
+      "id": "bug-576",
+      "timestamp": "2026-09-28T06:37:27.750Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "15 lines replaced/restructured",
+      "fix": "Rewrote 18→9 lines (15 removed) | Also: // Resolve category: prefer producttype (L2 child ; String cat2 = getString(asbisProduct, \"producttype",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-09-28T06:37:32.007Z"
+    },
+    {
+      "id": "bug-574",
+      "timestamp": "2026-09-28T13:10:00Z",
+      "error_message": "New ASBIS smartwatches and IP cameras land in the 'Смарт устройства' root (225 products piled up); new motherboards/cases/coolers would land in the 'Компютърни компоненти' root",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "The product sync looked up categories among visible ones only; the ASBIS subcategories (Смарт часовник, Външна/Вътрешна смарт IP камера, Дънна платка настолна, Шаси, Охладител) are hidden, so resolution fell back to the L1 root. alias_of_id (V32) was never consulted by the sync.",
+      "fix": "AsbisCategoryResolver: all categories are indexed; a category is usable if visible up to its root, or if hidden with alias_of_id pointing to such a category. Script 60 sets 9 aliases. Simulation on the real feed: 0 differences without aliases.",
+      "tags": [
+        "asbis",
+        "category-mapping",
+        "alias",
+        "sync"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-09-28T13:10:00Z"
     }
   ]
 }

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-28T06:14:01.675Z
-> Files: 783 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-28T06:39:10.622Z
+> Files: 787 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -446,7 +446,9 @@
 - `58_smart_devices_and_access_control.sql` — ============================================================================ (~1801 tok)
 - `59_smart_watches_and_cameras_out_of_smart_devices.sql` — От 500 „Смарт устройства“ по име: 41 часовника/гривни → 156 „Смарт часовници“, 92 камери/звънци → 100 „IP камери“ (без соларния панел и Aqara Cube); граници на броя 41–60 / 92–120; защитава 5 по-рано преместени часовника CANYON (manually_categorized); един DO блок + COMMIT (~1900 tok)
 - `59_smart_watches_and_cameras_out_of_smart_devices.sql` — ============================================================================ (~1447 tok)
+- `60_asbis_aliases_smart_devices_and_components.sql` — alias_of_id за 9 скрити ASBIS категории: 762/761/864/951 (часовници; 951 → „Kids Watch“) → 156, 765/767 (смарт IP камери) → 100, 414 → 2, 393 → 11, 403 → 4. Действа след деплоя на AsbisCategoryResolver; един DO блок + COMMIT (~1600 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
+- `60_asbis_aliases_smart_devices_and_components.sql` — ============================================================================ (~1452 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
 - `8_asbis_filters.sql` — Auto-select Asbis is_filter=true по option_count 2-50, с blacklist на packaging/global параметри (~600 tok)
@@ -889,7 +891,8 @@
 
 ## src/main/java/com/techstore/service/sync/
 
-- `AsbisSyncService.java` — AsbisSyncService; MAX_ATTRIBUTE_VALUE_LENGTH 2000; attrlist е Map<име, List<стойност>> → по една опция на стойност (~14900 tok)
+- `AsbisCategoryResolver.java` — Finds the shop category for an ASBIS product from its feed category (L1, "ProductCategory") and type (~1299 tok)
+- `AsbisSyncService.java` — AsbisSyncService (~14236 tok)
 - `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~17394 tok)
 - `TekraFeedValues.java` — Turns the text of one TEKRA feed property into the values it holds. (~917 tok)
 - `TekraFeedValues.java` — Стойностите на едно TEKRA свойство: повторен таг (List), разделяне по <br/>, „A,A“→„A“, лимит 2000 знака, Stats за sync лога (~900 tok)
@@ -1008,6 +1011,7 @@
 
 ## src/test/java/com/techstore/service/sync/
 
+- `AsbisCategoryResolverTest.java` — The ASBIS product sync matched only visible categories, so a product whose ASBIS subcategory the sho (~1633 tok)
 - `MostCategoryResolutionTest.java` — The Most feed carries 222 distinct (category, subcategory) pairs against only 29 (~2405 tok)
 - `TekraFeedValuesTest.java` — Повторени тагове, <br/>, „A,A“, лимит 2000, боклук (10 теста) (~900 tok)
 - `TekraFeedValuesTest.java` — One TEKRA property can hold several values; each has to become its own option. Before, a repeated (~840 tok)

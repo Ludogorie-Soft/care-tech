@@ -3968,3 +3968,11 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 09:25 | Session end: 16 writes across 7 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 3 reads | ~24431 tok |
 | 12:30 | Prod after batch 16 + rebuild #14 (35 s): unmapped 0, 0 dup groups, 500 shows only „Тип продукт“, lens 2.3 mm has its product | prod read-only | verified | ~2k |
 | 09:28 | Session end: 16 writes across 7 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 3 reads | ~24431 tok |
+| 09:31 | Session end: 16 writes across 7 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 3 reads | ~24431 tok |
+| 09:37 | Created src/main/java/com/techstore/service/sync/AsbisCategoryResolver.java | — | ~1299 |
+| 09:37 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | reduced (-9 lines) | ~178 |
+| 09:37 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | reduced (-16 lines) | ~80 |
+| 09:38 | Created src/test/java/com/techstore/service/sync/AsbisCategoryResolverTest.java | — | ~1633 |
+| 09:39 | Created scripts/60_asbis_aliases_smart_devices_and_components.sql | — | ~1452 |
+| 13:10 | ASBIS mapping honors alias_of (AsbisCategoryResolver) + script 60 (9 aliases: smart watches/cameras, motherboards/cases/coolers) | AsbisCategoryResolver, AsbisSyncService, AsbisCategoryResolverTest, scripts/60_asbis_aliases_smart_devices_and_components.sql | 10/10 tests; feed simulation: 0 diff without aliases, 882 expected with; guards pass on prod; local tx OK | ~15k |
+| 09:45 | Session end: 21 writes across 11 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 4 reads | ~44305 tok |

@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 27771167,
-    "total_reads": 10283,
-    "total_writes": 17648,
+    "total_tokens_estimated": 27839903,
+    "total_reads": 10290,
+    "total_writes": 17685,
     "total_sessions": 97,
-    "anatomy_hits": 4834,
-    "anatomy_misses": 4105,
-    "repeated_reads_blocked": 4356,
-    "estimated_savings_vs_bare_cli": 22781850
+    "anatomy_hits": 4839,
+    "anatomy_misses": 4107,
+    "repeated_reads_blocked": 4358,
+    "estimated_savings_vs_bare_cli": 22801038
   },
   "sessions": [
     {
@@ -168940,6 +168940,267 @@
         "writes_count": 16,
         "repeated_reads_blocked": 1,
         "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-09-28-0824",
+      "started": "2026-09-28T05:24:18.840Z",
+      "ended": "2026-09-28T06:31:16.962Z",
+      "reads": [
+        {
+          "file": "/Users/user/.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/parameter_filters_canonical_layer.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ValiApiService.java",
+          "tokens_estimated": 9094,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_15_brightness_and_unmapped.sql",
+          "tokens_estimated": 4200,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/exception/SupplierCategoryGoneException.java",
+          "tokens_estimated": 162,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ValiApiService.java",
+          "tokens_estimated": 726,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ValiApiService.java",
+          "tokens_estimated": 300,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ValiApiService.java",
+          "tokens_estimated": 39,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 84,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 164,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 96,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/ValiApiServiceRetryTest.java",
+          "tokens_estimated": 1742,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_15_brightness_and_unmapped.sql",
+          "tokens_estimated": 3948,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_15_brightness_and_unmapped.sql",
+          "tokens_estimated": 246,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql",
+          "tokens_estimated": 1359,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql",
+          "tokens_estimated": 277,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql",
+          "tokens_estimated": 13,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql",
+          "tokens_estimated": 170,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_16_smart_devices_leftovers.sql",
+          "tokens_estimated": 1771,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 13294,
+        "output_tokens_estimated": 11137,
+        "reads_count": 3,
+        "writes_count": 16,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-09-28-0824",
+      "started": "2026-09-28T05:24:18.840Z",
+      "ended": "2026-09-28T06:45:12.229Z",
+      "reads": [
+        {
+          "file": "/Users/user/.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/parameter_filters_canonical_layer.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ValiApiService.java",
+          "tokens_estimated": 9094,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_15_brightness_and_unmapped.sql",
+          "tokens_estimated": 4200,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+          "tokens_estimated": 14900,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/exception/SupplierCategoryGoneException.java",
+          "tokens_estimated": 162,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ValiApiService.java",
+          "tokens_estimated": 726,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ValiApiService.java",
+          "tokens_estimated": 300,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/ValiApiService.java",
+          "tokens_estimated": 39,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 84,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 164,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 96,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/ValiApiServiceRetryTest.java",
+          "tokens_estimated": 1742,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_15_brightness_and_unmapped.sql",
+          "tokens_estimated": 3948,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_15_brightness_and_unmapped.sql",
+          "tokens_estimated": 246,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql",
+          "tokens_estimated": 1359,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql",
+          "tokens_estimated": 277,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql",
+          "tokens_estimated": 13,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/59_smart_watches_and_cameras_out_of_smart_devices.sql",
+          "tokens_estimated": 170,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/55_filters_curated_16_smart_devices_leftovers.sql",
+          "tokens_estimated": 1771,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/AsbisCategoryResolver.java",
+          "tokens_estimated": 1392,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+          "tokens_estimated": 191,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+          "tokens_estimated": 85,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/sync/AsbisCategoryResolverTest.java",
+          "tokens_estimated": 1750,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/scripts/60_asbis_aliases_smart_devices_and_components.sql",
+          "tokens_estimated": 1556,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 28194,
+        "output_tokens_estimated": 16111,
+        "reads_count": 4,
+        "writes_count": 21,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 3
       }
     }
   ],
