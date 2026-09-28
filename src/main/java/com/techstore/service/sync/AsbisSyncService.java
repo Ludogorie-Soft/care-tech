@@ -547,23 +547,14 @@ public class AsbisSyncService {
                 }
             });
 
-            // Load categories — only VISIBLE ones (show=true).
-            // Hidden categories are excluded so products are never assigned to them during sync.
-            List<Category> allCategoriesForProducts = categoryRepository.findByShowTrue();
-            Map<String, Category> rootCategoriesByName = new HashMap<>();
-            Map<String, Category> childCategoriesByParentAndName = new HashMap<>();
-            for (Category c : allCategoriesForProducts) {
-                if (c.getNameBg() == null) continue;
-                String normalizedName = c.getNameBg().toLowerCase().trim();
-                if (c.getParent() == null) {
-                    rootCategoriesByName.put(normalizedName, c);
-                } else {
-                    childCategoriesByParentAndName.put(c.getParent().getId() + ":::" + normalizedName, c);
-                }
-            }
+            // Products only ever go to categories the shop shows; a hidden ASBIS subcategory that is an
+            // alias of a visible category sends its products there (see AsbisCategoryResolver).
+            List<Category> allCategories = categoryRepository.findAll();
+            AsbisCategoryResolver categoryResolver = new AsbisCategoryResolver(allCategories);
 
             // Category id → Category lookup (used for accessory corrections)
-            Map<Long, Category> catsById = allCategoriesForProducts.stream()
+            Map<Long, Category> catsById = allCategories.stream()
+                    .filter(c -> Boolean.TRUE.equals(c.getShow()))
                     .collect(Collectors.toMap(Category::getId, c -> c, (e, d) -> e));
 
             List<Map<String, Object>> allProducts = asbisApiService.getAllProducts();
@@ -598,25 +589,9 @@ public class AsbisSyncService {
                     String productCode = getString(asbisProduct, "productcode");
                     if (productCode == null || productCode.isBlank()) { totalErrors++; continue; }
 
-                    // Resolve category: prefer producttype (L2 child under L1 parent), fallback productcategory (L1 root)
-                    String cat2 = getString(asbisProduct, "producttype");
-                    String cat1 = getString(asbisProduct, "productcategory");
-                    Category category = null;
-                    if (cat2 != null && !cat2.isBlank() && cat1 != null && !cat1.isBlank()) {
-                        // Find root parent first, then look for child under it (exact parent-child match)
-                        Category parent = rootCategoriesByName.get(cat1.toLowerCase().trim());
-                        if (parent != null) {
-                            category = childCategoriesByParentAndName.get(parent.getId() + ":::" + cat2.toLowerCase().trim());
-                        }
-                    }
-                    if (category == null && cat2 != null && !cat2.isBlank()) {
-                        // Fallback: try cat2 as a root category
-                        category = rootCategoriesByName.get(cat2.toLowerCase().trim());
-                    }
-                    if (category == null && cat1 != null && !cat1.isBlank()) {
-                        // Fallback: use L1 root category
-                        category = rootCategoriesByName.get(cat1.toLowerCase().trim());
-                    }
+                    // Resolve category: producttype (L2 child under the L1 root), then L2 as a root, then the L1 root
+                    Category category = categoryResolver.resolve(
+                            getString(asbisProduct, "productcategory"), getString(asbisProduct, "producttype"));
                     // Resolve manufacturer
                     String vendorName = getString(asbisProduct, "vendor");
                     Manufacturer manufacturer = null;
