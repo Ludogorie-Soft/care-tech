@@ -6,6 +6,7 @@ import com.techstore.dto.request.*;
 import com.techstore.entity.*;
 import com.techstore.enums.Platform;
 import com.techstore.enums.ProductStatus;
+import com.techstore.exception.SupplierCategoryGoneException;
 import com.techstore.repository.*;
 import com.techstore.service.ValiApiService;
 import com.techstore.util.LogHelper;
@@ -375,6 +376,8 @@ public class ValiSyncService {
 
             int categoryCounter = 0;
             int failedCategories = 0;
+            // Categories Vali has removed (it rejects the id): nothing to refresh, so not a failed run.
+            List<Long> goneCategories = new ArrayList<>();
             for (Category category : valiCategories) {
                 categoryCounter++;
 
@@ -406,6 +409,10 @@ public class ValiSyncService {
                         paramData.categories.add(category);
                     }
 
+                } catch (SupplierCategoryGoneException e) {
+                    goneCategories.add(category.getExternalId());
+                    log.warn("Vali no longer has category {} ('{}') — its parameters are kept as they are",
+                            category.getExternalId(), category.getNameBg());
                 } catch (Exception e) {
                     failedCategories++;
                     log.error("Error fetching parameters for category {}: {}",
@@ -545,7 +552,8 @@ public class ValiSyncService {
             logHelper.updateSyncLogSimple(syncLog, failedCategories > 0 ? LOG_STATUS_FAILED : LOG_STATUS_SUCCESS,
                     allParametersData.size(), created, 0, failedCategories,
                     String.format("Created: %d, Reused: %d, Options: %d, Stale (kept): %d, Failed categories: %d",
-                            created, reused, optionsCreated, stale, failedCategories),
+                            created, reused, optionsCreated, stale, failedCategories)
+                            + (goneCategories.isEmpty() ? "" : ", Removed by Vali: " + goneCategories),
                     startTime);
 
             log.info("=== Parameters Sync V4.1 Completed ===");

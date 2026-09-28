@@ -2,6 +2,7 @@ package com.techstore.service;
 
 import com.techstore.dto.external.*;
 import com.techstore.dto.request.*;
+import com.techstore.exception.SupplierCategoryGoneException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -161,10 +162,32 @@ public class ValiApiService {
         }
     }
 
+    /** Vali's answer (HTTP 400) for a category id it no longer has — the STEM section 698–705 since 2026-09-26. */
+    private static final String INVALID_CATEGORY_ID = "Invalid category id";
+
+    /**
+     * Whether a failed call is worth repeating. A 4xx other than 429 is Vali's final answer about the request:
+     * repeating it cost five backoff rounds (~155 s) per removed category in each nightly sync.
+     */
+    static boolean isRetryable(Throwable throwable) {
+        if (throwable instanceof WebClientResponseException ex) {
+            return ex.getStatusCode().is5xxServerError() || ex.getStatusCode().value() == 429;
+        }
+        return !(throwable instanceof DataBufferLimitException);
+    }
+
+    static boolean isCategoryGone(Throwable throwable) {
+        return throwable instanceof WebClientResponseException ex
+                && ex.getStatusCode().value() == 400
+                && ex.getResponseBodyAsString().contains(INVALID_CATEGORY_ID);
+    }
+
     /**
      * Get parameters by category (no pagination available).
      * An empty list means Vali has no parameters for the category (container categories).
      * A failed request throws, so the caller can tell a broken fetch apart from "no parameters".
+     *
+     * @throws SupplierCategoryGoneException when Vali no longer has the category
      */
     public List<ParameterRequestDto> getParametersByCategory(Long categoryId) {
         log.debug("Fetching parameters for category: {}", categoryId);
@@ -177,11 +200,13 @@ public class ValiApiService {
                 .bodyToMono(new ParameterizedTypeReference<List<ParameterRequestDto>>() {})
                 .timeout(Duration.ofMillis(timeout))
                 .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay))
-                        .filter(throwable -> !(throwable instanceof WebClientResponseException.NotFound)))
+                        .filter(ValiApiService::isRetryable))
                 .onErrorResume(WebClientResponseException.NotFound.class, ex -> {
                     log.warn("Vali has no parameter list for category {} (404)", categoryId);
                     return Mono.just(List.of());
                 })
+                .onErrorMap(ValiApiService::isCategoryGone,
+                        ex -> new SupplierCategoryGoneException(categoryId, "Vali no longer has category " + categoryId))
                 .block();
 
         return parameters != null ? parameters : List.of();
@@ -202,14 +227,19 @@ public class ValiApiService {
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<List<ProductRequestDto>>() {})
                     .timeout(Duration.ofMillis(timeout))
-                    .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay)))
+                    .retryWhen(Retry.backoff(retryAttempts, Duration.ofMillis(retryDelay))
+                            .filter(ValiApiService::isRetryable))
                     .onErrorResume(DataBufferLimitException.class, ex -> {
                         log.error("Response too large for category {} (exceeds 50MB buffer): {}", categoryId, ex.getMessage());
                         return Mono.just(List.of());
                     })
                     .onErrorResume(WebClientResponseException.class, ex -> {
-                        log.warn("Error fetching products for category {}: {} - {}",
-                                categoryId, ex.getStatusCode(), ex.getResponseBodyAsString());
+                        if (isCategoryGone(ex)) {
+                            log.warn("Vali no longer has category {} — no products to read", categoryId);
+                        } else {
+                            log.warn("Error fetching products for category {}: {} - {}",
+                                    categoryId, ex.getStatusCode(), ex.getResponseBodyAsString());
+                        }
                         return Mono.just(List.of());
                     })
                     .block();
