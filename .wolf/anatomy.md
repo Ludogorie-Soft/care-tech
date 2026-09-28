@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-28T05:55:36.625Z
-> Files: 778 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-09-28T06:14:01.675Z
+> Files: 783 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -436,6 +436,8 @@
 - `55_filters_curated_14_twins_and_long_tail.sql` — ============================================================================ (~3734 tok)
 - `55_filters_curated_15_brightness_and_unmapped.sql` — Партида 15 (2026-09-28), един DO блок + COMMIT: MOST „Brightness“ → „Яркост“ само в 50/249 (правило за име по категория), шаблони „N cd/m²“ по първото число (typ./sdr/min…typ, 1,300, nits), нови 275/380 cd/m²; 63-те несъпоставени → 24 стойности (HDD 5,400, портове, 144 Hz, 1/5/8 ms, DDR4/5, Micro-ATX, Class 10, 12+4 pin, проектори по родна резолюция, нови A6 и 1.65 mm) + 39 без стойност; „Гейминг конзоли“: не → Без оптично устройство, 512 GB, N/A; маха стари drop правила, засенчващи новите (~4200 tok)
 - `55_filters_curated_15_brightness_and_unmapped.sql` — ============================================================================ (~3898 tok)
+- `55_filters_curated_16_smart_devices_leftovers.sql` — Партида 16: IGNORE по име за AUTO групите „Размер на интелигентния контакт“ и „Описание на сензора“ (500), нова стойност „2.3 mm“ при обектива (шаблон, подредба 1.65·2.3·2.8…), „bluetooth 5.4“ и списък функции при „Звук“ → без стойност; един DO блок + COMMIT (~1500 tok)
+- `55_filters_curated_16_smart_devices_leftovers.sql` — ============================================================================ (~1653 tok)
 - `56_move_products_out_of_hidden_categories.sql` — Продължение на стъпка 2б: 67 видими продукта от скрити категории → видими цели (по id, с очаквана текуща категория), manually_categorized = TRUE, category_id_pre_phase5; откат по изричния списък. Дребната техника/смарт дом (29) НЕ влиза (~3500 tok)
 - `56_move_products_out_of_hidden_categories.sql` — ============================================================================ (~2279 tok)
 - `57_retire_remaining_home_appliances.sql` — Довършва скрипт 50: manually_hidden за всички продукти в 549/557/561/570/572/581/585/586/591/592 + видимите Aqara (500), Ubiquiti Access (548), Realme (325) — 32 продукта, 29 видими; 76 в 500 и 17 в 548 не са пипани (~2000 tok)
@@ -761,12 +763,12 @@
 - `BusinessLogicException.java` — Class: BusinessLogicException (~52 tok)
 - `DuplicateResourceException.java` — Class: DuplicateResourceException (~54 tok)
 - `ExternalApiException.java` — ExternalApiException: getStatusCode, getResponseBody (~209 tok)
-- `SupplierCategoryGoneException.java` — доставчикът вече няма наша категория (VALI: HTTP 400 „Invalid category id“); getCategoryId. Не е провален fetch (~120 tok)
 - `GlobalExceptionHandler.java` — RestController: GlobalExceptionHandler (~5811 tok)
 - `InsufficientStockException.java` — Class: InsufficientStockException (~54 tok)
 - `InvalidCredentialsException.java` — Class: InvalidCredentialsException (~55 tok)
 - `InvalidTokenException.java` — Class: InvalidTokenException (~52 tok)
 - `ResourceNotFoundException.java` — Class: ResourceNotFoundException (~54 tok)
+- `SupplierCategoryGoneException.java` — доставчикът вече няма наша категория (VALI: HTTP 400 „Invalid category id“); getCategoryId. Не е провален fetch (~120 tok)
 - `SupplierCategoryGoneException.java` — The supplier no longer has a category we still carry — its API rejects the id outright. Not a failed (~152 tok)
 - `SyncException.java` — Class: SyncException (~75 tok)
 - `TokenExpiredException.java` — Class: TokenExpiredException (~52 tok)
@@ -991,9 +993,9 @@
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
 - `TekraApiServicePagingTest.java` — Paging of the TEKRA product feed. Only page 1 used to be read, so no category went past 100 (~1473 tok)
 - `TekraApiServicePagingTest.java` — Пагинация на TEKRA фийда с mock RestTemplate: всички страници, повторена страница (игнориран page), празна последна, малка категория, провал на страница, 429×3, счупен XML (7 теста) (~1500 tok)
-- `ValiApiServiceRetryTest.java` — WebClient със stub exchangeFunction: 400 „Invalid category id“ → SupplierCategoryGoneException с 1 заявка, 404 → празен списък, 503/502 → retry, 500 → хвърля след retry, 401 → 1 заявка; продукти на изчезнала категория → празен списък (7 теста) (~1300 tok)
 - `TekraApiServiceXmlTest.java` — Парсване на TEKRA фийда: повторен prop_* таг → списък, други тагове → последната стойност, escaped <br/> остава текст (~600 tok)
 - `TekraApiServiceXmlTest.java` — Parsing of the TEKRA product feed ({@code action=browse&feed=1}). (~538 tok)
+- `ValiApiServiceRetryTest.java` — WebClient със stub exchangeFunction: 400 „Invalid category id“ → SupplierCategoryGoneException с 1 заявка, 404 → празен списък, 503/502 → retry, 500 → хвърля след retry, 401 → 1 заявка; продукти на изчезнала категория → празен списък (7 теста) (~1300 tok)
 - `ValiApiServiceRetryTest.java` — From 2026-09-26 Vali answers the ids of its removed STEM section with HTTP 400 {"error":"Invalid cat (~1626 tok)
 
 ## src/test/java/com/techstore/service/filter/
