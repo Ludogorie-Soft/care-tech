@@ -1,5 +1,6 @@
 package com.techstore.service;
 
+import com.techstore.config.ShippingConfig;
 import com.techstore.dto.request.*;
 import com.techstore.dto.response.*;
 import com.techstore.entity.Category;
@@ -33,6 +34,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,6 +56,7 @@ public class ProductService {
     private final ManufacturerMapper manufacturerMapper;
     private final ProductParameterRepository productParameterRepository;
     private final CacheManager cacheManager;
+    private final ShippingConfig shippingConfig;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -1025,6 +1028,11 @@ public class ProductService {
         }
         dto.setWarranty(p.getWarranty());
         dto.setWeight(p.getWeight());
+        if (p.getFinalPrice() != null) {
+            BigDecimal grossPrice = p.getFinalPrice().multiply(new BigDecimal("1.20")).setScale(2, RoundingMode.HALF_UP);
+            dto.setDeliveryCharge(shippingConfig.singleProductDelivery(
+                    grossPrice, p.getWeight(), p.getCategory() != null ? p.getCategory().getId() : null));
+        }
         Map<Long, ProductParameterResponseDto> uniqueSpecs = new HashMap<>();
         for (ProductParameter pp : p.getProductParameters()) {
             if (pp.getParameter() == null || pp.getParameterOption() == null) continue;

@@ -337,8 +337,13 @@ tbi:
 shipping:
   cost:
     default: ${SHIPPING_COST_DEFAULT:3.50}            # EUR с ДДС, до офис на Speedy
+    max-weight-kg: ${SHIPPING_COST_MAX_WEIGHT_KG:3}   # над това тегло фиксираната цена не важи — по тарифа на куриера
     free:
       threshold: ${SHIPPING_FREE_THRESHOLD:170.00}    # EUR с ДДС — над тази сума доставката до офис е безплатна
+      max-weight-kg: ${SHIPPING_FREE_MAX_WEIGHT_KG:10} # над това тегло безплатната доставка не важи — по тарифа на куриера
+      # Никога безплатно: Непрекъсваеми токозахранващи у-ва (72), Управляеми UPS-и (73), Неуправляеми UPS-и (74),
+      # Батерии за UPS и СОТ-аларми (203), Телевизори (139), Настолни компютри (32)
+      excluded-category-ids: ${SHIPPING_FREE_EXCLUDED_CATEGORY_IDS:72,73,74,203,139,32}
   delivery:
     days: ${SHIPPING_DELIVERY_DAYS:2}                 # работни дни
 

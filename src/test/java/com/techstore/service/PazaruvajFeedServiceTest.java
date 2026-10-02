@@ -13,6 +13,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,6 +41,9 @@ class PazaruvajFeedServiceTest {
         ShippingConfig shippingConfig = new ShippingConfig();
         ReflectionTestUtils.setField(shippingConfig, "defaultShippingCost", new BigDecimal("3.50"));
         ReflectionTestUtils.setField(shippingConfig, "freeShippingThreshold", new BigDecimal("170.00"));
+        ReflectionTestUtils.setField(shippingConfig, "freeShippingMaxWeightKg", new BigDecimal("10"));
+        ReflectionTestUtils.setField(shippingConfig, "defaultShippingMaxWeightKg", new BigDecimal("3"));
+        ReflectionTestUtils.setField(shippingConfig, "freeShippingExcludedCategoryIds", Set.of(72L, 73L, 74L, 203L, 139L, 32L));
         ReflectionTestUtils.setField(shippingConfig, "deliveryDays", 2);
 
         service = new PazaruvajFeedService(productRepository, shippingConfig);
@@ -71,6 +75,45 @@ class PazaruvajFeedServiceTest {
         assertEquals("безплатно", tag(feedFor(product(3L, "141.67")), "DeliveryCost"));
         // 141.66 net → 169.99 with VAT: paid
         assertEquals("3.50 EUR", tag(feedFor(product(4L, "141.66")), "DeliveryCost"));
+    }
+
+    @Test
+    @DisplayName("Over 170 € and over 10 kg: courier's tariff, so no DeliveryCost at all")
+    void heavyProductOverThresholdHasNoDeliveryCost() {
+        PazaruvajProductProjection chair = product(5L, "350.00"); // 420.00 € with VAT
+        when(chair.getWeight()).thenReturn(new BigDecimal("30.00"));
+
+        String feed = feedFor(chair);
+
+        assertEquals("2 работни дни", tag(feed, "DeliveryTime"));
+        assertFalse(feed.contains("<DeliveryCost>"), "a heavy product must not claim free delivery");
+    }
+
+    @Test
+    @DisplayName("Exactly 10 kg over 170 € still ships free")
+    void tenKilogramsShipsFree() {
+        PazaruvajProductProjection ups = product(6L, "200.00"); // 240.00 € with VAT
+        when(ups.getWeight()).thenReturn(new BigDecimal("10.00"));
+
+        assertEquals("безплатно", tag(feedFor(ups), "DeliveryCost"));
+    }
+
+    @Test
+    @DisplayName("Under 170 € and over 3 kg: courier's tariff, so no DeliveryCost")
+    void heavyProductUnderThresholdHasNoDeliveryCost() {
+        PazaruvajProductProjection pcCase = product(7L, "100.00"); // 120.00 € with VAT
+        when(pcCase.getWeight()).thenReturn(new BigDecimal("8.50"));
+
+        assertFalse(feedFor(pcCase).contains("<DeliveryCost>"));
+    }
+
+    @Test
+    @DisplayName("A TV over 170 € never claims free delivery, whatever it weighs")
+    void excludedCategoryHasNoDeliveryCost() {
+        PazaruvajProductProjection tv = product(8L, "500.00"); // 600.00 € with VAT
+        when(tv.getCategoryId()).thenReturn(139L);
+
+        assertFalse(feedFor(tv).contains("<DeliveryCost>"));
     }
 
     private String feedFor(PazaruvajProductProjection product) {

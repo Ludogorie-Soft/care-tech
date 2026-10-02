@@ -1,11 +1,13 @@
 package com.techstore.config;
 
+import com.techstore.enums.DeliveryCharge;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,6 +26,9 @@ class ShippingConfigTest {
         config = new ShippingConfig();
         ReflectionTestUtils.setField(config, "defaultShippingCost", new BigDecimal("3.50"));
         ReflectionTestUtils.setField(config, "freeShippingThreshold", new BigDecimal("170.00"));
+        ReflectionTestUtils.setField(config, "freeShippingMaxWeightKg", new BigDecimal("10"));
+        ReflectionTestUtils.setField(config, "defaultShippingMaxWeightKg", new BigDecimal("3"));
+        ReflectionTestUtils.setField(config, "freeShippingExcludedCategoryIds", Set.of(72L, 73L, 74L, 203L, 139L, 32L));
         ReflectionTestUtils.setField(config, "deliveryDays", 2);
     }
 
@@ -50,5 +55,30 @@ class ShippingConfigTest {
     void isFreeShippingBoundary() {
         assertFalse(config.isFreeShipping(new BigDecimal("169.99")));
         assertTrue(config.isFreeShipping(new BigDecimal("170.00")));
+    }
+
+    @Test
+    @DisplayName("Under 170 €: flat rate up to 3 kg, courier's tariff above; a missing weight counts as light")
+    void singleProductUnderThreshold() {
+        assertEquals(DeliveryCharge.FIXED, config.singleProductDelivery(new BigDecimal("169.99"), new BigDecimal("3.00"), 1L));
+        assertEquals(DeliveryCharge.COURIER_TARIFF, config.singleProductDelivery(new BigDecimal("169.99"), new BigDecimal("3.01"), 1L));
+        assertEquals(DeliveryCharge.FIXED, config.singleProductDelivery(new BigDecimal("169.99"), null, 1L));
+    }
+
+    @Test
+    @DisplayName("From 170 €: free up to 10 kg, courier's tariff above")
+    void singleProductOverThreshold() {
+        assertEquals(DeliveryCharge.FREE, config.singleProductDelivery(new BigDecimal("170.00"), new BigDecimal("10.00"), 1L));
+        assertEquals(DeliveryCharge.COURIER_TARIFF, config.singleProductDelivery(new BigDecimal("170.00"), new BigDecimal("10.01"), 1L));
+        assertEquals(DeliveryCharge.FREE, config.singleProductDelivery(new BigDecimal("170.00"), null, 1L));
+    }
+
+    @Test
+    @DisplayName("UPS devices, UPS batteries, TVs and desktop computers never ship free")
+    void excludedCategoriesNeverShipFree() {
+        assertEquals(DeliveryCharge.COURIER_TARIFF, config.singleProductDelivery(new BigDecimal("500.00"), new BigDecimal("1.00"), 139L));
+        assertEquals(DeliveryCharge.COURIER_TARIFF, config.singleProductDelivery(new BigDecimal("500.00"), null, 32L));
+        // Under 170 € the exclusion changes nothing — the flat rate applies as for any light parcel
+        assertEquals(DeliveryCharge.FIXED, config.singleProductDelivery(new BigDecimal("60.00"), new BigDecimal("2.00"), 203L));
     }
 }

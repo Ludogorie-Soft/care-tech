@@ -209,11 +209,15 @@ public class PazaruvajFeedService {
             }
 
             // Pazaruvaj compares both with the product page: one number of days, and the
-            // delivery cost of an order holding just this product (to a Speedy office)
+            // delivery cost of an order holding just this product (to a Speedy office).
+            // The courier's tariff is not a fixed number, so then DeliveryCost is left out.
             if (includeDelivery) {
                 appendTag(sb, "DeliveryTime", deliveryTime);
-                appendTag(sb, "DeliveryCost",
-                        shippingConfig.isFreeShipping(priceVat) ? "безплатно" : paidDeliveryCost);
+                switch (shippingConfig.singleProductDelivery(priceVat, p.getWeight(), p.getCategoryId())) {
+                    case FIXED -> appendTag(sb, "DeliveryCost", paidDeliveryCost);
+                    case FREE -> appendTag(sb, "DeliveryCost", "безплатно");
+                    case COURIER_TARIFF -> { }
+                }
             }
 
             if (isValidEan(p.getBarcode())) {

@@ -1,5 +1,6 @@
 package com.techstore.dto.response;
 
+import com.techstore.enums.DeliveryCharge;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,6 +35,8 @@ public class ProductResponseDTO {
     private List<String> additionalImages;
     private Integer warranty;
     private BigDecimal weight;
+    /** Delivery of this product alone to a Speedy office — the same value the Pazaruvaj feed sends. */
+    private DeliveryCharge deliveryCharge;
     private CategorySummaryDTO category;
     private ManufacturerSummaryDto manufacturer;
     private List<ProductParameterResponseDto> specifications;
