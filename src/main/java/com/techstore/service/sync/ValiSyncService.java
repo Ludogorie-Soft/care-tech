@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.Objects;
 
@@ -40,6 +41,9 @@ import static com.techstore.util.LogHelper.LOG_STATUS_SUCCESS;
 @RequiredArgsConstructor
 @Slf4j
 public class ValiSyncService {
+
+    /** The whole word only — "Lavalier" and "Validated" stay as they are. */
+    private static final Pattern VALI_BRAND = Pattern.compile("\\s*\\bVALI\\b");
 
     private final ValiApiService valiApiService;
     private final CategoryRepository categoryRepository;
@@ -1200,12 +1204,24 @@ public class ValiSyncService {
         if (extProduct.getName() != null) {
             extProduct.getName().forEach(name -> {
                 if ("bg".equals(name.getLanguageCode())) {
-                    product.setNameBg(name.getText());
+                    product.setNameBg(removeValiBrand(name.getText()));
                 } else if ("en".equals(name.getLanguageCode())) {
-                    product.setNameEn(name.getText());
+                    product.setNameEn(removeValiBrand(name.getText()));
                 }
             });
         }
+    }
+
+    /**
+     * VALI's own products carry its brand in the name ("Настолен компютър VALI OFFICE BASIC");
+     * the shop sells them without it. Runs on every sync, because the sync rewrites names nightly.
+     */
+    static String removeValiBrand(String name) {
+        if (name == null || !VALI_BRAND.matcher(name).find()) {
+            return name;
+        }
+        String cleaned = VALI_BRAND.matcher(name).replaceAll("").replaceAll("\\s{2,}", " ").trim();
+        return cleaned.isEmpty() ? name : cleaned;
     }
 
     private static void setDescriptionToProduct(Product product, ProductRequestDto extProduct) {
