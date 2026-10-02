@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T11:44:56.265Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T12:25:28.567Z
 > Files: 797 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
@@ -109,7 +109,7 @@
 - `ComparePage.jsx` — EURO_RATE — renders table (~3958 tok)
 - `Contact.jsx` — Contact — renders form (~2804 tok)
 - `Cookies.jsx` — Responsive Cookies / Cookie Policy component (~3474 tok)
-- `DeliveryPage.jsx` — DeliveryPage (~2495 tok)
+- `DeliveryPage.jsx` — shippingCost (~2626 tok)
 - `ForUs.jsx` — ForUs (~2823 tok)
 - `InstallmentPurchasePage.jsx` — InstallmentPurchasePage (~3844 tok)
 - `OurClients.jsx` — clients (~2829 tok)

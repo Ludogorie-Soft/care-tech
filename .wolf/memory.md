@@ -4060,3 +4060,12 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 14:50 | Pazaruvaj DeliveryTime/DeliveryCost от ShippingConfig (2 работни дни; безплатно ≥128 € с ДДС, иначе 3.50 EUR); единен праг 128 € с ДДС в бекенд (OrderService gross) и фронтенд (utils.js константи; Cart, FreeDeliveryWarningModal, ProductPage видим ред, DeliveryPage); 2 нови теста | ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml, ShippingConfigTest, PazaruvajFeedServiceTest, care-tech-ui/* | 429/429 зелени, проверено в браузъра | ~60k |
 | 14:44 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/pazaruvaj_delivery_fields.md | — | ~353 |
 | 14:45 | Session end: 24 writes across 11 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 6 reads | ~8460 tok |
+| 14:46 | Session end: 24 writes across 11 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 6 reads | ~8460 tok |
+| 14:49 | Session end: 24 writes across 11 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 6 reads | ~8460 tok |
+| 14:59 | Деплой проверен: прод фийд 7217 продукта — всички „2 работни дни“, 1877 „безплатно“ / 5340 „3.50 EUR“, 0 несъответствия спрямо прага 128 €; продуктовата страница в прод показва реда за доставка | feed.xml, caretech.bg | ✓ | ~5k |
+| 14:58 | Session end: 24 writes across 11 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 6 reads | ~8460 tok |
+| 15:25 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | expanded (+11 lines) | ~237 |
+| 15:25 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | inline fix | ~39 |
+| 15:25 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | inline fix | ~45 |
+| 15:10 | Праг за безплатна доставка 128 → 170 € с ДДС (ShippingConfig, application.yml, utils.js); DeliveryPage текст + SEO описание вече от константите; тестове на 170; проверено в браузъра (139.63 € → 3.50, 179.40 € → безплатна, количка, /delivery-and-payment) | ShippingConfig.java, application.yml, ShippingConfigTest, PazaruvajFeedServiceTest, utils.js, DeliveryPage.jsx | ✓ 7/7 | ~15k |
+| 15:27 | Session end: 27 writes across 11 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 6 reads | ~8781 tok |

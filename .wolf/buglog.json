@@ -9892,6 +9892,38 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-10-02T11:50:00.000Z"
+    },
+    {
+      "id": "bug-598",
+      "timestamp": "2026-10-02T12:25:28.069Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/pages/DeliveryPage.jsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 8→19 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T12:25:28.070Z"
+    },
+    {
+      "id": "bug-599",
+      "timestamp": "2026-10-02T12:25:28.591Z",
+      "error_message": "Wrong reference: 128 should be freeFrom",
+      "file": "../../care-tech-ui/src/pages/DeliveryPage.jsx",
+      "root_cause": "Used \"128\" instead of \"freeFrom\"",
+      "fix": "Changed 128 → freeFrom",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T12:25:28.591Z"
     }
   ]
 }
