@@ -4069,3 +4069,45 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 15:25 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | inline fix | ~45 |
 | 15:10 | Праг за безплатна доставка 128 → 170 € с ДДС (ShippingConfig, application.yml, utils.js); DeliveryPage текст + SEO описание вече от константите; тестове на 170; проверено в браузъра (139.63 € → 3.50, 179.40 € → безплатна, количка, /delivery-and-payment) | ShippingConfig.java, application.yml, ShippingConfigTest, PazaruvajFeedServiceTest, utils.js, DeliveryPage.jsx | ✓ 7/7 | ~15k |
 | 15:27 | Session end: 27 writes across 11 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 6 reads | ~8781 tok |
+| 15:28 | Session end: 27 writes across 11 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 6 reads | ~8781 tok |
+| 15:39 | Edited src/main/java/com/techstore/dto/pazaruvaj/PazaruvajProductProjection.java | 2→4 lines | ~38 |
+| 15:39 | Edited src/main/java/com/techstore/config/ShippingConfig.java | modified isFreeShipping() | ~238 |
+| 15:39 | Edited src/main/resources/application.yml | 2→3 lines | ~68 |
+| 15:39 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | added 2 condition(s) | ~202 |
+| 15:40 | Edited ../../care-tech-ui/src/utils/utils.js | 2→3 lines | ~52 |
+| 15:40 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | 10→15 lines | ~246 |
+| 15:40 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | 1→2 lines | ~113 |
+| 15:40 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | 4→5 lines | ~38 |
+| 15:40 | Edited ../../care-tech-ui/src/components/cart/FreeDeliveryWarningModal.jsx | inline fix | ~30 |
+| 15:40 | Edited ../../care-tech-ui/src/components/cart/FreeDeliveryWarningModal.jsx | inline fix | ~30 |
+| 15:40 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | 3→7 lines | ~124 |
+| 15:40 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | inline fix | ~56 |
+| 15:40 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | 6→8 lines | ~67 |
+| 15:40 | Edited ../../care-tech-ui/src/pages/Cart.jsx | 5→10 lines | ~162 |
+| 15:40 | Edited ../../care-tech-ui/src/pages/Cart.jsx | 1→6 lines | ~39 |
+| 15:35 | Безплатна доставка само до 10 кг: ShippingConfig.isOverFreeShippingWeight + max-weight-kg; weight в 3-те feed заявки + projection; фийд без DeliveryCost над 170 € и >10 кг; фронтенд FREE_SHIPPING_MAX_WEIGHT_KG — ред под цената, прозорец, предупреждение, DeliveryPage (+SEO), бележка в количката; 4 нови теста | ShippingConfig, PazaruvajFeedService, ProductRepository, PazaruvajProductProjection, application.yml, тестове, care-tech-ui/* | 432/432, SQL проверен в прод (read-only), браузър ✓ | ~30k |
+| 15:44 | Session end: 42 writes across 12 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 6 reads | ~10318 tok |
+| 15:48 | Edited src/main/java/com/techstore/config/ShippingConfig.java | added 2 condition(s) | ~523 |
+| 15:48 | Edited src/main/java/com/techstore/config/ShippingConfig.java | added 2 import(s) | ~64 |
+| 15:48 | Edited src/main/resources/application.yml | 5→9 lines | ~211 |
+| 15:48 | Edited src/main/java/com/techstore/dto/pazaruvaj/PazaruvajProductProjection.java | 2→3 lines | ~15 |
+| 15:48 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | modified if() | ~191 |
+| 15:48 | Edited src/main/java/com/techstore/dto/response/ProductResponseDTO.java | 2→4 lines | ~48 |
+| 15:48 | Edited src/main/java/com/techstore/dto/response/ProductResponseDTO.java | added 1 import(s) | ~21 |
+| 15:49 | Edited src/main/java/com/techstore/service/ProductService.java | added 1 import(s) | ~22 |
+| 15:49 | Edited src/main/java/com/techstore/service/ProductService.java | 1→2 lines | ~25 |
+| 15:49 | Edited src/main/java/com/techstore/service/ProductService.java | added 1 condition(s) | ~120 |
+| 15:50 | Edited ../../care-tech-ui/src/utils/utils.js | 2→5 lines | ~116 |
+| 15:50 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | 7→10 lines | ~79 |
+| 15:50 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | inline fix | ~36 |
+| 15:50 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | 11→11 lines | ~252 |
+| 15:50 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | Number() → backend() | ~334 |
+| 15:50 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | added optional chaining | ~84 |
+| 15:51 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | 4→5 lines | ~248 |
+| 15:51 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | 4→6 lines | ~46 |
+| 15:51 | Edited ../../care-tech-ui/src/components/cart/FreeDeliveryWarningModal.jsx | 2→5 lines | ~77 |
+| 15:51 | Edited ../../care-tech-ui/src/components/cart/FreeDeliveryWarningModal.jsx | 1→6 lines | ~40 |
+| 15:51 | Edited ../../care-tech-ui/src/pages/Cart.jsx | 5→10 lines | ~192 |
+| 15:51 | Edited ../../care-tech-ui/src/pages/Cart.jsx | 3→4 lines | ~34 |
+| 16:05 | Текст „Доставка и плащане“ по указание (3 кг / 10 кг / изключения) + DeliveryCharge enum и ShippingConfig.singleProductDelivery; фийд (category_id, weight) и ProductResponseDTO.deliveryCharge; ProductPage показва deliveryCharge; прозорец, предупреждение, бележки в количката; 3 нови теста (ProductServiceDeliveryChargeTest) + разширени | ShippingConfig, DeliveryCharge, PazaruvajFeedService, ProductRepository, ProductService, ProductResponseDTO, application.yml, тестове, care-tech-ui/* | 436+3 зелени, SQL в прод (read-only), браузър ✓ | ~60k |
+| 15:56 | Session end: 64 writes across 14 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 7 reads | ~13813 tok |

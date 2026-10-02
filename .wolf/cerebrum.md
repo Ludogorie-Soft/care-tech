@@ -870,3 +870,21 @@ spring-retry — не посягай към `@Retryable`. VALI ползва WebC
 - [2026-10-02] `curl` към https://www.caretech.bg/api/... с подразбиращия се User-Agent връща празен отговор (exit 52, HTTP 000) — nginx режe ботове по UA. Това НЕ значи, че сървърът е паднал. Ползвай `curl -A "Mozilla/5.0 ..."`.
 - Проверка на прод фийда: `curl -A "Mozilla/5.0" https://www.caretech.bg/api/pazaruvaj/feed.xml` (~24 MB, ~7200 продукта) → `grep -oE "<Delivery(Time|Cost)>[^<]*" | sort | uniq -c`.
 - [2026-10-02, по-късно] Потребителят вдигна прага за безплатна доставка от 128 € на **170 € с ДДС**.
+
+## Key Learnings (тегло и безплатна доставка, 2026-10-02)
+- **Безплатната доставка (≥170 € с ДДС) важи само за пратки до 10 кг** — `shipping.cost.free.max-weight-kg` / `ShippingConfig.isOverFreeShippingWeight()` / `FREE_SHIPPING_MAX_WEIGHT_KG` в `utils.js`. Над 10 кг → „според тарифите на куриера“.
+- `products.weight` е в **кг** и се попълва САМО от VALI (3983 от 4506). ASBIS, MOST и TEKRA нямат тегло → липсващо тегло се брои за леко (безплатно).
+- Фийдът за Pazaruvaj: над прага и над 10 кг → **без таг `DeliveryCost`** (тарифата на куриера не е число, а Pazaruvaj приема само число или „безплатно“). Към 2026-10-02: 5802 × 3.50 EUR, 1313 × безплатно, 102 без DeliveryCost.
+- Количката и бекендът НЕ гледат теглото (решение на потребителя) — количката само добавя бележка „за пратки до 10 кг“ под „БЕЗПЛАТНО“.
+- Под 170 € и над 10 кг сайтът/фийдът все още казват 3.50 € (страницата пише „до 3 кг“) — неуточнено от потребителя.
+
+## Key Learnings (правила за доставка на продукт, 2026-10-02 — заменя частите за 10 кг по-горе)
+- **Правилата за ЕДИН продукт са само в `ShippingConfig.singleProductDelivery(grossPrice, weightKg, categoryId)` → `DeliveryCharge` (FIXED / FREE / COURIER_TARIFF).** Ползват го фийдът за Pazaruvaj (FIXED → „3.50 EUR“, FREE → „безплатно“, COURIER_TARIFF → без таг DeliveryCost) и `ProductService.convertToResponseDTO` (поле `deliveryCharge` в ProductResponseDTO). Фронтендът (`ProductPage.jsx`) само показва `item.deliveryCharge` — НЕ смята правилата сам.
+- Правила: под 170 € → 3.50 € до 3 кг, над 3 кг куриер; от 170 € → безплатно до 10 кг, над 10 кг куриер; изключени категории (72, 73, 74 UPS-и; 203 Батерии за UPS; 139 Телевизори; 32 Настолни компютри — и конфигурации, и маркови) → куриер от 170 €. Под 170 € изключението не променя нищо.
+- Конфигурация: `shipping.cost.max-weight-kg`, `shipping.cost.free.max-weight-kg`, `shipping.cost.free.excluded-category-ids` (чете се с `#{'${...}'.split(',')}` → Set<Long>, както в ValiSyncService).
+- Текстът на „Доставка и плащане“ е зададен дума по дума от потребителя (2026-10-02); списъкът с изключения е константа `FREE_SHIPPING_EXCLUSIONS` в utils.js.
+- Към 2026-10-02 фийдът: 5616 × 3.50 EUR, 1250 × безплатно, 351 без DeliveryCost.
+- Количката и бекендът за поръчката НЕ гледат тегло/категории (решение на потребителя) — количката има само бележки „за пратки до 3 кг“ / „за пратки до 10 кг“.
+
+## Do-Not-Repeat (локална проверка, 2026-10-02)
+- `/tmp/techstore-local/application-localaudit.properties` вече го няма — локален бекенд без него рискува scheduler-и/имейли. Проверка на фронтенда без бекенд: подмени XHR отговора на `products/{id}?language=bg` в браузъра и навигирай с `history.pushState` + `popstate` (без презареждане).

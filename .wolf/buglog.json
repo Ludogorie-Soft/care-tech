@@ -9924,6 +9924,134 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-10-02T12:25:28.591Z"
+    },
+    {
+      "id": "bug-600",
+      "timestamp": "2026-10-02T12:39:04.664Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/config/ShippingConfig.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T12:39:04.664Z"
+    },
+    {
+      "id": "bug-601",
+      "timestamp": "2026-10-02T12:39:20.948Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/PazaruvajFeedService.java",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 7→12 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T12:39:20.948Z"
+    },
+    {
+      "id": "bug-602",
+      "timestamp": "2026-10-02T12:40:25.459Z",
+      "error_message": "Wrong reference: Speedy should be FREE_SHIPPING_MAX_WEIGHT_KG",
+      "file": "../../care-tech-ui/src/components/cart/FreeDeliveryWarningModal.jsx",
+      "root_cause": "Used \"Speedy\" instead of \"FREE_SHIPPING_MAX_WEIGHT_KG\"",
+      "fix": "Changed Speedy → FREE_SHIPPING_MAX_WEIGHT_KG",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T12:40:25.459Z"
+    },
+    {
+      "id": "bug-603",
+      "timestamp": "2026-10-02T12:48:37.480Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/config/ShippingConfig.java",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 16→39 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T12:48:37.480Z"
+    },
+    {
+      "id": "bug-604",
+      "timestamp": "2026-10-02T12:49:11.027Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T12:49:11.027Z"
+    },
+    {
+      "id": "bug-605",
+      "timestamp": "2026-10-02T12:50:54.744Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T12:50:54.744Z"
+    },
+    {
+      "id": "bug-606",
+      "timestamp": "2026-10-02T12:51:07.910Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/pages/ProductPage.jsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 4→5 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T12:51:07.910Z"
+    },
+    {
+      "id": "bug-607",
+      "timestamp": "2026-10-02T12:51:32.856Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/pages/Cart.jsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 5→10 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T12:51:32.856Z"
     }
   ]
 }

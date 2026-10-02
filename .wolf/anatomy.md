@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T12:25:28.567Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T12:51:33.096Z
 > Files: 797 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
@@ -70,7 +70,7 @@
 
 ## ../../care-tech-ui/src/components/cart/
 
-- `FreeDeliveryWarningModal.jsx` — FreeDeliveryWarningModal (~969 tok)
+- `FreeDeliveryWarningModal.jsx` — FreeDeliveryWarningModal (~1043 tok)
 
 ## ../../care-tech-ui/src/components/compare/
 
@@ -101,7 +101,7 @@
 
 - `Blog.jsx` — formatDate (~2804 tok)
 - `BlogPostPage.jsx` — formatDate (~2609 tok)
-- `Cart.jsx` — EURO_RATE (~16749 tok)
+- `Cart.jsx` — EURO_RATE (~16966 tok)
 - `Category.jsx` — Category (~6664 tok)
 - `CategoryList.jsx` — CategoryList (~1407 tok)
 - `Certifications.jsx` — Grid от 6 сертификата: Hikvision HCSA-SaaS, CGSA-CCTV, HCSA-CCTV ×2 (Детелин, Любослав) на 1-4; OCNA (TP-Link Omada) и DHCA-DoLynk (Dahua) на 5-6; alt = надпис в lightbox-а (~1048 tok)
@@ -109,13 +109,13 @@
 - `ComparePage.jsx` — EURO_RATE — renders table (~3958 tok)
 - `Contact.jsx` — Contact — renders form (~2804 tok)
 - `Cookies.jsx` — Responsive Cookies / Cookie Policy component (~3474 tok)
-- `DeliveryPage.jsx` — shippingCost (~2626 tok)
+- `DeliveryPage.jsx` — maxWeight (~2808 tok)
 - `ForUs.jsx` — ForUs (~2823 tok)
 - `InstallmentPurchasePage.jsx` — InstallmentPurchasePage (~3844 tok)
 - `OurClients.jsx` — clients (~2829 tok)
 - `OurServices.jsx` — OurServices — renders form (~3552 tok)
 - `Policy.jsx` — sections (~4978 tok)
-- `ProductPage.jsx` — EURO_RATE (~10869 tok)
+- `ProductPage.jsx` — EURO_RATE (~11136 tok)
 - `ReturnPolicyPage.jsx` — sections (~4896 tok)
 - `SearchPage.jsx` — SearchPage (~2180 tok)
 
@@ -215,7 +215,7 @@
 - `partners.js` — Exports partners (~425 tok)
 - `slugify.js` — Exports slugify (~217 tok)
 - `tokenRefresh.js` — Exports setupTokenRefresh (~568 tok)
-- `utils.js` — Exports SITE_URL, displaySpecs, ORDER_FORMS, getStatusBadge + 7 more (~715 tok)
+- `utils.js` — Exports SITE_URL, displaySpecs, ORDER_FORMS, getStatusBadge + 10 more (~808 tok)
 
 ## ./
 
@@ -496,7 +496,7 @@
 - `SearchConfig.java` — Seconds a single search query may run before the driver cancels it. (~610 tok)
 - `SearchIndexManager.java` — app.search.postgresql.performance-test was already in application.yml but nothing (~4263 tok)
 - `SecurityConfig.java` — Configuration: SecurityConfig (~2685 tok)
-- `ShippingConfig.java` — Delivery terms of the shop — the single source for the order total and the Pazaruvaj feed. (~519 tok)
+- `ShippingConfig.java` — Delivery terms of the shop — the single source for the order total and the Pazaruvaj feed. (~975 tok)
 - `SlugRegenerationRunner.java` — Component: SlugRegenerationRunner (~401 tok)
 - `SpeedyConfig.java` — Configuration: SpeedyConfig (~136 tok)
 - `TbiConfig.java` — AES-256-CTR encryption key provided by TBI for the BIVD merchant account. (~402 tok)
@@ -583,7 +583,7 @@
 
 - `PazaruvajAttributeProjection.java` — Class: PazaruvajAttributeProjection (~45 tok)
 - `PazaruvajFeedConfig.java` — ALL | CATEGORY | PRODUCTS (~143 tok)
-- `PazaruvajProductProjection.java` — Class: PazaruvajProductProjection (~114 tok)
+- `PazaruvajProductProjection.java` — Kilograms; only VALI sends it, so it is null for most other products. (~150 tok)
 - `PazaruvajProductProjection.java` — Class: PazaruvajProductProjection (~109 tok)
 
 ## src/main/java/com/techstore/dto/request/
@@ -662,7 +662,7 @@
 - `ProductImageResponseDto.java` — Class: ProductImageResponseDto (~61 tok)
 - `ProductImageUploadResponseDTO.java` — Class: ProductImageUploadResponseDTO (~121 tok)
 - `ProductParameterResponseDto.java` — Class: ProductParameterResponseDto (~162 tok)
-- `ProductResponseDTO.java` — Class: ProductResponseDTO (~388 tok)
+- `ProductResponseDTO.java` — Delivery of this product alone to a Speedy office — the same value the Pazaruvaj feed sends. (~485 tok)
 - `ProductSearchResponse.java` — Class: ProductSearchResponse (~156 tok)
 - `ProductSearchResult.java` — Class: ProductSearchResult (~221 tok)
 - `ProductSummaryDto.java` — Class: ProductSummaryDto (~95 tok)
@@ -753,6 +753,8 @@
 - `UserFavorite.java` — Entity: UserFavorite (~211 tok)
 
 ## src/main/java/com/techstore/enums/
+
+- `DeliveryCharge.java` — FIXED / FREE / COURIER_TARIFF: доставка на един продукт до офис на Speedy (ред под цената + DeliveryCost във фийда) (~120 tok)
 
 - `BlogPostStatus.java` — Class: BlogPostStatus (~27 tok)
 - `OrderStatus.java` — Class: OrderStatus (~54 tok)
@@ -845,10 +847,10 @@
 - `MostApiService.java` — Тегли и парсва MOST XML feed-а (~17 MB, ~6100 продукта), кеш 10 мин. `fetchXmlWithRetry()` ХВЪРЛЯ `ExternalApiException` при празно тяло/HTTP грешка/счупен XML — вече не връща празен списък. 4 опита, backoff 5→10→20s. `@Qualifier("mostRestTemplate")` (~4936 tok)
 - `OrderService.java` — Creates a new order (~8716 tok)
 - `ParameterService.java` — Service: ParameterService (~9601 tok)
-- `PazaruvajFeedService.java` — XML/CSV фийд за pazaruvaj.com, кеширан, обновява се на 2 ч. DeliveryTime/DeliveryCost идват от ShippingConfig за всеки продукт („2 работни дни“; „безплатно“ ако цена с ДДС ≥ 128 €, иначе „3.50 EUR“) (~3604 tok)
+- `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3679 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Returns the given category ID plus all descendant IDs (recursive). (~2597 tok)
-- `ProductService.java` — Service: ProductService (~14083 tok)
+- `ProductService.java` — Service: ProductService (~13663 tok)
 - `ReviewService.java` — Service: ReviewService (~946 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
@@ -926,7 +928,7 @@
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` (~3052 tok)
+- `application.yml` (~3203 tok)
 - `logback-spring.xml` (~249 tok)
 
 ## src/main/resources/db/
@@ -1003,6 +1005,8 @@
 - `TbiLeasingControllerTest.java` — @WebMvcTest security tests: POST /register (401/200), POST /webhook (public 200), GET /application/{id} IDOR (401/200 owner/403 non-owner/200 admin/200 SUPER_ADMIN). 8 tests. (~2081 tok)
 
 ## src/test/java/com/techstore/service/
+
+- `ProductServiceDeliveryChargeTest.java` — продуктовото API връща deliveryCharge: FIXED / FREE / COURIER_TARIFF (телевизор) (3 теста) (~1100 tok)
 
 - `AsbisApiServiceAttrListTest.java` — ASBIS repeats an attribute name inside one product with a different value each time (1,170 times (~532 tok)
 - `AsbisApiServiceAttrListTest.java` — extractAttrList: повторено име пази всички различни стойности в реда от фийда (~450 tok)
