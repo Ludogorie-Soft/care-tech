@@ -841,4 +841,13 @@ spring-retry — не посягай към `@Retryable`. VALI ползва WebC
 
 - **Списъкът с клиенти е ДВА пъти**: `src/pages/OurClients.jsx` (страница `/clients`) и `src/components/home/CompaniesCarousel.jsx` („КОРПОРАТИВНИ КЛИЕНТИ“ на началната). Нов клиент → добавяй и в двата, с еднакъв `id` и уникален (имаше дублиран `id: 15` → Радио Силвър стана 16).
 - **Логата в `public/clients/` са PNG с прозрачен фон** (въртележката е на `bg-gray-100`). Бял фон се маха с PIL `ImageDraw.floodfill` от 4-те ъгъла (thresh 40) — така бялото вътре в логото остава; после crop по alpha bbox и `thumbnail((600, 600))`. Имена на файловете — ASCII (архивите идват с NFD „й“ = и + U+0306).
-- Маршрутът е `/clients`; `canonical` в OurClients.jsx сочеше `/our-clients` (404) — поправено 2026-10-02 (bug-580). `og:url` идва от SEO.jsx САМО ако страницата подаде `ogUrl` (2 от 29); иначе остава `https://www.caretech.bg/` от index.html.
+- Маршрутът е `/clients`; `canonical` в OurClients.jsx сочеше `/our-clients` (404) — поправено 2026-10-02 (bug-580). `og:url` в SEO.jsx = `ogUrl || canonical` (от 2026-10-02); ogUrl подават само ProductPage и Category. Страниците без canonical са точно noindex страниците (Cart, Search, Favorites, профил, админ, грешки…) — там og:url/canonical остават от предишната страница при SPA навигация.
+
+## Do-Not-Repeat (git, 2026-10-02)
+
+- [2026-10-02] `.wolf/` е в `.gitignore`, но файловете му са tracked — `git add .wolf` отказва („paths are ignored“) и commit-ът не става. За bookkeeping commit ползвай `git add -u .wolf`.
+
+## Decision Log (SEO, 2026-10-02)
+
+- **„Доставка и плащане“ (/delivery-and-payment) и „Закупуване на изплащане“ (/installment-purchase) стават индексируеми** — решение на потребителя. Бяха `noindex` от създаването си (копирано от шаблона на ComingSoonPage), без canonical. Сега без noindex, с canonical. Правило: canonical само на индексируеми страници — на noindex е противоречив сигнал.
+- Meta описанията на Доставка/Изплащане съдържат цени (3.50 €, 128 €, 15 000 €) — при промяна на тарифите в DeliveryPage.jsx / InstallmentPurchasePage.jsx обнови и `description` в SEO блока. Цените в описанията следват конвенцията € първо, после лв. (×1.95583).

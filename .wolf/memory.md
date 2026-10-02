@@ -4013,3 +4013,18 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 10:55 | Bug-580: canonical на /clients сочеше /our-clients (404) → /clients; проверено в превю | care-tech-ui src/pages/OurClients.jsx | готово, некомитнато | ~2k |
 | 10:03 | Session end: 9 writes across 5 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx, OurClients.jsx, CompaniesCarousel.jsx) | 15 reads | ~1248 tok |
 | 11:00 | Commit + push: care-tech-ui main 8a9fae0..2a661e2 (navbar, сертификати, клиенти, canonical); tech-store-api v2 — скрипт 61 + bookkeeping | двете репа | готово | ~4k |
+| 10:05 | Session end: 9 writes across 5 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx, OurClients.jsx, CompaniesCarousel.jsx) | 15 reads | ~1248 tok |
+| 10:06 | Edited ../../care-tech-ui/src/components/SEO.jsx | inline fix | ~14 |
+| 11:10 | SEO.jsx: og:url fallback към canonical; проверено в превю (/clients, /certifications, категория) | care-tech-ui src/components/SEO.jsx | готово, некомитнато | ~3k |
+| 10:07 | Session end: 10 writes across 6 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx, OurClients.jsx, CompaniesCarousel.jsx) | 16 reads | ~1262 tok |
+| 11:15 | Commit + push care-tech-ui main 2a661e2..1152f82 (og:url fallback) | care-tech-ui | готово | ~1k |
+| 10:07 | Session end: 10 writes across 6 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx, OurClients.jsx, CompaniesCarousel.jsx) | 16 reads | ~1262 tok |
+| 10:08 | Session end: 10 writes across 6 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx, OurClients.jsx, CompaniesCarousel.jsx) | 16 reads | ~1262 tok |
+| 10:10 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | CSS: https | ~41 |
+| 10:10 | Edited ../../care-tech-ui/src/pages/InstallmentPurchasePage.jsx | CSS: https | ~42 |
+| 11:25 | Delivery + InstallmentPurchase: махнат noindex, добавен canonical (решение на потребителя); проверено в превю (robots index,follow; canonical = og:url) | care-tech-ui src/pages/DeliveryPage.jsx, InstallmentPurchasePage.jsx | готово, некомитнато | ~4k |
+| 10:10 | Session end: 12 writes across 8 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx, OurClients.jsx, CompaniesCarousel.jsx) | 18 reads | ~1345 tok |
+| 10:11 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | "${title} - информация за " → "Доставка със Спиди: 3.50 " | ~52 |
+| 10:11 | Edited ../../care-tech-ui/src/pages/InstallmentPurchasePage.jsx | "${title} - пазарувайте на" → "Купете на изплащане с tbi" | ~50 |
+| 11:35 | Описания за Доставка/Изплащане (≤160 знака, € + лв.); commit + push care-tech-ui main 1152f82..1f694c7 | care-tech-ui | готово | ~5k |
+| 10:12 | Session end: 14 writes across 8 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx, OurClients.jsx, CompaniesCarousel.jsx) | 18 reads | ~1447 tok |

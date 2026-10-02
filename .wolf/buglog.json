@@ -9693,6 +9693,86 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-10-02T10:55:00.000Z"
+    },
+    {
+      "id": "bug-586",
+      "timestamp": "2026-10-02T07:06:35.944Z",
+      "error_message": "CSS fix: og",
+      "file": "../../care-tech-ui/src/components/SEO.jsx",
+      "root_cause": "og: url', ogUrl, true) → url', ogUrl || canonical, true)",
+      "fix": "Changed og: url', ogUrl, true) → url', ogUrl || canonical, true)",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T07:06:35.944Z"
+    },
+    {
+      "id": "bug-587",
+      "timestamp": "2026-10-02T07:10:06.137Z",
+      "error_message": "Wrong reference: noindex should be canonical",
+      "file": "../../care-tech-ui/src/pages/DeliveryPage.jsx",
+      "root_cause": "Used \"noindex\" instead of \"canonical\"",
+      "fix": "Changed noindex → canonical",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T07:10:06.137Z"
+    },
+    {
+      "id": "bug-588",
+      "timestamp": "2026-10-02T07:10:06.482Z",
+      "error_message": "Wrong reference: noindex should be canonical",
+      "file": "../../care-tech-ui/src/pages/InstallmentPurchasePage.jsx",
+      "root_cause": "Used \"noindex\" instead of \"canonical\"",
+      "fix": "Changed noindex → canonical",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T07:10:06.482Z"
+    },
+    {
+      "id": "bug-589",
+      "timestamp": "2026-10-02T07:11:31.662Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/DeliveryPage.jsx",
+      "root_cause": "Had `${title} - информация за доставка и плащане.`",
+      "fix": "Changed to \"Доставка със Спиди: 3.50 € (6.85 лв.) за пратки д",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T07:11:31.662Z"
+    },
+    {
+      "id": "bug-590",
+      "timestamp": "2026-10-02T07:11:31.977Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/InstallmentPurchasePage.jsx",
+      "root_cause": "Had `${title} - пазарувайте на изплащане с TBI bank.`",
+      "fix": "Changed to \"Купете на изплащане с tbi bank: покупки до 15 000",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T07:11:31.977Z"
     }
   ]
 }

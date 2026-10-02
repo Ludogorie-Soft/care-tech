@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T07:02:45.295Z
-> Files: 790 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T07:11:31.951Z
+> Files: 793 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -63,6 +63,7 @@
 - `CustomCheckbox.jsx` — CustomCheckbox (~258 tok)
 - `DateTimePicker.jsx` — MONTHS (~2516 tok)
 - `Footer.jsx` — Dynamic: reads root categories from Redux (FOOTER_CATEGORY_IDS whitelist 11 IDs); no hardcoded category links (~2800 tok)
+- `SEO.jsx` — SEO (~828 tok)
 - `TbiCheckoutModal.jsx` — TBI brand color (~5322 tok)
 
 ## ../../care-tech-ui/src/components/compare/
@@ -102,7 +103,9 @@
 - `ComparePage.jsx` — EURO_RATE — renders table (~3958 tok)
 - `Contact.jsx` — Contact — renders form (~2804 tok)
 - `Cookies.jsx` — Responsive Cookies / Cookie Policy component (~3474 tok)
+- `DeliveryPage.jsx` — DeliveryPage (~2430 tok)
 - `ForUs.jsx` — ForUs (~2823 tok)
+- `InstallmentPurchasePage.jsx` — InstallmentPurchasePage (~3844 tok)
 - `OurClients.jsx` — clients (~2829 tok)
 - `OurServices.jsx` — OurServices — renders form (~3552 tok)
 - `Policy.jsx` — sections (~4978 tok)
