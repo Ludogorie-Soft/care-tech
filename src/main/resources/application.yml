@@ -332,10 +332,15 @@ tbi:
     webhook-url: ${TBI_WEBHOOK_URL:https://caretech.bg/api/tbi/webhook}
     enabled: ${TBI_ENABLED:true}
 
-pazaruvaj:
+# Delivery terms — used for the order total and for DeliveryTime/DeliveryCost in the Pazaruvaj feed.
+# The frontend shows the same values (care-tech-ui/src/utils/utils.js); change both together.
+shipping:
+  cost:
+    default: ${SHIPPING_COST_DEFAULT:3.50}            # EUR с ДДС, до офис на Speedy
+    free:
+      threshold: ${SHIPPING_FREE_THRESHOLD:128.00}    # EUR с ДДС — над тази сума доставката до офис е безплатна
   delivery:
-    home-price: ${PAZARUVAJ_DELIVERY_HOME_PRICE:6.00}   # BGN — Speedy до адрес (по тарифа)
-    days: ${PAZARUVAJ_DELIVERY_DAYS:3}                  # дни за доставка
+    days: ${SHIPPING_DELIVERY_DAYS:2}                 # работни дни
 
 speedy:
     base-url: https://api.speedy.bg/v1/

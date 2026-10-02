@@ -174,8 +174,9 @@ public class OrderService {
         }
 
         order.calculateTotals();
+        // The free-delivery threshold is with VAT, the same amount the customer sees in the cart
         BigDecimal calculatedShippingCost = shippingConfig.calculateShippingCost(
-                order.getSubtotal(),
+                order.getSubtotal().add(order.getTaxAmount()),
                 order.getIsToSpeedyOffice()
         );
         order.setShippingCost(calculatedShippingCost);

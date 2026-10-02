@@ -34,12 +34,6 @@ public class PazaruvajFeedService {
     @Value("${app.url:https://www.caretech.bg}")
     private String appUrl;
 
-    @Value("${pazaruvaj.delivery.home-price:6.00}")
-    private BigDecimal homeDeliveryPrice;
-
-    @Value("${pazaruvaj.delivery.days:3}")
-    private int deliveryDays;
-
     /** Thread-safe holder for the pre-generated XML feed. */
     private final AtomicReference<String> cachedFeed = new AtomicReference<>();
 
@@ -174,7 +168,9 @@ public class PazaruvajFeedService {
     private String buildXml(List<PazaruvajProductProjection> products,
                              Map<Long, List<PazaruvajAttributeProjection>> attributesMap,
                              boolean includeDelivery) {
-        String deliveryDaysStr = deliveryDays + " дни";
+        String deliveryTime = deliveryTimeText(shippingConfig.getDeliveryDays());
+        String paidDeliveryCost = shippingConfig.getDefaultShippingCost()
+                .setScale(2, RoundingMode.HALF_UP).toPlainString() + " EUR";
 
         StringBuilder sb = new StringBuilder(products.size() * 600);
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<Products>\n");
@@ -212,9 +208,12 @@ public class PazaruvajFeedService {
                 appendCdata(sb, "Description", truncate(p.getDescriptionBg(), 500));
             }
 
+            // Pazaruvaj compares both with the product page: one number of days, and the
+            // delivery cost of an order holding just this product (to a Speedy office)
             if (includeDelivery) {
-                appendTag(sb, "DeliveryTime", deliveryDaysStr);
-                appendTag(sb, "DeliveryCost", homeDeliveryPrice.toPlainString() + " EUR");
+                appendTag(sb, "DeliveryTime", deliveryTime);
+                appendTag(sb, "DeliveryCost",
+                        shippingConfig.isFreeShipping(priceVat) ? "безплатно" : paidDeliveryCost);
             }
 
             if (isValidEan(p.getBarcode())) {
@@ -281,6 +280,11 @@ public class PazaruvajFeedService {
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────
+
+    /** Formats Pazaruvaj accepts: "1 работен ден", "4 работни дни" — never a range. */
+    private String deliveryTimeText(int days) {
+        return days == 1 ? "1 работен ден" : days + " работни дни";
+    }
 
     private String buildCategoryText(String parent, String category) {
         if (isNotBlank(parent) && isNotBlank(category) && !parent.equals(category)) {
