@@ -9773,6 +9773,125 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-10-02T07:11:31.977Z"
+    },
+    {
+      "id": "bug-591",
+      "timestamp": "2026-10-02T11:38:37.324Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/PazaruvajFeedService.java",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 9→3 lines (4 removed) | Also: appendTag(sb, \"DeliveryTime\", deliveryDaysStr);; appendTag(sb, \"DeliveryCost\", homeDeliveryPrice.to",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-10-02T11:38:37.801Z"
+    },
+    {
+      "id": "bug-592",
+      "timestamp": "2026-10-02T11:38:45.617Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/resources/application.yml",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→10 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "yml"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T11:38:45.617Z"
+    },
+    {
+      "id": "bug-593",
+      "timestamp": "2026-10-02T11:40:12.354Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/pages/Cart.jsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 4→4 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T11:40:12.354Z"
+    },
+    {
+      "id": "bug-594",
+      "timestamp": "2026-10-02T11:40:12.717Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/Cart.jsx",
+      "root_cause": "Had `${(productsAfterWithVatEuro + 3.5).toFixed(2)} € ",
+      "fix": "Changed to `${(productsAfterWithVatEuro + OFFICE_SHIPPING_COS",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T11:40:12.717Z"
+    },
+    {
+      "id": "bug-595",
+      "timestamp": "2026-10-02T11:40:35.818Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../care-tech-ui/src/components/cart/FreeDeliveryWarningModal.jsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 7→14 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T11:40:35.818Z"
+    },
+    {
+      "id": "bug-596",
+      "timestamp": "2026-10-02T11:50:00.000Z",
+      "error_message": "Pazaruvaj показва за всички оферти „доставка 6 EUR, срок 3 дни“; Pazaruvaj иска DeliveryTime/DeliveryCost да съвпадат с продуктовата страница",
+      "file": "src/main/java/com/techstore/service/PazaruvajFeedService.java",
+      "root_cause": "buildXml() пишеше фиксирани стойности от pazaruvaj.delivery.home-price=6.00 (приблизително до адрес) и days=3, несвързани със сайта (3.50 € до офис, безплатно ≥128 €, 1–2 работни дни)",
+      "fix": "Feed чете от ShippingConfig: DeliveryTime='2 работни дни', DeliveryCost='безплатно' ако цената с ДДС ≥ 128 €, иначе '3.50 EUR' (за всеки продукт). pazaruvaj.delivery.* премахнат; продуктовата страница показва видимо същия срок и цена",
+      "tags": [
+        "pazaruvaj",
+        "feed",
+        "delivery",
+        "shipping"
+      ],
+      "related_bugs": [
+        "bug-597"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T11:50:00.000Z"
+    },
+    {
+      "id": "bug-597",
+      "timestamp": "2026-10-02T11:50:00.000Z",
+      "error_message": "Количката показва БЕЗПЛАТНА доставка до офис над 250 лв. с ДДС, а поръчката се таксува 3.50 € до 150 € без ДДС (~180 € с ДДС); прод поръчка за ~140 € е таксувана, въпреки „БЕЗПЛАТНО“",
+      "file": "src/main/java/com/techstore/service/OrderService.java",
+      "root_cause": "ShippingConfig.freeShippingThreshold default 150.00 сравняван с нетния order.getSubtotal(); фронтендът ползва 250 лв. (Cart), 150 (FreeDeliveryWarningModal, сметнато срещу лева), 80 € (ProductPage) — 4 различни прага",
+      "fix": "Един праг 128 € с ДДС: ShippingConfig default 128.00 + isFreeShipping(); OrderService подава subtotal+taxAmount; фронтенд константи FREE_SHIPPING_THRESHOLD_EUR/OFFICE_SHIPPING_COST_EUR/DELIVERY_DAYS в utils.js, ползвани в Cart, FreeDeliveryWarningModal, ProductPage, DeliveryPage",
+      "tags": [
+        "shipping",
+        "cart",
+        "threshold",
+        "vat",
+        "currency"
+      ],
+      "related_bugs": [
+        "bug-596"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T11:50:00.000Z"
     }
   ]
 }

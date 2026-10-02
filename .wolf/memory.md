@@ -4028,3 +4028,35 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 10:11 | Edited ../../care-tech-ui/src/pages/InstallmentPurchasePage.jsx | "${title} - пазарувайте на" → "Купете на изплащане с tbi" | ~50 |
 | 11:35 | Описания за Доставка/Изплащане (≤160 знака, € + лв.); commit + push care-tech-ui main 1152f82..1f694c7 | care-tech-ui | готово | ~5k |
 | 10:12 | Session end: 14 writes across 8 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx, OurClients.jsx, CompaniesCarousel.jsx) | 18 reads | ~1447 tok |
+| 10:12 | Session end: 14 writes across 8 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx, OurClients.jsx, CompaniesCarousel.jsx) | 18 reads | ~1447 tok |
+
+## Session: 2026-10-02 11:07
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:11 | Created ../../../../.claude/plans/pazaruvaj-valiant-possum.md | — | ~1835 |
+| 14:38 | Created src/main/java/com/techstore/config/ShippingConfig.java | — | ~519 |
+| 14:38 | Edited src/main/java/com/techstore/service/OrderService.java | 3→4 lines | ~77 |
+| 14:38 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | reduced (-6 lines) | ~21 |
+| 14:38 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | 3→5 lines | ~69 |
+| 14:38 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | modified if() | ~116 |
+| 14:38 | Edited src/main/java/com/techstore/service/PazaruvajFeedService.java | modified deliveryTimeText() | ~75 |
+| 14:38 | Edited src/main/resources/application.yml | 5→10 lines | ~144 |
+| 14:39 | Edited ../../care-tech-ui/src/utils/utils.js | expanded (+6 lines) | ~129 |
+| 14:40 | Edited ../../care-tech-ui/src/pages/Cart.jsx | CSS: OFFICE_SHIPPING_COST_EUR | ~63 |
+| 14:40 | Edited ../../care-tech-ui/src/pages/Cart.jsx | 2→2 lines | ~24 |
+| 14:40 | Edited ../../care-tech-ui/src/pages/Cart.jsx | 4→4 lines | ~86 |
+| 14:40 | Edited ../../care-tech-ui/src/pages/Cart.jsx | 2→2 lines | ~81 |
+| 14:40 | Edited ../../care-tech-ui/src/pages/Cart.jsx | inline fix | ~26 |
+| 14:40 | Edited ../../care-tech-ui/src/pages/Cart.jsx | inline fix | ~28 |
+| 14:40 | Edited ../../care-tech-ui/src/components/cart/FreeDeliveryWarningModal.jsx | expanded (+7 lines) | ~176 |
+| 14:40 | Edited ../../care-tech-ui/src/components/cart/FreeDeliveryWarningModal.jsx | added 1 import(s) | ~34 |
+| 14:40 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | expanded (+19 lines) | ~437 |
+| 14:40 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | CSS: Speedy | ~160 |
+| 14:40 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | expanded (+8 lines) | ~49 |
+| 14:40 | Edited ../../care-tech-ui/src/pages/ProductPage.jsx | added 1 import(s) | ~29 |
+| 14:40 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | 2→5 lines | ~88 |
+| 14:40 | Edited ../../care-tech-ui/src/pages/DeliveryPage.jsx | added 1 import(s) | ~25 |
+| 14:50 | Pazaruvaj DeliveryTime/DeliveryCost от ShippingConfig (2 работни дни; безплатно ≥128 € с ДДС, иначе 3.50 EUR); единен праг 128 € с ДДС в бекенд (OrderService gross) и фронтенд (utils.js константи; Cart, FreeDeliveryWarningModal, ProductPage видим ред, DeliveryPage); 2 нови теста | ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml, ShippingConfigTest, PazaruvajFeedServiceTest, care-tech-ui/* | 429/429 зелени, проверено в браузъра | ~60k |
+| 14:44 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/pazaruvaj_delivery_fields.md | — | ~353 |
+| 14:45 | Session end: 24 writes across 11 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 6 reads | ~8460 tok |

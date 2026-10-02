@@ -150,7 +150,7 @@
 - **Nginx hardening (2026-07-06):** Added rate limiting (`limit_req_zone` 20r/s API, 50r/s general), connection limit (`limit_conn 30`), bad bot blocking (empty UA, sqlmap, nikto, masscan, zgrab), scan path blocking (.env, .php, wp-admin), security headers. Config saved as `nginx.prod.conf` in project root.
 - **Pazaruvaj generate endpoint (2026-07-06):** Added `format=CSV` parameter + CSV builder in PazaruvajFeedService. Live feed keeps delivery info (required by Heureka format); on-demand generate uses `includeDelivery=false`. Frontend has XML/CSV format selector in generator section.
 
-- **Pazaruvaj.com интеграция (2026-07-03, коригирано 2026-07-07):** Pazaruvaj е собственост на Heureka Group, но НЕ използва Heureka XML формат. Ползва собствен формат: root `<Products>`, item `<Product>`, полета `Identifier`, `Name`, `ProductUrl`, `ImageUrl`, `Price`, `Category`, `Manufacturer`, `ProductNumber`, `EanCode`, `Description`, `DeliveryTime`, `DeliveryCost`. Разделител на категории: ` > `. Доставка: плосък `<DeliveryCost>6.00 EUR</DeliveryCost>`, не nested блокове. Няма REST API — merchant-ът хоства XML URL, pazaruvaj го дърпа ежедневно след 17:00.
+- **Pazaruvaj.com интеграция (2026-07-03, коригирано 2026-07-07):** Pazaruvaj е собственост на Heureka Group, но НЕ използва Heureka XML формат. Ползва собствен формат: root `<Products>`, item `<Product>`, полета `Identifier`, `Name`, `ProductUrl`, `ImageUrl`, `Price`, `Category`, `Manufacturer`, `ProductNumber`, `EanCode`, `Description`, `DeliveryTime`, `DeliveryCost`. Разделител на категории: ` > `. Доставка: плоски тагове, не nested блокове — от 2026-10-02 `DeliveryTime`=„2 работни дни“, `DeliveryCost`=„безплатно“/„3.50 EUR“ за всеки продукт (виж Key Learnings доставка, 2026-10-02). Няма REST API — merchant-ът хоства XML URL, pazaruvaj го дърпа ежедневно след 17:00.
 - **Pazaruvaj PRICE_VAT:** Цената е в **EUR с ДДС** = `finalPrice × 1.20`. Без конвертиране към BGN (България е в еврозоната). Полето `CATEGORYTEXT` изисква кирилица.
 - **PazaruvajFeedService архитектура:** Feed се кешира в `AtomicReference<String>`, обновява се на 30 сек след старт + на всеки 2 часа. `PazaruvajFeedConfig` (тип ALL/CATEGORY/PRODUCTS) се пази в паметта — нулира се при рестарт. На-demand генерирането (`/generate`) е винаги fresh, без кеш.
 - **Native SQL feed query:** Feed query-тата ползват native SQL с `PazaruvajProductProjection` интерфейс за да избегнат N+1 и EAGER loading на `productParameters`. Category query използва recursive CTE (`WITH RECURSIVE cat_tree`) за да включи всички подкатегории.
@@ -851,3 +851,16 @@ spring-retry — не посягай към `@Retryable`. VALI ползва WebC
 
 - **„Доставка и плащане“ (/delivery-and-payment) и „Закупуване на изплащане“ (/installment-purchase) стават индексируеми** — решение на потребителя. Бяха `noindex` от създаването си (копирано от шаблона на ComingSoonPage), без canonical. Сега без noindex, с canonical. Правило: canonical само на индексируеми страници — на noindex е противоречив сигнал.
 - Meta описанията на Доставка/Изплащане съдържат цени (3.50 €, 128 €, 15 000 €) — при промяна на тарифите в DeliveryPage.jsx / InstallmentPurchasePage.jsx обнови и `description` в SEO блока. Цените в описанията следват конвенцията € първо, после лв. (×1.95583).
+
+## Key Learnings (доставка и Pazaruvaj, 2026-10-02)
+- **Условията за доставка са на ЕДНО място на бекенда: `ShippingConfig` (`shipping.*` в application.yml) — 3.50 € до офис на Speedy, безплатно от 128 € С ДДС, срок 2 работни дни.** Фронтендът ги дублира в `care-tech-ui/src/utils/utils.js` (`FREE_SHIPPING_THRESHOLD_EUR`, `OFFICE_SHIPPING_COST_EUR`, `DELIVERY_DAYS`). Сменят се заедно.
+- `OrderService` подава на `calculateShippingCost` сумата С ДДС (`subtotal + taxAmount`) — `Order.subtotal` е НЕТО.
+- Доставка до адрес не се таксува от магазина (0) — куриерът я начислява по тарифа.
+- **Pazaruvaj правила (имейл от тях, 2026-10-02):** `DeliveryTime` — едно число („4“, „4 дни“, „4 работни дни“), не интервал; „NO“ ако няма наличност. `DeliveryCost` — число („10“, „10 EUR“) или „безплатно“. Показват ги САМО ако същото е видимо на продуктовата страница — затова под цената в `ProductPage.jsx` има ред „Доставка: N работни дни · …“ (прозорецът „Доставка и плащане“ се рендерира само след клик и не се брои).
+- Фийдът смята `DeliveryCost` за всеки продукт: цена с ДДС ≥ прага → „безплатно“. Към 2026-10-02: 1879 безплатно / 5338 с 3.50 EUR.
+
+## Do-Not-Repeat (доставка, 2026-10-02)
+- [2026-10-02] NEVER слагай праг/цена на доставка като литерал в компонент (бяха 80 €, 128 €/250 лв., 150 € и 150 € нето на 4 места). Ползвай константите от `utils.js` / `ShippingConfig`. И не сравнявай евро праг със сума в лева (`150 - productsAfterWithVatLeva`).
+
+## Decision Log (доставка, 2026-10-02)
+- Потребителят избра праг **128 € с ДДС** (както на /delivery-and-payment) и срок **2 работни дни** (горната граница на старото „1–2“). Pazaruvaj показва 2 като „Доставка: до 3 дни“; 1 би дало „в наличност“, но не е гарантирано за стока от склад на доставчик.

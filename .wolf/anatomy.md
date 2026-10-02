@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T07:11:31.951Z
-> Files: 793 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T11:44:56.265Z
+> Files: 797 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -18,6 +18,7 @@
 ## ../../../../.claude/plans/
 
 - `buzzing-dancing-hare.md` — Параметри и филтри по категории: одит и план (~3946 tok)
+- `pazaruvaj-valiant-possum.md` — Pazaruvaj: верни DeliveryTime / DeliveryCost + един праг за безплатна доставка (~1720 tok)
 - `zippy-juggling-hearth.md` — Продуктови линкове `/product/{id}/{id}` вместо `/product/{slug}/{id}` (~1068 tok)
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
@@ -27,6 +28,7 @@
 - `feedback_showtoast_duration.md` — Declares type (~140 tok)
 - `MEMORY.md` — Memory Index (~512 tok)
 - `parameter_filters_canonical_layer.md` (~493 tok)
+- `pazaruvaj_delivery_fields.md` (~360 tok)
 - `personal_offer_flow.md` — Declares stored (~373 tok)
 - `prod_db_readonly_access.md` (~236 tok)
 - `project_most_api.md` (~361 tok)
@@ -66,6 +68,10 @@
 - `SEO.jsx` — SEO (~828 tok)
 - `TbiCheckoutModal.jsx` — TBI brand color (~5322 tok)
 
+## ../../care-tech-ui/src/components/cart/
+
+- `FreeDeliveryWarningModal.jsx` — FreeDeliveryWarningModal (~969 tok)
+
 ## ../../care-tech-ui/src/components/compare/
 
 - `CompareTray.jsx` — CompareTray (~1049 tok)
@@ -95,7 +101,7 @@
 
 - `Blog.jsx` — formatDate (~2804 tok)
 - `BlogPostPage.jsx` — formatDate (~2609 tok)
-- `Cart.jsx` — EURO_RATE (~16680 tok)
+- `Cart.jsx` — EURO_RATE (~16749 tok)
 - `Category.jsx` — Category (~6664 tok)
 - `CategoryList.jsx` — CategoryList (~1407 tok)
 - `Certifications.jsx` — Grid от 6 сертификата: Hikvision HCSA-SaaS, CGSA-CCTV, HCSA-CCTV ×2 (Детелин, Любослав) на 1-4; OCNA (TP-Link Omada) и DHCA-DoLynk (Dahua) на 5-6; alt = надпис в lightbox-а (~1048 tok)
@@ -103,13 +109,13 @@
 - `ComparePage.jsx` — EURO_RATE — renders table (~3958 tok)
 - `Contact.jsx` — Contact — renders form (~2804 tok)
 - `Cookies.jsx` — Responsive Cookies / Cookie Policy component (~3474 tok)
-- `DeliveryPage.jsx` — DeliveryPage (~2430 tok)
+- `DeliveryPage.jsx` — DeliveryPage (~2495 tok)
 - `ForUs.jsx` — ForUs (~2823 tok)
 - `InstallmentPurchasePage.jsx` — InstallmentPurchasePage (~3844 tok)
 - `OurClients.jsx` — clients (~2829 tok)
 - `OurServices.jsx` — OurServices — renders form (~3552 tok)
 - `Policy.jsx` — sections (~4978 tok)
-- `ProductPage.jsx` — EURO_RATE (~10468 tok)
+- `ProductPage.jsx` — EURO_RATE (~10869 tok)
 - `ReturnPolicyPage.jsx` — sections (~4896 tok)
 - `SearchPage.jsx` — SearchPage (~2180 tok)
 
@@ -209,7 +215,7 @@
 - `partners.js` — Exports partners (~425 tok)
 - `slugify.js` — Exports slugify (~217 tok)
 - `tokenRefresh.js` — Exports setupTokenRefresh (~568 tok)
-- `utils.js` — Exports SITE_URL, specificationsMap, ORDER_FORMS, getStatusBadge + 4 more (~490 tok)
+- `utils.js` — Exports SITE_URL, displaySpecs, ORDER_FORMS, getStatusBadge + 7 more (~715 tok)
 
 ## ./
 
@@ -490,7 +496,7 @@
 - `SearchConfig.java` — Seconds a single search query may run before the driver cancels it. (~610 tok)
 - `SearchIndexManager.java` — app.search.postgresql.performance-test was already in application.yml but nothing (~4263 tok)
 - `SecurityConfig.java` — Configuration: SecurityConfig (~2685 tok)
-- `ShippingConfig.java` — Изчислява цената на доставка (~354 tok)
+- `ShippingConfig.java` — Delivery terms of the shop — the single source for the order total and the Pazaruvaj feed. (~519 tok)
 - `SlugRegenerationRunner.java` — Component: SlugRegenerationRunner (~401 tok)
 - `SpeedyConfig.java` — Configuration: SpeedyConfig (~136 tok)
 - `TbiConfig.java` — AES-256-CTR encryption key provided by TBI for the BIVD merchant account. (~402 tok)
@@ -837,10 +843,9 @@
 - `ImageMigrationService.java` — Service: ImageMigrationService (~1434 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
 - `MostApiService.java` — Тегли и парсва MOST XML feed-а (~17 MB, ~6100 продукта), кеш 10 мин. `fetchXmlWithRetry()` ХВЪРЛЯ `ExternalApiException` при празно тяло/HTTP грешка/счупен XML — вече не връща празен списък. 4 опита, backoff 5→10→20s. `@Qualifier("mostRestTemplate")` (~4936 tok)
-- `OrderService.java` — Creates a new order (~8683 tok)
+- `OrderService.java` — Creates a new order (~8716 tok)
 - `ParameterService.java` — Service: ParameterService (~9601 tok)
-- `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3484 tok)
-- `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~1916 tok)
+- `PazaruvajFeedService.java` — XML/CSV фийд за pazaruvaj.com, кеширан, обновява се на 2 ч. DeliveryTime/DeliveryCost идват от ShippingConfig за всеки продукт („2 работни дни“; „безплатно“ ако цена с ДДС ≥ 128 €, иначе „3.50 EUR“) (~3604 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Returns the given category ID plus all descendant IDs (recursive). (~2597 tok)
 - `ProductService.java` — Service: ProductService (~14083 tok)
@@ -921,7 +926,7 @@
 ## src/main/resources/
 
 - `.DS_Store` (~1640 tok)
-- `application.yml` (~2973 tok)
+- `application.yml` (~3052 tok)
 - `logback-spring.xml` (~249 tok)
 
 ## src/main/resources/db/
@@ -989,6 +994,10 @@
 
 - `TechStoreApiApplicationTests.java` — @SpringBootTest @ActiveProfiles("test") context-load smoke test. Uses H2 + application-test.properties. (~78 tok)
 
+## src/test/java/com/techstore/config/
+
+- `ShippingConfigTest.java` — Праг за безплатна доставка 128 € с ДДС: 127.99 → 3.50, 128.00 → 0, до адрес → 0 (4 теста) (~550 tok)
+
 ## src/test/java/com/techstore/controller/
 
 - `TbiLeasingControllerTest.java` — @WebMvcTest security tests: POST /register (401/200), POST /webhook (public 200), GET /application/{id} IDOR (401/200 owner/403 non-owner/200 admin/200 SUPER_ADMIN). 8 tests. (~2081 tok)
@@ -998,6 +1007,7 @@
 - `AsbisApiServiceAttrListTest.java` — ASBIS repeats an attribute name inside one product with a different value each time (1,170 times (~532 tok)
 - `AsbisApiServiceAttrListTest.java` — extractAttrList: повторено име пази всички различни стойности в реда от фийда (~450 tok)
 - `MostApiServiceTest.java` — 11 теста с Mockito за провалите на MOST feed-а: празно/null тяло, connection error, изчерпани опити, възстановяване след преходен отказ, HTTP статус, счупен XML, изключен feed, кеширане на успех и НЕкеширане на провал (~1999 tok)
+- `PazaruvajFeedServiceTest.java` — DeliveryTime/DeliveryCost във фийда: 120 € → 3.50 EUR, 132 € → безплатно, прагът е по цената с ДДС (3 теста) (~900 tok)
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
 - `TekraApiServicePagingTest.java` — Paging of the TEKRA product feed. Only page 1 used to be read, so no category went past 100 (~1473 tok)
 - `TekraApiServicePagingTest.java` — Пагинация на TEKRA фийда с mock RestTemplate: всички страници, повторена страница (игнориран page), празна последна, малка категория, провал на страница, 429×3, счупен XML (7 теста) (~1500 tok)
