@@ -9557,6 +9557,142 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-09-28T13:10:00Z"
+    },
+    {
+      "id": "bug-578",
+      "timestamp": "2026-10-02T06:44:10.543Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/components/navbar/NavDropDown.jsx",
+      "root_cause": "Had \"flex flex-wrap py-2 -mx-2\"",
+      "fix": "Changed to \"flex flex-wrap py-2\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T06:44:10.543Z"
+    },
+    {
+      "id": "bug-579",
+      "timestamp": "2026-10-02T09:50:00.000Z",
+      "error_message": "Потребителят: „Има някакъв бъг с Водно охлаждане“ — в мега менюто на „Компютърни компоненти“ заглавието „Водно охлаждане“ стои в средата и цепи двуколонния списък; булетът на „Блокове за процесори“ е изместен наляво.",
+      "file": "scripts/61_water_cooling_to_bottom_of_components.sql; ../../care-tech-ui/src/components/navbar/NavDropDown.jsx",
+      "root_cause": "Скрипт 49 (bug-507) сложи 23 на sort_order 7. Тя е ЕДИНСТВЕНАТА категория с видими деца под 1, а NavDropDown рисува такава като заглавие с [column-span:all] — в средата на CSS columns списъка то го разделя на две балансирани части (3+3 над, 7+7 под). Отделно ul на децата имаше -mx-2, а li px-2 → лявата колона деца излиза 8px вляво от листовите категории (div px-2).",
+      "fix": "Скрипт 61: 23 → sort_order 22 (последна; 21 е „Входно-изходни контролери“, 22 свободен), един DO блок + COMMIT, с откат. NavDropDown: махнат -mx-2 от ul на децата — проверено в превю: всички леви булети на x=407, десни на x=736. Симулация с DOM преместване: 10+10 колони, групата отдолу. ПУСНАТ на прод 2026-10-02 от потребителя (psql -f): 23 → parent 1, sort 22; проверено с четене и в превю срещу прод API — 10+10 колони, „Водно охлаждане“ отдолу.",
+      "tags": [
+        "categories",
+        "menu",
+        "navdropdown",
+        "sort-order",
+        "css-columns",
+        "column-span",
+        "executed"
+      ],
+      "related_bugs": [
+        "bug-507",
+        "bug-578"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T09:50:00.000Z"
+    },
+    {
+      "id": "bug-580",
+      "timestamp": "2026-10-02T06:54:52.791Z",
+      "error_message": "CSS fix: id",
+      "file": "../../care-tech-ui/src/pages/Certifications.jsx",
+      "root_cause": "id: 4, src: \"/certificates/certification-1.png\", alt: \"Сертификат 4\" → 6, src: \"/certificates/certification-1.png\", alt: \"Сертификат 4\"",
+      "fix": "Changed id: 4, src: \"/certificates/certification-1.png\", alt: \"Сертификат 4\" → 6, src: \"/certificates/certification-1.png\", alt: \"Сертификат 4\"",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T06:54:52.791Z"
+    },
+    {
+      "id": "bug-581",
+      "timestamp": "2026-10-02T06:55:06.077Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/Certifications.jsx",
+      "root_cause": "Had \"Сертификат 3\"",
+      "fix": "Changed to \"Сертификат OCNA – Omada Certified Network Adminis",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T06:55:06.077Z"
+    },
+    {
+      "id": "bug-582",
+      "timestamp": "2026-10-02T06:59:40.332Z",
+      "error_message": "CSS fix: id",
+      "file": "../../care-tech-ui/src/pages/OurClients.jsx",
+      "root_cause": "id: 15, → 16,",
+      "fix": "Changed id: 15, → 16,",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-10-02T06:59:40.588Z"
+    },
+    {
+      "id": "bug-583",
+      "timestamp": "2026-10-02T06:59:40.848Z",
+      "error_message": "CSS fix: id",
+      "file": "../../care-tech-ui/src/components/home/CompaniesCarousel.jsx",
+      "root_cause": "id: 15, → 16,",
+      "fix": "Changed id: 15, → 16,",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-10-02T06:59:41.099Z"
+    },
+    {
+      "id": "bug-584",
+      "timestamp": "2026-10-02T07:02:45.318Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../care-tech-ui/src/pages/OurClients.jsx",
+      "root_cause": "Had \"https://www.caretech.bg/our-clients\"",
+      "fix": "Changed to \"https://www.caretech.bg/clients\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T07:02:45.318Z"
+    },
+    {
+      "id": "bug-580",
+      "timestamp": "2026-10-02T10:55:00.000Z",
+      "error_message": "canonical на страницата „Нашите клиенти“ сочи https://www.caretech.bg/our-clients, а маршрутът е /clients — каноничният адрес дава 404",
+      "file": "../../care-tech-ui/src/pages/OurClients.jsx",
+      "root_cause": "Страницата е монтирана на /clients (App.js:174; NavBar и Footer също линкват /clients), но SEO canonical е писан с /our-clients.",
+      "fix": "canonical → https://www.caretech.bg/clients; проверено в превю: <link rel=canonical href=…/clients>.",
+      "tags": [
+        "seo",
+        "canonical",
+        "routing",
+        "clients"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-02T10:55:00.000Z"
     }
   ]
 }

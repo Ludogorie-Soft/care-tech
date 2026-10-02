@@ -3981,3 +3981,35 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 09:57 | Session end: 21 writes across 11 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 4 reads | ~44305 tok |
 | 13:40 | User deployed backend v2 (VALI 4xx fix + ASBIS alias resolver); script 60 applied; API 200, monitors filters OK (Яркост 13 values) | prod | pending nightly check 2026-09-29 | ~1k |
 | 10:08 | Session end: 21 writes across 11 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 4 reads | ~44305 tok |
+| 10:09 | Session end: 21 writes across 11 files (SupplierCategoryGoneException.java, ValiApiService.java, ValiSyncService.java, ValiApiServiceRetryTest.java, 55_filters_curated_15_brightness_and_unmapped.sql) | 4 reads | ~44305 tok |
+
+## Session: 2026-10-02 09:41
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 09:43 | Created scripts/61_water_cooling_to_bottom_of_components.sql | — | ~617 |
+| 09:44 | Edited ../../care-tech-ui/src/components/navbar/NavDropDown.jsx | "flex flex-wrap py-2 -mx-2" → "flex flex-wrap py-2" | ~20 |
+| 09:50 | Bug-579: „Водно охлаждане“ цепи мега менюто — скрипт 61 (sort 7→22) + NavDropDown без -mx-2; проверено в превю | scripts/61_…sql, care-tech-ui NavDropDown.jsx | готово, скриптът чака пускане | ~9k |
+| 09:46 | Session end: 2 writes across 2 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx) | 1 reads | ~681 tok |
+| 09:48 | Session end: 2 writes across 2 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx) | 1 reads | ~681 tok |
+| 10:00 | Скрипт 61 пуснат на прод от потребителя; проверено (DB read-only + превю): „Водно охлаждане“ последна, 10+10 колони | scripts/61_…sql | готово; NavDropDown чака commit + деплой | ~3k |
+| 09:49 | Session end: 2 writes across 2 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx) | 1 reads | ~681 tok |
+| 09:49 | Session end: 2 writes across 2 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx) | 1 reads | ~681 tok |
+| 10:10 | Решение: „Водно охлаждане“ остава червено заглавие в менюто (вариант 2 отложен) | .wolf/cerebrum.md | записано | ~1k |
+| 09:51 | Session end: 2 writes across 2 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx) | 1 reads | ~681 tok |
+| 09:54 | Edited ../../care-tech-ui/src/pages/Certifications.jsx | 4→6 lines | ~252 |
+| 09:55 | Edited ../../care-tech-ui/src/pages/Certifications.jsx | 2→2 lines | ~92 |
+| 10:25 | Добавени 2 сертификата HCSA-CCTV (Детелин, Любослав) на позиции 3-4, смалени до 2400px JPEG; точни alt-ове за всички 6; проверено в превю | care-tech-ui public/certificates/, src/pages/Certifications.jsx | готово, некомитнато | ~6k |
+| 09:56 | Session end: 4 writes across 3 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx) | 8 reads | ~1025 tok |
+| 10:35 | Смалени старите HCSA-SaaS и CGSA-CCTV до 2400px (2.5 MB→288 KB, 9 MB→700 KB), същите имена; проверено в превю | care-tech-ui public/certificates/ | готово, некомитнато по искане | ~2k |
+| 09:57 | Session end: 4 writes across 3 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx) | 9 reads | ~1025 tok |
+| 09:59 | Edited ../../care-tech-ui/src/pages/OurClients.jsx | 2→2 lines | ~14 |
+| 09:59 | Edited ../../care-tech-ui/src/pages/OurClients.jsx | expanded (+10 lines) | ~90 |
+| 09:59 | Edited ../../care-tech-ui/src/components/home/CompaniesCarousel.jsx | 2→2 lines | ~14 |
+| 09:59 | Edited ../../care-tech-ui/src/components/home/CompaniesCarousel.jsx | expanded (+10 lines) | ~90 |
+| 10:50 | 2 нови клиента (ПТГ „Н. Й. Вапцаров“ Враца, ОУ „Св. Св. Кирил и Методий“ Малорад): прозрачни PNG ≤600px в public/clients, добавени в OurClients + CompaniesCarousel; дублиран id 15 оправен; проверено в превю | care-tech-ui | готово, некомитнато | ~10k |
+| 10:01 | Session end: 8 writes across 5 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx, OurClients.jsx, CompaniesCarousel.jsx) | 15 reads | ~1233 tok |
+| 10:02 | Edited ../../care-tech-ui/src/pages/OurClients.jsx | "https://www.caretech.bg/o" → "https://www.caretech.bg/c" | ~15 |
+| 10:55 | Bug-580: canonical на /clients сочеше /our-clients (404) → /clients; проверено в превю | care-tech-ui src/pages/OurClients.jsx | готово, некомитнато | ~2k |
+| 10:03 | Session end: 9 writes across 5 files (61_water_cooling_to_bottom_of_components.sql, NavDropDown.jsx, Certifications.jsx, OurClients.jsx, CompaniesCarousel.jsx) | 15 reads | ~1248 tok |
+| 11:00 | Commit + push: care-tech-ui main 8a9fae0..2a661e2 (navbar, сертификати, клиенти, canonical); tech-store-api v2 — скрипт 61 + bookkeeping | двете репа | готово | ~4k |

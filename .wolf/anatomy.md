@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-09-28T06:39:10.622Z
-> Files: 787 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T07:02:45.295Z
+> Files: 790 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -72,6 +72,7 @@
 ## ../../care-tech-ui/src/components/home/
 
 - `AdImageSectionTwo.jsx` — slides (~993 tok)
+- `CompaniesCarousel.jsx` — „КОРПОРАТИВНИ КЛИЕНТИ“ на началната (react-slick, lazyLoad); собствено копие на масива `clients` — пази го в синхрон с pages/OurClients.jsx (~2164 tok)
 - `OurPartnersSection.jsx` — PrevArrow (~1621 tok)
 - `PromoProductsSection.jsx` — PromoProductsSection (~2722 tok)
 - `ReviewsSlider.jsx` — PrevArrow (~1554 tok)
@@ -80,7 +81,7 @@
 
 - `AuthDropDown.jsx` — AuthDropDown — renders form (~3716 tok)
 - `NavBar.jsx` — NavBar (~4458 tok)
-- `NavDropDown.jsx` — Dynamic nav dropdown: root→sub→children from Redux; selfChild removed; section headers with children render as clickable Link to /category/list/ (~4100 tok)
+- `NavDropDown.jsx` — MotionLink (~4136 tok)
 - `SearchBar.jsx` — SearchBar — renders form (~2518 tok)
 
 ## ../../care-tech-ui/src/components/products/
@@ -96,14 +97,13 @@
 - `Cart.jsx` — EURO_RATE (~16680 tok)
 - `Category.jsx` — Category (~6664 tok)
 - `CategoryList.jsx` — CategoryList (~1407 tok)
-- `Certifications.jsx` — Grid от 4 сертификата (HCSA, CGSA Hikvision на 1-2 място; стари на 3-4); lightbox с AnimatePresence (~400 tok)
-- `Certifications.jsx` — Certifications (~884 tok)
+- `Certifications.jsx` — Grid от 6 сертификата: Hikvision HCSA-SaaS, CGSA-CCTV, HCSA-CCTV ×2 (Детелин, Любослав) на 1-4; OCNA (TP-Link Omada) и DHCA-DoLynk (Dahua) на 5-6; alt = надпис в lightbox-а (~1048 tok)
 - `ComingSoonPage.jsx` — ComingSoonPage (~385 tok)
 - `ComparePage.jsx` — EURO_RATE — renders table (~3958 tok)
 - `Contact.jsx` — Contact — renders form (~2804 tok)
 - `Cookies.jsx` — Responsive Cookies / Cookie Policy component (~3474 tok)
 - `ForUs.jsx` — ForUs (~2823 tok)
-- `OurClients.jsx` — clients (~2724 tok)
+- `OurClients.jsx` — clients (~2829 tok)
 - `OurServices.jsx` — OurServices — renders form (~3552 tok)
 - `Policy.jsx` — sections (~4978 tok)
 - `ProductPage.jsx` — EURO_RATE (~10468 tok)
@@ -446,9 +446,11 @@
 - `58_smart_devices_and_access_control.sql` — ============================================================================ (~1801 tok)
 - `59_smart_watches_and_cameras_out_of_smart_devices.sql` — От 500 „Смарт устройства“ по име: 41 часовника/гривни → 156 „Смарт часовници“, 92 камери/звънци → 100 „IP камери“ (без соларния панел и Aqara Cube); граници на броя 41–60 / 92–120; защитава 5 по-рано преместени часовника CANYON (manually_categorized); един DO блок + COMMIT (~1900 tok)
 - `59_smart_watches_and_cameras_out_of_smart_devices.sql` — ============================================================================ (~1447 tok)
-- `60_asbis_aliases_smart_devices_and_components.sql` — alias_of_id за 9 скрити ASBIS категории: 762/761/864/951 (часовници; 951 → „Kids Watch“) → 156, 765/767 (смарт IP камери) → 100, 414 → 2, 393 → 11, 403 → 4. Действа след деплоя на AsbisCategoryResolver; един DO блок + COMMIT (~1600 tok)
 - `6_fix_asbis_category_names_bg.sql` — Превежда English Asbis category names → Bulgarian (~3500 tok)
+- `60_asbis_aliases_smart_devices_and_components.sql` — alias_of_id за 9 скрити ASBIS категории: 762/761/864/951 (часовници; 951 → „Kids Watch“) → 156, 765/767 (смарт IP камери) → 100, 414 → 2, 393 → 11, 403 → 4. Действа след деплоя на AsbisCategoryResolver; един DO блок + COMMIT (~1600 tok)
 - `60_asbis_aliases_smart_devices_and_components.sql` — ============================================================================ (~1452 tok)
+- `61_water_cooling_to_bottom_of_components.sql` — „Водно охлаждане“ (23) под „Компютърни компоненти“: sort_order 7 → 22 (последна), за да не цепи двуколонното мега меню; един DO блок + COMMIT, откат в края (~650 tok)
+- `61_water_cooling_to_bottom_of_components.sql` — ============================================================================ (~617 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
 - `8_asbis_filters.sql` — Auto-select Asbis is_filter=true по option_count 2-50, с blacklist на packaging/global параметри (~600 tok)
