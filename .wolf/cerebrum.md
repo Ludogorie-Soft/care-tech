@@ -888,3 +888,9 @@ spring-retry — не посягай към `@Retryable`. VALI ползва WebC
 
 ## Do-Not-Repeat (локална проверка, 2026-10-02)
 - `/tmp/techstore-local/application-localaudit.properties` вече го няма — локален бекенд без него рискува scheduler-и/имейли. Проверка на фронтенда без бекенд: подмени XHR отговора на `products/{id}?language=bg` в браузъра и навигирай с `history.pushState` + `popstate` (без презареждане).
+
+## Key Learnings (VALI в имената на продуктите, 2026-10-02)
+- **VALI sync-ът записва `name_bg`/`name_en` наново ВСЯКА нощ и за съществуващи продукти** (`ValiSyncService.updateProductFieldsFromExternal` → `setNamesToProduct`). Ръчна/SQL промяна на име на VALI продукт, който още е във фийда, се губи на следващия прогон — промяната трябва да е и в sync-а. Slug-а sync-ът НЕ го пипа (`Product.generateSlug()` само ако е празен).
+- `ValiSyncService.removeValiBrand()` маха цялата дума „VALI" (главни, `\bVALI\b`) от имената при вноса; „Lavalier", „Validated" остават. Скрипт 62 изчисти съществуващите 15 имена + 23 slug-а (вкл. 8 скрити тениски „CARETECH COMPUTERS" със slug t-shirt-vali-…). Пуска се СЛЕД деплоя на sync-а.
+- Продуктовата страница зарежда по ID (`/product/:slug/:id` → `products/{id}`), затова смяна на slug не чупи стари линкове.
+- Локалната база `techstore-filter-pg` (docker, :5433, user postgres, db techstore) е копие на каталога — там скриптовете се тестват истински; откатът от края на скрипта връща данните.

@@ -4111,3 +4111,14 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 15:51 | Edited ../../care-tech-ui/src/pages/Cart.jsx | 3→4 lines | ~34 |
 | 16:05 | Текст „Доставка и плащане“ по указание (3 кг / 10 кг / изключения) + DeliveryCharge enum и ShippingConfig.singleProductDelivery; фийд (category_id, weight) и ProductResponseDTO.deliveryCharge; ProductPage показва deliveryCharge; прозорец, предупреждение, бележки в количката; 3 нови теста (ProductServiceDeliveryChargeTest) + разширени | ShippingConfig, DeliveryCharge, PazaruvajFeedService, ProductRepository, ProductService, ProductResponseDTO, application.yml, тестове, care-tech-ui/* | 436+3 зелени, SQL в прод (read-only), браузър ✓ | ~60k |
 | 15:56 | Session end: 64 writes across 14 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 7 reads | ~13813 tok |
+| 15:57 | Session end: 64 writes across 14 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 7 reads | ~13813 tok |
+| 16:01 | Session end: 64 writes across 14 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 7 reads | ~13813 tok |
+| 16:30 | Деплой проверен: прод фийд 7217 — 5616 × 3.50 EUR, 1250 × безплатно, 351 без DeliveryCost; 0 разминавания спрямо тегло/категория в базата; продуктови страници (UPS, мини PC, тежка стойка, лек продукт над 170, евтин) и /delivery-and-payment съвпадат | feed.xml, caretech.bg | ✓ | ~8k |
+| 16:07 | Session end: 64 writes across 14 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 7 reads | ~13813 tok |
+| 16:14 | Session end: 64 writes across 14 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 7 reads | ~13813 tok |
+| 16:15 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | added 1 condition(s) | ~273 |
+| 16:15 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | 3→6 lines | ~64 |
+| 16:15 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | added 1 import(s) | ~31 |
+| 16:15 | Created src/test/java/com/techstore/service/sync/ValiProductNameTest.java | — | ~599 |
+| 17:10 | Махане на „VALI" от имената: ValiSyncService.removeValiBrand() в setNamesToProduct (sync-ът презаписва имената всяка нощ) + ValiProductNameTest (7); скрипт 62 за 15 имена + 23 slug-а, тестван на локалната база (вкл. откат) | ValiSyncService.java, ValiProductNameTest.java, scripts/62_remove_vali_from_product_names.sql | 446/446, скрипт ✓ локално | ~25k |
+| 16:19 | Session end: 68 writes across 16 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 8 reads | ~30594 tok |

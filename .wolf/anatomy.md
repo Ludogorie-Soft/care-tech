@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T12:51:33.096Z
-> Files: 797 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T13:15:14.426Z
+> Files: 800 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -368,6 +368,8 @@
 - `segments_j` (~85 tok)
 
 ## scripts/
+
+- `62_remove_vali_from_product_names.sql` — маха „VALI" от имената и slug-овете на 23 продукта (15 с VALI в името + 8 тениски); откат с точните стари стойности (~2500 tok)
 
 - `1_rename_categories.sql` — Преименуване на Vali/Tekra категории по external_id (~2744 tok)
 - `10_fix_sort_order_after_reorganization.sql` — Поправя sort_order след скрипт 7: Asbis subcategories → 100+, Vali subcategories → 1-21, top-level re-run (~600 tok)
@@ -754,9 +756,8 @@
 
 ## src/main/java/com/techstore/enums/
 
-- `DeliveryCharge.java` — FIXED / FREE / COURIER_TARIFF: доставка на един продукт до офис на Speedy (ред под цената + DeliveryCost във фийда) (~120 tok)
-
 - `BlogPostStatus.java` — Class: BlogPostStatus (~27 tok)
+- `DeliveryCharge.java` — FIXED / FREE / COURIER_TARIFF: доставка на един продукт до офис на Speedy (ред под цената + DeliveryCost във фийда) (~120 tok)
 - `OrderStatus.java` — Class: OrderStatus (~54 tok)
 - `PaymentMethod.java` — PaymentMethod: getDisplayName (~133 tok)
 - `PaymentStatus.java` — Class: PaymentStatus (~38 tok)
@@ -909,7 +910,7 @@
 - `TekraFeedValues.java` — Turns the text of one TEKRA feed property into the values it holds. (~917 tok)
 - `TekraFeedValues.java` — Стойностите на едно TEKRA свойство: повторен таг (List), разделяне по <br/>, „A,A“→„A“, лимит 2000 знака, Stats за sync лога (~900 tok)
 - `TekraSyncService.java` — Service: TekraSyncService; extractTekraParameters → Map<key, List<value>> (една опция на стойност) (~23500 tok)
-- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15745 tok)
+- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15943 tok)
 
 ## src/main/java/com/techstore/util/
 
@@ -1006,12 +1007,11 @@
 
 ## src/test/java/com/techstore/service/
 
-- `ProductServiceDeliveryChargeTest.java` — продуктовото API връща deliveryCharge: FIXED / FREE / COURIER_TARIFF (телевизор) (3 теста) (~1100 tok)
-
 - `AsbisApiServiceAttrListTest.java` — ASBIS repeats an attribute name inside one product with a different value each time (1,170 times (~532 tok)
 - `AsbisApiServiceAttrListTest.java` — extractAttrList: повторено име пази всички различни стойности в реда от фийда (~450 tok)
 - `MostApiServiceTest.java` — 11 теста с Mockito за провалите на MOST feed-а: празно/null тяло, connection error, изчерпани опити, възстановяване след преходен отказ, HTTP статус, счупен XML, изключен feed, кеширане на успех и НЕкеширане на провал (~1999 tok)
 - `PazaruvajFeedServiceTest.java` — DeliveryTime/DeliveryCost във фийда: 120 € → 3.50 EUR, 132 € → безплатно, прагът е по цената с ДДС (3 теста) (~900 tok)
+- `ProductServiceDeliveryChargeTest.java` — продуктовото API връща deliveryCharge: FIXED / FREE / COURIER_TARIFF (телевизор) (3 теста) (~1100 tok)
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
 - `TekraApiServicePagingTest.java` — Paging of the TEKRA product feed. Only page 1 used to be read, so no category went past 100 (~1473 tok)
 - `TekraApiServicePagingTest.java` — Пагинация на TEKRA фийда с mock RestTemplate: всички страници, повторена страница (игнориран page), празна последна, малка категория, провал на страница, 429×3, счупен XML (7 теста) (~1500 tok)
@@ -1034,6 +1034,7 @@
 - `MostCategoryResolutionTest.java` — The Most feed carries 222 distinct (category, subcategory) pairs against only 29 (~2405 tok)
 - `TekraFeedValuesTest.java` — Повторени тагове, <br/>, „A,A“, лимит 2000, боклук (10 теста) (~900 tok)
 - `TekraFeedValuesTest.java` — One TEKRA property can hold several values; each has to become its own option. Before, a repeated (~840 tok)
+- `ValiProductNameTest.java` — VALI's own products came with its brand in the name ("Настолен компютър VALI OFFICE BASIC"). (~599 tok)
 
 ## src/test/java/com/techstore/util/
 
