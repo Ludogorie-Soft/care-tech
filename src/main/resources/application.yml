@@ -338,7 +338,7 @@ shipping:
   cost:
     default: ${SHIPPING_COST_DEFAULT:3.50}            # EUR с ДДС, до офис на Speedy
     free:
-      threshold: ${SHIPPING_FREE_THRESHOLD:128.00}    # EUR с ДДС — над тази сума доставката до офис е безплатна
+      threshold: ${SHIPPING_FREE_THRESHOLD:170.00}    # EUR с ДДС — над тази сума доставката до офис е безплатна
   delivery:
     days: ${SHIPPING_DELIVERY_DAYS:2}                 # работни дни
 

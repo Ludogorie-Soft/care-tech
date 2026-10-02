@@ -19,7 +19,7 @@ public class ShippingConfig {
     private BigDecimal defaultShippingCost;
 
     /** Order value (EUR <b>with</b> VAT) from which delivery to a Speedy office is free. */
-    @Value("${shipping.cost.free.threshold:128.00}")
+    @Value("${shipping.cost.free.threshold:170.00}")
     private BigDecimal freeShippingThreshold;
 
     /** Working days to deliver an in-stock order — shown on the product page and in the Pazaruvaj feed. */

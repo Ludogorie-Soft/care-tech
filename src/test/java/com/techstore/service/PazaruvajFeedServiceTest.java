@@ -39,7 +39,7 @@ class PazaruvajFeedServiceTest {
     void setUp() {
         ShippingConfig shippingConfig = new ShippingConfig();
         ReflectionTestUtils.setField(shippingConfig, "defaultShippingCost", new BigDecimal("3.50"));
-        ReflectionTestUtils.setField(shippingConfig, "freeShippingThreshold", new BigDecimal("128.00"));
+        ReflectionTestUtils.setField(shippingConfig, "freeShippingThreshold", new BigDecimal("170.00"));
         ReflectionTestUtils.setField(shippingConfig, "deliveryDays", 2);
 
         service = new PazaruvajFeedService(productRepository, shippingConfig);
@@ -47,18 +47,18 @@ class PazaruvajFeedServiceTest {
     }
 
     @Test
-    @DisplayName("Product under 128 € with VAT pays the office rate")
+    @DisplayName("Product under 170 € with VAT pays the office rate")
     void cheapProductPaysOfficeRate() {
-        String product = feedFor(product(1L, "100.00")); // 120.00 € with VAT
+        String product = feedFor(product(1L, "140.00")); // 168.00 € with VAT
 
         assertEquals("2 работни дни", tag(product, "DeliveryTime"));
         assertEquals("3.50 EUR", tag(product, "DeliveryCost"));
     }
 
     @Test
-    @DisplayName("Product from 128 € with VAT ships free")
+    @DisplayName("Product from 170 € with VAT ships free")
     void expensiveProductShipsFree() {
-        String product = feedFor(product(2L, "110.00")); // 132.00 € with VAT
+        String product = feedFor(product(2L, "145.00")); // 174.00 € with VAT
 
         assertEquals("2 работни дни", tag(product, "DeliveryTime"));
         assertEquals("безплатно", tag(product, "DeliveryCost"));
@@ -67,10 +67,10 @@ class PazaruvajFeedServiceTest {
     @Test
     @DisplayName("Threshold is applied to the price with VAT, not the net price")
     void thresholdUsesPriceWithVat() {
-        // 106.67 net → 128.00 with VAT: free, although the net price is under 128
-        assertEquals("безплатно", tag(feedFor(product(3L, "106.67")), "DeliveryCost"));
-        // 106.66 net → 127.99 with VAT: paid
-        assertEquals("3.50 EUR", tag(feedFor(product(4L, "106.66")), "DeliveryCost"));
+        // 141.67 net → 170.00 with VAT: free, although the net price is under 170
+        assertEquals("безплатно", tag(feedFor(product(3L, "141.67")), "DeliveryCost"));
+        // 141.66 net → 169.99 with VAT: paid
+        assertEquals("3.50 EUR", tag(feedFor(product(4L, "141.66")), "DeliveryCost"));
     }
 
     private String feedFor(PazaruvajProductProjection product) {
