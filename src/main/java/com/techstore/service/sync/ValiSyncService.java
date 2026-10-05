@@ -89,7 +89,12 @@ public class ValiSyncService {
 
             log.info("Found {} existing manufacturers in database", allExistingManufacturers.size());
 
-            long created = 0, skipped = 0;
+            Set<Long> valiIds = externalManufacturers.stream()
+                    .map(ManufacturerRequestDto::getId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            long created = 0, linked = 0, skipped = 0;
 
             for (ManufacturerRequestDto extManufacturer : externalManufacturers) {
                 // Primary check by externalId — prevents duplicate key violation
@@ -107,15 +112,27 @@ public class ValiSyncService {
                     existingManufacturers.put(normalizedName, manufacturer);
                     existingByExternalId.put(manufacturer.getExternalId(), manufacturer);
                     created++;
+                } else if (extManufacturer.getId() != null
+                        && (manufacturer.getExternalId() == null || !valiIds.contains(manufacturer.getExternalId()))) {
+                    // The brand is already here — from another supplier (no external id), or under an
+                    // id VALI has since dropped. Without VALI's id the products sync finds no
+                    // manufacturer and skips every product of the brand, night after night.
+                    log.info("Linking manufacturer '{}' (id {}) to VALI id {} (was {})",
+                            manufacturer.getName(), manufacturer.getId(), extManufacturer.getId(),
+                            manufacturer.getExternalId());
+                    manufacturer.setExternalId(extManufacturer.getId());
+                    manufacturerRepository.save(manufacturer);
+                    existingByExternalId.put(extManufacturer.getId(), manufacturer);
+                    linked++;
                 } else {
                     skipped++;
                 }
             }
 
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS,
-                    (long) externalManufacturers.size(), created, 0, 0,
-                    String.format("Skipped %d existing", skipped), startTime);
-            log.info("Manufacturers sync completed - Created: {}, Skipped: {}", created, skipped);
+                    (long) externalManufacturers.size(), created, linked, 0,
+                    String.format("Created %d, Linked %d, Skipped %d existing", created, linked, skipped), startTime);
+            log.info("Manufacturers sync completed - Created: {}, Linked: {}, Skipped: {}", created, linked, skipped);
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);

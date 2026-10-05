@@ -29,6 +29,15 @@ public class CronJobService {
         log.info("Starting scheduled synchronization at {}", LocalDateTime.now());
 
         // --- Vali ---
+        // Manufacturers first: a product whose manufacturer is missing is skipped by the products sync.
+        // Separate try — a failure here must not cost the night's prices and stock.
+        try {
+            valiSyncService.syncManufacturers();
+            log.info("Vali manufacturers sync completed at {}", LocalDateTime.now());
+        } catch (Exception e) {
+            log.error(Markers.CRITICAL, "Scheduled Vali manufacturers synchronization failed", e);
+        }
+
         try {
             valiSyncService.syncParameters();
             log.info("Vali parameters sync completed at {}", LocalDateTime.now());
