@@ -894,3 +894,9 @@ spring-retry — не посягай към `@Retryable`. VALI ползва WebC
 - `ValiSyncService.removeValiBrand()` маха цялата дума „VALI" (главни, `\bVALI\b`) от имената при вноса; „Lavalier", „Validated" остават. Скрипт 62 изчисти съществуващите 15 имена + 23 slug-а (вкл. 8 скрити тениски „CARETECH COMPUTERS" със slug t-shirt-vali-…). Пуска се СЛЕД деплоя на sync-а.
 - Продуктовата страница зарежда по ID (`/product/:slug/:id` → `products/{id}`), затова смяна на slug не чупи стари линкове.
 - Локалната база `techstore-filter-pg` (docker, :5433, user postgres, db techstore) е копие на каталога — там скриптовете се тестват истински; откатът от края на скрипта връща данните.
+
+## Key Learnings (VALI производители, 2026-10-05)
+- **„Errors: N" в VALI_PRODUCTS = продукти, пропуснати заради липсващ производител** (`processProductsChunk`: „Manufacturer X not found … skipping"). Грешките при API (изчезнала категория и т.н.) НЕ се броят — `ValiApiService.getProductsByCategory` ги поглъща и връща празен списък.
+- `manufacturers.external_id` е уникален и се ползва САМО от VALI (ASBIS/MOST/TEKRA са NULL). VALI продуктите намират производителя единствено по него.
+- До 2026-10-05 нощният cron НЕ пускаше `syncManufacturers` за VALI (последно 2026-05-20) — вече го пуска преди параметрите, в отделен try. `syncManufacturers` вече свързва съвпадение по име (ASBIS марка без id, или VALI марка със сменено от VALI id).
+- **VALI API се вика и локално** (`VALI_API_BASE_URL` + Bearer `VALI_API_TOKEN` от .env, браузърен UA): `/manufacturers` (361), `/products?page=N&per_page=1000` (12 страници, ~220 KB всяка — id, manufacturer_id, status, categories; без имена). Удобно за сверка без прод логове.

@@ -4122,3 +4122,17 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 16:15 | Created src/test/java/com/techstore/service/sync/ValiProductNameTest.java | — | ~599 |
 | 17:10 | Махане на „VALI" от имената: ValiSyncService.removeValiBrand() в setNamesToProduct (sync-ът презаписва имената всяка нощ) + ValiProductNameTest (7); скрипт 62 за 15 имена + 23 slug-а, тестван на локалната база (вкл. откат) | ValiSyncService.java, ValiProductNameTest.java, scripts/62_remove_vali_from_product_names.sql | 446/446, скрипт ✓ локално | ~25k |
 | 16:19 | Session end: 68 writes across 16 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 8 reads | ~30594 tok |
+| 16:21 | Session end: 68 writes across 16 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 8 reads | ~30594 tok |
+| 17:25 | Скрипт 62 пуснат в прод от потребителя (13:23 по часа на базата): 23 продукта, 0 имена/slug-ове с VALI; Lavalier/Validated (7) непокътнати; сайтът показва новите имена, старият адрес /product/pc-desktop-vali-office-basic/2543 води към новия slug, canonical е новият | scripts/62, caretech.bg | ✓ | ~6k |
+| 16:24 | Session end: 68 writes across 16 files (pazaruvaj-valiant-possum.md, ShippingConfig.java, OrderService.java, PazaruvajFeedService.java, application.yml) | 8 reads | ~30594 tok |
+
+## Session: 2026-10-05 14:15
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 2026-10-05 | Проверка след 3 нощни VALI sync-а (3–5.10): 0 имена и 0 slug-а с VALI, видимите продукти обновени от sync-а на 03.10 01:04 с чисти имена; „Errors: 33" в sync_logs е същото от поне 25.09 — не е от промяната | sync_logs, products | ✓ | ~4k |
+| 14:22 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | added 1 condition(s) | ~738 |
+| 14:22 | Edited src/main/java/com/techstore/service/CronJobService.java | added error handling | ~151 |
+| 14:22 | Created src/test/java/com/techstore/service/sync/ValiManufacturersSyncTest.java | — | ~1359 |
+| 2026-10-05 | VALI „Errors: 33" = 33 продукта с липсващ производител (SCUF 15, Ubiquiti 8, Natec 6, Brook 3, IPEVO 1); поправка: syncManufacturers свързва по име + в нощния cron; ValiManufacturersSyncTest (4); симулация с реалния списък: създава 3, свързва 3 | ValiSyncService.java, CronJobService.java, ValiManufacturersSyncTest.java | 450/450 | ~40k |
+| 14:25 | Session end: 3 writes across 3 files (ValiSyncService.java, CronJobService.java, ValiManufacturersSyncTest.java) | 1 reads | ~18351 tok |

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-02T13:15:14.426Z
-> Files: 800 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-05T11:22:55.726Z
+> Files: 802 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -369,8 +369,6 @@
 
 ## scripts/
 
-- `62_remove_vali_from_product_names.sql` — маха „VALI" от имената и slug-овете на 23 продукта (15 с VALI в името + 8 тениски); откат с точните стари стойности (~2500 tok)
-
 - `1_rename_categories.sql` — Преименуване на Vali/Tekra категории по external_id (~2744 tok)
 - `10_fix_sort_order_after_reorganization.sql` — Поправя sort_order след скрипт 7: Asbis subcategories → 100+, Vali subcategories → 1-21, top-level re-run (~600 tok)
 - `11_fix_product_slugs.sql` — Генерира slug за продукти с empty/null slug от name_en/name_bg; Cyrillic product-id fallback опционален (~400 tok)
@@ -462,6 +460,7 @@
 - `60_asbis_aliases_smart_devices_and_components.sql` — ============================================================================ (~1452 tok)
 - `61_water_cooling_to_bottom_of_components.sql` — „Водно охлаждане“ (23) под „Компютърни компоненти“: sort_order 7 → 22 (последна), за да не цепи двуколонното мега меню; един DO блок + COMMIT, откат в края (~650 tok)
 - `61_water_cooling_to_bottom_of_components.sql` — ============================================================================ (~617 tok)
+- `62_remove_vali_from_product_names.sql` — маха „VALI" от имената и slug-овете на 23 продукта (15 с VALI в името + 8 тениски); откат с точните стари стойности (~2500 tok)
 - `7_reorganize_asbis_categories.sql` — Разпуска 43 Asbis root категории под Vali дървото; "Дребни домакински уреди" остава видим root (~6000 tok)
 - `7b_fix_asbis_duplicate_subcategories.sql` — Merge Asbis дублики (ед.ч.) → Vali канонични (мн.ч.): Видео карта→Видео карти, Памет→Памети и др. Скрива Asbis дублика след merge. (~500 tok)
 - `8_asbis_filters.sql` — Auto-select Asbis is_filter=true по option_count 2-50, с blacklist на packaging/global параметри (~600 tok)
@@ -840,7 +839,7 @@
 - `CategoryAliasResolver.java` — alias категория → целевата; alias към скрита цел остава на себе си (празна). Ползва се от ProductSearchService и CategoryFilterService (~350 tok)
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~12606 tok)
 - `CategoryService.java` — Service: CategoryService (~4270 tok)
-- `CronJobService.java` — Nightly cron (1am). Sync Vali→Tekra→Most→Asbis. Failures logged with Markers.CRITICAL (→ Slack). (~806 tok)
+- `CronJobService.java` — Service: CronJobService (~1046 tok)
 - `EmailService.java` — Service for sending email notifications (~5028 tok)
 - `FileUploadService.java` — Service: FileUploadService (~7260 tok)
 - `ImageMigrationService.java` — Service: ImageMigrationService (~1434 tok)
@@ -910,7 +909,7 @@
 - `TekraFeedValues.java` — Turns the text of one TEKRA feed property into the values it holds. (~917 tok)
 - `TekraFeedValues.java` — Стойностите на едно TEKRA свойство: повторен таг (List), разделяне по <br/>, „A,A“→„A“, лимит 2000 знака, Stats за sync лога (~900 tok)
 - `TekraSyncService.java` — Service: TekraSyncService; extractTekraParameters → Map<key, List<value>> (една опция на стойност) (~23500 tok)
-- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~15943 tok)
+- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~16279 tok)
 
 ## src/main/java/com/techstore/util/
 
@@ -1034,6 +1033,7 @@
 - `MostCategoryResolutionTest.java` — The Most feed carries 222 distinct (category, subcategory) pairs against only 29 (~2405 tok)
 - `TekraFeedValuesTest.java` — Повторени тагове, <br/>, „A,A“, лимит 2000, боклук (10 теста) (~900 tok)
 - `TekraFeedValuesTest.java` — One TEKRA property can hold several values; each has to become its own option. Before, a repeated (~840 tok)
+- `ValiManufacturersSyncTest.java` — Every night VALI_PRODUCTS reported "Errors: 33": 33 VALI products whose manufacturer had no (~1359 tok)
 - `ValiProductNameTest.java` — VALI's own products came with its brand in the name ("Настолен компютър VALI OFFICE BASIC"). (~599 tok)
 
 ## src/test/java/com/techstore/util/
