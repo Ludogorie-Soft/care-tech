@@ -10118,6 +10118,48 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-10-05T10:00:00.000Z"
+    },
+    {
+      "id": "bug-612",
+      "timestamp": "2026-10-07T00:00:00.000Z",
+      "error_message": "GSC: ~14.7k 'Alternate page with proper canonical tag'; live check: /product/...?og_bypass=1 → 301 към същия URL с ?og_bypass=1 (redirect loop, ERR_TOO_MANY_REDIRECTS)",
+      "file": "nginx.prod.conf",
+      "root_cause": "`rewrite ^(/product/[^?]*).*$ $1 permanent;` — nginx rewrite мачва само $uri (без query), а при замяна без завършващ '?' добавя оригиналните args обратно → 301 към себе си. Същото за /category/.",
+      "fix": "nginx.prod.conf: `rewrite ^(/product/.*)$ $1? permanent;` и `rewrite ^(/category/.*)$ $1? permanent;` — завършващият '?' изтрива query стринга. Проверено в nginx:stable-alpine (Docker): 1×301 към чист URL, без цикъл. Чака ръчен деплой на сървъра.",
+      "tags": [
+        "nginx",
+        "seo",
+        "gsc",
+        "redirect-loop",
+        "og_bypass",
+        "canonical"
+      ],
+      "related_bugs": [
+        "bug-329",
+        "bug-395"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-07T00:00:00.000Z"
+    },
+    {
+      "id": "bug-613",
+      "timestamp": "2026-10-07T00:00:00.000Z",
+      "error_message": "GSC: /promotions, /index.html се отчитат като 'Alternate page with proper canonical tag' на началната страница",
+      "file": "care-tech-ui/public/index.html",
+      "root_cause": "Статичен <link rel=\"canonical\" href=\"https://www.caretech.bg/\"> в index.html → суровият HTML на всеки SPA маршрут сочи към /; SEO.jsx го поправя чак след JS.",
+      "fix": "Премахнат статичният canonical. SEO.jsx setLink() създава <link> ако липсва. Проверено в dev server: суров HTML 0 canonical; рендерирано / → /, /promotions → /promotions, продукт → собствен URL (точно 1 таг).",
+      "tags": [
+        "seo",
+        "gsc",
+        "canonical",
+        "react",
+        "index.html"
+      ],
+      "related_bugs": [
+        "bug-612"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-07T00:00:00.000Z"
     }
   ]
 }

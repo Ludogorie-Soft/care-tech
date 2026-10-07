@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-05T11:22:55.726Z
-> Files: 802 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-07T11:48:55.848Z
+> Files: 803 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -26,6 +26,7 @@
 - `asbis_price_field.md` (~203 tok)
 - `euro_rate_convention.md` (~361 tok)
 - `feedback_showtoast_duration.md` — Declares type (~140 tok)
+- `gsc_alternate_canonical_audit.md` (~421 tok)
 - `MEMORY.md` — Memory Index (~512 tok)
 - `parameter_filters_canonical_layer.md` (~493 tok)
 - `pazaruvaj_delivery_fields.md` (~360 tok)
@@ -47,7 +48,7 @@
 
 ## ../../care-tech-ui/public/
 
-- `index.html` — Care Tech – Продажба и ремонт на лаптопи (~1910 tok)
+- `index.html` — Care Tech – Продажба и ремонт на лаптопи (~1937 tok)
 - `leasing-complete.html` — TBI Complete (~184 tok)
 
 ## ../../care-tech-ui/src/
@@ -244,7 +245,7 @@
 - `mvnw` — or more contributor license agreements.  See the NOTICE file (~3144 tok)
 - `mvnw.cmd` — Declares Directory (~2262 tok)
 - `nginx.conf` — Nginx configuration (~575 tok)
-- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~2968 tok)
+- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~3019 tok)
 - `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
 - `ORDER_EDIT_PLAN.md` — План: Редактиране на поръчки от администратор (~577 tok)
 - `PARAMETER_MAPPING_PLAN.md` — План: CareTech Параметри + Филтър Дедупликация (AI-assisted) (~10360 tok)

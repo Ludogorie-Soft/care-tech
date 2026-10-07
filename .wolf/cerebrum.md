@@ -37,6 +37,13 @@
 - **leasingSlice registerError:** Stores `true` (flag) on failure, not backend payload — prevents accidental leakage of server error details to UI.
 - **Dropdown re-show bug pattern:** In a controlled input where selecting from dropdown also calls `setState` on the input value — any `useEffect` watching that value will re-fire. Use a `programmaticQueryRef` flag to suppress the effect when the change was programmatic (not user typing).
 
+## Key Learnings (SEO / OG routing, 2026-10-07)
+
+- **Two controllers serve `/api/og/product/{id}`:** `OgMetaController` (produces=text/html, sets `__og` cookie, Googlebot-aware) and legacy `OGPreviewController` (no produces, meta-refresh to `?og_bypass=1`). Spring picks by Accept header: browsers/Googlebot (`Accept: text/html`) → OgMetaController; `Accept: */*` (curl, some bots) → OGPreviewController. When probing live, always send a browser Accept header or you test the wrong controller.
+- **Googlebot never sees the React app on /product/ and /category/:** nginx sends every cookie-less request to /api/og, and OgMetaController returns Googlebot a ~2 KB page (title, description, canonical, OG tags) with an empty body — no price, specs, JSON-LD or internal links.
+- **`care-tech-ui/public/index.html` hard-codes `<link rel="canonical" href="https://www.caretech.bg/">`.** Every SPA route's raw HTML therefore points to the homepage until SEO.jsx rewrites it client-side (e.g. /promotions shows up in GSC as an alternate of /). Remove it before routing Googlebot to React.
+- **`/category/list/:slug/:id` is its own React page (CategoryList)**, but the OG canonical points to `/category/:slug/:id`, so Google treats every /list/ page as an alternate.
+
 ## Do-Not-Repeat
 
 - [2026-08-20] NEVER call `fetchCategoryParameters` (paramSlice) with an object `{ categoryId, language }` — the thunk accepts a plain number as first arg. Passing an object produces URL `parameters/category/[object Object]` → 404. `language=bg` is hardcoded inside the thunk. Correct: `dispatch(fetchCategoryParameters(categoryId))`.
@@ -67,6 +74,8 @@
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
 <!-- Format: [YYYY-MM-DD] Description of what went wrong and what to do instead. -->
+
+- [2026-10-07] NEVER write an nginx `rewrite` meant to strip query params without a trailing `?` in the replacement. `rewrite ^(/product/[^?]*).*$ $1 permanent;` re-appends the original args → 301 to itself (infinite loop). Correct: `rewrite ^(/product/.*)$ $1? permanent;`.
 
 - [2026-08-06] NEVER use `ch.qos.logback.classic.filter.MarkerFilter` in logback XML — this class does NOT exist in the logback version used by this project (Spring Boot 3.x with logback-classic). Instead, create a custom `Filter<ILoggingEvent>` subclass that checks `event.getMarkerList()`. See `CriticalMarkerFilter.java`.
 

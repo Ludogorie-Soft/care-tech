@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-05-15T09:51:21.541Z",
   "lifetime": {
-    "total_tokens_estimated": 28335498,
-    "total_reads": 10582,
-    "total_writes": 18623,
-    "total_sessions": 100,
-    "anatomy_hits": 4897,
-    "anatomy_misses": 4332,
+    "total_tokens_estimated": 28354974,
+    "total_reads": 10584,
+    "total_writes": 18631,
+    "total_sessions": 101,
+    "anatomy_hits": 4898,
+    "anatomy_misses": 4333,
     "repeated_reads_blocked": 4430,
-    "estimated_savings_vs_bare_cli": 22858108
+    "estimated_savings_vs_bare_cli": 22858308
   },
   "sessions": [
     {
@@ -176288,6 +176288,108 @@
         "writes_count": 3,
         "repeated_reads_blocked": 0,
         "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-10-05-1415",
+      "started": "2026-10-05T11:15:04.091Z",
+      "ended": "2026-10-05T11:25:55.806Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 15943,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/sync/ValiSyncService.java",
+          "tokens_estimated": 790,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/main/java/com/techstore/service/CronJobService.java",
+          "tokens_estimated": 162,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/src/test/java/com/techstore/service/sync/ValiManufacturersSyncTest.java",
+          "tokens_estimated": 1456,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 15943,
+        "output_tokens_estimated": 2408,
+        "reads_count": 1,
+        "writes_count": 3,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-10-07-1443",
+      "started": "2026-10-07T11:43:03.493Z",
+      "ended": "2026-10-07T11:47:56.199Z",
+      "reads": [],
+      "writes": [
+        {
+          "file": "/Users/user/.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/gsc_alternate_canonical_audit.md",
+          "tokens_estimated": 447,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 447,
+        "reads_count": 0,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-10-07-1443",
+      "started": "2026-10-07T11:43:03.493Z",
+      "ended": "2026-10-07T11:50:30.612Z",
+      "reads": [
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/public/index.html",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/user/.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/gsc_alternate_canonical_audit.md",
+          "tokens_estimated": 447,
+          "action": "create"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 84,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/cp/tech-store-api/nginx.prod.conf",
+          "tokens_estimated": 84,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/user/Documents/projects/care-tech-ui/public/index.html",
+          "tokens_estimated": 63,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 678,
+        "reads_count": 1,
+        "writes_count": 4,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
       }
     }
   ],

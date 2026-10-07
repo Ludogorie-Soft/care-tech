@@ -4136,3 +4136,17 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 14:22 | Created src/test/java/com/techstore/service/sync/ValiManufacturersSyncTest.java | — | ~1359 |
 | 2026-10-05 | VALI „Errors: 33" = 33 продукта с липсващ производител (SCUF 15, Ubiquiti 8, Natec 6, Brook 3, IPEVO 1); поправка: syncManufacturers свързва по име + в нощния cron; ValiManufacturersSyncTest (4); симулация с реалния списък: създава 3, свързва 3 | ValiSyncService.java, CronJobService.java, ValiManufacturersSyncTest.java | 450/450 | ~40k |
 | 14:25 | Session end: 3 writes across 3 files (ValiSyncService.java, CronJobService.java, ValiManufacturersSyncTest.java) | 1 reads | ~18351 tok |
+| 14:25 | Session end: 3 writes across 3 files (ValiSyncService.java, CronJobService.java, ValiManufacturersSyncTest.java) | 1 reads | ~18351 tok |
+
+## Session: 2026-10-07 14:43
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:00 | GSC Coverage Drilldown analysis (Alternate page w/ canonical, 14.7k): 63% legacy ?og_bypass=1, 26% product URLs from pre-08-10 flow, 10% categories; live probes found og_bypass 301 self-loop + Googlebot gets empty OG-only page + static canonical "/" in index.html | nginx.prod.conf, OgMetaController.java, OGPreviewController.java, care-tech-ui/public/index.html | findings + plan, no code changed | ~25k |
+| 14:47 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/gsc_alternate_canonical_audit.md | — | ~418 |
+| 14:47 | Session end: 1 writes across 1 files (gsc_alternate_canonical_audit.md) | 0 reads | ~447 tok |
+| 14:48 | Edited nginx.prod.conf | modified if() | ~79 |
+| 14:48 | Edited nginx.prod.conf | modified if() | ~79 |
+| 14:48 | Edited ../../care-tech-ui/public/index.html | 4→5 lines | ~59 |
+| 10:30 | GSC fix steps 1+2: nginx og_bypass rewrite gets trailing "?" (no more 301 self-loop; verified in Docker nginx); removed static canonical from care-tech-ui index.html (verified in dev server: raw 0 tags, rendered = correct per-route) | nginx.prod.conf, care-tech-ui/public/index.html | done, not deployed/committed | ~12k |
+| 14:50 | Session end: 4 writes across 3 files (gsc_alternate_canonical_audit.md, nginx.prod.conf, index.html) | 1 reads | ~678 tok |
