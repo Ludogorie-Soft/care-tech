@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -200,9 +201,10 @@ public class AdminController {
     public ResponseEntity<List<ProductResponseDTO>> createPromoByCategory(
             @RequestParam("categoryId") Long categoryId,
             @RequestParam("discount")BigDecimal discount,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endsAt,
             @RequestParam(defaultValue = "en", name = "lang") String lang
     ) {
-        List<ProductResponseDTO> response = adminService.createPromoByCategory(categoryId, discount, lang);
+        List<ProductResponseDTO> response = adminService.createPromoByCategory(categoryId, discount, endsAt, lang);
         return ResponseEntity.ok(response);
     }
 
@@ -210,9 +212,10 @@ public class AdminController {
     public ResponseEntity<List<ProductResponseDTO>> createPromoByManufacturer(
             @RequestParam("manufacturerId") Long manufacturerId,
             @RequestParam("discount") BigDecimal discount,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endsAt,
             @RequestParam(defaultValue = "en", name = "lang") String lang
     ) {
-        List<ProductResponseDTO> response = adminService.createPromoByManufacturer(manufacturerId, discount, lang);
+        List<ProductResponseDTO> response = adminService.createPromoByManufacturer(manufacturerId, discount, endsAt, lang);
         return ResponseEntity.ok(response);
     }
 

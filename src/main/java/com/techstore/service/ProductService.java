@@ -1045,6 +1045,7 @@ public class ProductService {
         dto.setMarkupPercentage(p.getMarkupPercentage());
         dto.setFinalPrice(p.getFinalPrice());
         dto.setDiscount(p.getDiscount());
+        dto.setPromoEndsAt(p.getPromoEndsAt());
         dto.setActive(p.getActive());
         dto.setFeatured(p.getFeatured());
         dto.setShow(p.getShow());

@@ -16,6 +16,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +52,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
                                       Pageable pageable);
 
     List<Product> findAllByCategoryId(Long categoryId);
+
+    List<Product> findByPromoEndsAtLessThanEqual(LocalDateTime moment);
 
     @Query("SELECT p FROM Product p WHERE p.slug IS NULL OR p.slug = ''")
     List<Product> findProductsWithoutSlug();

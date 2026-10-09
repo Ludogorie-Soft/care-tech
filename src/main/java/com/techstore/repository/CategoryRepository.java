@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +35,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Optional<Category> findByNameBg(String nameBg);
 
     List<Category> findByIsPromoActiveTrue();
+
+    List<Category> findByPromoEndsAtLessThanEqual(LocalDateTime moment);
 
     List<Category> findDistinctByProductsMarkupPercentageGreaterThan(BigDecimal markup);
 
