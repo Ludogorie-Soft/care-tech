@@ -185,7 +185,7 @@ public class Product extends BaseEntity {
 
         BigDecimal markup = BigDecimal.ZERO;
         if (markupPercentage != null && markupPercentage.compareTo(BigDecimal.ZERO) > 0) {
-            markup = priceClient.multiply(markupPercentage.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+            markup = priceClient.multiply(markupPercentage.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP));
         }
 
         BigDecimal basePrice = priceClient.add(markup);

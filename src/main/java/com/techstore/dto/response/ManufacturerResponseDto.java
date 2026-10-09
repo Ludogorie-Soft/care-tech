@@ -2,6 +2,7 @@ package com.techstore.dto.response;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -18,4 +19,6 @@ public class ManufacturerResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean isPromoActive;
+    /** Only in the admin "with markup" list: the most common markup among the products. */
+    private BigDecimal markupPercentage;
 }
