@@ -92,6 +92,31 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Admin product search across all products, including hidden and unavailable ones.
+     * Example: GET /api/admin/products/search?q=imou камера&onSale=true&page=0&size=12
+     */
+    @GetMapping("/products/search")
+    public ResponseEntity<Page<ProductResponseDTO>> searchAdminProducts(
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "false") boolean onSale,
+            @RequestParam(defaultValue = "false") boolean withMarkup,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "bg") String lang) {
+
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
+                Sort.by("nameBg").and(Sort.by("id")));
+        return ResponseEntity.ok(productService.searchAdminProducts(q, onSale, withMarkup, pageable, lang));
+    }
+
+    @GetMapping("/products/{id}")
+    public ResponseEntity<ProductResponseDTO> getProductForAdmin(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "bg") String language) {
+        return ResponseEntity.ok(productService.getProductByIdForAdmin(id, language));
+    }
+
     @GetMapping("/products/with-markup")
     public ResponseEntity<Page<ProductResponseDTO>> getProductsWithMarkup(
             @RequestParam(defaultValue = "0") int page,
