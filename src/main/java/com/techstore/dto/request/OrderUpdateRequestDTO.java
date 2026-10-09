@@ -78,4 +78,8 @@ public class OrderUpdateRequestDTO {
     /** null = do not touch items. quantity = 0 removes the item. */
     @Valid
     private List<OrderItemUpdateDTO> items;
+
+    /** Products added to the order; customPriceEuro null = the product's current price. */
+    @Valid
+    private List<OrderCreateRequestDTO.OrderItemRequestDTO> newItems;
 }

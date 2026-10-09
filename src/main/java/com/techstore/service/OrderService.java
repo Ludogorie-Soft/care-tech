@@ -153,29 +153,7 @@ public class OrderService {
 
         // Add order items
         for (var itemDto : request.getItems()) {
-            Product product = productRepository.findById(itemDto.getProductId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + itemDto.getProductId()));
-
-            OrderItem orderItem = new OrderItem();
-            orderItem.setProduct(product);
-            orderItem.setProductName(product.getNameBg());
-            orderItem.setProductSku(product.getSku());
-            orderItem.setProductModel(product.getModel());
-            orderItem.setQuantity(itemDto.getQuantity());
-
-            if (itemDto.getCustomPriceEuro() != null) {
-                orderItem.setUnitPrice(itemDto.getCustomPriceEuro());
-                orderItem.setDiscountAmount(
-                    itemDto.getDiscountPercent() != null ? itemDto.getDiscountPercent() : BigDecimal.ZERO
-                );
-            } else {
-                orderItem.setUnitPrice(product.getFinalPrice() != null ? product.getFinalPrice() : product.getPriceClient());
-                orderItem.setDiscountAmount(product.getDiscount());
-            }
-            orderItem.setTaxRate(new BigDecimal("20.00"));
-
-            orderItem.calculateLineTotals();
-            order.addOrderItem(orderItem);
+            order.addOrderItem(buildOrderItem(itemDto));
         }
 
         order.calculateTotals();
@@ -471,8 +449,9 @@ public class OrderService {
         if (request.getInvoiceDate()   != null) order.setInvoiceDate(request.getInvoiceDate());
 
         // ── Order items ───────────────────────────────────────────────────────
-        if (request.getItems() != null) {
-            for (OrderItemUpdateDTO itemUpdate : request.getItems()) {
+        if (request.getItems() != null || request.getNewItems() != null) {
+            List<OrderItemUpdateDTO> itemUpdates = request.getItems() != null ? request.getItems() : List.of();
+            for (OrderItemUpdateDTO itemUpdate : itemUpdates) {
                 OrderItem orderItem = order.getOrderItems().stream()
                         .filter(oi -> oi.getId().equals(itemUpdate.getOrderItemId()))
                         .findFirst()
@@ -483,8 +462,20 @@ public class OrderService {
                     order.removeOrderItem(orderItem);
                 } else {
                     orderItem.setQuantity(itemUpdate.getQuantity());
+                    if (itemUpdate.getUnitPrice() != null
+                            && itemUpdate.getUnitPrice().compareTo(orderItem.getUnitPrice()) != 0) {
+                        orderItem.setUnitPrice(itemUpdate.getUnitPrice());
+                        // The old discount no longer describes a manually set price
+                        orderItem.setDiscountAmount(BigDecimal.ZERO);
+                    }
                     orderItem.calculateLineTotals();
                 }
+            }
+
+            List<OrderCreateRequestDTO.OrderItemRequestDTO> newItems =
+                    request.getNewItems() != null ? request.getNewItems() : List.of();
+            for (OrderCreateRequestDTO.OrderItemRequestDTO itemDto : newItems) {
+                order.addOrderItem(buildOrderItem(itemDto));
             }
 
             if (order.getOrderItems().isEmpty()) {
@@ -664,6 +655,32 @@ public class OrderService {
                 .termsAgreed(order.getTermsAgreed())
                 .warrantyFilePath(order.getWarrantyFilePath())
                 .build();
+    }
+
+    private OrderItem buildOrderItem(OrderCreateRequestDTO.OrderItemRequestDTO itemDto) {
+        Product product = productRepository.findById(itemDto.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + itemDto.getProductId()));
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setProduct(product);
+        orderItem.setProductName(product.getNameBg());
+        orderItem.setProductSku(product.getSku());
+        orderItem.setProductModel(product.getModel());
+        orderItem.setQuantity(itemDto.getQuantity());
+
+        if (itemDto.getCustomPriceEuro() != null) {
+            orderItem.setUnitPrice(itemDto.getCustomPriceEuro());
+            orderItem.setDiscountAmount(
+                itemDto.getDiscountPercent() != null ? itemDto.getDiscountPercent() : BigDecimal.ZERO
+            );
+        } else {
+            orderItem.setUnitPrice(product.getFinalPrice() != null ? product.getFinalPrice() : product.getPriceClient());
+            orderItem.setDiscountAmount(product.getDiscount());
+        }
+        orderItem.setTaxRate(new BigDecimal("20.00"));
+
+        orderItem.calculateLineTotals();
+        return orderItem;
     }
 
     private OrderItemResponseDTO mapItemToResponseDTO(OrderItem item) {
