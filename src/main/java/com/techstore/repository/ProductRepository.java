@@ -27,6 +27,10 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     Optional<Product> findByReferenceNumber(String referenceNumber); // Added this method
 
+    /** For the product page head, which shows the manufacturer outside a transaction. */
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.manufacturer WHERE p.id = :id")
+    Optional<Product> findWithManufacturerById(@Param("id") Long id);
+
     List<Product> findByExternalIdIn(Collection<Long> externalIds);
 
     List<Product> findByReferenceNumberIn(Collection<String> referenceNumbers);

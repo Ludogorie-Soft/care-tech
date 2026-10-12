@@ -186,6 +186,9 @@ logging:
 app:
     name: CareTech
     url: ${APP_URL:https://www.caretech.bg}
+    # React index.html, served by the frontend container on the Docker network; product and
+    # category pages are this shell with their own head tags (OgMetaController)
+    spa-index-url: ${SPA_INDEX_URL:http://care-tech-ui/index.html}
     email:
       info: ${CARETECH_INFO_EMAIL:info@caretech.bg}
       from: ${CARETECH_ORDERS_EMAIL:orders@caretech.bg}

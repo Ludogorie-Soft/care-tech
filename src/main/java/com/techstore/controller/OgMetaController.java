@@ -4,6 +4,9 @@ import com.techstore.entity.Category;
 import com.techstore.entity.Product;
 import com.techstore.repository.CategoryRepository;
 import com.techstore.repository.ProductRepository;
+import com.techstore.service.ProductService;
+import com.techstore.service.seo.SpaHead;
+import com.techstore.service.seo.SpaShellService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,20 +24,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 /**
- * Returns minimal HTML with Open Graph meta tags for social media crawlers
- * (Facebook, WhatsApp, Viber, Telegram, etc.).
+ * Product and category pages: the React index.html with the page's own head tags and HTTP status.
  *
- * Strategy: nginx routes ALL /product/ and /category/ requests here (not just known bots).
- * - Bots (no cookie): read OG tags and stop — goal achieved.
- * - Browsers (no cookie): get OG HTML + Set-Cookie(__og=1, 30 min) + instant meta-refresh
- *   back to the same URL. On the second request they have the cookie, nginx serves React directly.
- * - Browsers (has cookie): never reach here — nginx proxies straight to React.
- *
- * This approach works for ANY messenger/bot regardless of User-Agent.
- *
- * nginx passes the URL the visitor asked for in X-Original-URI. When it is not the canonical URL
- * (old slug, shifted category ID, parent category without /list/) the answer is a 301 to the
- * canonical one; an unknown ID is a 404.
+ * nginx sends every /product/ and /category/ request here, passing the URL the visitor asked for
+ * in X-Original-URI. Everyone gets the same answer:
+ * - 200: the React app, its title, description, canonical and Open Graph tags already filled in, so
+ *   social crawlers (no JS) get a preview and search engines get the canonical before rendering.
+ * - 301: the URL is not the canonical one (old slug, shifted category ID, parent without /list/).
+ * - 404: unknown or hidden product/category, with noindex; React shows its "not available" page.
+ * - 503: index.html is not available; nginx then serves the plain React app.
  */
 @RestController
 @RequestMapping("/api/og")
@@ -43,20 +41,18 @@ public class OgMetaController {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final SpaShellService spaShell;
+
+    private static final MediaType TEXT_HTML_UTF8 = new MediaType("text", "html", StandardCharsets.UTF_8);
 
     @Value("${app.url:https://caretech.bg}")
     private String siteUrl;
 
-    private static final double EURO_RATE = 1.95583;
-
     // ── Product ────────────────────────────────────────────────────────────────
 
-    @GetMapping(value = "/product/{id}", produces = MediaType.TEXT_HTML_VALUE)
-    public ResponseEntity<String> productOg(@PathVariable Long id, HttpServletRequest request) {
-        Optional<Product> opt = productRepository.findById(id);
-
-        boolean googlebot = isGooglebot(request.getHeader(HttpHeaders.USER_AGENT));
-
+    @GetMapping("/product/{id}")
+    public ResponseEntity<String> productPage(@PathVariable Long id, HttpServletRequest request) {
+        Optional<Product> opt = productRepository.findWithManufacturerById(id).filter(ProductService::isVisibleOnSite);
         if (opt.isEmpty()) {
             return notFound();
         }
@@ -71,60 +67,75 @@ public class OgMetaController {
             return movedPermanently(productUrl);
         }
 
-        String image = buildImageUrl(p.getPrimaryImageUrl(), p.getId());
-        String title = p.getNameBg() != null ? p.getNameBg() + " | Caretech" : "Caretech";
-        String description = buildProductDescription(p);
-        String imageAlt = p.getNameBg() != null ? p.getNameBg() : p.getNameEn();
-
-        var builder = ResponseEntity.ok().contentType(MediaType.TEXT_HTML);
-        if (!googlebot) {
-            builder = builder.header(HttpHeaders.SET_COOKIE, "__og=1; Max-Age=1800; Path=/; SameSite=Lax");
-        }
-        return builder.body(ogHtml(title, description, image, productUrl, "product", productUrl, imageAlt, !googlebot));
+        // Titles as ProductPage.jsx sets them, so the head does not change when React starts.
+        String name = p.getNameBg() != null ? p.getNameBg() : p.getNameEn();
+        String title = p.getManufacturer() != null && p.getManufacturer().getName() != null
+                ? name + " | " + p.getManufacturer().getName()
+                : name;
+        return page(new SpaHead.Tags(title, name + " | Care Tech", buildProductDescription(p, name), productUrl,
+                buildImageUrl(p.getPrimaryImageUrl(), p.getId()), name, "product", true));
     }
 
     // ── Category ───────────────────────────────────────────────────────────────
 
-    @GetMapping(value = "/category/{id}", produces = MediaType.TEXT_HTML_VALUE)
-    public ResponseEntity<String> categoryOg(@PathVariable Long id, HttpServletRequest request) {
+    @GetMapping("/category/{id}")
+    public ResponseEntity<String> categoryPage(@PathVariable Long id, HttpServletRequest request) {
         String requested = requestedPath(request, "/category/");
 
         // As in Category.jsx, the slug picks the category among the visible ones and the ID is only a
         // fallback: Google still holds URLs whose ID has shifted (torches/213 while torches is 214).
         Optional<Category> opt = Optional.ofNullable(slugOf(requested))
                 .flatMap(categoryRepository::findFirstBySlugAndShowTrueOrderByIdAsc)
-                .or(() -> categoryRepository.findById(id));
-
-        boolean googlebot = isGooglebot(request.getHeader(HttpHeaders.USER_AGENT));
-
+                .or(() -> categoryRepository.findById(id))
+                .filter(c -> Boolean.TRUE.equals(c.getShow()));
         if (opt.isEmpty()) {
             return notFound();
         }
 
         Category c = opt.get();
-        String categoryUrl = categoryUrl(c);
+        boolean parent = categoryRepository.existsByParentIdAndShowTrue(c.getId());
+        String categoryUrl = siteUrl + "/category/" + (parent ? "list/" : "") + c.getSlug() + "/" + c.getId();
         if (requested != null && StringUtils.hasText(c.getSlug())
                 && !categoryUrl.equals(siteUrl + "/category/" + requested)) {
             return movedPermanently(categoryUrl);
         }
 
-        String title = c.getNameBg() != null ? c.getNameBg() + " | Caretech" : "Caretech";
-        String description = "Разгледайте продуктите от категория " + c.getNameBg()
-                + ". Онлайн магазин за технологични продукти с най-добри цени.";
-
-        var builder = ResponseEntity.ok().contentType(MediaType.TEXT_HTML);
-        if (!googlebot) {
-            builder = builder.header(HttpHeaders.SET_COOKIE, "__og=1; Max-Age=1800; Path=/; SameSite=Lax");
-        }
-        return builder.body(ogHtml(title, description, siteUrl + "/logo.png", categoryUrl, "website", categoryUrl, null, !googlebot));
+        // Parents render CategoryList.jsx, the others Category.jsx; titles as those pages set them.
+        String name = c.getNameBg() != null ? c.getNameBg() : c.getNameEn();
+        String title = parent ? name + " | Care Tech" : name + " - Категория";
+        String description = parent
+                ? "Разгледайте подкатегориите на " + name + " в Care Tech."
+                : "Разгледайте продуктите от категория " + name + ". Онлайн магазин за технологични продукти с най-добри цени.";
+        return page(new SpaHead.Tags(title, name + " | Care Tech", description, categoryUrl,
+                siteUrl + "/logo.png", name, "website", true));
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
-    /** Categories with visible children live under /category/list/ (CategoryList.jsx), as React links them. */
-    private String categoryUrl(Category c) {
-        String list = categoryRepository.existsByParentIdAndShowTrue(c.getId()) ? "list/" : "";
-        return siteUrl + "/category/" + list + c.getSlug() + "/" + c.getId();
+    private ResponseEntity<String> page(SpaHead.Tags tags) {
+        return spaShell.indexHtml()
+                .map(html -> html(HttpStatus.OK, SpaHead.render(html, tags)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+    }
+
+    /** 404 with noindex. Without index.html, a bare page that sends browsers to the homepage. */
+    private ResponseEntity<String> notFound() {
+        SpaHead.Tags tags = new SpaHead.Tags("Страницата не е намерена | Care Tech", "Care Tech",
+                "Страницата не е намерена или продуктът вече не е наличен.", null,
+                siteUrl + "/logo.png", "Care Tech", "website", false);
+        return html(HttpStatus.NOT_FOUND, spaShell.indexHtml()
+                .map(html -> SpaHead.render(html, tags))
+                .orElseGet(() -> redirect(siteUrl)));
+    }
+
+    /**
+     * No {@code produces} on the mappings: WebConfig resolves an Accept header of "any type" (curl, some
+     * crawlers) to JSON, which a text/html-only mapping would answer with 406. The type is set here instead.
+     */
+    private static ResponseEntity<String> html(HttpStatus status, String body) {
+        // index.html points to hashed bundles that change with every frontend deploy
+        return ResponseEntity.status(status).contentType(TEXT_HTML_UTF8)
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache").body(body);
     }
 
     /**
@@ -158,11 +169,6 @@ public class OgMetaController {
         return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header(HttpHeaders.LOCATION, url).build();
     }
 
-    /** 404 for search engines; browsers still follow the meta refresh to the homepage. */
-    private ResponseEntity<String> notFound() {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_HTML).body(redirect(siteUrl));
-    }
-
     private String buildImageUrl(String stored, Long productId) {
         if (stored != null && (stored.startsWith("http://") || stored.startsWith("https://"))) {
             return stored;
@@ -170,15 +176,15 @@ public class OgMetaController {
         return siteUrl + "/api/images/product/" + productId + "/primary";
     }
 
-    private String buildProductDescription(Product p) {
+    /** As ProductPage.jsx: the description cut at 155 characters, else the name and the price. */
+    private static String buildProductDescription(Product p, String name) {
         if (p.getDescriptionBg() != null && !p.getDescriptionBg().isBlank()) {
             String plain = p.getDescriptionBg().replaceAll("<[^>]*>", "").trim();
             if (!plain.isEmpty()) {
-                return plain.length() > 160 ? plain.substring(0, 157) + "..." : plain;
+                return plain.length() > 155 ? plain.substring(0, 155) + "..." : plain;
             }
         }
-        StringBuilder sb = new StringBuilder();
-        if (p.getNameBg() != null) sb.append(p.getNameBg());
+        StringBuilder sb = new StringBuilder(name);
         if (p.getFinalPrice() != null) {
             BigDecimal withVat = p.getFinalPrice().multiply(BigDecimal.valueOf(1.2))
                     .setScale(2, RoundingMode.HALF_UP);
@@ -187,73 +193,8 @@ public class OgMetaController {
         return sb.toString();
     }
 
-    private static String escape(String s) {
-        if (s == null) return "";
-        return s.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;");
-    }
-
-    private boolean isGooglebot(String userAgent) {
-        return userAgent != null && userAgent.toLowerCase().contains("googlebot");
-    }
-
-    private String ogHtml(String title, String description, String image,
-                           String url, String type, String canonical) {
-        return ogHtml(title, description, image, url, type, canonical, null, true);
-    }
-
-    private String ogHtml(String title, String description, String image,
-                           String url, String type, String canonical, String imageAlt) {
-        return ogHtml(title, description, image, url, type, canonical, imageAlt, true);
-    }
-
-    private String ogHtml(String title, String description, String image,
-                           String url, String type, String canonical, String imageAlt,
-                           boolean includeJsRedirect) {
-        String t = escape(title);
-        String d = escape(description);
-        String i = escape(image);
-        String u = escape(url);
-        String alt = escape(imageAlt != null ? imageAlt : title);
-        String body = includeJsRedirect
-                ? "  <!-- JS redirect: browsers follow this, social crawlers do not execute JS -->\n  <script>window.location.replace('" + u + "');</script>"
-                : "  <!-- Googlebot: no redirect, canonical is authoritative -->";
-        return """
-                <!DOCTYPE html>
-                <html lang="bg">
-                <head>
-                  <meta charset="UTF-8">
-                  <title>%s</title>
-                  <meta name="description" content="%s">
-                  <link rel="canonical" href="%s">
-
-                  <!-- Open Graph -->
-                  <meta property="og:type"              content="%s">
-                  <meta property="og:title"             content="%s">
-                  <meta property="og:description"       content="%s">
-                  <meta property="og:image"             content="%s">
-                  <meta property="og:image:secure_url"  content="%s">
-                  <meta property="og:image:alt"         content="%s">
-                  <meta property="og:url"               content="%s">
-                  <meta property="og:site_name"         content="Caretech">
-                  <meta property="og:locale"            content="bg_BG">
-
-                  <!-- Twitter Card -->
-                  <meta name="twitter:card"        content="summary_large_image">
-                  <meta name="twitter:title"       content="%s">
-                  <meta name="twitter:description" content="%s">
-                  <meta name="twitter:image"       content="%s">
-                  <meta name="twitter:image:alt"   content="%s">
-
-                </head>
-                <body>
-                %s
-                </body>
-                </html>
-                """.formatted(t, d, u, type, t, d, i, i, alt, u, t, d, i, alt, body);
-    }
-
-    private String redirect(String url) {
+    private static String redirect(String url) {
         return "<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0; url="
-                + escape(url) + "\"></head><body></body></html>";
+                + url + "\"></head><body></body></html>";
     }
 }

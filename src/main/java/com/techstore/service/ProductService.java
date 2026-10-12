@@ -284,16 +284,21 @@ public class ProductService {
         return productRepository.findByActiveTrue(pageable).map(p -> convertToResponseDTO(p, lang));
     }
 
+    /** Whether the product page shows this product; only AVAILABLE products are shown on the site. */
+    public static boolean isVisibleOnSite(Product product) {
+        return !Boolean.TRUE.equals(product.getDeleted())
+                && product.getStatus() == ProductStatus.AVAILABLE
+                && Boolean.TRUE.equals(product.getActive())
+                && Boolean.TRUE.equals(product.getShow());
+    }
+
     @Transactional(readOnly = true)
     @Cacheable(value = "products", key = "#id + '_' + #lang")
     public ProductResponseDTO getProductById(Long id, String lang) {
         validateProductId(id);
         validateLanguage(lang);
         Product product = findProductByIdOrThrow(id);
-        if (Boolean.TRUE.equals(product.getDeleted())
-                || product.getStatus() != ProductStatus.AVAILABLE
-                || !Boolean.TRUE.equals(product.getActive())
-                || !Boolean.TRUE.equals(product.getShow())) {
+        if (!isVisibleOnSite(product)) {
             throw new ResourceNotFoundException("Product not found with id: " + id);
         }
         ProductResponseDTO dto = convertToResponseDTO(product, lang);

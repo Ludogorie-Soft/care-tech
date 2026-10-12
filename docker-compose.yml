@@ -64,6 +64,8 @@ services:
       REACT_APP_API_URL: http://localhost:8080
     ports:
       - "3000:80"
+    networks:
+      - techstore-network
     restart: unless-stopped
 
 volumes:
