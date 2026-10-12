@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,8 +63,10 @@ public class SitemapController {
 
             // Categories
             List<SitemapEntry> categories = categoryRepository.findSitemapEntries();
+            Set<Long> parentIds = categoryRepository.findVisibleParentIds();
             for (SitemapEntry cat : categories) {
-                String loc = appUrl + "/category/" + cat.getSlug() + "/" + cat.getId();
+                String path = parentIds.contains(cat.getId()) ? "/category/list/" : "/category/";
+                String loc = appUrl + path + cat.getSlug() + "/" + cat.getId();
                 String lastmod = cat.getUpdatedAt() != null ? cat.getUpdatedAt().format(DATE_FMT) : today;
                 appendUrl(xml, loc, lastmod, "weekly", "0.8");
             }

@@ -8,12 +8,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 /**
@@ -27,6 +31,10 @@ import java.util.Optional;
  * - Browsers (has cookie): never reach here — nginx proxies straight to React.
  *
  * This approach works for ANY messenger/bot regardless of User-Agent.
+ *
+ * nginx passes the URL the visitor asked for in X-Original-URI. When it is not the canonical URL
+ * (old slug, shifted category ID, parent category without /list/) the answer is a 301 to the
+ * canonical one; an unknown ID is a 404.
  */
 @RestController
 @RequestMapping("/api/og")
@@ -50,11 +58,19 @@ public class OgMetaController {
         boolean googlebot = isGooglebot(request.getHeader(HttpHeaders.USER_AGENT));
 
         if (opt.isEmpty()) {
-            return ResponseEntity.ok(redirect(siteUrl));
+            return notFound();
         }
 
         Product p = opt.get();
         String productUrl = siteUrl + "/product/" + p.getSlug() + "/" + p.getId();
+
+        // The ID is the key, as in ProductPage.jsx: an old or missing slug gets a 301 to the current URL.
+        String requested = requestedPath(request, "/product/");
+        if (requested != null && StringUtils.hasText(p.getSlug())
+                && !requested.equals(p.getSlug() + "/" + p.getId())) {
+            return movedPermanently(productUrl);
+        }
+
         String image = buildImageUrl(p.getPrimaryImageUrl(), p.getId());
         String title = p.getNameBg() != null ? p.getNameBg() + " | Caretech" : "Caretech";
         String description = buildProductDescription(p);
@@ -71,16 +87,27 @@ public class OgMetaController {
 
     @GetMapping(value = "/category/{id}", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> categoryOg(@PathVariable Long id, HttpServletRequest request) {
-        Optional<Category> opt = categoryRepository.findById(id);
+        String requested = requestedPath(request, "/category/");
+
+        // As in Category.jsx, the slug picks the category among the visible ones and the ID is only a
+        // fallback: Google still holds URLs whose ID has shifted (torches/213 while torches is 214).
+        Optional<Category> opt = Optional.ofNullable(slugOf(requested))
+                .flatMap(categoryRepository::findFirstBySlugAndShowTrueOrderByIdAsc)
+                .or(() -> categoryRepository.findById(id));
 
         boolean googlebot = isGooglebot(request.getHeader(HttpHeaders.USER_AGENT));
 
         if (opt.isEmpty()) {
-            return ResponseEntity.ok(redirect(siteUrl));
+            return notFound();
         }
 
         Category c = opt.get();
-        String categoryUrl = siteUrl + "/category/" + c.getSlug() + "/" + c.getId();
+        String categoryUrl = categoryUrl(c);
+        if (requested != null && StringUtils.hasText(c.getSlug())
+                && !categoryUrl.equals(siteUrl + "/category/" + requested)) {
+            return movedPermanently(categoryUrl);
+        }
+
         String title = c.getNameBg() != null ? c.getNameBg() + " | Caretech" : "Caretech";
         String description = "Разгледайте продуктите от категория " + c.getNameBg()
                 + ". Онлайн магазин за технологични продукти с най-добри цени.";
@@ -93,6 +120,48 @@ public class OgMetaController {
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────
+
+    /** Categories with visible children live under /category/list/ (CategoryList.jsx), as React links them. */
+    private String categoryUrl(Category c) {
+        String list = categoryRepository.existsByParentIdAndShowTrue(c.getId()) ? "list/" : "";
+        return siteUrl + "/category/" + list + c.getSlug() + "/" + c.getId();
+    }
+
+    /**
+     * The part after {@code prefix} of the URL the visitor asked for, e.g. "list/laptops/36".
+     * Null when nginx did not pass X-Original-URI (a direct /api/og call): no redirect then.
+     */
+    private static String requestedPath(HttpServletRequest request, String prefix) {
+        String uri = request.getHeader("X-Original-URI");
+        if (uri == null) return null;
+        int query = uri.indexOf('?');
+        String path;
+        try {
+            path = UriUtils.decode(query >= 0 ? uri.substring(0, query) : uri, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+        if (!path.startsWith(prefix)) return null;
+        return StringUtils.trimTrailingCharacter(path.substring(prefix.length()), '/');
+    }
+
+    /** "list/laptops/36" → "laptops"; "36" → null. */
+    private static String slugOf(String requested) {
+        if (requested == null) return null;
+        int lastSlash = requested.lastIndexOf('/');
+        if (lastSlash <= 0) return null;
+        String slug = requested.substring(0, lastSlash);
+        return slug.startsWith("list/") ? slug.substring("list/".length()) : slug;
+    }
+
+    private static ResponseEntity<String> movedPermanently(String url) {
+        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header(HttpHeaders.LOCATION, url).build();
+    }
+
+    /** 404 for search engines; browsers still follow the meta refresh to the homepage. */
+    private ResponseEntity<String> notFound() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.TEXT_HTML).body(redirect(siteUrl));
+    }
 
     private String buildImageUrl(String stored, Long productId) {
         if (stored != null && (stored.startsWith("http://") || stored.startsWith("https://"))) {

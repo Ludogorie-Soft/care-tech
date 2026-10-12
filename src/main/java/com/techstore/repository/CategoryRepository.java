@@ -23,6 +23,10 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     boolean existsBySlugAndIdNot(String slug, Long id);
 
+    Optional<Category> findFirstBySlugAndShowTrueOrderByIdAsc(String slug);
+
+    boolean existsByParentIdAndShowTrue(Long parentId);
+
     List<Category> findByShowTrue();
 
     Page<Category> findByShowTrue(Pageable pageable);
@@ -40,4 +44,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @Query("SELECT c.id AS id, c.slug AS slug, c.updatedAt AS updatedAt FROM Category c WHERE c.show = true AND c.slug IS NOT NULL AND c.slug <> ''")
     List<SitemapEntry> findSitemapEntries();
+
+    /** Categories with at least one visible child — React shows them under /category/list/. */
+    @Query("SELECT DISTINCT c.parent.id FROM Category c WHERE c.show = true AND c.parent IS NOT NULL")
+    Set<Long> findVisibleParentIds();
 }
