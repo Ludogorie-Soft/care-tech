@@ -16,6 +16,7 @@
 - Never show raw backend error messages (stack traces, `message` fields, Spring error objects) on customer-facing UI. Always replace with a fixed Bulgarian user-friendly string.
 - Admin-panel errors (ManufacturerModal, ParamsLayout etc.) may still show technical details — only customer-facing pages need sanitized messages.
 - TBI modal button labels should be minimal Bulgarian — e.g. "Продължи", not "Продължи към TBI →".
+- **Никога не премахвай съществуваща функционалност без изрично разрешение от потребителя** (казано 2026-10-09). При съмнение, че нещо липсва — първо провери git историята (и двете репота, всички клонове и stash-ове) и докладвай.
 
 <!-- How the user likes things done. Code style, tools, patterns, communication. -->
 
@@ -42,7 +43,20 @@
 - **Two controllers serve `/api/og/product/{id}`:** `OgMetaController` (produces=text/html, sets `__og` cookie, Googlebot-aware) and legacy `OGPreviewController` (no produces, meta-refresh to `?og_bypass=1`). Spring picks by Accept header: browsers/Googlebot (`Accept: text/html`) → OgMetaController; `Accept: */*` (curl, some bots) → OGPreviewController. When probing live, always send a browser Accept header or you test the wrong controller.
 - **Googlebot never sees the React app on /product/ and /category/:** nginx sends every cookie-less request to /api/og, and OgMetaController returns Googlebot a ~2 KB page (title, description, canonical, OG tags) with an empty body — no price, specs, JSON-LD or internal links.
 - **`care-tech-ui/public/index.html` hard-codes `<link rel="canonical" href="https://www.caretech.bg/">`.** Every SPA route's raw HTML therefore points to the homepage until SEO.jsx rewrites it client-side (e.g. /promotions shows up in GSC as an alternate of /). Remove it before routing Googlebot to React.
+- **Category IDs shifted in the past (found 2026-10-12):** Google still holds ~80 category URLs whose slug is current but whose ID is stale, mostly off by +1 (`torches/213` while torches is now 214, and 213 is now lunch-box). The OG canonical is built from the ID only, so it sends these URLs to the *wrong* category. Resolve by slug first, not by ID. 92 slugs are shared by more than one category (hidden duplicates), so prefer the visible one.
+- **Which nginx file is which (2026-10-12):** the public host nginx is `nginx.prod.conf` in tech-store-api (branch v2), installed on the server as `/etc/nginx/conf.d/caretech.bg.conf` per its header (not confirmed without SSH). `care-tech-ui/nginx.conf` is only the nginx inside the frontend Docker image that serves the React build (host port 3000). `nginx.conf` on backend `main` is a stale 2025-09 docker-compose config. Live probes on 2026-10-12 matched every observable behaviour of nginx.prod.conf (nginx/1.28.2).
+- **React resolves categories by SLUG, not ID** (`Category.jsx`/`CategoryList.jsx`: `source.find(c => c.slug === categoryParam)` over visible categories); products by ID (`ProductPage.jsx`). Server-side URL logic must match: slugs are unique among visible categories (0 duplicates), product slugs are not (282 duplicates).
+- **X-Original-URI pattern (2026-10-12):** `location /api/og` sets `proxy_set_header X-Original-URI $request_uri;`. `$request_uri` keeps the visitor's original URL after an internal `rewrite ... last`, and the client cannot spoof it because proxy_set_header overrides. OgMetaController compares it with the canonical URL and returns a 301 on mismatch; with no header it never redirects, so backend and nginx can be deployed in either order.
+- **Parent category = has at least one VISIBLE child** (`existsByParentIdAndShowTrue`); such categories are canonical at `/category/list/{slug}/{id}` in React, OG and the sitemap.
+- **GSC "Validate fix" for "Alternate page with proper canonical tag":** it fails as soon as one rechecked URL is still an alternate. Legitimate alternates (old URLs) never pass; they pass only once they 301 or become self-canonical.
 - **`/category/list/:slug/:id` is its own React page (CategoryList)**, but the OG canonical points to `/category/:slug/:id`, so Google treats every /list/ page as an alternate.
+
+- **Редакция на поръчка от админ (2026-10-09):** `PUT /api/admin/orders/{id}` (`OrderService.updateOrder`, `OrderUpdateRequestDTO`) — patch семантика; `items` позволява само количество (0 = премахване). `OrderItem.unitPrice` е БЕЗ ДДС, NUMERIC(10,2); `OrderItem.discountAmount` всъщност е ПРОЦЕНТ (UI смята старата цена като `lineTotalWithTax / (1 - discountAmount/100)`). Промяна на цена на артикул в съществуваща поръчка НИКОГА не е съществувала — custom цена има само при създаване (`OrderItemRequestDTO.customPriceEuro`, ползва се от конвертиране на лична оферта).
+
+- **Промоция/надценка на категория или марка** записва същия процент върху всеки продукт (`products.discount` / `products.markup_percentage`); категорията пази само флаг + `promo_discount`/`promo_ends_at` (V43). Надценка на категория/марка не се пази никъде — „текущата“ е най-честата сред продуктите (`ProductRepository.findMostCommonMarkupPer*`). Нови продукти от sync в такава категория/марка НЕ получават нито надценката, нито промоцията (известен пропуск, извън обхвата към 2026-10-09).
+- **В zsh `$P` с интервали не се разделя на думи** — за psql команди с много аргументи пиши bash скрипт в /tmp и го пускай с `bash`.
+
+- **Локален браузър тест на целия стек (проверено 2026-10-09):** временна база `docker run --rm postgres:15` на 127.0.0.1:55434 (Flyway пуска V1..V43 сам при старт). `preview_start` НЕ може да изпълни `./mvnw` в tech-store-api (EPERM от macOS) → `./mvnw -DskipTests package`, копирай jar-а в /tmp и стартирай `java -jar` от там чрез launch.json конфигурация. Порт 8080 е зает от друг проект (budgetnik) → SERVER_PORT=8089, фронтенд на 3001 с `REACT_APP_API_URL=http://localhost:8089` (shell env бие .env). Нужни env: всички `${...}` без default от application.yml + `SPRING_DATASOURCE_URL`/`SPRING_FLYWAY_URL` (yml има твърд host `postgres`), `AWS_S3_BUCKET_NAME`, `AWS_S3_REGION`, `SLACK_WEBHOOK_URL`; за безопасност `SPRING_MAIL_HOST=127.0.0.1 SPRING_MAIL_PORT=1` и фиктивни URL-и на доставчиците/TBI. Няма bootstrap админ — създай users ред (role ADMIN, email_verified true, BCrypt хеш). Login е от иконата „Профил“ в хедъра (desktop viewport 1440×900).
 
 ## Do-Not-Repeat
 
@@ -74,6 +88,8 @@
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
 <!-- Format: [YYYY-MM-DD] Description of what went wrong and what to do instead. -->
+
+- [2026-10-12] NEVER put `produces = "text/html"` on endpoints that crawlers, curl or browsers hit directly. WebConfig sets `defaultContentType(APPLICATION_JSON)`, so `Accept: */*` resolves to JSON → 406 ("No acceptable representation"). Leave produces off and set `Content-Type: text/html;charset=UTF-8` on the ResponseEntity.
 
 - [2026-10-07] NEVER write an nginx `rewrite` meant to strip query params without a trailing `?` in the replacement. `rewrite ^(/product/[^?]*).*$ $1 permanent;` re-appends the original args → 301 to itself (infinite loop). Correct: `rewrite ^(/product/.*)$ $1? permanent;`.
 
@@ -166,6 +182,14 @@
 - **Category tree в React:** `buildTree()` + `flattenTree()` изграждат плосък масив с `depth` поле от flat API response. Tree view: indentation по `depth * 18px` + `└` символ. При активно търсене — превключва към flat view с родителя вдясно.
 
 ## Decision Log
+
+- [2026-10-12] **Step 3 SEO architecture:** for /product/ and /category/ the backend serves the React index.html with a page-specific head (title, description, canonical, og, twitter) and the real status (200/301/404), instead of a bare OG page plus cookie and JS redirect. Rejected: routing Googlebot straight to React by User-Agent, because it bypasses the step-4 301s and leaves soft 404s. **Hidden products and categories return 404** (user's choice over 200 + noindex).
+
+- [2026-10-09] Промоциите имат незадължителен краен срок (`promo_ends_at`, Europe/Sofia local time). `PromotionExpiryService` (@Scheduled на всяка минута) ги изтрива; срокът е на ниво продукт (категория/марка го копира върху продуктите си), категорията/марката само сваля флага. Scheduler pool = 3, за да не чака нощния sync. Потребителят попита дали проверката всяка минута е тежка — отговор: една заявка по частичен индекс, ~0 натоварване; остана 1 мин.
+- [2026-10-09] Админ търсене `GET /api/admin/products/search` (JPA Specification, всички неизтрити продукти вкл. скрити) — ползва се от Продукти, Промоции и Надценки чрез `pages/admin/useAdminProductSearch.js`. Списъците „Промоционални продукти“ и „Продукти с надценка“ вече идват от него (onSale / withMarkup), не от `/products/sale` и `/admin/products/with-markup`.
+- [2026-10-09] Чекбоксът „Искам предложение за разсрочено плащане“ е махнат от количката по изрично искане (има TBI). Бекенд полето `installmentOffer` остава (default false), старите поръчки го показват в админа.
+
+- [2026-10-09] Админ редакция на поръчка (цена на ред + добавяне на продукт) е в бранч `feature/admin-order-items-edit` и в двете репота (бекенд от `v2`, фронтенд от `main`). НЕ се слива/пушва, докато потребителят не каже. Цената се въвежда с ДДС, пази се без ДДС (закръглена до цент); ръчна цена нулира отстъпката на реда; доставката не се преизчислява автоматично.
 
 <!-- Significant technical decisions with rationale. Why X was chosen over Y. -->
 

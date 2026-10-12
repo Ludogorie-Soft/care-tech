@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-07T11:48:55.848Z
-> Files: 803 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-12T09:01:03.771Z
+> Files: 828 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -19,12 +19,15 @@
 
 - `buzzing-dancing-hare.md` — Параметри и филтри по категории: одит и план (~3946 tok)
 - `pazaruvaj-valiant-possum.md` — Pazaruvaj: верни DeliveryTime / DeliveryCost + един праг за безплатна доставка (~1720 tok)
+- `purring-soaring-codd.md` — План: чекаут, търсачки и промоции/надценки в админа (~2723 tok)
 - `zippy-juggling-hearth.md` — Продуктови линкове `/product/{id}/{id}` вместо `/product/{slug}/{id}` (~1068 tok)
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
+- `admin_order_items_edit.md` (~449 tok)
 - `asbis_price_field.md` (~203 tok)
 - `euro_rate_convention.md` (~361 tok)
+- `feedback_no_feature_removal.md` (~269 tok)
 - `feedback_showtoast_duration.md` — Declares type (~140 tok)
 - `gsc_alternate_canonical_audit.md` (~421 tok)
 - `MEMORY.md` — Memory Index (~512 tok)
@@ -122,7 +125,10 @@
 
 ## ../../care-tech-ui/src/pages/admin/
 
+- `AdminSearchInput.jsx` — Shared admin search box (input, clear, search button; Enter searches) used by Products/Promotions/Markup (~393 tok)
+- `CategoryPickerSearch.jsx` — Name search over the category tree leaves for the category picker modals (Promotions/CategoryModal, Markup/MarkupCategoryModal) (~818 tok)
 - `Dashboard.jsx` — Dashboard (~622 tok)
+- `useAdminProductSearch.js` — Hook for GET admin/products/search (hidden/unavailable included): debounced query, onSale/withMarkup, requireQuery, paging, reload (~718 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Blog/
 
@@ -165,7 +171,8 @@
 
 ## ../../care-tech-ui/src/pages/admin/Orders/
 
-- `EditOrderModal.jsx` — TABS — renders form (~6632 tok)
+- `AddOrderProductSearch.jsx` — Admin product search (GET products/search, debounced) for adding a product to an existing order; disables products already in the order (~1024 tok)
+- `EditOrderModal.jsx` — Admin order edit, 5 tabs; Продукти tab: quantity, unit price with VAT (sent as net unitPrice), add product (newItems), totals summary (~8900 tok)
 - `OrderDetailPage.jsx` — OrderDetailPage (~5639 tok)
 - `useOrderUtils.js` — Exports useOrderUtils (~802 tok)
 
@@ -179,6 +186,7 @@
 
 ## ../../care-tech-ui/src/pages/admin/Promotions/
 
+- `promoDate.js` — Promo end date helpers (string-based, Bulgarian local time, no Date parsing): toDateTimeLocal, toApiDateTime, formatPromoEnd, nowDateTimeLocal (~245 tok)
 - `PromoModal.jsx` — getBasePrice — renders form (~4779 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Reviews/
@@ -245,7 +253,7 @@
 - `mvnw` — or more contributor license agreements.  See the NOTICE file (~3144 tok)
 - `mvnw.cmd` — Declares Directory (~2262 tok)
 - `nginx.conf` — Nginx configuration (~575 tok)
-- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~3019 tok)
+- `nginx.prod.conf` — Production Nginx config — /etc/nginx/conf.d/caretech.bg.conf (~2492 tok)
 - `OFFER_TO_ORDER_PLAN.md` — План: Оферти с Продуктова Селекция, Per-Item Отстъпки и Конвертиране в Поръчка (~3263 tok)
 - `ORDER_EDIT_PLAN.md` — План: Редактиране на поръчки от администратор (~577 tok)
 - `PARAMETER_MAPPING_PLAN.md` — План: CareTech Параметри + Филтър Дедупликация (AI-assisted) (~10360 tok)
@@ -257,7 +265,7 @@
 
 ## .claude/
 
-- `launch.json` — Preview конфигурация „care-tech-ui“: стартира фронтенда на :3000 (сочи към прод API) (~76 tok)
+- `launch.json` (~550 tok)
 - `settings.json` (~441 tok)
 - `settings.local.json` (~96 tok)
 
@@ -523,9 +531,8 @@
 - `FilterConfigController.java` — Админ API на филтрите (/api/admin/filters, ADMIN/SUPER_ADMIN): свойства, стойности, правила за стойности и по име, параметри на доставчиците (MAP/IGNORE/HIDE), преглед на израз, опашки (несъпоставени, сурови параметри), групи по категория (режим, добави, махни, подредба) (~1500 tok)
 - `ImageProxyController.java` — RestController: ImageProxyController (3 endpoints) (~1992 tok)
 - `ManufacturerController.java` — RestController: ManufacturerController (6 endpoints) (~770 tok)
-- `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~2282 tok)
+- `OgMetaController.java` — Product and category pages: the React index.html with the page's own head tags and HTTP status. (~2519 tok)
 - `OgMetaController.java` — Returns minimal HTML with Open Graph meta tags for social media crawlers (~1379 tok)
-- `OGPreviewController.java` — RestController: OGPreviewController (3 endpoints) (~1834 tok)
 - `OrderController.java` — Създаване на нова поръчка (~1909 tok)
 - `ParameterController.java` — RestController: ParameterController (9 endpoints) (~1484 tok)
 - `PazaruvajFeedController.java` — Public XML product feed consumed by pazaruvaj.com crawler (every ~12 h). (~1747 tok)
@@ -610,9 +617,9 @@
 - `OrderCreateRequestDTO.java` — Admin-only: when set, overrides the product's current price (used for offer-to-order conversion). (~1011 tok)
 - `OrderFilterDTO.java` — Class: OrderFilterDTO (~232 tok)
 - `OrderItemCreateDTO.java` — Class: OrderItemCreateDTO (~116 tok)
-- `OrderItemUpdateDTO.java` — 0 = remove the item from the order. (~90 tok)
+- `OrderItemUpdateDTO.java` — orderItemId, quantity (0 = remove), optional unitPrice without VAT (changed price resets the item discount). (~150 tok)
 - `OrderStatusUpdateDTO.java` — Class: OrderStatusUpdateDTO (~122 tok)
-- `OrderUpdateRequestDTO.java` — Admin-only DTO for full order editing. (~542 tok)
+- `OrderUpdateRequestDTO.java` — Admin-only DTO for full order editing; `items` edits existing lines, `newItems` (OrderItemRequestDTO) adds products. (~580 tok)
 - `ParameterOptionRequestDto.java` — Class: ParameterOptionRequestDto (~128 tok)
 - `ParameterRequestDto.java` — Class: ParameterRequestDto (~130 tok)
 - `ParameterValueRequestDto.java` — Class: ParameterValueRequestDto (~142 tok)
@@ -805,6 +812,7 @@
 
 ## src/main/java/com/techstore/repository/
 
+- `AdminProductSpecifications.java` — Admin product search. Unlike the storefront search it also returns hidden, (~951 tok)
 - `BlogCategoryRepository.java` — Repository: BlogCategoryRepository (~167 tok)
 - `BlogPostRepository.java` — Repository: BlogPostRepository (~705 tok)
 - `BlogTagRepository.java` — Repository: BlogTagRepository (~270 tok)
@@ -818,7 +826,7 @@
 - `ParameterRepository.java` — Repository: ParameterRepository. findParametersForAvailableProductsByCategory uses status = AVAILABLE (not <> NOT_AVAILABLE) (~1065 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~557 tok)
-- `ProductRepository.java` — The category a product already sits in. Returns the id rather than the entity so the …; markNotAvailableByPlatformSkuNotIn + countAvailableByPlatformSkuNotIn / countByPlatformAndStatusNot (защита на mark-unseen) (~4100 tok)
+- `ProductRepository.java` — For the product page head, which shows the manufacturer outside a transaction. (~4295 tok)
 - `ProductSearchRepository.java` — Guards against a pathological query turning into dozens of ANDed ILIKEs. (~11934 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
@@ -851,7 +859,8 @@
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3679 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Returns the given category ID plus all descendant IDs (recursive). (~2597 tok)
-- `ProductService.java` — Service: ProductService (~13663 tok)
+- `ProductService.java` — Whether the product page shows this product; only AVAILABLE products are shown on the site. (~13728 tok)
+- `PromotionExpiryService.java` — @Scheduled every 60s: products with promo_ends_at <= now (Europe/Sofia) → discount 0 + price recalculated; categories/brands → promo flag/discount/end cleared. PROMO_ZONE constant (~827 tok)
 - `ReviewService.java` — Service: ReviewService (~946 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
@@ -901,6 +910,11 @@
 - `ResolutionParser.java` — RESOLUTION: 1920x1080 (x/×/х), FHD/QHD/WQHD/UWQHD/4K; „HD“ умишлено не (~600 tok)
 - `ResponseMsParser.java` — RESPONSE_MS: 1 ms (GTG) / 1ms MPRT / 0.5 мс → най-малкото време в ms (~400 tok)
 - `WifiStandardParser.java` — WIFI_GEN: най-новото Wi-Fi поколение (802.11 букви, „Wi-Fi 6E“, класове AX3000/BE3600/AC1200/N300); ax + 6 GHz = 6E; ключове wifi4…wifi7, wifi6e (~600 tok)
+
+## src/main/java/com/techstore/service/seo/
+
+- `SpaHead.java` — Puts a page's own head tags into the React index.html, in place of its homepage defaults. (~904 tok)
+- `SpaShellService.java` — The frontend's index.html — the shell React boots from. (~629 tok)
 
 ## src/main/java/com/techstore/service/sync/
 
@@ -972,6 +986,7 @@
 - `V41__seed_more_filter_junk_rules.sql` — Още статични HIDE/IGNORE по име (след куриране на 83 категории): HIDE „ново име на аксесоар“, „съкратено описание“, „свързани продукти(1)“, грамове рециклирана пластмаса (ABS 920, TPU…); IGNORE съдържание/включени аксесоари, съвместими модели/принтери, бранд, продавач, серия. „Марка“ умишлено НЕ (франчайз при фигурките) (~500 tok)
 - `V41__seed_more_filter_junk_rules.sql` — V41: More static IGNORE / HIDE rules, found after curating 83 categories (2026-09-24). (~419 tok)
 - `V42__drop_legacy_filter_flags.sql` — V42: DROP parameters.is_filter, parameters.filter_order, category_parameters.is_filter (нищо не ги чете след фаза 6) (~150 tok)
+- `V43__add_promotion_end_date.sql` — V43: products.promo_ends_at (+ partial index); categories/manufacturers.promo_discount + promo_ends_at; backfills promo_discount with the most common product discount (~399 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)
 - `V7__set_category_parameter_filters_by_usage.sql` — V7: Industry-standard per-category filter configuration (~3966 tok)
@@ -1003,15 +1018,28 @@
 
 ## src/test/java/com/techstore/controller/
 
+- `OgMetaControllerTest.java` — A product the site shows: AVAILABLE, active, shown, not deleted. (~4064 tok)
 - `TbiLeasingControllerTest.java` — @WebMvcTest security tests: POST /register (401/200), POST /webhook (public 200), GET /application/{id} IDOR (401/200 owner/403 non-owner/200 admin/200 SUPER_ADMIN). 8 tests. (~2081 tok)
+
+## src/test/java/com/techstore/entity/
+
+- `ProductFinalPriceTest.java` — calculateFinalPrice: fractional markup kept exactly (12.5%), whole markup + discount unchanged. 2 tests (~350 tok)
+
+## src/test/java/com/techstore/repository/
+
+- `AdminProductSpecificationsTest.java` — @DataJpaTest on H2 (test profile): words across fields, transliteration, SKU, barcode/ID, onSale/withMarkup, LIKE escaping. 6 tests (~1248 tok)
 
 ## src/test/java/com/techstore/service/
 
 - `AsbisApiServiceAttrListTest.java` — ASBIS repeats an attribute name inside one product with a different value each time (1,170 times (~532 tok)
 - `AsbisApiServiceAttrListTest.java` — extractAttrList: повторено име пази всички различни стойности в реда от фийда (~450 tok)
 - `MostApiServiceTest.java` — 11 теста с Mockito за провалите на MOST feed-а: празно/null тяло, connection error, изчерпани опити, възстановяване след преходен отказ, HTTP статус, счупен XML, изключен feed, кеширане на успех и НЕкеширане на провал (~1999 tok)
+- `OrderServiceUpdateItemsTest.java` — Class: OrderServiceUpdateItemsTest (~2132 tok)
+- `OrderServiceUpdateItemsTest.java` — Mockito tests for OrderService.updateOrder: changed unit price resets discount + totals, new items with product/custom price, empty-order rejection. 6 tests. (~2300 tok)
 - `PazaruvajFeedServiceTest.java` — DeliveryTime/DeliveryCost във фийда: 120 € → 3.50 EUR, 132 € → безплатно, прагът е по цената с ДДС (3 теста) (~900 tok)
 - `ProductServiceDeliveryChargeTest.java` — продуктовото API връща deliveryCharge: FIXED / FREE / COURIER_TARIFF (телевизор) (3 теста) (~1100 tok)
+- `PromotionExpiryServiceDbTest.java` — @DataJpaTest on H2 with the real service: expired product/category/brand cleared, future and no-end promotions untouched. 3 tests (~1299 tok)
+- `PromotionExpiryServiceTest.java` — Mockito: expired product gets full price back, expired category/brand lose flag, nothing due touches nothing. 3 tests (~1200 tok)
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
 - `TekraApiServicePagingTest.java` — Paging of the TEKRA product feed. Only page 1 used to be read, so no category went past 100 (~1473 tok)
 - `TekraApiServicePagingTest.java` — Пагинация на TEKRA фийда с mock RestTemplate: всички страници, повторена страница (игнориран page), празна последна, малка категория, провал на страница, 429×3, счупен XML (7 теста) (~1500 tok)
@@ -1020,6 +1048,10 @@
 - `ValiApiServiceRetryTest.java` — WebClient със stub exchangeFunction: 400 „Invalid category id“ → SupplierCategoryGoneException с 1 заявка, 404 → празен списък, 503/502 → retry, 500 → хвърля след retry, 401 → 1 заявка; продукти на изчезнала категория → празен списък (7 теста) (~1300 tok)
 - `ValiApiServiceRetryTest.java` — From 2026-09-26 Vali answers the ids of its removed STEM section with HTTP 400 {"error":"Invalid cat (~1626 tok)
 
+## src/test/java/com/techstore/service/admin/
+
+- `AdminServicePromoTest.java` — Mockito: promo end date stored/cleared, past date and >=100% rejected, category promo copies end date to products. 5 tests (~1500 tok)
+
 ## src/test/java/com/techstore/service/filter/
 
 - `DisplaySpecificationLinesTest.java` — ASBIS sends feature lists joined with {@code <br/>} and wrapped in {@code <b>}; the product page (~465 tok)
@@ -1027,6 +1059,11 @@
 ## src/test/java/com/techstore/service/filter/parser/
 
 - `FilterValueParsersTest.java` — 55 теста за DIAGONAL_INCH, REFRESH_HZ, CAPACITY_GB, RESOLUTION с реални формати на доставчиците (~1500 tok)
+
+## src/test/java/com/techstore/service/seo/
+
+- `SpaHeadTest.java` — Class: SpaHeadTest (~1225 tok)
+- `SpaShellServiceTest.java` — Class: SpaShellServiceTest (~878 tok)
 
 ## src/test/java/com/techstore/service/sync/
 
@@ -1048,3 +1085,9 @@
 - `DisplaySpecificationLinesTest.java` — displayLines: <br/>-списъци на редове, тагове за форматиране, </br>, <a>/<img>, „<5 ms“ остава (5 теста) (~500 tok)
 - `FilterConfigControllerTest.java` — @WebMvcTest: анонимен 401, USER 403, ADMIN 200, невалиден израз 400 (~500 tok)
 - `FilterConfigServiceTest.java` — validatePattern: съобщението на PostgreSQL без „ERROR:“, валиден израз минава, >500 знака се отказва без база (~400 tok)
+- `src/test/java/com/techstore/repository/CategoryRepositoryCanonicalUrlTest.java` — @DataJpaTest (H2): findFirstBySlugAndShowTrueOrderByIdAsc, existsByParentIdAndShowTrue, findVisibleParentIds (~700 tok)
+- `src/main/java/com/techstore/service/seo/SpaShellService.java` — fetches the frontend index.html (SPA_INDEX_URL) with If-None-Match on every call; keeps the last good copy (~600 tok)
+- `src/main/java/com/techstore/service/seo/SpaHead.java` — replaces title/description/robots/canonical/og/twitter tags in index.html with the page's own (~900 tok)
+- `src/test/java/com/techstore/service/seo/SpaHeadTest.java` — SpaHead against the production index.html fixture (6 tests)
+- `src/test/java/com/techstore/service/seo/SpaShellServiceTest.java` — JDK HttpServer: ETag/304, new deploy, frontend down, never reachable (4 tests)
+- `src/test/resources/spa/index.html` — production care-tech-ui index.html captured 2026-10-12 (fixture)

@@ -10160,6 +10160,235 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-10-07T00:00:00.000Z"
+    },
+    {
+      "id": "bug-614",
+      "timestamp": "2026-10-09T14:32:21+03:00",
+      "error_message": "UnnecessaryStubbingException in OrderServiceUpdateItemsTest.removingEveryItemIsRejected (stub at setUp: orderRepository.save)",
+      "file": "src/test/java/com/techstore/service/OrderServiceUpdateItemsTest.java",
+      "root_cause": "MockitoExtension uses strict stubs; the shared save() stub in @BeforeEach is never called when updateOrder throws before saving",
+      "fix": "Made the shared save() stub lenient() so tests that fail validation before save do not trip strict stubbing ДЕПЛОЙНАТО 2026-10-12 и проверено на живо: 110 категорийни URL-а от експорта → 82×1 301, 27×200, 1×404, 0 вериги от редиректи; 224/224 sitemap → 200 (28 /list/); 888 продуктови → 875×200, 13×404, само 1 двоен редирект (non-www + стар slug).",
+      "tags": [
+        "mockito",
+        "strict-stubs",
+        "test",
+        "orders"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-12T00:00:00.000Z"
+    },
+    {
+      "id": "bug-615",
+      "timestamp": "2026-10-09T12:23:13.133Z",
+      "error_message": "Wrong reference: sync should be 1",
+      "file": "../../../../.claude/plans/purring-soaring-codd.md",
+      "root_cause": "Used \"sync\" instead of \"1\"",
+      "fix": "care-tech-ui main ade745b: ProductPage използва itemStatus (а не status/error на списъка) → „Продуктът не е наличен“ + noindex + линк към началната. Бекенд v2 41cb0ff: OgMetaController връща 404 за скрити продукти/категории (ProductService.isVisibleOnSite). Не е деплойнато.",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-09T12:23:13.133Z"
+    },
+    {
+      "id": "bug-615",
+      "timestamp": "2026-10-09T15:51:46+03:00",
+      "error_message": "Fractional markup applied as a whole percent: 12.5% markup priced as 13%",
+      "file": "src/main/java/com/techstore/entity/Product.java",
+      "root_cause": "calculateFinalPrice divided markupPercentage by 100 with scale 2 (0.125 → 0.13) — same bug class as the discount one fixed earlier",
+      "fix": "Use scale 6 for the markup ratio; ProductFinalPriceTest covers 12.5%. Prod had 0 fractional markups, so no price changed",
+      "tags": [
+        "pricing",
+        "markup",
+        "bigdecimal",
+        "rounding"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-09T15:51:46+03:00"
+    },
+    {
+      "id": "bug-616",
+      "timestamp": "2026-10-09T15:51:46+03:00",
+      "error_message": "Markup modal error toast showed 'Грешка ...: undefined'",
+      "file": "../../care-tech-ui/src/pages/admin/Markup/MarkupModal.jsx",
+      "root_cause": "Thunks rejectWithValue(error.message) (a string) but the modal read error.message of the unwrapped string",
+      "fix": "Markup and promo thunks reject with the server message (error.response.data.message || error.message); modals show error?.message || String(error)",
+      "tags": [
+        "frontend",
+        "redux",
+        "toast",
+        "admin",
+        "markup"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-09T15:51:46+03:00"
+    },
+    {
+      "id": "bug-617",
+      "timestamp": "2026-10-09T15:51:46+03:00",
+      "error_message": "Admin could not open hidden/unavailable products for editing (404 in ProductModal)",
+      "file": "../../care-tech-ui/src/redux/productSlice.js",
+      "root_cause": "fetchProductForEdit used the public GET /api/products/{id}, which 404s for hidden, inactive or unavailable products",
+      "fix": "New GET /api/admin/products/{id} (only deleted ones are excluded); fetchProductForEdit uses it",
+      "tags": [
+        "admin",
+        "products",
+        "visibility",
+        "api"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-09T15:51:46+03:00"
+    },
+    {
+      "id": "bug-619",
+      "timestamp": "2026-10-12T08:04:39.467Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../../../../../tmp/tsa-v2-seo/src/main/java/com/techstore/controller/OgMetaController.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: String requested = requestedPath(request, \"/category/\");; // As in Category.jsx, the slug picks the category among the",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-10-12T08:04:39.715Z"
+    },
+    {
+      "id": "bug-620",
+      "timestamp": "2026-10-12T08:04:39.960Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../../../../../tmp/tsa-v2-seo/src/main/java/com/techstore/controller/OgMetaController.java",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-12T08:04:39.960Z"
+    },
+    {
+      "id": "bug-614",
+      "timestamp": "2026-10-12T00:00:00.000Z",
+      "error_message": "GSC валидация 'Алтернативна страница с правилен каноничен маркер' — неуспех: /category/torches/213, /category/watches/219 и др.",
+      "file": "src/main/java/com/techstore/controller/OgMetaController.java",
+      "root_cause": "Category ID-тата са се изместили (предимно +1); OG canonical се строеше само по ID → torches/213 сочеше към lunch-box/213 (грешна категория). Родителските категории имаха OG canonical без /list/, а React ги canonical-изира със /list/. Непознато ID връщаше 200 + meta refresh към началната (soft 404).",
+      "fix": "v2 f95bcb9: nginx подава X-Original-URI ($request_uri) към /api/og; OgMetaController търси категорията по slug сред видимите (като Category.jsx), с ID-то само като резервен вариант → 301 към каноничния URL (/list/ за категории с видими деца); продукти: ID-то е ключът, при стар slug → 301; непознато ID → 404. Sitemap-ът дава /category/list/ за родители. 12 MockMvc + 2 H2 теста; симулация върху прод данни: 82/110 → 301, 0 вериги от редиректи, sitemap 224/224 → 200.",
+      "tags": [
+        "seo",
+        "gsc",
+        "canonical",
+        "category",
+        "redirect",
+        "nginx",
+        "sitemap"
+      ],
+      "related_bugs": [
+        "bug-612",
+        "bug-613"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-12T00:00:00.000Z"
+    },
+    {
+      "id": "bug-615",
+      "timestamp": "2026-10-12T00:00:00.000Z",
+      "error_message": "Скрит продукт (напр. /product/cpu-water-block-alphacool-apex-1-cpu-cooler-am5/2418) показва вечно „Зареждане на продукта...“; сървърът връща 200 (soft 404)",
+      "file": "care-tech-ui/src/pages/ProductPage.jsx; src/main/java/com/techstore/controller/OgMetaController.java",
+      "root_cause": "GET /api/products/{id} връща 404 за скрити продукти (~19.8k: NOT_AVAILABLE/LIMITED/ON_ROUTE/ON_DEMAND или show_flag=false), а ProductPage не обработва грешката и остава в loading. OgMetaController ползва findById без проверка за видимост → 200 с OG тагове.",
+      "fix": "PENDING — част от плана за стъпка 3: сървърът връща 404 (+noindex) за скрити продукти/категории; ProductPage показва „Продуктът не е наличен“ при 404.",
+      "tags": [
+        "seo",
+        "soft-404",
+        "product-page",
+        "react",
+        "hidden-products"
+      ],
+      "related_bugs": [
+        "bug-614"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-12T00:00:00.000Z"
+    },
+    {
+      "id": "bug-623",
+      "timestamp": "2026-10-12T08:51:45.728Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 7→4 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-12T08:51:45.728Z"
+    },
+    {
+      "id": "bug-624",
+      "timestamp": "2026-10-12T08:54:39.839Z",
+      "error_message": "Wrong reference: findById should be findWithManufacturerById",
+      "file": "src/main/java/com/techstore/controller/OgMetaController.java",
+      "root_cause": "Used \"findById\" instead of \"findWithManufacturerById\"",
+      "fix": "Changed findById → findWithManufacturerById",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-12T08:54:39.839Z"
+    },
+    {
+      "id": "bug-616",
+      "timestamp": "2026-10-12T00:00:00.000Z",
+      "error_message": "HttpMediaTypeNotAcceptableException: No acceptable representation → 500/406 for GET /api/og/product/{id} with Accept: */*",
+      "file": "src/main/java/com/techstore/controller/OgMetaController.java",
+      "root_cause": "WebConfig.configureContentNegotiation sets defaultContentType(APPLICATION_JSON); 'Accept: */*' falls through to that default, so a mapping with produces=text/html does not match. The legacy OGPreviewController (no produces) silently served those requests, so deleting it would have broken curl and some crawlers.",
+      "fix": "Removed produces from the OgMetaController mappings; set Content-Type text/html;charset=UTF-8 explicitly on the ResponseEntity. Covered by OgMetaControllerTest.anyAcceptGetsThePage.",
+      "tags": [
+        "spring",
+        "content-negotiation",
+        "406",
+        "produces",
+        "og",
+        "crawlers"
+      ],
+      "related_bugs": [
+        "bug-614"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-12T00:00:00.000Z"
+    },
+    {
+      "id": "bug-626",
+      "timestamp": "2026-10-12T09:01:03.040Z",
+      "error_message": "Wrong condition in logic",
+      "file": "../../../../../../tmp/ctu-main-seo/src/pages/ProductPage.jsx",
+      "root_cause": "Condition was: if (status === \"loading\")",
+      "fix": "Changed to: if (itemStatus === \"failed\")",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-12T09:01:03.040Z"
     }
   ]
 }

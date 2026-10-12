@@ -4150,3 +4150,87 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 14:48 | Edited ../../care-tech-ui/public/index.html | 4→5 lines | ~59 |
 | 10:30 | GSC fix steps 1+2: nginx og_bypass rewrite gets trailing "?" (no more 301 self-loop; verified in Docker nginx); removed static canonical from care-tech-ui index.html (verified in dev server: raw 0 tags, rendered = correct per-route) | nginx.prod.conf, care-tech-ui/public/index.html | done, not deployed/committed | ~12k |
 | 14:50 | Session end: 4 writes across 3 files (gsc_alternate_canonical_audit.md, nginx.prod.conf, index.html) | 1 reads | ~678 tok |
+| 14:51 | Session end: 4 writes across 3 files (gsc_alternate_canonical_audit.md, nginx.prod.conf, index.html) | 1 reads | ~678 tok |
+| 15:20 | Session end: 4 writes across 3 files (gsc_alternate_canonical_audit.md, nginx.prod.conf, index.html) | 1 reads | ~678 tok |
+
+## Session: 2026-10-09 08:10
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-10-09 14:12
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:15 | Investigated 'missing' admin order price edit: never existed in either repo (all branches/stashes); plan for price edit + add product to order | EditOrderModal.jsx, OrderService.java, OrderItemUpdateDTO.java | plan pending approval | ~25k |
+| 14:15 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/feedback_no_feature_removal.md | — | ~256 |
+| 14:15 | Session end: 1 writes across 1 files (feedback_no_feature_removal.md) | 0 reads | ~274 tok |
+| 14:22 | Created src/test/java/com/techstore/service/OrderServiceUpdateItemsTest.java | — | ~2132 |
+| 14:24 | Created ../../care-tech-ui/src/pages/admin/Orders/AddOrderProductSearch.jsx | — | ~1024 |
+| 14:32 | Admin order edit: unit price change + add product to existing order (branch feature/admin-order-items-edit in both repos); 456/456 backend tests, CRA build OK | OrderService.java, OrderItemUpdateDTO.java, OrderUpdateRequestDTO.java, OrderServiceUpdateItemsTest.java, EditOrderModal.jsx, AddOrderProductSearch.jsx | done, not merged | ~45k |
+| 14:32 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/admin_order_items_edit.md | — | ~258 |
+| 14:33 | Session end: 4 writes across 4 files (feedback_no_feature_removal.md, OrderServiceUpdateItemsTest.java, AddOrderProductSearch.jsx, admin_order_items_edit.md) | 0 reads | ~3858 tok |
+| 15:10 | Session end: 4 writes across 4 files (feedback_no_feature_removal.md, OrderServiceUpdateItemsTest.java, AddOrderProductSearch.jsx, admin_order_items_edit.md) | 0 reads | ~3858 tok |
+| 15:15 | Session end: 4 writes across 4 files (feedback_no_feature_removal.md, OrderServiceUpdateItemsTest.java, AddOrderProductSearch.jsx, admin_order_items_edit.md) | 34 reads | ~55453 tok |
+| 15:15 | Session end: 4 writes across 4 files (feedback_no_feature_removal.md, OrderServiceUpdateItemsTest.java, AddOrderProductSearch.jsx, admin_order_items_edit.md) | 34 reads | ~55453 tok |
+| 15:21 | Created ../../../../.claude/plans/purring-soaring-codd.md | — | ~2828 |
+| 15:21 | Edited ../../../../.claude/plans/purring-soaring-codd.md | inline fix | ~15 |
+| 15:23 | Edited ../../../../.claude/plans/purring-soaring-codd.md | 1→2 lines | ~97 |
+| 15:25 | Created src/main/java/com/techstore/repository/AdminProductSpecifications.java | — | ~951 |
+| 15:27 | Created ../../care-tech-ui/src/pages/admin/useAdminProductSearch.js | — | ~718 |
+| 15:27 | Created ../../care-tech-ui/src/pages/admin/AdminSearchInput.jsx | — | ~393 |
+| 15:29 | Created ../../care-tech-ui/src/pages/admin/CategoryPickerSearch.jsx | — | ~818 |
+| 15:32 | Created src/test/java/com/techstore/repository/AdminProductSpecificationsTest.java | — | ~1248 |
+| 15:33 | Created src/main/resources/db/migration/V43__add_promotion_end_date.sql | — | ~399 |
+| 15:33 | Created src/main/java/com/techstore/service/PromotionExpiryService.java | — | ~827 |
+| 15:37 | Created ../../care-tech-ui/src/pages/admin/Promotions/promoDate.js | — | ~245 |
+| 15:51 | Checkout installment checkbox removed; admin product search (Products/Promotions/Markup); promo end date + expiry job (V43); promo & markup editing; markup ratio scale fix. Backend 472/472 tests, V43 checked on throwaway PG15, CRA build OK. Branch feature/admin-order-items-edit, not merged | Cart.jsx, AdminProductSpecifications, PromotionExpiryService, AdminService, PromoModal, MarkupModal, … | done | ~150k |
+| 15:51 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/admin_order_items_edit.md | — | ~448 |
+| 15:52 | Session end: 16 writes across 13 files (feedback_no_feature_removal.md, OrderServiceUpdateItemsTest.java, AddOrderProductSearch.jsx, admin_order_items_edit.md, purring-soaring-codd.md) | 34 reads | ~64927 tok |
+| 15:54 | Session end: 16 writes across 13 files (feedback_no_feature_removal.md, OrderServiceUpdateItemsTest.java, AddOrderProductSearch.jsx, admin_order_items_edit.md, purring-soaring-codd.md) | 34 reads | ~64927 tok |
+| 15:57 | Created src/test/java/com/techstore/service/PromotionExpiryServiceDbTest.java | — | ~1299 |
+| 16:00 | Created .claude/launch.json | — | ~550 |
+| 16:16 | DB-backed expiry test (PromotionExpiryServiceDbTest, 3/3); removed dead category filter in Promotions/Markup; full local browser test (throwaway PG + jar on :8089 + UI on :3001): admin search, hidden product edit, brand promo edit + auto-expiry at 16:10, product promo create/edit/remove, category picker search, markup edit 12.5% exact, markup add + 500% validation, order price edit + add product, checkout without installment checkbox — all OK; env cleaned up | PromotionExpiryServiceDbTest.java, PromotionsLayout.jsx, MarkupLayout.jsx | done | ~60k |
+| 16:17 | Session end: 18 writes across 15 files (feedback_no_feature_removal.md, OrderServiceUpdateItemsTest.java, AddOrderProductSearch.jsx, admin_order_items_edit.md, purring-soaring-codd.md) | 35 reads | ~66944 tok |
+
+## Session: 2026-10-12 10:56
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:00 | GSC validation export 2026-10-12 (1000 pending, 5 failed): steps 1+2 confirmed live; 110 category URLs vs prod DB → 81 slug≠id (73 slug lives at another id, mostly +1 shift), 33 /list/ parents; 888 product URLs will pass on recrawl | (analysis only) | plan for step 4 (301 slug/id mismatch) proposed | ~20k |
+| 11:04 | Edited ../../../../../../tmp/tsa-v2-seo/src/main/java/com/techstore/controller/OgMetaController.java | added 4 import(s) | ~120 |
+| 11:04 | Edited ../../../../../../tmp/tsa-v2-seo/src/main/java/com/techstore/controller/OgMetaController.java | modified Browsers() | ~104 |
+| 11:04 | Edited ../../../../../../tmp/tsa-v2-seo/src/main/java/com/techstore/controller/OgMetaController.java | added 1 condition(s) | ~154 |
+| 11:04 | Edited ../../../../../../tmp/tsa-v2-seo/src/main/java/com/techstore/controller/OgMetaController.java | added 1 condition(s) | ~279 |
+| 11:04 | Edited ../../../../../../tmp/tsa-v2-seo/src/main/java/com/techstore/controller/OgMetaController.java | added error handling | ~549 |
+| 11:05 | Created ../../../../../../tmp/tsa-v2-seo/src/test/java/com/techstore/controller/OgMetaControllerTest.java | — | ~2558 |
+| 11:06 | Created ../../../../../../tmp/tsa-v2-seo/src/test/java/com/techstore/repository/CategoryRepositoryCanonicalUrlTest.java | — | ~698 |
+| 13:30 | GSC step 4 on v2 (worktree): OgMetaController 301 by slug (categories) / by ID (products), 404 for unknown ID, /list/ canonical for parents; nginx X-Original-URI; sitemap /list/ for parents; +OgMetaControllerTest (12) +CategoryRepositoryCanonicalUrlTest (2); full suite 464/464 green; prod-data simulation 82/110 → 301, 0 chains | OgMetaController.java, CategoryRepository.java, SitemapController.java, nginx.prod.conf, 2 tests | committed v2 f95bcb9, not pushed/deployed | ~45k |
+| 11:10 | Session end: 7 writes across 3 files (OgMetaController.java, OgMetaControllerTest.java, CategoryRepositoryCanonicalUrlTest.java) | 1 reads | ~7063 tok |
+| 13:45 | pushed v2 (4bc38f7, ceeac2d, f95bcb9) to origin | - | origin/v2 = f95bcb9 | ~1k |
+| 11:12 | Session end: 7 writes across 3 files (OgMetaController.java, OgMetaControllerTest.java, CategoryRepositoryCanonicalUrlTest.java) | 1 reads | ~7063 tok |
+| 14:00 | nginx config audit: live site matches 13/13 observable behaviours of nginx.prod.conf; identified 3 nginx files (prod host / UI container / stale main) | - | answered, no change | ~6k |
+| 11:15 | Session end: 7 writes across 3 files (OgMetaController.java, OgMetaControllerTest.java, CategoryRepositoryCanonicalUrlTest.java) | 1 reads | ~7063 tok |
+| 14:05 | switched local checkout feature/admin-order-items-edit → v2 at user's request (.wolf uncommitted changes carried over; feature branch untouched) | - | on v2 @ f95bcb9 | ~1k |
+| 11:17 | Session end: 7 writes across 3 files (OgMetaController.java, OgMetaControllerTest.java, CategoryRepositoryCanonicalUrlTest.java) | 1 reads | ~7063 tok |
+| 14:30 | step 4 deployed by user; verified live (Googlebot + browser + Viber flows; full sweep of 110 category / 888 product export URLs and 224 sitemap categories) | - | all as simulated; user to restart GSC validation | ~8k |
+| 11:35 | Session end: 7 writes across 3 files (OgMetaController.java, OgMetaControllerTest.java, CategoryRepositoryCanonicalUrlTest.java) | 1 reads | ~7063 tok |
+| 15:00 | step 3 research: robots allows /api; bundle API=https://www.caretech.bg; product render = 5 API + 2 image calls, rendered page has Product+BreadcrumbList JSON-LD; hidden product → API 404 → React stuck on loading (soft 404, bug-615); backend & frontend containers on different docker networks | - | plan B (server-rendered head in SPA shell) proposed | ~15k |
+| 11:40 | Session end: 7 writes across 3 files (OgMetaController.java, OgMetaControllerTest.java, CategoryRepositoryCanonicalUrlTest.java) | 1 reads | ~7063 tok |
+| 15:10 | user confirmed prod docker layout: all 3 containers on opt_techstore-network (compose in /opt) → SPA_INDEX_URL=http://care-tech-ui/index.html, no network change needed | - | step 3 waits for answer on hidden products 404 vs noindex | ~1k |
+| 11:51 | Edited src/main/java/com/techstore/service/ProductService.java | 7→4 lines | ~51 |
+| 11:52 | Edited src/main/java/com/techstore/service/ProductService.java | modified isVisibleOnSite() | ~184 |
+| 11:53 | Created src/main/java/com/techstore/service/seo/SpaShellService.java | — | ~629 |
+| 11:53 | Created src/main/java/com/techstore/service/seo/SpaHead.java | — | ~904 |
+| 11:54 | Created src/main/java/com/techstore/controller/OgMetaController.java | — | ~2515 |
+| 11:54 | Edited src/main/java/com/techstore/repository/ProductRepository.java | 1→5 lines | ~90 |
+| 11:54 | Edited src/main/java/com/techstore/controller/OgMetaController.java | inline fix | ~32 |
+| 11:55 | Edited nginx.prod.conf | 2→4 lines | ~56 |
+| 11:56 | Created src/test/java/com/techstore/controller/OgMetaControllerTest.java | — | ~4064 |
+| 11:57 | Created src/test/java/com/techstore/service/seo/SpaHeadTest.java | — | ~1225 |
+| 11:57 | Created src/test/java/com/techstore/service/seo/SpaShellServiceTest.java | — | ~878 |
+| 12:01 | Edited ../../../../../../tmp/ctu-main-seo/src/pages/ProductPage.jsx | added 1 condition(s) | ~321 |
+| 12:01 | Edited ../../../../../../tmp/ctu-main-seo/src/pages/ProductPage.jsx | inline fix | ~27 |
+| 12:01 | Edited ../../../../../../tmp/ctu-main-seo/src/pages/ProductPage.jsx | inline fix | ~19 |
+| 12:01 | Edited ../../../../../../tmp/ctu-main-seo/src/pages/ProductPage.jsx | inline fix | ~9 |
+| 16:30 | Step 3 implemented: OgMetaController serves React index.html with page head (SpaHead) + 200/301/404/503; SpaShellService (ETag); hidden products/categories → 404; dropped produces (406 on Accept */*, bug-616) and OGPreviewController; nginx: all /product/ & /category/ → backend, @spa fallback, limit_req on /api/og; compose frontend on techstore-network. Frontend: ProductPage "not available" on itemStatus failed (bug-615). Verified: 479/479 backend tests, prod-fixture head tests, Docker nginx e2e (routing, 301/404, 503 + backend-down fallback), browser check of hidden/visible product, prod build | OgMetaController, SpaShellService, SpaHead, ProductService, ProductRepository, application.yml, docker-compose.yml, nginx.prod.conf, ProductPage.jsx | committed v2 41cb0ff, care-tech-ui main ade745b; not pushed/deployed | ~90k |
