@@ -10605,6 +10605,38 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-10-14T15:00:00.000Z"
+    },
+    {
+      "id": "bug-640",
+      "timestamp": "2026-10-14T16:30:00.000Z",
+      "error_message": "Sitemap подава 5 несъществуващи страници (/contact, /why-us, /our-services, /our-clients, /brands); липсват /faq, /device-insurance и другите инфо страници",
+      "file": "src/main/java/com/techstore/controller/SitemapController.java",
+      "root_cause": "STATIC_PAGES не съвпадаше с маршрутите в care-tech-ui/src/App.js; фронтендът отговаря 200 за всеки път → меки 404 в Search Console.",
+      "fix": "Реалните маршрути + 8 липсващи инфо страници; SitemapControllerStaticPagesTest пази списъка.",
+      "tags": [
+        "seo",
+        "sitemap",
+        "soft-404"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T16:30:00.000Z"
+    },
+    {
+      "id": "bug-641",
+      "timestamp": "2026-10-14T16:30:00.000Z",
+      "error_message": "Страницата „Застраховка на техниката“ води към /contact (404) и е с примерен текст; ЧЗВ с примерни въпроси",
+      "file": "care-tech-ui/src/pages/DeviceInsurancePage.jsx, FaqPage.jsx",
+      "root_cause": "Заготовки без съдържание от клиента.",
+      "fix": "Текстът на клиента дословно (20 въпроса в 5 раздела; 5 абзаца), <details> акордеон, FAQPage JSON-LD, контакт блок с /contacts.",
+      "tags": [
+        "content",
+        "faq",
+        "links"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T16:30:00.000Z"
     }
   ]
 }
