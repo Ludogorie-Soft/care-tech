@@ -35,17 +35,29 @@ public class SitemapController {
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    private static final String[][] STATIC_PAGES = {
-            {"/",              "1.0", "daily"},
-            {"/promotions",    "0.9", "daily"},
-            {"/brands",        "0.7", "weekly"},
-            {"/blog",          "0.7", "weekly"},
-            {"/about",         "0.5", "monthly"},
-            {"/why-us",        "0.5", "monthly"},
-            {"/our-services",  "0.5", "monthly"},
-            {"/certifications","0.5", "monthly"},
-            {"/contact",       "0.6", "monthly"},
-            {"/our-clients",   "0.4", "monthly"},
+    /**
+     * Pages without an id in the URL. Each path must be a route in care-tech-ui/src/App.js: the
+     * frontend answers 200 for any path, so a wrong one here shows up in Search Console as a
+     * soft 404 rather than as an error.
+     */
+    static final String[][] STATIC_PAGES = {
+            {"/",                     "1.0", "daily"},
+            {"/promotions",           "0.9", "daily"},
+            {"/blog",                 "0.7", "weekly"},
+            {"/contacts",             "0.6", "monthly"},
+            {"/services",             "0.6", "monthly"},
+            {"/about",                "0.5", "monthly"},
+            {"/why-caretech",         "0.5", "monthly"},
+            {"/certifications",       "0.5", "monthly"},
+            {"/clients",              "0.4", "monthly"},
+            {"/faq",                  "0.5", "monthly"},
+            {"/delivery-and-payment", "0.5", "monthly"},
+            {"/installment-purchase", "0.5", "monthly"},
+            {"/device-insurance",     "0.4", "monthly"},
+            {"/return-policy",        "0.4", "monthly"},
+            {"/policy",               "0.3", "yearly"},
+            {"/cookies",              "0.2", "yearly"},
+            {"/site-map",             "0.3", "monthly"},
     };
 
     @GetMapping(value = "/api/sitemap.xml")
