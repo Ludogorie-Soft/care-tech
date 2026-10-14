@@ -6,7 +6,6 @@ import com.techstore.dto.response.ParameterResponseDto;
 import com.techstore.entity.Category;
 import com.techstore.entity.Parameter;
 import com.techstore.entity.ParameterOption;
-import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.DuplicateResourceException;
 import com.techstore.exception.ValidationException;
 import com.techstore.mapper.ParameterMapper;
@@ -45,26 +44,21 @@ public class ParameterService {
                 "category: " + requestDto.getCategoryId());
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            // Comprehensive validation
             validateParameterRequest(requestDto, true);
 
-            // Find and validate category
             Category category = findCategoryByIdOrThrow(requestDto.getCategoryId());
 
-            // Check for duplicates
             checkForDuplicateParameter(requestDto, category);
 
-            // Create parameter with options
             Parameter parameter = createParameterFromRequest(requestDto, category);
             parameter = parameterRepository.save(parameter);
 
-            // Create parameter options
             createParameterOptions(parameter, requestDto.getOptions());
 
             log.info("Parameter created successfully with id: {} and external id: {}",
                     parameter.getId(), parameter.getExternalId());
 
-            return parameterMapper.toResponseDto(parameter, language);
+            return toResponseDto(parameter, language);
 
         }, context);
     }
@@ -76,74 +70,23 @@ public class ParameterService {
         String context = ExceptionHelper.createErrorContext("updateParameter", "Parameter", id, null);
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            // Validate inputs
             validateParameterId(id);
             validateParameterRequest(requestDto, false);
 
-            // Find existing parameter
             Parameter existingParameter = findParameterByIdOrThrow(id);
 
-            // Validate parameter name uniqueness within category if changed
             validateParameterNameUniqueness(requestDto, existingParameter);
 
-            // Update parameter
             updateParameterFromRequest(existingParameter, requestDto);
             Parameter updatedParameter = parameterRepository.save(existingParameter);
 
-            // Update parameter options
             updateParameterOptions(updatedParameter, requestDto.getOptions());
 
             log.info("Parameter updated successfully with ID: {}", id);
-            return parameterMapper.toResponseDto(updatedParameter, language);
+            return toResponseDto(updatedParameter, language);
 
         }, context);
     }
-
-    @CacheEvict(value = "parameters", allEntries = true)
-    public void deleteParameter(Long parameterId) {
-        log.info("Deleting parameter with ID: {}", parameterId);
-
-        String context = ExceptionHelper.createErrorContext("deleteParameter", "Parameter", parameterId, null);
-
-        ExceptionHelper.wrapDatabaseOperation(() -> {
-            validateParameterId(parameterId);
-
-            Parameter parameter = findParameterByIdOrThrow(parameterId);
-
-            // Business validation for deletion
-            validateParameterDeletion(parameter);
-
-            // Delete parameter (cascade will handle options and product parameters)
-            parameterRepository.delete(parameter);
-
-            log.info("Parameter deleted successfully with ID: {}", parameterId);
-            return null;
-        }, context);
-    }
-
-    @Transactional(readOnly = true)
-    @Cacheable(value = "parameters", key = "'category_' + #categoryId + '_' + #language")
-    public List<ParameterResponseDto> getParametersByCategory(Long categoryId, String language) {
-        log.debug("Fetching parameters for available products in category: {}", categoryId);
-
-        validateCategoryId(categoryId);
-        findCategoryByIdOrThrow(categoryId);
-
-        return ExceptionHelper.wrapDatabaseOperation(() -> {
-            List<Parameter> parameters = parameterRepository.findParametersForAvailableProductsByCategory(categoryId);
-
-            parameters.forEach(parameter -> {
-                List<ParameterOption> uniqueOptions =
-                        parameterOptionRepository.findUniqueOptionsByParameter(parameter.getId());
-                parameter.setOptions(new HashSet<>(uniqueOptions));
-            });
-
-            return parameters.stream()
-                    .map(parameter -> parameterMapper.toResponseDto(parameter, language))
-                    .toList();
-        }, "fetch parameters for category: " + categoryId);
-    }
-
 
     @Transactional(readOnly = true)
     @Cacheable(value = "parameters", key = "'category_all_' + #categoryId + '_' + #language")
@@ -151,10 +94,13 @@ public class ParameterService {
         log.debug("Fetching all parameters for category: {}", categoryId);
 
         validateCategoryId(categoryId);
-        findCategoryByIdOrThrow(categoryId);
+        Category resolvedCategory = findCategoryByIdOrThrow(categoryId);
+        Long resolvedId = resolvedCategory.getAliasOf() != null
+                ? resolvedCategory.getAliasOf().getId()
+                : categoryId;
 
         return ExceptionHelper.wrapDatabaseOperation(() -> {
-            List<Parameter> parameters = parameterRepository.findUniqueByCategoryId(categoryId);
+            List<Parameter> parameters = parameterRepository.findByCategoryIdOrderByOrderAsc(resolvedId);
 
             parameters.forEach(parameter -> {
                 List<ParameterOption> uniqueOptions =
@@ -163,12 +109,10 @@ public class ParameterService {
             });
 
             return parameters.stream()
-                    .map(p -> parameterMapper.toResponseDto(p, language))
+                    .map(p -> toResponseDto(p, language))
                     .toList();
         }, "fetch all parameters for category: " + categoryId);
     }
-
-
 
     @Transactional(readOnly = true)
     @Cacheable(value = "parameters", key = "#id + '_' + #language")
@@ -178,7 +122,7 @@ public class ParameterService {
         validateParameterId(id);
 
         Parameter parameter = findParameterByIdOrThrow(id);
-        return parameterMapper.toResponseDto(parameter, language);
+        return toResponseDto(parameter, language);
     }
 
     @Transactional(readOnly = true)
@@ -189,25 +133,21 @@ public class ParameterService {
 
         return ExceptionHelper.wrapDatabaseOperation(() ->
                         parameterRepository.findAll().stream()
-                                .map(parameter -> parameterMapper.toResponseDto(parameter, language))
+                                .map(parameter -> toResponseDto(parameter, language))
                                 .toList(),
                 "fetch all parameters"
         );
     }
 
-    @Transactional(readOnly = true)
-    public boolean parameterExistsInCategory(String parameterName, Long categoryId, String language) {
-        if (!StringUtils.hasText(parameterName) || categoryId == null) {
-            return false;
+    // ✅ Helper method
+    private String getOptionDisplayName(ParameterOption option) {
+        if (StringUtils.hasText(option.getNameBg())) {
+            return option.getNameBg();
+        } else if (StringUtils.hasText(option.getNameEn())) {
+            return option.getNameEn();
+        } else {
+            return "Option ID: " + option.getId();
         }
-
-        validateCategoryId(categoryId);
-
-        Category category = findCategoryByIdOrThrow(categoryId);
-
-        return "bg".equalsIgnoreCase(language) ?
-                parameterRepository.existsByNameBgIgnoreCaseAndCategory(parameterName.trim(), category) :
-                parameterRepository.existsByNameEnIgnoreCaseAndCategory(parameterName.trim(), category);
     }
 
     // ========== PRIVATE VALIDATION METHODS ==========
@@ -247,15 +187,12 @@ public class ParameterService {
             throw new ValidationException("Parameter name is required");
         }
 
-        // Validate parameter names
         validateParameterNames(requestDto.getName());
 
-        // Validate order
         if (requestDto.getOrder() != null && requestDto.getOrder() < 0) {
             throw new ValidationException("Parameter order cannot be negative");
         }
 
-        // Validate options if provided
         if (requestDto.getOptions() != null && !requestDto.getOptions().isEmpty()) {
             validateParameterOptions(requestDto.getOptions());
         }
@@ -289,13 +226,13 @@ public class ParameterService {
 
     private void validateParameterOptions(List<ParameterOptionRequestDto> options) {
         if (options.isEmpty()) {
-            return; // Options are optional
+            return;
         }
 
-        Set<Long> externalIds = new java.util.HashSet<>();
-        Set<Integer> orders = new java.util.HashSet<>();
+        Set<Long> externalIds = new HashSet<>();
 
         for (ParameterOptionRequestDto option : options) {
+            // ✅ Проверка за external_id дубликати
             if (option.getExternalId() != null) {
                 if (externalIds.contains(option.getExternalId())) {
                     throw new ValidationException("Duplicate parameter option external ID: " + option.getExternalId());
@@ -303,17 +240,12 @@ public class ParameterService {
                 externalIds.add(option.getExternalId());
             }
 
-            if (option.getOrder() != null) {
-                if (option.getOrder() < 0) {
-                    throw new ValidationException("Parameter option order cannot be negative");
-                }
-
-                if (orders.contains(option.getOrder())) {
-                    throw new ValidationException("Duplicate parameter option order: " + option.getOrder());
-                }
-                orders.add(option.getOrder());
+            // ✅ Проверка за отрицателен order
+            if (option.getOrder() != null && option.getOrder() < 0) {
+                throw new ValidationException("Parameter option order cannot be negative");
             }
 
+            // ✅ Проверка за име
             if (option.getName() == null || option.getName().isEmpty()) {
                 throw new ValidationException("Parameter option name is required");
             }
@@ -329,12 +261,6 @@ public class ParameterService {
             if (StringUtils.hasText(name.getText())) {
                 hasValidName = true;
 
-                if (name.getText().trim().length() > 255) {
-                    throw new ValidationException(
-                            String.format("Parameter option name (%s) cannot exceed 255 characters",
-                                    name.getLanguageCode()));
-                }
-
                 if (name.getText().trim().length() < 1) {
                     throw new ValidationException(
                             String.format("Parameter option name (%s) cannot be empty",
@@ -348,29 +274,11 @@ public class ParameterService {
         }
     }
 
-    private void validateParameterDeletion(Parameter parameter) {
-        // Check if parameter has product parameters (is being used by products)
-        if (parameter.getOptions() != null) {
-            long totalProductUsages = parameter.getOptions().stream()
-                    .mapToLong(option -> option.getProductParameters() != null ?
-                            option.getProductParameters().size() : 0)
-                    .sum();
-
-            if (totalProductUsages > 0) {
-                throw new BusinessLogicException(
-                        String.format("Cannot delete parameter '%s' because it is used by %d products. " +
-                                        "Please remove the parameter from products first.",
-                                getParameterDisplayName(parameter), totalProductUsages));
-            }
-        }
-    }
-
     private void validateParameterNameUniqueness(ParameterRequestDto requestDto, Parameter existingParameter) {
         if (requestDto.getName() == null || requestDto.getName().isEmpty()) {
             return;
         }
 
-        // Check if names are actually changing
         boolean nameChanged = false;
 
         for (var nameDto : requestDto.getName()) {
@@ -383,14 +291,17 @@ public class ParameterService {
                 currentName = existingParameter.getNameEn();
             }
 
-            if (!java.util.Objects.equals(newName, currentName)) {
+            if (!Objects.equals(newName, currentName)) {
                 nameChanged = true;
                 break;
             }
         }
 
         if (nameChanged) {
-            checkForDuplicateParameterNames(requestDto, existingParameter.getCategory());
+            // ✅ Проверяваме във ВСИЧКИ категории на параметъра
+            for (Category category : existingParameter.getCategories()) {
+                checkForDuplicateParameterNames(requestDto, category, existingParameter.getId());
+            }
         }
     }
 
@@ -413,20 +324,10 @@ public class ParameterService {
     }
 
     private void checkForDuplicateParameter(ParameterRequestDto requestDto, Category category) {
-        // Check by external ID if this is a sync operation
-        if (requestDto.getExternalId() != null) {
-            if (parameterRepository.findByExternalIdAndCategoryId(requestDto.getExternalId(), category.getId()).isPresent()) {
-                throw new DuplicateResourceException(
-                        String.format("Parameter already exists with external ID %d in category %d",
-                                requestDto.getExternalId(), category.getId()));
-            }
-        }
-
-        // Check by names
-        checkForDuplicateParameterNames(requestDto, category);
+        checkForDuplicateParameterNames(requestDto, category, null);
     }
 
-    private void checkForDuplicateParameterNames(ParameterRequestDto requestDto, Category category) {
+    private void checkForDuplicateParameterNames(ParameterRequestDto requestDto, Category category, Long excludeParameterId) {
         for (var nameDto : requestDto.getName()) {
             if (!StringUtils.hasText(nameDto.getText())) {
                 continue;
@@ -435,13 +336,26 @@ public class ParameterService {
             String parameterName = nameDto.getText().trim();
 
             if ("bg".equalsIgnoreCase(nameDto.getLanguageCode())) {
-                if (parameterRepository.existsByNameBgIgnoreCaseAndCategory(parameterName, category)) {
+                // ✅ Търсим параметри в тази категория с това име
+                List<Parameter> duplicates = parameterRepository.findByCategoryIdOrderByOrderAsc(category.getId())
+                        .stream()
+                        .filter(p -> parameterName.equalsIgnoreCase(p.getNameBg()))
+                        .filter(p -> excludeParameterId == null || !p.getId().equals(excludeParameterId))
+                        .toList();
+
+                if (!duplicates.isEmpty()) {
                     throw new DuplicateResourceException(
                             String.format("Parameter with Bulgarian name '%s' already exists in this category",
                                     parameterName));
                 }
             } else if ("en".equalsIgnoreCase(nameDto.getLanguageCode())) {
-                if (parameterRepository.existsByNameEnIgnoreCaseAndCategory(parameterName, category)) {
+                List<Parameter> duplicates = parameterRepository.findByCategoryIdOrderByOrderAsc(category.getId())
+                        .stream()
+                        .filter(p -> parameterName.equalsIgnoreCase(p.getNameEn()))
+                        .filter(p -> excludeParameterId == null || !p.getId().equals(excludeParameterId))
+                        .toList();
+
+                if (!duplicates.isEmpty()) {
                     throw new DuplicateResourceException(
                             String.format("Parameter with English name '%s' already exists in this category",
                                     parameterName));
@@ -453,21 +367,37 @@ public class ParameterService {
     private Parameter createParameterFromRequest(ParameterRequestDto requestDto, Category category) {
         Parameter parameter = new Parameter();
         parameter.setExternalId(requestDto.getExternalId());
-        parameter.setCategory(category);
+
+        // ✅ Инициализираме categories Set и добавяме категорията
+        parameter.setCategories(new HashSet<>());
+        parameter.getCategories().add(category);
+
         parameter.setOrder(requestDto.getOrder() != null ? requestDto.getOrder() : 0);
 
         setParameterNamesFromRequest(parameter, requestDto.getName());
+        parameter.setCreatedBy("ADMIN");
+        parameter.setLastModifiedBy("ADMIN");
 
         return parameter;
     }
 
     private void updateParameterFromRequest(Parameter parameter, ParameterRequestDto requestDto) {
+        parameter.setLastModifiedBy("ADMIN");
         if (requestDto.getOrder() != null) {
             parameter.setOrder(requestDto.getOrder());
         }
 
         if (requestDto.getName() != null && !requestDto.getName().isEmpty()) {
             setParameterNamesFromRequest(parameter, requestDto.getName());
+        }
+
+        // ✅ Ако се предава категория, добавяме я към Set-а
+        if (requestDto.getCategoryId() != null) {
+            Category category = findCategoryByIdOrThrow(requestDto.getCategoryId());
+            if (!parameter.getCategories().contains(category)) {
+                parameter.getCategories().add(category);
+                log.info("Added category {} to parameter {}", category.getId(), parameter.getId());
+            }
         }
     }
 
@@ -491,69 +421,156 @@ public class ParameterService {
         List<ParameterOption> options = new ArrayList<>();
 
         for (ParameterOptionRequestDto optionDto : optionDtos) {
+            String optionNameBg = getOptionNameBg(optionDto);
+            if (optionNameBg == null || optionNameBg.isEmpty()) {
+                log.warn("Skipping option without Bulgarian name for parameter {}", parameter.getId());
+                continue;
+            }
+
             ParameterOption option = createParameterOptionFromRequest(optionDto, parameter);
             options.add(option);
+            log.debug("Creating new option '{}' for new parameter", optionNameBg);
         }
 
-        parameterOptionRepository.saveAll(options);
-        log.debug("Created {} parameter options for parameter: {}", options.size(), parameter.getId());
+        if (!options.isEmpty()) {
+            parameterOptionRepository.saveAll(options);
+            log.info("Created {} parameter options for new parameter: {}", options.size(), parameter.getId());
+        }
     }
 
     private void updateParameterOptions(Parameter parameter, List<ParameterOptionRequestDto> optionDtos) {
         if (optionDtos == null) {
-            return; // Don't update options if not provided
+            return;
         }
 
-        // Get existing options and map them by external ID, handling duplicates
-        Map<Long, ParameterOption> existingOptionsByExternalId = parameterOptionRepository
-                .findByParameterIdOrderByOrderAsc(parameter.getId())
-                .stream()
+        // ✅ 1. Зареди съществуващите options
+        List<ParameterOption> existingOptions = parameterOptionRepository
+                .findByParameterIdOrderByOrderAsc(parameter.getId());
+
+        // ✅ 2. Индексирай по ID (за admin panel)
+        Map<Long, ParameterOption> existingOptionsById = existingOptions.stream()
+                .filter(opt -> opt.getId() != null)
+                .collect(Collectors.toMap(
+                        ParameterOption::getId,
+                        option -> option
+                ));
+
+        // ✅ 3. Индексирай по externalId (за API sync)
+        Map<Long, ParameterOption> existingOptionsByExternalId = existingOptions.stream()
                 .filter(opt -> opt.getExternalId() != null)
                 .collect(Collectors.toMap(
                         ParameterOption::getExternalId,
                         option -> option,
                         (option1, option2) -> {
-                            log.warn("Duplicate externalId {} found for parameter options with IDs {} and {}. Keeping the one with the higher ID.",
-                                    option1.getExternalId(), option1.getId(), option2.getId());
-                            return option1.getId() > option2.getId() ? option1 : option2;
+                            log.warn("Duplicate external_id '{}' found for parameter {}, keeping first",
+                                    option1.getExternalId(), parameter.getId());
+                            return option1;
                         }
                 ));
 
         List<ParameterOption> optionsToSave = new ArrayList<>();
-        Set<Long> processedExternalIds = new HashSet<>();
+        Set<Long> processedIds = new HashSet<>();
 
-        // Separate new options from updates
+        // ✅ 4. Обработи options от request-а
         for (ParameterOptionRequestDto optionDto : optionDtos) {
-            if (optionDto.getExternalId() == null) {
-                // This is a new option, create it
-                optionsToSave.add(createParameterOptionFromRequest(optionDto, parameter));
-            } else {
-                // This is an option with an external ID, process as an update or create
-                processedExternalIds.add(optionDto.getExternalId());
-                ParameterOption existingOption = existingOptionsByExternalId.get(optionDto.getExternalId());
+            String optionNameBg = getOptionNameBg(optionDto);
+            if (optionNameBg == null || optionNameBg.isEmpty()) {
+                log.warn("Skipping option without Bulgarian name for parameter {}", parameter.getId());
+                continue;
+            }
+
+            ParameterOption existingOption = null;
+
+            // ✅ 4a. ПРИОРИТЕТ 1: Търси по database ID (от admin panel)
+            if (optionDto.getOptionId() != null) {
+                existingOption = existingOptionsById.get(optionDto.getOptionId());
+
                 if (existingOption != null) {
-                    // Update existing option
-                    updateParameterOptionFromRequest(existingOption, optionDto);
-                    optionsToSave.add(existingOption);
+                    // ✅ Валидация: провери дали option принадлежи на този параметър
+                    if (!existingOption.getParameter().getId().equals(parameter.getId())) {
+                        throw new ValidationException(
+                                String.format("Parameter option %d does not belong to parameter %d",
+                                        optionDto.getOptionId(), parameter.getId()));
+                    }
+
+                    processedIds.add(existingOption.getId());
+                    log.debug("Found existing option by database ID: {} for parameter {}",
+                            optionDto.getOptionId(), parameter.getId());
                 } else {
-                    // Create new option with external ID
-                    optionsToSave.add(createParameterOptionFromRequest(optionDto, parameter));
+                    throw new ValidationException(
+                            String.format("Parameter option with ID %d not found", optionDto.getOptionId()));
                 }
+            }
+            // ✅ 4b. ПРИОРИТЕТ 2: Търси по externalId (от API sync)
+            else if (optionDto.getExternalId() != null) {
+                existingOption = existingOptionsByExternalId.get(optionDto.getExternalId());
+
+                if (existingOption != null) {
+                    processedIds.add(existingOption.getId());
+                    log.debug("Found existing option by external_id: {} for parameter {}",
+                            optionDto.getExternalId(), parameter.getId());
+                }
+            }
+
+            // ✅ 5. UPDATE съществуваща или CREATE нова опция
+            if (existingOption != null) {
+                // UPDATE съществуваща
+                updateParameterOptionFromRequest(existingOption, optionDto);
+                optionsToSave.add(existingOption);
+                log.debug("Updating existing option '{}' for parameter {}",
+                        getOptionDisplayName(existingOption), parameter.getId());
+            } else {
+                // CREATE нова опция
+                ParameterOption newOption = createParameterOptionFromRequest(optionDto, parameter);
+                optionsToSave.add(newOption);
+                log.debug("Adding new option '{}' to parameter {}", optionNameBg, parameter.getId());
             }
         }
 
-        // Delete options that are no longer in the request (only those with external IDs)
-        List<ParameterOption> optionsToDelete = existingOptionsByExternalId.values().stream()
-                .filter(option -> !processedExternalIds.contains(option.getExternalId()))
-                .collect(Collectors.toList());
+        // ✅ 6. DELETE options that are NO LONGER in the request
+        List<ParameterOption> optionsToDelete = existingOptions.stream()
+                .filter(option -> !processedIds.contains(option.getId()))
+                .toList();
 
         if (!optionsToDelete.isEmpty()) {
-            parameterOptionRepository.deleteAll(optionsToDelete);
-            log.debug("Deleted {} parameter options for parameter: {}", optionsToDelete.size(), parameter.getId());
+            List<ParameterOption> safeToDelete = new ArrayList<>();
+
+            for (ParameterOption optionToDelete : optionsToDelete) {
+                long productUsages = optionToDelete.getProductParameters() != null ?
+                        optionToDelete.getProductParameters().size() : 0;
+
+                if (productUsages > 0) {
+                    log.warn("Skipping deletion of parameter option '{}' (ID: {}) because it is used by {} products",
+                            getOptionDisplayName(optionToDelete), optionToDelete.getId(), productUsages);
+                } else {
+                    safeToDelete.add(optionToDelete);
+                }
+            }
+
+            if (!safeToDelete.isEmpty()) {
+                parameterOptionRepository.deleteAll(safeToDelete);
+                log.info("Deleted {} unused parameter options for parameter: {}",
+                        safeToDelete.size(), parameter.getId());
+            }
         }
 
-        parameterOptionRepository.saveAll(optionsToSave);
-        log.debug("Updated {} parameter options for parameter: {}", optionsToSave.size(), parameter.getId());
+        // ✅ 7. SAVE всички промени (updates + новите)
+        if (!optionsToSave.isEmpty()) {
+            parameterOptionRepository.saveAll(optionsToSave);
+            log.info("Saved {} parameter options for parameter: {} (updates + additions)",
+                    optionsToSave.size(), parameter.getId());
+        }
+    }
+
+    private String getOptionNameBg(ParameterOptionRequestDto optionDto) {
+        if (optionDto.getName() == null) return null;
+
+        return optionDto.getName().stream()
+                .filter(name -> "bg".equalsIgnoreCase(name.getLanguageCode()))
+                .map(com.techstore.dto.external.NameDto::getText)
+                .filter(StringUtils::hasText)
+                .findFirst()
+                .orElse(null);
     }
 
     private ParameterOption createParameterOptionFromRequest(ParameterOptionRequestDto optionDto, Parameter parameter) {
@@ -563,6 +580,7 @@ public class ParameterService {
         option.setOrder(optionDto.getOrder() != null ? optionDto.getOrder() : 0);
 
         setParameterOptionNamesFromRequest(option, optionDto.getName());
+        option.setCreatedBy("ADMIN");
 
         return option;
     }
@@ -589,13 +607,8 @@ public class ParameterService {
         }
     }
 
-    private String getParameterDisplayName(Parameter parameter) {
-        if (StringUtils.hasText(parameter.getNameEn())) {
-            return parameter.getNameEn();
-        } else if (StringUtils.hasText(parameter.getNameBg())) {
-            return parameter.getNameBg();
-        } else {
-            return "Parameter ID: " + parameter.getId();
-        }
+    @Transactional(readOnly = true)
+    public ParameterResponseDto toResponseDto(Parameter parameter, String language) {
+        return parameterMapper.toResponseDto(parameter, language);
     }
 }

@@ -1,29 +1,16 @@
 package com.techstore.service.sync;
 
+import com.techstore.dto.external.FlagDto;
 import com.techstore.dto.external.ImageDto;
-import com.techstore.dto.request.CategoryRequestFromExternalDto;
-import com.techstore.dto.request.ManufacturerRequestDto;
-import com.techstore.dto.request.ParameterOptionRequestDto;
-import com.techstore.dto.request.ParameterRequestDto;
-import com.techstore.dto.request.ParameterValueRequestDto;
-import com.techstore.dto.request.ProductRequestDto;
-import com.techstore.entity.Category;
-import com.techstore.entity.Manufacturer;
-import com.techstore.entity.Parameter;
-import com.techstore.entity.ParameterOption;
-import com.techstore.entity.Product;
-import com.techstore.entity.ProductParameter;
-import com.techstore.entity.SyncLog;
+import com.techstore.dto.request.*;
+import com.techstore.entity.*;
 import com.techstore.enums.Platform;
 import com.techstore.enums.ProductStatus;
-import com.techstore.repository.CategoryRepository;
-import com.techstore.repository.ManufacturerRepository;
-import com.techstore.repository.ParameterOptionRepository;
-import com.techstore.repository.ParameterRepository;
-import com.techstore.repository.ProductRepository;
-import com.techstore.service.CachedLookupService;
+import com.techstore.exception.SupplierCategoryGoneException;
+import com.techstore.repository.*;
 import com.techstore.service.ValiApiService;
 import com.techstore.util.LogHelper;
+import com.techstore.util.Markers;
 import com.techstore.util.SyncHelper;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -32,16 +19,31 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 import static com.techstore.util.LogHelper.LOG_STATUS_FAILED;
 import static com.techstore.util.LogHelper.LOG_STATUS_SUCCESS;
 
+/**
+ * ValiSyncService - VERSION 4.3 - FINAL FIX
+ *
+ * Дата: 18.05.2026
+ *
+ * КРИТИЧНА ПОПРАВКА:
+ * - uq_product_parameters_unique: Цялостна преработка на setParametersToProduct за правилно
+ *   изграждане на финалната колекция от параметри и избягване на дубликати.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ValiSyncService {
+
+    /** The whole word only — "Lavalier" and "Validated" stay as they are. */
+    private static final Pattern VALI_BRAND = Pattern.compile("\\s*\\bVALI\\b");
 
     private final ValiApiService valiApiService;
     private final CategoryRepository categoryRepository;
@@ -50,7 +52,6 @@ public class ValiSyncService {
     private final ParameterRepository parameterRepository;
     private final ParameterOptionRepository parameterOptionRepository;
     private final EntityManager entityManager;
-    private final CachedLookupService cachedLookupService;
     private final SyncHelper syncHelper;
     private final LogHelper logHelper;
 
@@ -60,9 +61,6 @@ public class ValiSyncService {
     @Value("${app.sync.batch-size:30}")
     private int batchSize;
 
-    @Value("${app.sync.max-chunk-duration-minutes:5}")
-    private int maxChunkDurationMinutes;
-
     @Transactional
     public void syncManufacturers() {
         String syncType = "VALI_MANUFACTURERS";
@@ -70,38 +68,103 @@ public class ValiSyncService {
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("Starting manufacturers synchronization");
+            log.info("Starting manufacturers synchronization - CREATE ONLY mode");
 
             List<ManufacturerRequestDto> externalManufacturers = valiApiService.getManufacturers();
-            Map<Long, Manufacturer> existingManufacturers = cachedLookupService.getAllManufacturersMap();
+            log.info("Fetched {} manufacturers from Vali API", externalManufacturers.size());
 
-            long created = 0, updated = 0;
+            List<Manufacturer> allExistingManufacturers = manufacturerRepository.findAll();
+
+            Map<Long, Manufacturer> existingByExternalId = allExistingManufacturers.stream()
+                    .filter(m -> m.getExternalId() != null)
+                    .collect(Collectors.toMap(Manufacturer::getExternalId, m -> m, (e, d) -> e));
+
+            Map<String, Manufacturer> existingManufacturers = allExistingManufacturers.stream()
+                    .filter(m -> m.getName() != null && !m.getName().isEmpty())
+                    .collect(Collectors.toMap(
+                            m -> normalizeManufacturerName(m.getName()),
+                            m -> m,
+                            (existing, duplicate) -> existing
+                    ));
+
+            log.info("Found {} existing manufacturers in database", allExistingManufacturers.size());
+
+            Set<Long> valiIds = externalManufacturers.stream()
+                    .map(ManufacturerRequestDto::getId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            long created = 0, linked = 0, skipped = 0;
 
             for (ManufacturerRequestDto extManufacturer : externalManufacturers) {
-                Manufacturer manufacturer = existingManufacturers.get(extManufacturer.getId());
+                // Primary check by externalId — prevents duplicate key violation
+                if (extManufacturer.getId() != null && existingByExternalId.containsKey(extManufacturer.getId())) {
+                    skipped++;
+                    continue;
+                }
+
+                String normalizedName = normalizeManufacturerName(extManufacturer.getName());
+                Manufacturer manufacturer = existingManufacturers.get(normalizedName);
 
                 if (manufacturer == null) {
                     manufacturer = createManufacturerFromExternal(extManufacturer);
                     manufacturer = manufacturerRepository.save(manufacturer);
-                    existingManufacturers.put(manufacturer.getExternalId(), manufacturer);
+                    existingManufacturers.put(normalizedName, manufacturer);
+                    existingByExternalId.put(manufacturer.getExternalId(), manufacturer);
                     created++;
+                } else if (extManufacturer.getId() != null
+                        && (manufacturer.getExternalId() == null || !valiIds.contains(manufacturer.getExternalId()))) {
+                    // The brand is already here — from another supplier (no external id), or under an
+                    // id VALI has since dropped. Without VALI's id the products sync finds no
+                    // manufacturer and skips every product of the brand, night after night.
+                    log.info("Linking manufacturer '{}' (id {}) to VALI id {} (was {})",
+                            manufacturer.getName(), manufacturer.getId(), extManufacturer.getId(),
+                            manufacturer.getExternalId());
+                    manufacturer.setExternalId(extManufacturer.getId());
+                    manufacturerRepository.save(manufacturer);
+                    existingByExternalId.put(extManufacturer.getId(), manufacturer);
+                    linked++;
                 } else {
-                    updateManufacturerFromExternal(manufacturer, extManufacturer);
-                    manufacturer = manufacturerRepository.save(manufacturer);
-                    existingManufacturers.put(manufacturer.getExternalId(), manufacturer);
-                    updated++;
+                    skipped++;
                 }
             }
 
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS,
-                    (long) externalManufacturers.size(), created, updated, 0, null, startTime);
-            log.info("Manufacturers synchronization completed - Created: {}, Updated: {}", created, updated);
+                    (long) externalManufacturers.size(), created, linked, 0,
+                    String.format("Created %d, Linked %d, Skipped %d existing", created, linked, skipped), startTime);
+            log.info("Manufacturers sync completed - Created: {}, Linked: {}, Skipped: {}", created, linked, skipped);
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
             log.error("Error during manufacturers synchronization", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private String normalizeManufacturerName(String name) {
+        if (name == null) return "";
+        return name.toLowerCase().trim().replaceAll("\\s+", " ");
+    }
+
+    private Manufacturer createManufacturerFromExternal(ManufacturerRequestDto extManufacturer) {
+        Manufacturer manufacturer = new Manufacturer();
+        manufacturer.setExternalId(extManufacturer.getId());
+        manufacturer.setName(extManufacturer.getName());
+        manufacturer.setPlatform(Platform.VALI);
+
+        if (extManufacturer.getInformation() != null) {
+            manufacturer.setInformationName(extManufacturer.getInformation().getName());
+            manufacturer.setInformationEmail(extManufacturer.getInformation().getEmail());
+            manufacturer.setInformationAddress(extManufacturer.getInformation().getAddress());
+        }
+
+        if (extManufacturer.getEuRepresentative() != null) {
+            manufacturer.setEuRepresentativeName(extManufacturer.getEuRepresentative().getName());
+            manufacturer.setEuRepresentativeEmail(extManufacturer.getEuRepresentative().getEmail());
+            manufacturer.setEuRepresentativeAddress(extManufacturer.getEuRepresentative().getAddress());
+        }
+
+        return manufacturer;
     }
 
     @Transactional
@@ -111,39 +174,30 @@ public class ValiSyncService {
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("Starting categories synchronization (memory optimized)");
+            log.info("Starting categories synchronization - CREATE ONLY mode");
 
             List<CategoryRequestFromExternalDto> externalCategories = valiApiService.getCategories();
             log.info("Fetched {} categories from Vali API", externalCategories.size());
 
-            // Clear any existing cache to free memory
             entityManager.clear();
 
-            // Load existing categories in smaller batches
             Map<Long, Category> existingCategories = new HashMap<>();
+            long created = 0, skipped = 0;
 
-            // Process in chunks to avoid memory issues
             int chunkSize = 100;
-            long created = 0, updated = 0, skipped = 0;
-
             for (int i = 0; i < externalCategories.size(); i += chunkSize) {
                 int end = Math.min(i + chunkSize, externalCategories.size());
                 List<CategoryRequestFromExternalDto> chunk = externalCategories.subList(i, end);
 
-                log.info("Processing category chunk {}-{} of {}", i, end, externalCategories.size());
-
-                // Reload only needed categories for this chunk
                 Set<Long> chunkExternalIds = chunk.stream()
                         .map(CategoryRequestFromExternalDto::getId)
                         .collect(Collectors.toSet());
 
-                // Fetch only categories we need
                 List<Category> existingInChunk = categoryRepository.findByExternalIdIn(chunkExternalIds);
                 for (Category cat : existingInChunk) {
                     existingCategories.put(cat.getExternalId(), cat);
                 }
 
-                // Process chunk
                 List<Category> categoriesToSave = new ArrayList<>();
 
                 for (CategoryRequestFromExternalDto extCategory : chunk) {
@@ -156,42 +210,29 @@ public class ValiSyncService {
 
                     if (category == null) {
                         category = createCategoryFromExternal(extCategory);
+                        categoriesToSave.add(category);
+                        existingCategories.put(category.getExternalId(), category);
                         created++;
                     } else {
-                        updateCategoryFromExternal(category, extCategory);
-                        updated++;
+                        skipped++;
                     }
-
-                    categoriesToSave.add(category);
-                    existingCategories.put(category.getExternalId(), category);
                 }
 
-                // Save chunk
                 if (!categoriesToSave.isEmpty()) {
                     categoryRepository.saveAll(categoriesToSave);
                     categoryRepository.flush();
                 }
 
-                // Clear EntityManager to free memory
                 entityManager.clear();
 
-                // Suggest garbage collection (optional)
-                if (i % 200 == 0) {
-                    System.gc();
-                }
             }
 
-            // Update parent relationships after all categories are saved
-            log.info("Updating parent relationships...");
             updateCategoryParentsOptimized(externalCategories, existingCategories);
 
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, externalCategories.size(),
-                    created, updated, 0,
-                    skipped > 0 ? String.format("Skipped %d excluded categories", skipped) : null,
-                    startTime);
+                    created, 0, 0, String.format("Skipped %d existing", skipped), startTime);
 
-            log.info("Categories sync completed - Created: {}, Updated: {}, Skipped: {}",
-                    created, updated, skipped);
+            log.info("Categories sync completed - Created: {}, Skipped: {}", created, skipped);
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
@@ -202,9 +243,7 @@ public class ValiSyncService {
 
     private void updateCategoryParentsOptimized(List<CategoryRequestFromExternalDto> externalCategories,
                                                 Map<Long, Category> existingCategories) {
-        int batchSize = 50;
-        int updateCount = 0;
-
+        int batchSizeLocal = 50;
         List<Category> categoriesToUpdate = new ArrayList<>();
 
         for (CategoryRequestFromExternalDto extCategory : externalCategories) {
@@ -213,387 +252,27 @@ public class ValiSyncService {
                 Category parent = existingCategories.get(extCategory.getParent());
 
                 if (category != null && parent != null && !parent.equals(category)) {
-                    category.setParent(parent);
-                    categoriesToUpdate.add(category);
-                    updateCount++;
+                    if (category.getParent() == null) {
+                        category.setParent(parent);
+                        categoriesToUpdate.add(category);
 
-                    // Save in batches
-                    if (categoriesToUpdate.size() >= batchSize) {
-                        categoryRepository.saveAll(categoriesToUpdate);
-                        categoryRepository.flush();
-                        entityManager.clear();
-                        categoriesToUpdate.clear();
+                        if (categoriesToUpdate.size() >= batchSizeLocal) {
+                            categoryRepository.saveAll(categoriesToUpdate);
+                            categoryRepository.flush();
+                            entityManager.clear();
+                            categoriesToUpdate.clear();
+                        }
                     }
                 }
             }
         }
 
-        // Save remaining
         if (!categoriesToUpdate.isEmpty()) {
             categoryRepository.saveAll(categoriesToUpdate);
             categoryRepository.flush();
             entityManager.clear();
         }
-
-        log.info("Updated parent relationships for {} categories", updateCount);
     }
-
-//    @Transactional
-//    public void syncCategories() {
-//        String syncType = "VALI_CATEGORIES";
-//        SyncLog syncLog = logHelper.createSyncLogSimple(syncType);
-//        long startTime = System.currentTimeMillis();
-//
-//        try {
-//            log.info("Starting categories synchronization");
-//
-//            List<CategoryRequestFromExternalDto> externalCategories = valiApiService.getCategories();
-//            Map<Long, Category> existingCategories = cachedLookupService.getAllCategoriesMap();
-//
-//            long created = 0, updated = 0, skipped = 0;
-//
-//            for (CategoryRequestFromExternalDto extCategory : externalCategories) {
-//                if (excludedCategories.contains(extCategory.getId())) {
-//                    skipped++;
-//                    continue;
-//                }
-//
-//                Category category = existingCategories.get(extCategory.getId());
-//
-//                if (category == null) {
-//                    category = createCategoryFromExternal(extCategory);
-//                    category = categoryRepository.save(category);
-//                    existingCategories.put(category.getExternalId(), category);
-//                    created++;
-//                } else {
-//                    updateCategoryFromExternal(category, extCategory);
-//                    category = categoryRepository.save(category);
-//                    existingCategories.put(category.getExternalId(), category);
-//                    updated++;
-//                }
-//            }
-//
-//            // Update parent relationships after all categories are saved
-//            updateCategoryParents(externalCategories, existingCategories);
-//
-//            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, externalCategories.size(),
-//                    created, updated, 0,
-//                    skipped > 0 ? String.format("Skipped %d excluded categories", skipped) : null,
-//                    startTime);
-//
-//        } catch (Exception e) {
-//            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
-//            log.error("Error during categories synchronization", e); // Log the full exception
-//            throw new RuntimeException(e);
-//        }
-//    }
-
-    @Transactional
-    public void syncParameters() {
-        String syncType = "VALI_PARAMETERS";
-        SyncLog syncLog = logHelper.createSyncLogSimple(syncType);
-        long startTime = System.currentTimeMillis();
-
-        try {
-            log.info("Starting Vali parameters synchronization with options");
-
-            List<Category> categories = categoryRepository.findAll();
-            long totalProcessed = 0, created = 0, updated = 0, errors = 0;
-
-            for (Category category : categories) {
-                try {
-                    Map<String, Parameter> existingParameters = cachedLookupService.getParametersByCategory(category);
-
-                    List<ParameterRequestDto> externalParameters = valiApiService.getParametersByCategory(category.getExternalId());
-
-                    if (externalParameters == null || externalParameters.isEmpty()) {
-                        log.debug("No parameters found for category: {}", category.getNameBg());
-                        continue;
-                    }
-
-                    List<Parameter> parametersToSave = new ArrayList<>();
-
-                    for (ParameterRequestDto extParam : externalParameters) {
-                        Parameter parameter = existingParameters.get(extParam.getExternalId().toString());
-
-                        if (parameter == null) {
-                            parameter = parameterRepository
-                                    .findByExternalIdAndCategoryId(extParam.getExternalId(), category.getId())
-                                    .orElseGet(() -> createParameterFromExternal(extParam, category));
-                            created++;
-                        } else {
-                            updateParameterFromExternal(parameter, extParam);
-                            updated++;
-                        }
-
-                        parametersToSave.add(parameter);
-                    }
-
-                    if (!parametersToSave.isEmpty()) {
-                        parameterRepository.saveAll(parametersToSave);
-
-                        for (int i = 0; i < parametersToSave.size(); i++) {
-                            Parameter parameter = parametersToSave.get(i);
-                            ParameterRequestDto extParam = externalParameters.get(i);
-
-                            try {
-                                if (parameter.getExternalId() != null && extParam.getOptions() != null) {
-                                    syncValiParameterOptions(parameter, extParam.getOptions());
-                                }
-                            } catch (Exception e) {
-                                log.error("Error syncing options for parameter {}: {}",
-                                        parameter.getNameBg(), e.getMessage(), e); // Log the full exception
-                                errors++;
-                            }
-                        }
-                    }
-
-                    totalProcessed += externalParameters.size();
-
-                } catch (Exception e) {
-                    log.error("Error syncing parameters for category {}: {}", category.getExternalId(), e.getMessage(), e); // Log the full exception
-                    errors++;
-                }
-            }
-
-            String message = String.format("Vali parameters processed: %d, created: %d, updated: %d",
-                    totalProcessed, created, updated);
-            if (errors > 0) {
-                message += String.format(", errors: %d", errors);
-            }
-
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, created, updated, errors,
-                    errors > 0 ? message : null, startTime);
-
-            log.info("Vali parameters synchronization completed - Processed: {}, Created: {}, Updated: {}, Errors: {}",
-                    totalProcessed, created, updated, errors);
-
-        } catch (Exception e) {
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
-            log.error("Error during Vali parameters synchronization", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Transactional
-    public void syncProducts() {
-        String syncType = "VALI_PRODUCTS";
-        log.info("Starting chunked products synchronization");
-        SyncLog syncLog = logHelper.createSyncLogSimple(syncType);
-        long startTime = System.currentTimeMillis();
-
-        long totalProcessed = 0, created = 0, updated = 0, errors = 0;
-
-        try {
-            // Load all manufacturers once
-            Map<Long, Manufacturer> manufacturersMap = manufacturerRepository.findAll()
-                    .stream()
-                    .filter(m -> m.getExternalId() != null)
-                    .collect(Collectors.toMap(
-                            Manufacturer::getExternalId,
-                            m -> m,
-                            (existing, duplicate) -> {
-                                log.warn("Duplicate manufacturer externalId: {}, IDs: {} and {}, keeping first",
-                                        existing.getExternalId(), existing.getId(), duplicate.getId());
-                                return existing;
-                            }
-                    ));
-
-            List<Category> categories = categoryRepository.findAll();
-            log.info("Found {} categories to process for products", categories.size());
-
-            for (Category category : categories) {
-                try {
-                    CategorySyncResult result = syncProductsByCategory(category, manufacturersMap); // Pass manufacturersMap
-                    totalProcessed += result.processed;
-                    created += result.created;
-                    updated += result.updated;
-                    errors += result.errors;
-
-                } catch (Exception e) {
-                    log.error("Error processing products for category {}: {}", category.getExternalId(), e.getMessage(), e); // Log the full exception
-                    errors++;
-                }
-            }
-
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, created, updated, errors,
-                    errors > 0 ? String.format("Completed with %d errors", errors) : null, startTime);
-            log.info("Products synchronization completed - Created: {}, Updated: {}, Errors: {}", created, updated, errors);
-
-        } catch (Exception e) {
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, totalProcessed, created, updated, errors, e.getMessage(), startTime);
-            log.error("Error during products synchronization", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void syncValiParameterOptions(Parameter parameter, List<ParameterOptionRequestDto> externalOptions) {
-        if (externalOptions == null || externalOptions.isEmpty()) {
-            return;
-        }
-
-        // Use externalId as key for existing options
-        Map<Long, ParameterOption> existingOptions = parameterOptionRepository
-                .findByParameterIdOrderByOrderAsc(parameter.getId()) // Corrected method name
-                .stream()
-                .filter(opt -> opt.getExternalId() != null)
-                .collect(Collectors.toMap(
-                        ParameterOption::getExternalId,
-                        o -> o,
-                        (existing, duplicate) -> {
-                            log.warn("Duplicate parameter option externalId '{}' for parameter {}, keeping first (IDs: {} and {})",
-                                    existing.getExternalId(), parameter.getNameBg(), existing.getId(), duplicate.getId());
-                            return existing;
-                        }
-                ));
-
-        List<ParameterOption> optionsToSave = new ArrayList<>();
-
-        for (ParameterOptionRequestDto extOption : externalOptions) {
-            ParameterOption option = existingOptions.get(extOption.getExternalId()); // Use external ID for lookup
-
-            if (option == null) {
-                option = createValiParameterOptionFromExternal(extOption, parameter);
-                if (option != null) {
-                    optionsToSave.add(option);
-                }
-            } else {
-                updateValiParameterOptionFromExternal(option, extOption);
-                optionsToSave.add(option); // Add to list for saveAll
-            }
-        }
-
-        if (!optionsToSave.isEmpty()) {
-            parameterOptionRepository.saveAll(optionsToSave);
-        }
-    }
-
-    private ParameterOption createValiParameterOptionFromExternal(ParameterOptionRequestDto extOption, Parameter parameter) {
-        try {
-            ParameterOption option = new ParameterOption();
-            option.setExternalId(extOption.getExternalId());
-            option.setParameter(parameter);
-            option.setOrder(extOption.getOrder());
-
-            if (extOption.getName() != null) {
-                extOption.getName().forEach(name -> {
-                    if ("bg".equals(name.getLanguageCode())) {
-                        option.setNameBg(name.getText());
-                    } else if ("en".equals(name.getLanguageCode())) {
-                        option.setNameEn(name.getText());
-                    }
-                });
-            }
-
-            return option;
-        } catch (Exception e) {
-            log.error("Error creating Vali parameter option with external ID {}: {}", extOption.getExternalId(), e.getMessage(), e); // Log the full exception
-            return null;
-        }
-    }
-
-    private void updateValiParameterOptionFromExternal(ParameterOption option, ParameterOptionRequestDto extOption) {
-        try {
-            option.setOrder(extOption.getOrder());
-
-            if (extOption.getName() != null) {
-                extOption.getName().forEach(name -> {
-                    if ("bg".equals(name.getLanguageCode())) {
-                        option.setNameBg(name.getText());
-                    } else if ("en".equals(name.getLanguageCode())) {
-                        option.setNameEn(name.getText());
-                    }
-                });
-            }
-        } catch (Exception e) {
-            log.error("Error updating Vali parameter option with ID {}: {}", option.getId(), e.getMessage(), e); // Log the full exception
-        }
-    }
-
-    // ===========================================
-    // PRODUCT PARAMETERS MAPPING
-    // ===========================================
-
-    private void setParametersToProduct(Product product, ProductRequestDto extProduct) {
-        if (extProduct.getParameters() == null || product.getCategory() == null) {
-            product.setProductParameters(new HashSet<>());
-            return;
-        }
-
-        Set<ProductParameter> newProductParameters = new HashSet<>();
-        int mappedCount = 0;
-        int notFoundCount = 0;
-
-        // Collect all external parameter and option IDs for this product
-        Set<Long> externalParameterIds = extProduct.getParameters().stream()
-                .map(ParameterValueRequestDto::getParameterId)
-                .collect(Collectors.toSet());
-        Set<Long> externalOptionIds = extProduct.getParameters().stream()
-                .map(ParameterValueRequestDto::getOptionId)
-                .collect(Collectors.toSet());
-
-        // Fetch all relevant parameters and options in bulk
-        Map<Long, Parameter> parametersByExternalId = parameterRepository
-                .findByExternalIdInAndCategoryId(externalParameterIds, product.getCategory().getId())
-                .stream()
-                .collect(Collectors.toMap(Parameter::getExternalId, p -> p));
-
-        Map<Long, ParameterOption> optionsByExternalId = parameterOptionRepository
-                .findByExternalIdInAndParameterCategoryId(externalOptionIds, product.getCategory().getId())
-                .stream()
-                .collect(Collectors.toMap(ParameterOption::getExternalId, o -> o));
-
-
-        for (ParameterValueRequestDto paramValue : extProduct.getParameters()) {
-            try {
-                Parameter parameter = parametersByExternalId.get(paramValue.getParameterId());
-                if (parameter == null) {
-                    log.warn("Parameter with external ID {} not found for category {} for product {}",
-                            paramValue.getParameterId(), product.getCategory().getId(), extProduct.getReferenceNumber());
-                    notFoundCount++;
-                    continue;
-                }
-
-                ParameterOption option = optionsByExternalId.get(paramValue.getOptionId());
-                if (option == null) {
-                    log.info("Parameter option with external ID {} not found for parameter {} (external ID) for product {}",
-                            paramValue.getOptionId(), paramValue.getParameterId(), extProduct.getReferenceNumber());
-                    notFoundCount++;
-                    continue;
-                }
-
-                // Validate that the option belongs to the parameter
-                if (!option.getParameter().getId().equals(parameter.getId())) {
-                    log.warn("Parameter option {} (external ID) does not belong to parameter {} (external ID) for product {}",
-                            paramValue.getOptionId(), paramValue.getParameterId(), extProduct.getReferenceNumber());
-                    notFoundCount++;
-                    continue;
-                }
-
-                ProductParameter pp = new ProductParameter();
-                pp.setProduct(product);
-                pp.setParameter(parameter);
-                pp.setParameterOption(option);
-                newProductParameters.add(pp);
-
-                mappedCount++;
-
-            } catch (Exception e) {
-                log.error("Error mapping parameter for product {}: {}", extProduct.getReferenceNumber(), e.getMessage(), e); // Log the full exception
-                notFoundCount++;
-            }
-        }
-
-        if (notFoundCount > 0) {
-            log.info("Finished mapping parameters for product {}. Mapped: {}, Not Found: {}",
-                    extProduct.getReferenceNumber(), mappedCount, notFoundCount);
-        }
-        product.setProductParameters(newProductParameters);
-    }
-
-    // ===========================================
-    // CATEGORY HELPERS
-    // ===========================================
 
     private Category createCategoryFromExternal(CategoryRequestFromExternalDto extCategory) {
         Category category = new Category();
@@ -618,32 +297,6 @@ public class ValiSyncService {
         return category;
     }
 
-    private void updateCategoryFromExternal(Category category, CategoryRequestFromExternalDto extCategory) {
-        category.setShow(extCategory.getShow());
-        category.setSortOrder(extCategory.getOrder());
-
-        String oldNameBg = category.getNameBg();
-        String oldNameEn = category.getNameEn();
-
-        if (extCategory.getName() != null) {
-            extCategory.getName().forEach(name -> {
-                if ("bg".equals(name.getLanguageCode())) {
-                    category.setNameBg(name.getText());
-                } else if ("en".equals(name.getLanguageCode())) {
-                    category.setNameEn(name.getText());
-                }
-            });
-        }
-
-        boolean nameChanged = !Objects.equals(category.getNameBg(), oldNameBg) ||
-                !Objects.equals(category.getNameEn(), oldNameEn); // Use Objects.equals for null-safe comparison
-
-        if (category.getSlug() == null || category.getSlug().isEmpty() || nameChanged) {
-            String baseName = category.getNameEn() != null ? category.getNameEn() : category.getNameBg();
-            category.setSlug(generateUniqueSlugForVali(baseName, category));
-        }
-    }
-
     private String generateUniqueSlugForVali(String categoryName, Category category) {
         if (categoryName == null || categoryName.trim().isEmpty()) {
             return "category-" + System.currentTimeMillis();
@@ -651,17 +304,8 @@ public class ValiSyncService {
 
         String baseSlug = syncHelper.createSlugFromName(categoryName);
 
-        // Use the optimized repository method
         if (!categoryRepository.existsBySlugAndIdNot(baseSlug, category.getId())) {
             return baseSlug;
-        }
-
-        String discriminator = syncHelper.extractDiscriminator(categoryName);
-        if (discriminator != null && !discriminator.isEmpty()) {
-            String discriminatedSlug = baseSlug + "-" + discriminator;
-            if (!categoryRepository.existsBySlugAndIdNot(discriminatedSlug, category.getId())) {
-                return discriminatedSlug;
-            }
         }
 
         int counter = 1;
@@ -674,71 +318,386 @@ public class ValiSyncService {
         return numberedSlug;
     }
 
-    private void updateCategoryParents(List<CategoryRequestFromExternalDto> externalCategories, Map<Long, Category> existingCategories) {
-        // Set parent references without saving - Hibernate will handle this on transaction commit
-        for (CategoryRequestFromExternalDto extCategory : externalCategories) {
-            if (extCategory.getParent() != null && extCategory.getParent() != 0) {
-                Category category = existingCategories.get(extCategory.getId());
-                Category parent = existingCategories.get(extCategory.getParent());
+    @Transactional
+    public void syncParameters() {
+        String syncType = "VALI_PARAMETERS";
+        SyncLog syncLog = logHelper.createSyncLogSimple(syncType);
+        long startTime = System.currentTimeMillis();
 
-                if (category != null && parent != null && !parent.equals(category)) {
-                    category.setParent(parent);
+        try {
+            log.info("=== Starting Parameters Synchronization V4.1 ===");
+            log.info("Strategy: Deduplicate by EXTERNAL_ID (not by name!)");
+
+            // ✅ Load existing parameters by EXTERNAL_ID
+            List<Parameter> allExistingParams = parameterRepository.findAll();
+
+            for (Parameter p : allExistingParams) {
+                if (p.getCategories() != null) {
+                    p.getCategories().size();
                 }
             }
+
+            Map<Long, Parameter> globalParamsCache = allExistingParams.stream()
+                    .filter(p -> p.getExternalId() != null)
+                    .collect(Collectors.toMap(
+                            Parameter::getExternalId,
+                            p -> p,
+                            (existing, duplicate) -> existing
+                    ));
+
+            // Fallback map: ALL params without externalId, keyed by normalised name_bg (cross-platform adoption)
+            Map<String, Parameter> allParamsByNameBg = allExistingParams.stream()
+                    .filter(p -> p.getExternalId() == null)
+                    .filter(p -> p.getNameBg() != null)
+                    .collect(Collectors.toMap(
+                            p -> p.getNameBg().toLowerCase().trim(),
+                            p -> p,
+                            (existing, duplicate) -> existing
+                    ));
+
+            // Guard: categoryId → (normalizedNameBg → parameterId) — prevents duplicate param names per category
+            Map<Long, Map<String, Long>> paramNamesByCategory = new HashMap<>();
+            for (Parameter p : allExistingParams) {
+                if (p.getNameBg() == null || p.getCategories() == null) continue;
+                String norm = p.getNameBg().toLowerCase().trim();
+                for (Category cat : p.getCategories()) {
+                    if (cat.getId() != null) {
+                        paramNamesByCategory.computeIfAbsent(cat.getId(), k -> new HashMap<>())
+                                .put(norm, p.getId());
+                    }
+                }
+            }
+
+            log.info("Loaded {} existing parameters from database", globalParamsCache.size());
+
+            // ✅ Load existing options by EXTERNAL_ID
+            List<ParameterOption> allExistingOptions = parameterOptionRepository.findAll();
+
+            Map<String, ParameterOption> globalOptionsCache = allExistingOptions.stream()
+                    .filter(o -> o.getExternalId() != null && o.getExternalId() != 0)
+                    .filter(o -> o.getParameter() != null && o.getParameter().getExternalId() != null)
+                    .collect(Collectors.toMap(
+                            o -> o.getParameter().getExternalId() + "_" + o.getExternalId(),
+                            o -> o,
+                            (existing, duplicate) -> existing
+                    ));
+
+            log.info("Loaded {} existing options from database", globalOptionsCache.size());
+
+            // ✅ Get only Vali categories with externalId
+            List<Category> valiCategories = categoryRepository.findAll().stream()
+                    .filter(cat -> cat.getExternalId() != null)
+                    .filter(cat -> cat.getPlatform() == Platform.VALI)
+                    .toList();
+
+            log.info("Processing parameters from {} Vali categories", valiCategories.size());
+
+            // ✅ Collect parameters data by EXTERNAL_ID
+            Map<Long, ParameterData> allParametersData = new HashMap<>();
+
+            int categoryCounter = 0;
+            int failedCategories = 0;
+            // Categories Vali has removed (it rejects the id): nothing to refresh, so not a failed run.
+            List<Long> goneCategories = new ArrayList<>();
+            for (Category category : valiCategories) {
+                categoryCounter++;
+
+                try {
+                    List<ParameterRequestDto> apiParams = valiApiService
+                            .getParametersByCategory(category.getExternalId());
+
+                    if (apiParams == null || apiParams.isEmpty()) {
+                        continue;
+                    }
+
+                    log.debug("[{}/{}] Category '{}': {} parameters from API",
+                            categoryCounter, valiCategories.size(), category.getNameBg(), apiParams.size());
+
+                    for (ParameterRequestDto apiParam : apiParams) {
+                        Long externalId = apiParam.getExternalId();
+
+                        if (externalId == null || externalId == 0) {
+                            log.warn("Parameter without externalId in category {}: {}",
+                                    category.getNameBg(), extractNameBg(apiParam));
+                            continue;
+                        }
+
+                        ParameterData paramData = allParametersData.computeIfAbsent(
+                                externalId,
+                                k -> new ParameterData(apiParam, new HashSet<>())
+                        );
+
+                        paramData.categories.add(category);
+                    }
+
+                } catch (SupplierCategoryGoneException e) {
+                    goneCategories.add(category.getExternalId());
+                    log.warn("Vali no longer has category {} ('{}') — its parameters are kept as they are",
+                            category.getExternalId(), category.getNameBg());
+                } catch (Exception e) {
+                    failedCategories++;
+                    log.error("Error fetching parameters for category {}: {}",
+                            category.getExternalId(), e.getMessage());
+                }
+            }
+
+            if (failedCategories > 0) {
+                log.error(Markers.CRITICAL, "Vali parameters: {} of {} category fetches failed — "
+                        + "their parameters were not refreshed this run", failedCategories, valiCategories.size());
+            }
+
+            log.info("Collected {} unique parameters (by externalId) across all categories",
+                    allParametersData.size());
+
+            long created = 0, reused = 0, optionsCreated = 0;
+
+            for (Map.Entry<Long, ParameterData> entry : allParametersData.entrySet()) {
+                Long externalId = entry.getKey();
+                ParameterData paramData = entry.getValue();
+
+                try {
+                    Parameter parameter = globalParamsCache.get(externalId);
+
+                    if (parameter == null) {
+                        String nameBgLower = extractNameBg(paramData.apiParam) != null
+                                ? extractNameBg(paramData.apiParam).toLowerCase().trim() : null;
+                        Parameter orphanByName = nameBgLower != null
+                                ? allParamsByNameBg.remove(nameBgLower) : null;
+
+                        if (orphanByName != null) {
+                            orphanByName.setExternalId(externalId);
+                            // Assign new categories through uniqueness guard
+                            Set<Category> existCats = orphanByName.getCategories();
+                            if (existCats == null) { existCats = new HashSet<>(); orphanByName.setCategories(existCats); }
+                            Set<Long> existCatIds = existCats.stream().map(Category::getId).collect(Collectors.toSet());
+                            for (Category c : paramData.categories) {
+                                if (!existCatIds.contains(c.getId()) &&
+                                        canAddCategoryToParam(orphanByName.getId(), orphanByName.getNameBg(), c, paramNamesByCategory)) {
+                                    existCats.add(c);
+                                    registerParamInCategory(orphanByName.getId(), orphanByName.getNameBg(), c, paramNamesByCategory);
+                                }
+                            }
+                            parameter = parameterRepository.save(orphanByName);
+                            globalParamsCache.put(externalId, parameter);
+                            reused++;
+                            log.debug("↑ Adopted parameter '{}' (assigned externalId={})",
+                                    parameter.getNameBg(), externalId);
+                        } else {
+                            parameter = createParameterFromExternal(paramData.apiParam);
+                            // Filter categories through uniqueness guard before saving
+                            Set<Category> validCats = new HashSet<>();
+                            String newParamNameBg = extractNameBg(paramData.apiParam);
+                            for (Category c : paramData.categories) {
+                                if (canAddCategoryToParam(null, newParamNameBg, c, paramNamesByCategory)) {
+                                    validCats.add(c);
+                                }
+                            }
+                            parameter.setCategories(validCats);
+                            parameter = parameterRepository.save(parameter);
+                            for (Category c : parameter.getCategories()) {
+                                registerParamInCategory(parameter.getId(), parameter.getNameBg(), c, paramNamesByCategory);
+                            }
+                            globalParamsCache.put(externalId, parameter);
+                            created++;
+                            log.debug("✓ Created parameter: '{}' (externalId={}) for {} categories",
+                                    parameter.getNameBg(), externalId, paramData.categories.size());
+                        }
+                    } else {
+                        boolean updated = false;
+
+                        if (!"ADMIN".equalsIgnoreCase(parameter.getLastModifiedBy())) {
+                            String apiNameBg = extractNameBg(paramData.apiParam);
+                            String apiNameEn = extractNameEn(paramData.apiParam);
+                            if (apiNameBg != null && !apiNameBg.equals(parameter.getNameBg())) {
+                                parameter.setNameBg(apiNameBg);
+                                updated = true;
+                            }
+                            if (apiNameEn != null && !apiNameEn.equals(parameter.getNameEn())) {
+                                parameter.setNameEn(apiNameEn);
+                                updated = true;
+                            }
+                        }
+
+                        Set<Category> existingCategories = parameter.getCategories();
+                        if (existingCategories == null) {
+                            existingCategories = new HashSet<>();
+                            parameter.setCategories(existingCategories);
+                        }
+
+                        Set<Long> existingCategoryIds = existingCategories.stream()
+                                .map(Category::getId)
+                                .collect(Collectors.toSet());
+
+                        for (Category newCat : paramData.categories) {
+                            if (!existingCategoryIds.contains(newCat.getId()) &&
+                                    canAddCategoryToParam(parameter.getId(), parameter.getNameBg(), newCat, paramNamesByCategory)) {
+                                existingCategories.add(newCat);
+                                registerParamInCategory(parameter.getId(), parameter.getNameBg(), newCat, paramNamesByCategory);
+                                updated = true;
+                            }
+                        }
+
+                        if (updated) {
+                            parameterRepository.save(parameter);
+                        }
+
+                        reused++;
+                    }
+
+                    if (paramData.apiParam.getOptions() != null &&
+                            !paramData.apiParam.getOptions().isEmpty()) {
+
+                        int optionsForThisParam = createOptionsForParameter(
+                                parameter,
+                                paramData.apiParam.getOptions(),
+                                globalOptionsCache
+                        );
+
+                        optionsCreated += optionsForThisParam;
+                    }
+
+                } catch (Exception e) {
+                    log.error("Error processing parameter externalId={}: {}", externalId, e.getMessage(), e);
+                }
+            }
+
+            // Parameters missing from this run are kept on purpose. A partial fetch used to delete them
+            // with a cascade to options, product values and category links (2026-06-02: 1169 rows).
+            Set<Long> currentValiExternalIds = allParametersData.keySet();
+            long stale = allExistingParams.stream()
+                    .filter(p -> p.getPlatform() == Platform.VALI)
+                    .filter(p -> p.getExternalId() != null)
+                    .filter(p -> !currentValiExternalIds.contains(p.getExternalId()))
+                    .count();
+
+            logHelper.updateSyncLogSimple(syncLog, failedCategories > 0 ? LOG_STATUS_FAILED : LOG_STATUS_SUCCESS,
+                    allParametersData.size(), created, 0, failedCategories,
+                    String.format("Created: %d, Reused: %d, Options: %d, Stale (kept): %d, Failed categories: %d",
+                            created, reused, optionsCreated, stale, failedCategories)
+                            + (goneCategories.isEmpty() ? "" : ", Removed by Vali: " + goneCategories),
+                    startTime);
+
+            log.info("=== Parameters Sync V4.1 Completed ===");
+            log.info("   Unique parameters: {}", allParametersData.size());
+            log.info("   Created: {}, Reused: {}", created, reused);
+            log.info("   Options created: {}", optionsCreated);
+            log.info("   Stale parameters kept: {}, failed category fetches: {}", stale, failedCategories);
+
+        } catch (Exception e) {
+            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
+            log.error("Error during parameters synchronization", e);
+            throw new RuntimeException(e);
         }
     }
 
-    // ===========================================
-    // MANUFACTURER HELPERS
-    // ===========================================
+    private int createOptionsForParameter(Parameter parameter,
+                                          List<ParameterOptionRequestDto> apiOptions,
+                                          Map<String, ParameterOption> globalOptionsCache) {
+        int created = 0;
 
-    private Manufacturer createManufacturerFromExternal(ManufacturerRequestDto extManufacturer) {
-        Manufacturer manufacturer = new Manufacturer();
-        manufacturer.setExternalId(extManufacturer.getId());
-        manufacturer.setName(extManufacturer.getName());
-        manufacturer.setPlatform(Platform.VALI);
+        // Every Vali option keeps its own row, keyed by its external id. Merging same-name options here
+        // was in-memory only: product sync resolves options by external id from the DB, so the product
+        // values of every merged option were silently dropped. Same-name values are unified in the
+        // canonical filter layer instead.
+        for (ParameterOptionRequestDto apiOption : apiOptions) {
+            try {
+                Long externalId = apiOption.getExternalId();
 
-        if (extManufacturer.getInformation() != null) {
-            manufacturer.setInformationName(extManufacturer.getInformation().getName());
-            manufacturer.setInformationEmail(extManufacturer.getInformation().getEmail());
-            manufacturer.setInformationAddress(extManufacturer.getInformation().getAddress());
+                if (externalId == null || externalId == 0) {
+                    continue;
+                }
+
+                String optKey = parameter.getExternalId() + "_" + externalId;
+
+                if (globalOptionsCache.containsKey(optKey)) {
+                    ParameterOption existing = globalOptionsCache.get(optKey);
+                    String currentNameBg = extractOptionNameBg(apiOption);
+                    if (currentNameBg != null && !currentNameBg.equals(existing.getNameBg())) {
+                        existing.setNameBg(currentNameBg);
+                        String currentNameEn = extractOptionNameEn(apiOption);
+                        if (currentNameEn != null) existing.setNameEn(currentNameEn);
+                        parameterOptionRepository.save(existing);
+                    }
+                    continue;
+                }
+
+                String nameBg = extractOptionNameBg(apiOption);
+                if (nameBg == null || nameBg.isEmpty()) {
+                    continue;
+                }
+
+                ParameterOption option = new ParameterOption();
+                option.setParameter(parameter);
+                option.setExternalId(externalId);
+                option.setNameBg(nameBg);
+                option.setNameEn(extractOptionNameEn(apiOption));
+                option.setOrder(apiOption.getOrder() != null ? apiOption.getOrder() : 0);
+
+                option = parameterOptionRepository.save(option);
+                globalOptionsCache.put(optKey, option);
+                created++;
+
+            } catch (Exception e) {
+                log.error("Error creating option for parameter {}: {}", parameter.getNameBg(), e.getMessage());
+            }
         }
 
-        if (extManufacturer.getEuRepresentative() != null) {
-            manufacturer.setEuRepresentativeName(extManufacturer.getEuRepresentative().getName());
-            manufacturer.setEuRepresentativeEmail(extManufacturer.getEuRepresentative().getEmail());
-            manufacturer.setEuRepresentativeAddress(extManufacturer.getEuRepresentative().getAddress());
-        }
-
-        return manufacturer;
+        return created;
     }
 
-    private void updateManufacturerFromExternal(Manufacturer manufacturer, ManufacturerRequestDto extManufacturer) {
-        manufacturer.setName(extManufacturer.getName());
+    private static class ParameterData {
+        ParameterRequestDto apiParam;
+        Set<Category> categories;
 
-        if (extManufacturer.getInformation() != null) {
-            manufacturer.setInformationName(extManufacturer.getInformation().getName());
-            manufacturer.setInformationEmail(extManufacturer.getInformation().getEmail());
-            manufacturer.setInformationAddress(extManufacturer.getInformation().getAddress());
-        }
-
-        if (extManufacturer.getEuRepresentative() != null) {
-            manufacturer.setEuRepresentativeName(extManufacturer.getEuRepresentative().getName());
-            manufacturer.setEuRepresentativeEmail(extManufacturer.getEuRepresentative().getEmail());
-            manufacturer.setEuRepresentativeAddress(extManufacturer.getEuRepresentative().getAddress());
+        ParameterData(ParameterRequestDto apiParam, Set<Category> categories) {
+            this.apiParam = apiParam;
+            this.categories = categories;
         }
     }
 
-    // ===========================================
-    // PARAMETER HELPERS
-    // ===========================================
+    private String extractNameBg(ParameterRequestDto param) {
+        if (param.getName() == null) return null;
+        return param.getName().stream()
+                .filter(n -> "bg".equals(n.getLanguageCode()))
+                .map(n -> n.getText())
+                .findFirst()
+                .orElse(null);
+    }
 
-    private Parameter createParameterFromExternal(ParameterRequestDto extParameter, Category category) {
+    private String extractNameEn(ParameterRequestDto param) {
+        if (param.getName() == null) return null;
+        return param.getName().stream()
+                .filter(n -> "en".equals(n.getLanguageCode()))
+                .map(n -> n.getText())
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String extractOptionNameBg(ParameterOptionRequestDto option) {
+        if (option.getName() == null) return null;
+        return option.getName().stream()
+                .filter(n -> "bg".equals(n.getLanguageCode()))
+                .map(n -> n.getText())
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String extractOptionNameEn(ParameterOptionRequestDto option) {
+        if (option.getName() == null) return null;
+        return option.getName().stream()
+                .filter(n -> "en".equals(n.getLanguageCode()))
+                .map(n -> n.getText())
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Parameter createParameterFromExternal(ParameterRequestDto extParameter) {
         Parameter parameter = new Parameter();
         parameter.setExternalId(extParameter.getExternalId());
-        parameter.setCategory(category);
         parameter.setOrder(extParameter.getOrder());
         parameter.setPlatform(Platform.VALI);
+        parameter.setCategories(new HashSet<>());
+        parameter.setCreatedBy("system");
 
         if (extParameter.getName() != null) {
             extParameter.getName().forEach(name -> {
@@ -753,25 +712,122 @@ public class ValiSyncService {
         return parameter;
     }
 
-    private void updateParameterFromExternal(Parameter parameter, ParameterRequestDto extParameter) {
-        parameter.setOrder(extParameter.getOrder());
+    @Transactional
+    public void syncProducts() {
+        String syncType = "VALI_PRODUCTS";
+        log.info("Starting products synchronization");
+        SyncLog syncLog = logHelper.createSyncLogSimple(syncType);
+        long startTime = System.currentTimeMillis();
 
-        if (extParameter.getName() != null) {
-            extParameter.getName().forEach(name -> {
-                if ("bg".equals(name.getLanguageCode())) {
-                    parameter.setNameBg(name.getText());
-                } else if ("en".equals(name.getLanguageCode())) {
-                    parameter.setNameEn(name.getText());
+        long totalProcessed = 0, created = 0, updated = 0, errors = 0;
+
+        try {
+            Map<Long, Manufacturer> manufacturersMap = manufacturerRepository.findAll()
+                    .stream()
+                    .filter(m -> m.getExternalId() != null)
+                    .collect(Collectors.toMap(
+                            Manufacturer::getExternalId,
+                            m -> m,
+                            (existing, duplicate) -> existing
+                    ));
+
+            log.info("Loaded {} manufacturers", manufacturersMap.size());
+
+            if (manufacturersMap.isEmpty()) {
+                log.error("⚠️ NO MANUFACTURERS FOUND! Run syncManufacturers() first!");
+                logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0,
+                        "No manufacturers found", startTime);
+                return;
+            }
+
+            Map<Long, Parameter> globalParametersCache = parameterRepository.findAll()
+                    .stream()
+                    .filter(p -> p.getExternalId() != null)
+                    .collect(Collectors.toMap(
+                            Parameter::getExternalId,
+                            p -> p,
+                            (existing, duplicate) -> existing
+                    ));
+
+            log.info("Loaded {} parameters globally", globalParametersCache.size());
+
+            Map<String, ParameterOption> globalOptionsCache = parameterOptionRepository.findAll()
+                    .stream()
+                    .filter(o -> o.getExternalId() != null && o.getExternalId() != 0)
+                    .filter(o -> o.getParameter() != null && o.getParameter().getExternalId() != null)
+                    .collect(Collectors.toMap(
+                            o -> o.getParameter().getExternalId() + "_" + o.getExternalId(),
+                            o -> o,
+                            (existing, duplicate) -> existing
+                    ));
+
+            log.info("Loaded {} options globally", globalOptionsCache.size());
+
+            List<Category> categories = categoryRepository.findAll();
+            log.info("Found {} categories to process", categories.size());
+
+            // Tracks every Vali product externalId seen in the API response this run.
+            // Used at the end to detect products no longer returned by the API.
+            Set<Long> seenExternalIds = new HashSet<>();
+
+            int categoryCounter = 0;
+
+            for (Category category : categories) {
+                categoryCounter++;
+
+                if (category.getExternalId() == null || category.getPlatform() != Platform.VALI) {
+                    continue;
                 }
-            });
+
+                try {
+                    CategorySyncResult result = syncProductsByCategory(
+                            category,
+                            manufacturersMap,
+                            globalParametersCache,
+                            globalOptionsCache,
+                            seenExternalIds
+                    );
+
+                    totalProcessed += result.processed;
+                    created += result.created;
+                    updated += result.updated;
+                    errors += result.errors;
+
+                } catch (Exception e) {
+                    log.error("Error processing products for category {}: {}",
+                            category.getExternalId(), e.getMessage(), e);
+                    errors++;
+                }
+            }
+
+            // Mark VALI products absent from API as NOT_AVAILABLE
+            long markedUnavailable = markUnseenAsUnavailable(seenExternalIds);
+
+            int deduplicated = productRepository.deduplicateCrossPlatformBySku();
+            log.info("Cross-platform deduplication: hidden {} higher-priced duplicates", deduplicated);
+
+            String note = String.format("MarkedUnavailable: %d%s",
+                    markedUnavailable, errors > 0 ? ", Errors: " + errors : "");
+            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, created, updated, errors,
+                    note, startTime);
+
+            log.info("=== Products Sync Completed ===");
+            log.info("   Total: {}, Created: {}, Updated: {}, MarkedUnavailable: {}, Deduplicated: {}, Errors: {}",
+                    totalProcessed, created, updated, markedUnavailable, deduplicated, errors);
+
+        } catch (Exception e) {
+            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, totalProcessed, created, updated, errors,
+                    e.getMessage(), startTime);
+            log.error("Error during products synchronization", e);
+            throw new RuntimeException(e);
         }
     }
 
-    // ===========================================
-    // PRODUCT SYNC BY CATEGORY
-    // ===========================================
-
-    private CategorySyncResult syncProductsByCategory(Category category, Map<Long, Manufacturer> manufacturersMap) { // Added manufacturersMap
+    private CategorySyncResult syncProductsByCategory(Category category,
+                                                      Map<Long, Manufacturer> manufacturersMap,
+                                                      Map<Long, Parameter> globalParametersCache,
+                                                      Map<String, ParameterOption> globalOptionsCache,
+                                                      Set<Long> seenExternalIds) {
         long totalProcessed = 0, created = 0, updated = 0, errors = 0;
 
         try {
@@ -787,7 +843,15 @@ public class ValiSyncService {
                 List<ProductRequestDto> chunk = chunks.get(i);
 
                 try {
-                    ChunkResult result = processProductsChunk(chunk, manufacturersMap, category); // Pass category
+                    ChunkResult result = processProductsChunk(
+                            chunk,
+                            manufacturersMap,
+                            category,
+                            globalParametersCache,
+                            globalOptionsCache,
+                            seenExternalIds
+                    );
+
                     totalProcessed += result.processed;
                     created += result.created;
                     updated += result.updated;
@@ -799,144 +863,296 @@ public class ValiSyncService {
                     }
 
                 } catch (Exception e) {
-                    log.error("Error processing product chunk for category {}: {}", category.getExternalId(), e.getMessage(), e); // Log the full exception
+                    log.error("Error processing product chunk {}/{} for category {}: {}",
+                            i + 1, chunks.size(), category.getExternalId(), e.getMessage(), e);
                     errors += chunk.size();
                 }
             }
 
         } catch (Exception e) {
-            log.error("Error getting products for category {}: {}", category.getExternalId(), e.getMessage(), e); // Log the full exception
+            log.error("Error getting products for category {}: {}", category.getExternalId(), e.getMessage(), e);
             errors++;
         }
 
         return new CategorySyncResult(totalProcessed, created, updated, errors);
     }
 
-    private ChunkResult processProductsChunk(List<ProductRequestDto> products, Map<Long, Manufacturer> manufacturersMap, Category category) {
+    private ChunkResult processProductsChunk(List<ProductRequestDto> products,
+                                             Map<Long, Manufacturer> manufacturersMap,
+                                             Category category,
+                                             Map<Long, Parameter> globalParametersCache,
+                                             Map<String, ParameterOption> globalOptionsCache,
+                                             Set<Long> seenExternalIds) {
         long processed = 0, created = 0, updated = 0, errors = 0;
-        long chunkStartTime = System.currentTimeMillis();
 
-        // Collect all external product IDs in the current chunk
         Set<Long> externalProductIdsInChunk = products.stream()
                 .map(ProductRequestDto::getId)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        // Fetch existing products from the database in bulk
+        // Register every product returned by the API as "seen" this sync run
+        seenExternalIds.addAll(externalProductIdsInChunk);
+
         Map<Long, Product> existingProductsMap = productRepository.findByExternalIdIn(externalProductIdsInChunk)
                 .stream()
                 .collect(Collectors.toMap(Product::getExternalId, p -> p));
+
+        // Fallback: products that exist in DB by referenceNumber but have no externalId yet
+        Set<String> unmatchedRefNums = products.stream()
+                .filter(p -> !existingProductsMap.containsKey(p.getId()) && p.getReferenceNumber() != null)
+                .map(ProductRequestDto::getReferenceNumber)
+                .collect(Collectors.toSet());
+        Map<String, Product> existingByRefNum = unmatchedRefNums.isEmpty()
+                ? Collections.emptyMap()
+                : productRepository.findByReferenceNumberIn(unmatchedRefNums)
+                        .stream()
+                        .collect(Collectors.toMap(Product::getReferenceNumber, p -> p));
 
         List<Product> productsToSave = new ArrayList<>();
 
         for (ProductRequestDto extProduct : products) {
             try {
-                Product product;
-                // Extract the specific manufacturer for the current product
                 Manufacturer manufacturer = manufacturersMap.get(extProduct.getManufacturerId());
+                if (manufacturer == null) {
+                    log.warn("Manufacturer {} not found for product {}, skipping",
+                            extProduct.getManufacturerId(), extProduct.getReferenceNumber());
+                    errors++;
+                    continue;
+                }
+
+                Product product;
 
                 if (existingProductsMap.containsKey(extProduct.getId())) {
                     product = existingProductsMap.get(extProduct.getId());
-                    updateProductFieldsFromExternal(product, extProduct, manufacturer, category); // Pass specific manufacturer
+                    updateProductFieldsFromExternal(product, extProduct, manufacturer, category,
+                            globalParametersCache, globalOptionsCache);
+                    updated++;
+                } else if (existingByRefNum.containsKey(extProduct.getReferenceNumber())) {
+                    product = existingByRefNum.get(extProduct.getReferenceNumber());
+                    // Backfill externalId so future syncs find it correctly
+                    if (product.getExternalId() == null) {
+                        product.setExternalId(extProduct.getId());
+                        log.info("Backfilling externalId={} for product referenceNumber={}",
+                                extProduct.getId(), extProduct.getReferenceNumber());
+                    }
+                    updateProductFieldsFromExternal(product, extProduct, manufacturer, category,
+                            globalParametersCache, globalOptionsCache);
                     updated++;
                 } else {
                     product = new Product();
-                    product.setId(null); // Ensure it's a new entity
-                    updateProductFieldsFromExternal(product, extProduct, manufacturer, category); // Pass specific manufacturer
+                    product.setId(null);
+                    updateProductFieldsFromExternal(product, extProduct, manufacturer, category,
+                            globalParametersCache, globalOptionsCache);
                     created++;
                 }
+
                 productsToSave.add(product);
                 processed++;
 
-                // Check for chunk duration to prevent very long transactions
-                if ((System.currentTimeMillis() - chunkStartTime) > (maxChunkDurationMinutes * 60 * 1000)) {
-                    log.warn("Chunk processing for category {} exceeded max duration ({} minutes). Breaking early.",
-                            category.getExternalId(), maxChunkDurationMinutes);
-                    break;
-                }
-
             } catch (Exception e) {
                 errors++;
-                log.error("Error processing product with external ID {}: {}", extProduct.getId(), e.getMessage(), e); // Log the full exception
+                log.error("Error processing product {}: {}", extProduct.getReferenceNumber(), e.getMessage());
             }
         }
 
         if (!productsToSave.isEmpty()) {
-            productRepository.saveAll(productsToSave);
+            try {
+                productRepository.saveAll(productsToSave);
+            } catch (Exception e) {
+                log.error("Error saving products batch: {}", e.getMessage(), e);
+                errors += productsToSave.size();
+            }
         }
 
-        entityManager.flush();
-        entityManager.clear();
+        try {
+            entityManager.flush();
+        } catch (Exception e) {
+            log.error("Flush failed for chunk — session will be cleared: {}", e.getMessage());
+            errors += productsToSave.size();
+        } finally {
+            entityManager.clear();
+        }
 
         return new ChunkResult(processed, created, updated, errors);
     }
 
-    // ===========================================
-    // PRODUCT HELPERS
-    // ===========================================
+    private void updateProductFieldsFromExternal(Product product, ProductRequestDto extProduct,
+                                                 Manufacturer manufacturer, Category category,
+                                                 Map<Long, Parameter> globalParametersCache,
+                                                 Map<String, ParameterOption> globalOptionsCache) {
+        boolean isNew = (product.getId() == null);
 
-    // Removed createProductFromExternal and updateProductFromExternal as they are merged into processProductsChunk
-    // and updateProductFieldsFromExternal now handles both creation and update logic.
+        if (isNew) {
+            product.setExternalId(extProduct.getId());
+            product.setWorkflowId(extProduct.getIdWF());
+            product.setReferenceNumber(extProduct.getReferenceNumber());
+            product.setModel(extProduct.getModel());
+            product.setSku(extProduct.getModel()); // manufacturer part number (e.g. SA400S37/240G)
+            product.setBarcode(extProduct.getBarcode());
+            product.setManufacturer(manufacturer);
+            product.setCategory(category);
+            product.setWarranty(extProduct.getWarranty());
+            product.setWeight(extProduct.getWeight());
+            product.setPlatform(Platform.VALI);
+            product.setCreatedBy("system");
+        } else if (product.getSku() == null && extProduct.getModel() != null && !extProduct.getModel().isBlank()) {
+            // Backfill SKU for existing products that were created before this field was populated
+            product.setSku(extProduct.getModel());
+        }
 
-    private void updateProductFieldsFromExternal(Product product, ProductRequestDto extProduct, Manufacturer manufacturer, Category category) {
-        product.setExternalId(extProduct.getId());
-        product.setWorkflowId(extProduct.getIdWF());
-        product.setReferenceNumber(extProduct.getReferenceNumber());
-        product.setModel(extProduct.getModel());
-        product.setBarcode(extProduct.getBarcode());
-        product.setManufacturer(manufacturer);
-        product.setStatus(ProductStatus.fromCode(extProduct.getStatus()));
+        setNamesToProduct(product, extProduct);
+        setDescriptionToProduct(product, extProduct);
+        setImagesToProduct(product, extProduct);
+
+        try {
+            setParametersToProduct(product, extProduct, globalParametersCache, globalOptionsCache);
+        } catch (Exception e) {
+            log.error("Error setting parameters for product {}: {}", extProduct.getReferenceNumber(), e.getMessage());
+            if (isNew) {
+                product.setProductParameters(new HashSet<>());
+            }
+        }
+
+        setFlagsToProduct(product, extProduct);
+        ProductStatus resolvedStatus = ProductStatus.fromCode(extProduct.getStatus());
+        product.setStatus(resolvedStatus);
         product.setPriceClient(extProduct.getPriceClient());
         product.setPricePartner(extProduct.getPricePartner());
         product.setPricePromo(extProduct.getPricePromo());
         product.setPriceClientPromo(extProduct.getPriceClientPromo());
-        product.setShow(extProduct.getShow());
-        product.setWarranty(extProduct.getWarranty());
-        product.setWeight(extProduct.getWeight());
-        product.setPlatform(Platform.VALI);
-
-        // Set category directly from the passed category object
-        product.setCategory(category);
-
-        setImagesToProduct(product, extProduct);
-        setNamesToProduct(product, extProduct);
-        setDescriptionToProduct(product, extProduct);
-        setParametersToProduct(product, extProduct);
         product.calculateFinalPrice();
+
+        boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
+        // manuallyHidden wins over the feed: an admin who hid a product should not see
+        // it reappear on the next sync (SEARCH_AUDIT_PLAN.md phase 1).
+        product.setShow(!Boolean.TRUE.equals(product.getManuallyHidden())
+                && Boolean.TRUE.equals(extProduct.getShow())
+                && hasValidPrice
+                && resolvedStatus == ProductStatus.AVAILABLE);
     }
 
-    private void setCategoryToProduct(Product product, ProductRequestDto extProduct) {
-        // This method is no longer needed as category is passed directly to updateProductFieldsFromExternal
-        // and set on the product.
-        // Keeping it for now, but it will be removed or refactored if not used elsewhere.
-        if (extProduct.getCategories() == null || extProduct.getCategories().isEmpty()) {
+    private void setParametersToProduct(Product product, ProductRequestDto extProduct,
+                                        Map<Long, Parameter> globalParametersCache,
+                                        Map<String, ParameterOption> globalOptionsCache) {
+        Set<ProductParameter> currentParams = product.getProductParameters();
+        if (currentParams == null) {
+            currentParams = new HashSet<>();
+            product.setProductParameters(currentParams);
+        }
+
+        if (extProduct.getParameters() == null || product.getCategory() == null) {
+            currentParams.clear();
             return;
         }
 
-        Long categoryId = extProduct.getCategories().get(0).getId();
-        Optional<Category> categoryOpt = categoryRepository.findByExternalId(categoryId);
+        // Build the target set from the API: key=(parameterId-optionId)
+        Map<String, Parameter> targetParams = new java.util.LinkedHashMap<>();
+        Map<String, ParameterOption> targetOptions = new java.util.LinkedHashMap<>();
+        int notFoundCount = 0;
 
-        if (categoryOpt.isPresent()) {
-            product.setCategory(categoryOpt.get());
-        } else {
-            log.warn("Category with external ID {} not found for product {}",
-                    categoryId, extProduct.getReferenceNumber());
+        for (ParameterValueRequestDto pv : extProduct.getParameters()) {
+            if (pv.getOptionId() == null || pv.getOptionId() == 0) continue;
+
+            Parameter parameter = globalParametersCache.get(pv.getParameterId());
+            if (parameter == null) { notFoundCount++; continue; }
+
+            ParameterOption option = globalOptionsCache.get(pv.getParameterId() + "_" + pv.getOptionId());
+            if (option == null) { notFoundCount++; continue; }
+
+            String key = parameter.getId() + "-" + option.getId();
+            targetParams.put(key, parameter);
+            targetOptions.put(key, option);
+        }
+
+        // Remove non-manual entries NOT present in API target → Hibernate will DELETE them
+        // Entries that ARE in the target are kept (avoids DELETE+INSERT of the same row)
+        currentParams.removeIf(pp -> {
+            if (isManualParameterForVali(pp)) return false;
+            if (pp.getParameter() == null || pp.getParameterOption() == null) return true;
+            String key = pp.getParameter().getId() + "-" + pp.getParameterOption().getId();
+            return !targetParams.containsKey(key);
+        });
+
+        // Collect keys already in the collection after cleanup
+        Set<String> existingKeys = currentParams.stream()
+                .filter(pp -> pp.getParameter() != null && pp.getParameterOption() != null)
+                .map(pp -> pp.getParameter().getId() + "-" + pp.getParameterOption().getId())
+                .collect(Collectors.toSet());
+
+        // Add API entries not already present → Hibernate will INSERT them
+        for (String key : targetParams.keySet()) {
+            if (existingKeys.contains(key)) continue;
+            ProductParameter pp = new ProductParameter();
+            pp.setProduct(product);
+            pp.setParameter(targetParams.get(key));
+            pp.setParameterOption(targetOptions.get(key));
+            currentParams.add(pp);
+        }
+
+        if (notFoundCount > 0) {
+            log.warn("Product {}: {} params processed, {} not found",
+                    extProduct.getReferenceNumber(), currentParams.size(), notFoundCount);
         }
     }
 
-    private static void setImagesToProduct(Product product, ProductRequestDto extProduct) {
-        if (extProduct.getImages() != null && !extProduct.getImages().isEmpty()) {
-            product.setPrimaryImageUrl(extProduct.getImages().get(0).getHref());
+    private boolean canAddCategoryToParam(Long paramId, String nameBg, Category cat,
+                                          Map<Long, Map<String, Long>> paramNamesByCategory) {
+        if (cat.getId() == null || nameBg == null) return true;
+        Map<String, Long> namesInCat = paramNamesByCategory.get(cat.getId());
+        if (namesInCat == null) return true;
+        Long existingId = namesInCat.get(nameBg.toLowerCase().trim());
+        if (existingId == null) return true;
+        if (existingId.equals(paramId)) return true;
+        log.warn("Blocked duplicate param '{}' in category '{}' — already owned by param id={}",
+                nameBg, cat.getNameBg(), existingId);
+        return false;
+    }
 
-            List<String> newAdditionalImages = extProduct.getImages().stream()
+    private void registerParamInCategory(Long paramId, String nameBg, Category cat,
+                                         Map<Long, Map<String, Long>> paramNamesByCategory) {
+        if (paramId == null || cat.getId() == null || nameBg == null) return;
+        paramNamesByCategory.computeIfAbsent(cat.getId(), k -> new HashMap<>())
+                .put(nameBg.toLowerCase().trim(), paramId);
+    }
+
+    private boolean isManualParameterForVali(ProductParameter productParameter) {
+        Parameter parameter = productParameter.getParameter();
+        if (parameter == null) return false;
+
+        // A parameter is considered "manual" if it's not from Vali, or if it was touched by an admin.
+        boolean isDifferentPlatform = (parameter.getPlatform() == null ||
+                parameter.getPlatform() != Platform.VALI);
+
+        boolean isCreatedByAdmin = isAdminUser(parameter.getCreatedBy());
+        boolean isModifiedByAdmin = isAdminUser(parameter.getLastModifiedBy());
+
+        return isDifferentPlatform || isCreatedByAdmin || isModifiedByAdmin;
+    }
+
+    private boolean isAdminUser(String username) {
+        if (username == null || username.isEmpty()) return false;
+        return "ADMIN".equalsIgnoreCase(username.trim()) || "admin".equalsIgnoreCase(username.trim());
+    }
+
+    private void setImagesToProduct(Product product, ProductRequestDto extProduct) {
+        if (extProduct.getImages() != null && !extProduct.getImages().isEmpty()) {
+            // Keep existing S3 URL if already migrated; otherwise store the vali.bg URL.
+            // ImageMigrationService handles the actual S3 upload as a separate background job.
+            String newPrimary = extProduct.getImages().get(0).getHref();
+            if (!isAlreadyOnS3(product.getPrimaryImageUrl())) {
+                product.setPrimaryImageUrl(newPrimary);
+            }
+
+            List<String> additionalImages = extProduct.getImages().stream()
                     .skip(1)
                     .map(ImageDto::getHref)
                     .toList();
 
             if (product.getAdditionalImages() != null) {
                 product.getAdditionalImages().clear();
-                product.getAdditionalImages().addAll(newAdditionalImages);
+                product.getAdditionalImages().addAll(additionalImages);
             } else {
-                product.setAdditionalImages(new ArrayList<>(newAdditionalImages));
+                product.setAdditionalImages(new ArrayList<>(additionalImages));
             }
         } else {
             product.setPrimaryImageUrl(null);
@@ -948,33 +1164,140 @@ public class ValiSyncService {
         }
     }
 
+    private void setFlagsToProduct(Product product, ProductRequestDto extProduct) {
+        Set<ProductFlag> currentFlags = product.getProductFlags();
+        if (currentFlags == null) {
+            currentFlags = new HashSet<>();
+            product.setProductFlags(currentFlags);
+        }
+
+        List<FlagDto> apiFlags = extProduct.getFlags();
+        if (apiFlags == null || apiFlags.isEmpty()) {
+            currentFlags.clear();
+            return;
+        }
+
+        Map<Long, FlagDto> apiFlagsById = apiFlags.stream()
+                .filter(f -> f.getId() != null)
+                .collect(Collectors.toMap(FlagDto::getId, f -> f, (a, b) -> a));
+
+        // Remove flags no longer present in API
+        currentFlags.removeIf(pf -> !apiFlagsById.containsKey(pf.getExternalId()));
+
+        Map<Long, ProductFlag> existingById = currentFlags.stream()
+                .collect(Collectors.toMap(ProductFlag::getExternalId, pf -> pf));
+
+        for (FlagDto flagDto : apiFlags) {
+            if (flagDto.getId() == null) continue;
+
+            ProductFlag existing = existingById.get(flagDto.getId());
+            if (existing != null) {
+                existing.setImageUrl(flagDto.getImage());
+                applyFlagNames(existing, flagDto);
+            } else {
+                ProductFlag pf = new ProductFlag();
+                pf.setProduct(product);
+                pf.setExternalId(flagDto.getId());
+                pf.setImageUrl(flagDto.getImage());
+                applyFlagNames(pf, flagDto);
+                currentFlags.add(pf);
+            }
+        }
+    }
+
+    private void applyFlagNames(ProductFlag flag, FlagDto flagDto) {
+        if (flagDto.getName() == null) return;
+        flagDto.getName().forEach(n -> {
+            if ("bg".equals(n.getLanguageCode())) flag.setNameBg(n.getText());
+            else if ("en".equals(n.getLanguageCode())) flag.setNameEn(n.getText());
+        });
+    }
+
+    private boolean isAlreadyOnS3(String url) {
+        return url != null && url.contains("amazonaws.com");
+    }
+
     private static void setNamesToProduct(Product product, ProductRequestDto extProduct) {
         if (extProduct.getName() != null) {
             extProduct.getName().forEach(name -> {
                 if ("bg".equals(name.getLanguageCode())) {
-                    product.setNameBg(name.getText());
+                    product.setNameBg(removeValiBrand(name.getText()));
                 } else if ("en".equals(name.getLanguageCode())) {
-                    product.setNameEn(name.getText());
+                    product.setNameEn(removeValiBrand(name.getText()));
                 }
             });
         }
+    }
+
+    /**
+     * VALI's own products carry its brand in the name ("Настолен компютър VALI OFFICE BASIC");
+     * the shop sells them without it. Runs on every sync, because the sync rewrites names nightly.
+     */
+    static String removeValiBrand(String name) {
+        if (name == null || !VALI_BRAND.matcher(name).find()) {
+            return name;
+        }
+        String cleaned = VALI_BRAND.matcher(name).replaceAll("").replaceAll("\\s{2,}", " ").trim();
+        return cleaned.isEmpty() ? name : cleaned;
     }
 
     private static void setDescriptionToProduct(Product product, ProductRequestDto extProduct) {
-        if (extProduct.getDescription() != null) {
-            extProduct.getDescription().forEach(desc -> {
-                if ("bg".equals(desc.getLanguageCode())) {
-                    product.setDescriptionBg(desc.getText());
-                } else if ("en".equals(desc.getLanguageCode())) {
-                    product.setDescriptionEn(desc.getText());
-                }
-            });
+        if (extProduct.getDescription() == null || extProduct.getDescription().isEmpty()) {
+            return;
         }
+
+        extProduct.getDescription().forEach(desc -> {
+            if (desc.getText() == null || desc.getText().isBlank()) return;
+            if ("bg".equals(desc.getLanguageCode())) {
+                product.setDescriptionBg(desc.getText());
+            } else if ("en".equals(desc.getLanguageCode())) {
+                product.setDescriptionEn(desc.getText());
+            }
+        });
     }
 
-    // ===========================================
-    // UTILITY METHODS
-    // ===========================================
+    /**
+     * After a full products sync, finds all VALI products (with a known externalId) that were
+     * NOT returned by the Vali API and marks them NOT_AVAILABLE + hidden.
+     * Skips the operation entirely if seenExternalIds is empty as a safety guard
+     * (would otherwise mark every product unavailable on a total API failure).
+     *
+     * @return number of products marked NOT_AVAILABLE
+     */
+    @Transactional
+    public long markUnseenAsUnavailable(Set<Long> seenExternalIds) {
+        if (seenExternalIds.isEmpty()) {
+            log.warn("seenExternalIds is empty — skipping markUnseenAsUnavailable to avoid mass status reset");
+            return 0;
+        }
+
+        List<Product> allValiProducts = productRepository.findByPlatformAndExternalIdNotNull(Platform.VALI);
+
+        List<Product> toMark = allValiProducts.stream()
+                .filter(p -> !seenExternalIds.contains(p.getExternalId()))
+                .filter(p -> p.getStatus() != ProductStatus.NOT_AVAILABLE || Boolean.TRUE.equals(p.getShow()))
+                .toList();
+
+        if (toMark.isEmpty()) {
+            return 0;
+        }
+
+        toMark.forEach(p -> {
+            p.setStatus(ProductStatus.NOT_AVAILABLE);
+            p.setShow(false);
+        });
+
+        productRepository.saveAll(toMark);
+        entityManager.flush();
+        entityManager.clear();
+
+        log.info("Marked {} VALI products as NOT_AVAILABLE (absent from Vali API)", toMark.size());
+        toMark.stream().limit(10).forEach(p ->
+                log.info("  → NOT_AVAILABLE: [{}] {} (externalId={})",
+                        p.getReferenceNumber(), p.getNameBg(), p.getExternalId()));
+
+        return toMark.size();
+    }
 
     private <T> List<List<T>> partitionList(List<T> list, int partitionSize) {
         List<List<T>> partitions = new ArrayList<>();
@@ -984,16 +1307,8 @@ public class ValiSyncService {
         return partitions;
     }
 
-    // ===========================================
-    // RESULT CLASSES
-    // ===========================================
-
     private static class CategorySyncResult {
-        long processed;
-        long created;
-        long updated;
-        long errors;
-
+        long processed, created, updated, errors;
         CategorySyncResult(long processed, long created, long updated, long errors) {
             this.processed = processed;
             this.created = created;
@@ -1003,11 +1318,7 @@ public class ValiSyncService {
     }
 
     private static class ChunkResult {
-        long processed;
-        long created;
-        long updated;
-        long errors;
-
+        long processed, created, updated, errors;
         ChunkResult(long processed, long created, long updated, long errors) {
             this.processed = processed;
             this.created = created;

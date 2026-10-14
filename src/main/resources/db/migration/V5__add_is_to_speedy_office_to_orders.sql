@@ -1,2 +1,0 @@
-ALTER TABLE orders
-ADD COLUMN is_to_speedy_office BOOLEAN NOT NULL DEFAULT TRUE;

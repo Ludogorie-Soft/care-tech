@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +35,7 @@ public class ParameterController {
 
     private final ParameterService parameterService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping
     public ResponseEntity<ParameterResponseDto> createParameter(
             @Valid @RequestBody ParameterRequestDto requestDto,
@@ -45,6 +46,7 @@ public class ParameterController {
         return ResponseEntity.status(HttpStatus.CREATED).body(parameter);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PutMapping(value = "/{id}")
     public ResponseEntity<ParameterResponseDto> updateParameter(
             @PathVariable("id") Long id,
@@ -54,13 +56,6 @@ public class ParameterController {
         log.info("Updating parameter with ID: {}", id);
         ParameterResponseDto parameter = parameterService.updateParameter(id, requestDto, language);
         return ResponseEntity.ok(parameter);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteParameter(@PathVariable @NotNull Long id) {
-        log.info("Deleting parameter with ID: {}", id);
-        parameterService.deleteParameter(id);
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping(value = "/category/{categoryId}")

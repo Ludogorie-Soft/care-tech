@@ -17,6 +17,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -83,11 +84,11 @@ public class AsbisApiService {
                 String url = buildApiUrl("ProductList.xml");
                 log.info("Fetching ProductList.xml (attempt {}/{})", attempt + 1, retryAttempts);
 
-                String response = restTemplate.getForObject(url, String.class);
+                byte[] responseBytes = restTemplate.getForObject(url, byte[].class);
 
-                if (response != null && !response.isEmpty()) {
+                if (responseBytes != null && responseBytes.length > 0) {
                     log.info("✓ Successfully fetched ProductList.xml on attempt {}", attempt + 1);
-                    return response;
+                    return new String(responseBytes, StandardCharsets.UTF_8);
                 }
 
             } catch (Exception e) {
@@ -261,14 +262,13 @@ public class AsbisApiService {
                 Object attrListObj = product.get("attrlist");
                 if (attrListObj instanceof Map) {
                     @SuppressWarnings("unchecked")
-                    Map<String, String> attrList = (Map<String, String>) attrListObj;
+                    Map<String, List<String>> attrList = (Map<String, List<String>>) attrListObj;
 
-                    for (Map.Entry<String, String> entry : attrList.entrySet()) {
-                        String paramName = entry.getKey();
-                        String paramValue = entry.getValue();
-
-                        if (paramValue != null && !paramValue.trim().isEmpty()) {
-                            parametersMap.computeIfAbsent(paramName, k -> new HashSet<>()).add(paramValue);
+                    for (Map.Entry<String, List<String>> entry : attrList.entrySet()) {
+                        for (String paramValue : entry.getValue()) {
+                            if (paramValue != null && !paramValue.trim().isEmpty()) {
+                                parametersMap.computeIfAbsent(entry.getKey(), k -> new HashSet<>()).add(paramValue);
+                            }
                         }
                     }
                 }
@@ -296,11 +296,11 @@ public class AsbisApiService {
                 String url = buildApiUrl("PriceAvail.xml");
                 log.info("Fetching PriceAvail.xml (attempt {}/{})", attempt + 1, retryAttempts);
 
-                String response = restTemplate.getForObject(url, String.class);
+                byte[] responseBytes = restTemplate.getForObject(url, byte[].class);
 
-                if (response != null && !response.isEmpty()) {
+                if (responseBytes != null && responseBytes.length > 0) {
                     log.info("✓ Successfully fetched PriceAvail.xml on attempt {}", attempt + 1);
-                    return response;
+                    return new String(responseBytes, StandardCharsets.UTF_8);
                 }
 
             } catch (Exception e) {
@@ -414,7 +414,7 @@ public class AsbisApiService {
             Document document = builder.parse(new ByteArrayInputStream(xmlResponse.getBytes("UTF-8")));
             document.getDocumentElement().normalize();
 
-            NodeList productNodes = document.getElementsByTagName("Product");
+            NodeList productNodes = document.getElementsByTagName("PRICE");
             log.info("✓ Found {} Product nodes in PriceAvail XML", productNodes.getLength());
 
             for (int i = 0; i < productNodes.getLength(); i++) {
@@ -460,51 +460,46 @@ public class AsbisApiService {
         Map<String, Object> data = new HashMap<>();
 
         try {
-            // Extract product code (mandatory)
-            String productCode = getElementText(element, "ProductCode");
+            // WIC = product code/SKU in Asbis PriceAvail.xml
+            String productCode = getElementText(element, "WIC");
             if (productCode == null || productCode.trim().isEmpty()) {
-                log.warn("Skipping price record with missing ProductCode");
+                log.warn("Skipping price record with missing WIC");
                 return null;
             }
-            data.put("productcode", productCode);
+            data.put("productcode", productCode.trim());
 
-            // Extract price
-            String priceStr = getElementText(element, "Price");
-            if (priceStr != null && !priceStr.trim().isEmpty()) {
+            // RETAIL_PRICE = suggested retail price (VAT-inclusive).
+            // Divide by 1.20 to get pre-VAT price — priceClient is always stored without VAT.
+            String retailStr = getElementText(element, "RETAIL_PRICE");
+            if (retailStr != null && !retailStr.trim().isEmpty()) {
                 try {
-                    BigDecimal price = new BigDecimal(priceStr.trim().replaceAll("[^0-9.]", ""));
-                    data.put("price", price);
+                    BigDecimal retailPrice = new BigDecimal(retailStr.trim().replaceAll("[^0-9.]", ""));
+                    BigDecimal priceExVat = retailPrice.divide(new BigDecimal("1.20"), 2, java.math.RoundingMode.HALF_UP);
+                    data.put("price", priceExVat);
                 } catch (Exception e) {
-                    log.debug("Could not parse price for product {}: {}", productCode, priceStr);
+                    log.debug("Could not parse RETAIL_PRICE for product {}: {}", productCode, retailStr);
                     data.put("price", null);
                 }
             }
 
-            // Extract stock quantity
-            String stockStr = getElementText(element, "Stock");
-            if (stockStr != null && !stockStr.trim().isEmpty()) {
+            // MY_PRICE = dealer/client price (kept for reference)
+            String myPriceStr = getElementText(element, "MY_PRICE");
+            if (myPriceStr != null && !myPriceStr.trim().isEmpty()) {
                 try {
-                    Integer stock = Integer.parseInt(stockStr.trim());
-                    data.put("stock", stock);
+                    data.put("myprice", new BigDecimal(myPriceStr.trim().replaceAll("[^0-9.]", "")));
                 } catch (Exception e) {
-                    log.debug("Could not parse stock for product {}: {}", productCode, stockStr);
-                    data.put("stock", 0);
+                    data.put("myprice", null);
                 }
-            } else {
-                data.put("stock", 0);
             }
 
-            // Extract availability status
-            String availability = getElementText(element, "Availability");
-            data.put("availability", availability);
+            // AVAIL = "да" (in stock) or "По заявка" (on order) — map to stock 1/0
+            String avail = getElementText(element, "AVAIL");
+            boolean inStock = avail != null && avail.trim().equalsIgnoreCase("да");
+            data.put("stock", inStock ? 1 : 0);
+            data.put("availability", avail);
 
-            // Extract availability date
-            String availDate = getElementText(element, "AvailabilityDate");
-            data.put("availabilitydate", availDate);
-
-            // Additional fields that might exist
-            data.put("currency", getElementText(element, "Currency"));
-            data.put("warehouse", getElementText(element, "Warehouse"));
+            data.put("currency", getElementText(element, "CURRENCY_CODE"));
+            data.put("warrantyterm", getElementText(element, "WARRANTYTERM"));
 
         } catch (Exception e) {
             log.error("Error extracting price/availability from XML element", e);
@@ -616,7 +611,7 @@ public class AsbisApiService {
                         NodeList attrListNodes = productElement.getElementsByTagName("AttrList");
                         if (attrListNodes.getLength() > 0) {
                             Element attrListElement = (Element) attrListNodes.item(0);
-                            Map<String, String> attributes = extractAttrList(attrListElement);
+                            Map<String, List<String>> attributes = extractAttrList(attrListElement);
                             product.put("attrlist", attributes);
                         }
 
@@ -671,8 +666,13 @@ public class AsbisApiService {
         return getAllProducts();
     }
 
-    private Map<String, String> extractAttrList(Element attrListElement) {
-        Map<String, String> attributes = new HashMap<>();
+    /**
+     * Attribute name → its values, in feed order. A name can repeat inside one product with a different
+     * value each time — "LAN" as "4 x 10Base-T/100Base-TX/1000Base-T" and "4 (RJ-45)", "Височина" of the
+     * earbud and of its case — 1,170 times in 669 products. A plain map kept only the last one.
+     */
+    static Map<String, List<String>> extractAttrList(Element attrListElement) {
+        Map<String, List<String>> attributes = new LinkedHashMap<>();
 
         NodeList elementNodes = attrListElement.getElementsByTagName("element");
         for (int i = 0; i < elementNodes.getLength(); i++) {
@@ -682,7 +682,10 @@ public class AsbisApiService {
                 String value = element.getAttribute("Value");
 
                 if (name != null && !name.isEmpty() && value != null && !value.isEmpty()) {
-                    attributes.put(name, value);
+                    List<String> values = attributes.computeIfAbsent(name, k -> new ArrayList<>());
+                    if (!values.contains(value)) {
+                        values.add(value);
+                    }
                 }
             }
         }

@@ -16,7 +16,7 @@ spring:
       port: 587
       protocol: smtp
       username: orders@caretech.bg
-      password: 184562@!Zas2
+      password: ${MAIL_PASSWORD}
       properties:
         mail:
           smtp:
@@ -26,7 +26,7 @@ spring:
               trust: mail.caretech.bg
             starttls:
               enable: true
-              required: true
+              required: false
             connectiontimeout: 10000
             timeout: 10000
             writetimeout: 10000
@@ -40,7 +40,6 @@ spring:
             - parameterOptions
             - categoriesByExternalId
             - manufacturersByExternalId
-            - parametersByCategory
             - productsByCategory
         caffeine:
             spec: maximumSize=10000,expireAfterWrite=1h,expireAfterAccess=30m
@@ -53,15 +52,22 @@ spring:
         username: ${POSTGRES_USER}
         password: ${POSTGRES_PASSWORD}
         driver-class-name: org.postgresql.Driver
+        hikari:
+            maximum-pool-size: 20
+            connection-timeout: 30000
+            idle-timeout: 600000
+            max-lifetime: 1800000
 
     # JPA/Hibernate Configuration
     jpa:
+        open-in-view: false
         hibernate:
             ddl-auto: validate
         show-sql: false
         properties:
             hibernate:
                 jdbc:
+                    time_zone: Europe/Sofia
                     batch_size: 30
                 order_inserts: true
                 order_updates: true
@@ -75,14 +81,12 @@ spring:
                         directory:
                             root: ${SPRING_JPA_PROPERTIES_HIBERNATE_SEARCH_BACKEND_DIRECTORY_ROOT}
 
-    # Connection Pool Configuration
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 20000
-      idle-timeout: 300000
-      max-lifetime: 1800000
-      leak-detection-threshold: 60000
+    # NOTE: the connection pool is configured under spring.datasource.hikari above.
+    # A second block used to sit here as spring.hikari, which is not a key Spring reads,
+    # so its values (pool size 10, connection-timeout 20s) were silently ignored while
+    # the real pool ran with 20 connections. Removed rather than merged: leak detection
+    # would fire constantly on the sync jobs, which legitimately hold a connection for
+    # minutes at a time.
 
     # Flyway Migrations Configuration
     flyway:
@@ -95,6 +99,7 @@ spring:
 
     # Jackson Configuration
     jackson:
+        time-zone: Europe/Sofia
         serialization:
             write-dates-as-timestamps: false
             fail-on-empty-beans: false
@@ -140,9 +145,9 @@ tekra:
 server:
     port: 8080
     error:
-        include-message: always
-        include-binding-errors: always
-        include-stacktrace: on_param  # Include stack trace only when trace=true parameter is passed
+        include-message: never
+        include-binding-errors: never
+        include-stacktrace: never
         include-exception: false
     servlet:
         encoding:
@@ -152,6 +157,9 @@ server:
 # LOGGING CONFIGURATION
 logging:
     level:
+        root: INFO
+        com.techstore: INFO
+#        org.flywaydb: DEBUG
         org.hibernate.SQL: WARN
         org.hibernate.type.descriptor.sql: WARN
         org.hibernate.tool.schema: WARN
@@ -159,9 +167,9 @@ logging:
         org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
         org.springframework.security.web.FilterChainProxy: WARN
         org.hibernate.type.descriptor.sql.BasicBinder: ERROR
-        com.techstore.service.SyncService: warn
-        com.techstore.repository.ProductSearchRepository: warn
-        com.techstore.service.ProductSearchService: warn
+        com.techstore.service.SyncService: WARN
+        com.techstore.repository.ProductSearchRepository: WARN
+        com.techstore.service.ProductSearchService: WARN
     pattern:
         console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
         file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
@@ -173,10 +181,14 @@ logging:
             max-history: 30
             total-size-cap: 300MB
 
+
 # Application Specific Configuration
 app:
     name: CareTech
-    url: ${REACT_APP_API_URL:https://www.caretech.bg}
+    url: ${APP_URL:https://www.caretech.bg}
+    # React index.html, served by the frontend container on the Docker network; product and
+    # category pages are this shell with their own head tags (OgMetaController)
+    spa-index-url: ${SPA_INDEX_URL:http://care-tech-ui/index.html}
     email:
       info: ${CARETECH_INFO_EMAIL:info@caretech.bg}
       from: ${CARETECH_ORDERS_EMAIL:orders@caretech.bg}
@@ -184,7 +196,7 @@ app:
     search:
         postgresql:
             auto-create-indexes: true  # Set to false to disable auto-creation
-            performance-test: true
+            performance-test: false   # виж SearchIndexManager — пуска две probe заявки при всеки старт
             log-slow-queries: true
     error:
         include-stack-trace: false
@@ -216,6 +228,10 @@ app:
                 - pozharoizvesyavane
                 - perimetrova-zashtita
 
+    cart:
+        abandoned-reminder-after-days: 3
+        abandoned-reminder-resend-after-days: 30
+
     markup:
         default-percentage: 20.0
         max-percentage: 200.0
@@ -231,7 +247,7 @@ app:
     upload:
         directory: ${UPLOAD_DIR}
         max-file-size: 10485760
-        allowed-extensions: jpg,jpeg,png,gif,webp
+        allowed-extensions: jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,odt,ods,rtf,txt,csv
 
     # Admin Configuration
     admin:
@@ -253,6 +269,9 @@ management:
     endpoint:
         health:
             show-details: when-authorized
+    health:
+        mail:
+            enabled: false
 
 # OpenAPI/Swagger Configuration
 springdoc:
@@ -260,7 +279,7 @@ springdoc:
         path: /v3/api-docs
     swagger-ui:
         path: /swagger-ui.html
-        enabled: true
+        enabled: ${SWAGGER_ENABLED:false}
         operations-sorter: method
         tags-sorter: alpha
 
@@ -274,18 +293,30 @@ vali:
 
 most:
   api:
-    url: https://most.traveldatabank.biz/ProductXML
+    url: https://portal.mostbg.com/api/product/xml/all?currency=EUR
     enabled: true
+    # The feed is a single ~17 MB XML GET. A working night takes ~70 s end to end,
+    # so the response timeout is deliberately generous; the connection timeout is not.
+    timeout: 180000
+    connection-timeout: 15000
+    # On 2026-09-23 a single transient failure at 01:50 (592 ms, no bytes received)
+    # cost the whole nightly Most sync. Retries with exponential backoff: 5s → 10s → 20s.
+    retry-attempts: 4
+    retry-delay: 5000
   exchange:
-    usd-to-bgn: 1.80
-    eur-to-bgn: 1.95583
+    # Prices are stored in EUR, so only a USD -> EUR rate can ever be needed.
+    # The feed is requested with ?currency=EUR and currently returns EUR for every
+    # product, so this path is not exercised. Left at 0 = not configured: a USD price
+    # is then skipped with an ERROR rather than stored as EUR at the wrong value.
+    # Set to the current USD -> EUR rate only if Most starts sending USD.
+    usd-to-eur: 0
 
 asbis:
   api:
     enabled: true
     base-url: "https://services.it4profit.com/product/bg/714"
-    username: "detelin"
-    password: "951753gG@."
+    username: ${ASBIS_USERNAME}
+    password: ${ASBIS_PASSWORD}
     timeout: 60000
     retry-attempts: 3
     retry-delay: 2000
@@ -295,10 +326,34 @@ excluded:
     categories:
         external-ids: ${VALI_EXCLUDED_CATEGORIES_IDS}
 
+tbi:
+  fusion-pay:
+    api-base-url: ${TBI_API_BASE_URL:https://beta.tbibank.support}
+    reseller-code: ${TBI_RESELLER_CODE}
+    reseller-key: ${TBI_RESELLER_KEY}
+    encryption-key: ${TBI_ENCRYPTION_KEY}
+    webhook-url: ${TBI_WEBHOOK_URL:https://caretech.bg/api/tbi/webhook}
+    enabled: ${TBI_ENABLED:true}
+
+# Delivery terms — used for the order total and for DeliveryTime/DeliveryCost in the Pazaruvaj feed.
+# The frontend shows the same values (care-tech-ui/src/utils/utils.js); change both together.
+shipping:
+  cost:
+    default: ${SHIPPING_COST_DEFAULT:3.50}            # EUR с ДДС, до офис на Speedy
+    max-weight-kg: ${SHIPPING_COST_MAX_WEIGHT_KG:3}   # над това тегло фиксираната цена не важи — по тарифа на куриера
+    free:
+      threshold: ${SHIPPING_FREE_THRESHOLD:170.00}    # EUR с ДДС — над тази сума доставката до офис е безплатна
+      max-weight-kg: ${SHIPPING_FREE_MAX_WEIGHT_KG:10} # над това тегло безплатната доставка не важи — по тарифа на куриера
+      # Никога безплатно: Непрекъсваеми токозахранващи у-ва (72), Управляеми UPS-и (73), Неуправляеми UPS-и (74),
+      # Батерии за UPS и СОТ-аларми (203), Телевизори (139), Настолни компютри (32)
+      excluded-category-ids: ${SHIPPING_FREE_EXCLUDED_CATEGORY_IDS:72,73,74,203,139,32}
+  delivery:
+    days: ${SHIPPING_DELIVERY_DAYS:2}                 # работни дни
+
 speedy:
     base-url: https://api.speedy.bg/v1/
-    user-name: ${SPEEDY_USERNAME:1907702}
-    password: ${SPEEDY_PASSWORD:9382888519}
-    sender-site-id: ${SPEEDY_SENDER_ID:10147}
+    user-name: ${SPEEDY_USERNAME}
+    password: ${SPEEDY_PASSWORD}
+    sender-site-id: ${SPEEDY_SENDER_ID}
     default-service-id: ${SPEEDY_DEFAULT_SERVICE_ID:505}
     saturday-delivery: false

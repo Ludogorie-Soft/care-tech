@@ -5,11 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +34,7 @@ public class S3Service {
     private long maxFileSize;
 
     @Value("${app.upload.allowed-extensions:jpg,jpeg,png,gif,webp}")
-    private String[] allowedExtensions;
+    private String allowedExtensionsStr;
 
     public S3Service(S3Client s3Client) {
         this.s3Client = s3Client;
@@ -65,8 +69,14 @@ public class S3Service {
     }
 
     public void deleteImage(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) return;
         try {
             String key = extractKeyFromUrl(imageUrl);
+
+            if (key.isBlank()) {
+                log.debug("Skipping S3 delete — URL is not an S3 object: {}", imageUrl);
+                return;
+            }
 
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                     .bucket(bucketName)
@@ -92,6 +102,134 @@ public class S3Service {
         }
     }
 
+    // ============ WARRANTY FILE OPERATIONS ============
+
+    public String uploadWarrantyFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BusinessLogicException("Warranty file cannot be empty");
+        }
+        if (file.getSize() > maxFileSize) {
+            throw new BusinessLogicException("File size exceeds maximum allowed size");
+        }
+
+        String extension = getFileExtension(file.getOriginalFilename());
+        List<String> allowed = Arrays.asList("pdf", "doc", "docx", "xls", "xlsx", "odt", "ods", "rtf", "txt", "jpg", "jpeg", "png", "webp", "heic");
+        if (!allowed.contains(extension)) {
+            throw new BusinessLogicException("File type not allowed for warranty documents. Allowed: " + allowed);
+        }
+
+        String key = "warranties/" + UUID.randomUUID() + "." + extension;
+        try {
+            PutObjectRequest put = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .contentType(file.getContentType())
+                    .contentLength(file.getSize())
+                    .build();
+            s3Client.putObject(put, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            log.info("Warranty file uploaded to S3: {}", key);
+            return key;
+        } catch (IOException e) {
+            log.error("Error uploading warranty file to S3: {}", e.getMessage());
+            throw new BusinessLogicException("Failed to upload warranty file: " + e.getMessage());
+        }
+    }
+
+    public byte[] downloadFileBytes(String key) {
+        try {
+            GetObjectRequest get = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+            try (ResponseInputStream<GetObjectResponse> response = s3Client.getObject(get)) {
+                return response.readAllBytes();
+            }
+        } catch (IOException e) {
+            log.error("Error downloading file from S3: {}", key, e);
+            throw new BusinessLogicException("Failed to download file from S3: " + e.getMessage());
+        }
+    }
+
+    public void deleteWarrantyFile(String key) {
+        if (key == null || key.isBlank()) return;
+        try {
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build());
+            log.info("Warranty file deleted from S3: {}", key);
+        } catch (Exception e) {
+            log.error("Error deleting warranty file from S3: {}", key, e);
+        }
+    }
+
+    /**
+     * Downloads an image from a remote URL and uploads it to S3.
+     * Returns the S3 URL on success, or null if download/upload fails.
+     */
+    public String uploadImageFromUrl(String sourceUrl, String subfolder) {
+        if (sourceUrl == null || sourceUrl.isBlank()) return null;
+        // Already on S3 — nothing to do
+        if (sourceUrl.contains("amazonaws.com")) return sourceUrl;
+
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) new URL(sourceUrl).openConnection();
+            connection.setRequestMethod("GET");
+            connection.setInstanceFollowRedirects(true);  // follow 301/302 redirects
+            connection.setConnectTimeout(15000);
+            connection.setReadTimeout(30000);
+            connection.setRequestProperty("User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36");
+
+            int status = connection.getResponseCode();
+            if (status != 200) {
+                log.warn("Cannot download image from {} — HTTP {}", sourceUrl, status);
+                return null;
+            }
+
+            String contentType = connection.getContentType();
+            String safeContentType = (contentType != null) ? contentType : "image/jpeg";
+            String extension = getExtensionFromUrl(sourceUrl, contentType);
+            String key = subfolder + "/" + UUID.randomUUID() + "." + extension;
+
+            try (InputStream in = connection.getInputStream()) {
+                byte[] bytes = in.readAllBytes();
+                PutObjectRequest put = PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .contentType(safeContentType)
+                        .contentLength((long) bytes.length)
+                        .build();
+                s3Client.putObject(put, RequestBody.fromBytes(bytes));
+            }
+
+            String s3Url = String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, key);
+            log.debug("Migrated image {} → {}", sourceUrl, s3Url);
+            return s3Url;
+
+        } catch (Exception e) {
+            log.warn("Failed to upload image from URL {} to S3: {}", sourceUrl, e.getMessage());
+            return null;
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
+    }
+
+    private String getExtensionFromUrl(String url, String contentType) {
+        String lower = url.toLowerCase();
+        if (lower.endsWith(".png"))  return "png";
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "jpg";
+        if (lower.endsWith(".gif"))  return "gif";
+        if (lower.endsWith(".webp")) return "webp";
+        if (contentType != null) {
+            if (contentType.contains("png"))  return "png";
+            if (contentType.contains("gif"))  return "gif";
+            if (contentType.contains("webp")) return "webp";
+        }
+        return "jpg";
+    }
+
     private void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new BusinessLogicException("File is empty");
@@ -101,12 +239,37 @@ public class S3Service {
             throw new BusinessLogicException("File size exceeds maximum allowed size of " + maxFileSize + " bytes");
         }
 
-        String extension = getFileExtension(file.getOriginalFilename()).toLowerCase();
-        List<String> allowedExtList = Arrays.asList(allowedExtensions);
+        String originalFilename = file.getOriginalFilename();
+        String extension = getFileExtension(originalFilename);
+
+        if (extension == null || extension.isEmpty()) {
+            throw new BusinessLogicException("File has no extension");
+        }
+
+        extension = extension.toLowerCase();
+
+        // Парсни правилно allowed extensions
+        List<String> allowedExtList = Arrays.asList(allowedExtensionsStr.split(","));
+
+        log.info("Validating file '{}' with extension '{}'. Allowed: {}",
+                originalFilename, extension, allowedExtList);
 
         if (!allowedExtList.contains(extension)) {
-            throw new BusinessLogicException("File extension not allowed. Allowed extensions: " + String.join(", ", allowedExtensions));
+            throw new BusinessLogicException(
+                    String.format("File extension '%s' not allowed. Allowed extensions: %s",
+                            extension, allowedExtensionsStr));
         }
+    }
+
+    private String getFileExtension(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            return "";
+        }
+        int lastDotIndex = filename.lastIndexOf(".");
+        if (lastDotIndex == -1 || lastDotIndex == filename.length() - 1) {
+            return "";
+        }
+        return filename.substring(lastDotIndex + 1).toLowerCase();
     }
 
     private String generateFileName(String originalFilename) {
@@ -114,17 +277,16 @@ public class S3Service {
         return UUID.randomUUID().toString() + "." + extension;
     }
 
-    private String getFileExtension(String filename) {
-        if (filename == null || filename.lastIndexOf(".") == -1) {
-            return "";
-        }
-        return filename.substring(filename.lastIndexOf(".") + 1);
-    }
-
     private String extractKeyFromUrl(String imageUrl) {
         // Extract key from URL like: https://bucket.s3.region.amazonaws.com/key
+        // ".amazonaws.com/" is 15 characters — use +15 to skip past the trailing slash
         try {
-            return imageUrl.substring(imageUrl.indexOf(".amazonaws.com/") + 14);
+            int idx = imageUrl.indexOf(".amazonaws.com/");
+            if (idx == -1) {
+                log.warn("URL is not an S3 URL, cannot extract key: {}", imageUrl);
+                return "";
+            }
+            return imageUrl.substring(idx + 15);
         } catch (Exception e) {
             log.warn("Could not extract key from URL: {}", imageUrl);
             return "";

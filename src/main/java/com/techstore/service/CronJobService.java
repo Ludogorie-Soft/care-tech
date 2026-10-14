@@ -1,7 +1,11 @@
 package com.techstore.service;
 
+import com.techstore.service.filter.FilterIndexService;
+import com.techstore.service.sync.AsbisSyncService;
+import com.techstore.service.sync.MostSyncService;
 import com.techstore.service.sync.TekraSyncService;
 import com.techstore.service.sync.ValiSyncService;
+import com.techstore.util.Markers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,46 +20,84 @@ public class CronJobService {
 
     private final ValiSyncService valiSyncService;
     private final TekraSyncService tekraSyncService;
+    private final MostSyncService mostSyncService;
+    private final AsbisSyncService asbisSyncService;
+    private final FilterIndexService filterIndexService;
 
     @Scheduled(cron = "0 0 1 * * ?")
-    public void syncVali() {
-        log.info("Starting scheduled Vali synchronization at {}", LocalDateTime.now());
+    public void syncApis() {
+        log.info("Starting scheduled synchronization at {}", LocalDateTime.now());
+
+        // --- Vali ---
+        // Manufacturers first: a product whose manufacturer is missing is skipped by the products sync.
+        // Separate try — a failure here must not cost the night's prices and stock.
         try {
-//            valiSyncService.syncCategories();
-//            log.info("Scheduled category synchronization completed at {}", LocalDateTime.now());
-//
-//            valiSyncService.syncManufacturers();
-//            log.info("Scheduled manufacturers synchronization completed at {}", LocalDateTime.now());
-//
+            valiSyncService.syncManufacturers();
+            log.info("Vali manufacturers sync completed at {}", LocalDateTime.now());
+        } catch (Exception e) {
+            log.error(Markers.CRITICAL, "Scheduled Vali manufacturers synchronization failed", e);
+        }
+
+        try {
             valiSyncService.syncParameters();
-            log.info("Scheduled parameters synchronization completed at {}", LocalDateTime.now());
+            log.info("Vali parameters sync completed at {}", LocalDateTime.now());
 
             valiSyncService.syncProducts();
-            log.info("Scheduled products synchronization completed at {}", LocalDateTime.now());
+            log.info("Vali products sync completed at {}", LocalDateTime.now());
 
         } catch (Exception e) {
-            log.error("CRITICAL: Scheduled Vali synchronization failed", e);
+            log.error(Markers.CRITICAL, "Scheduled Vali synchronization failed", e);
         }
-    }
 
-    @Scheduled(cron = "0 0 2 * * ?")
-    public void syncTekra() {
-        log.info("Starting scheduled Tekra synchronization at {}", LocalDateTime.now());
+        // --- Tekra ---
         try {
-//            tekraSyncService.syncTekraCategories();
-//            log.info("Scheduled Tekra category synchronization completed at {}", LocalDateTime.now());
-//
-//            tekraSyncService.syncTekraManufacturers();
-//            log.info("Scheduled Tekra manufacturers synchronization completed at {}", LocalDateTime.now());
-//
             tekraSyncService.syncTekraParameters();
-            log.info("Scheduled Tekra parameters synchronization completed at {}", LocalDateTime.now());
+            log.info("Tekra parameters sync completed at {}", LocalDateTime.now());
 
             tekraSyncService.syncTekraProducts();
-            log.info("Scheduled Tekra products synchronization completed at {}", LocalDateTime.now());
+            log.info("Tekra products sync completed at {}", LocalDateTime.now());
 
         } catch (Exception e) {
-            log.error("CRITICAL: Scheduled Tekra synchronization failed", e);
+            log.error(Markers.CRITICAL, "Scheduled Tekra synchronization failed", e);
         }
+
+        // --- Most ---
+        try {
+            mostSyncService.syncMostManufacturers();
+            log.info("Most manufacturers sync completed at {}", LocalDateTime.now());
+
+            mostSyncService.syncMostParameters();
+            log.info("Most parameters sync completed at {}", LocalDateTime.now());
+
+            mostSyncService.syncMostProducts();
+            log.info("Most products sync completed at {}", LocalDateTime.now());
+
+        } catch (Exception e) {
+            log.error(Markers.CRITICAL, "Scheduled Most synchronization failed", e);
+        }
+
+        // --- Asbis ---
+        try {
+            asbisSyncService.syncAsbisParameters();
+            log.info("Asbis parameters sync completed at {}", LocalDateTime.now());
+
+            asbisSyncService.syncAsbisProducts();
+            log.info("Asbis products sync completed at {}", LocalDateTime.now());
+
+            asbisSyncService.syncAsbisPriceAvail();
+            log.info("Asbis price/availability sync completed at {}", LocalDateTime.now());
+
+        } catch (Exception e) {
+            log.error(Markers.CRITICAL, "Scheduled Asbis synchronization failed", e);
+        }
+
+        // --- Filter index --- rebuilt from whatever the syncs above left, even when one of them failed.
+        try {
+            filterIndexService.rebuild("CRON", false);
+        } catch (Exception e) {
+            log.error(Markers.CRITICAL, "Scheduled filter index rebuild failed", e);
+        }
+
+        log.info("Scheduled synchronization finished at {}", LocalDateTime.now());
     }
 }

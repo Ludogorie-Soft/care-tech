@@ -1,14 +1,18 @@
 package com.techstore.controller.sync;
 
+import com.techstore.service.TekraApiService;
 import com.techstore.service.sync.TekraSyncService;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @Hidden
@@ -19,6 +23,14 @@ import java.util.Map;
 public class TekraSyncController {
 
     private final TekraSyncService tekraSyncService;
+    private final TekraApiService tekraApiService;
+
+    @GetMapping(value = "/tekra-categories")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
+    public ResponseEntity<List<Map<String, Object>>> listTekraCategories() {
+        List<Map<String, Object>> categories = tekraApiService.getCategoriesRaw();
+        return ResponseEntity.ok(categories);
+    }
 
     @PostMapping(value = "/categories")
     public ResponseEntity<Map<String, Object>> syncCategories() {

@@ -3,6 +3,7 @@ package com.techstore.service.sync;
 import com.techstore.entity.*;
 import com.techstore.enums.Platform;
 import com.techstore.enums.ProductStatus;
+import com.techstore.exception.SyncException;
 import com.techstore.repository.*;
 import com.techstore.service.MostApiService;
 import com.techstore.util.LogHelper;
@@ -10,16 +11,39 @@ import com.techstore.util.SyncHelper;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.techstore.util.LogHelper.LOG_STATUS_FAILED;
 import static com.techstore.util.LogHelper.LOG_STATUS_SUCCESS;
 
+/**
+ * MostSyncService - COMPLETELY REWRITTEN VERSION 3.0
+ *
+ * Дата: 23.01.2025
+ *
+ * КРИСТАЛНА ЛОГИКА (същата като Vali & Tekra):
+ * 1. Manufacturers → CREATE ONLY with name deduplication
+ * 2. Categories → Uses MOST_CATEGORY_MAPPING (hardcoded)
+ * 3. Parameters → ГЛОБАЛНО дедуплициране по ИМЕ
+ * 4. Products → Използва готовите параметри (global cache)
+ *
+ * ГАРАНЦИИ:
+ * - Един параметър "RAM" за ВСИЧКИ категории
+ * - Една опция "16GB" за ВСИЧКИ "RAM"
+ * - НИЩО не липсва
+ * - БЕЗ дублирания
+ * - Споделяне с Vali/Tekra категории и производители
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,712 +59,1242 @@ public class MostSyncService {
     private final SyncHelper syncHelper;
     private final LogHelper logHelper;
 
-    private static final String USD_TO_BGN_RATE = "1.80"; // Приблизителен курс USD -> BGN
-    private static final String EUR_TO_BGN_RATE = "1.95583"; // Фиксиран курс EUR -> BGN
+    @Autowired
+    @Lazy
+    private MostSyncService self;
+
+    // USD -> EUR rate, used only if the Most feed ever returns a USD price.
+    // Unlike EUR/BGN this is a floating rate, so it is configuration, not a constant.
+    // 0 (the default) means "not configured" — see the USD branch below for the
+    // deliberate fail-safe behaviour in that case.
+    @Value("${most.exchange.usd-to-eur:0}")
+    private BigDecimal usdToEurRate;
+
+    // parameter_options.name_bg is TEXT; the cap only guards against runaway values.
+    private static final int MAX_PROPERTY_VALUE_LENGTH = 2000;
+
+    // Products whose MOST category maps to "Лаптопи" but whose name reveals they are accessories.
+    // Checked in order — first match wins.
+    private static final List<String[]> LAPTOP_CATEGORY_NAME_OVERRIDES;
+
+    static {
+        // Each entry: { namePattern (lowercase), targetCategoryNameBg }
+        // Order matters — first match wins. More specific patterns come before general ones.
+        List<String[]> overrides = new ArrayList<>();
+
+        // ── Tablets → Таблети ───────────────────────────────────────────────
+        // Must come first — LENOVO TAB / REALME PAD are NOTEBOOK-mapped but are tablets
+        overrides.add(new String[]{"lenovo tab",     "Таблети"});
+        overrides.add(new String[]{"realme pad",     "Таблети"});
+        overrides.add(new String[]{"samsung tab",    "Таблети"});
+        overrides.add(new String[]{"tablet",         "Таблети"});
+
+        // ── Bags / backpacks / sleeves → Чанти за лаптопи ──────────────────
+        overrides.add(new String[]{"backpack",       "Чанти за лаптопи"});
+        overrides.add(new String[]{"bagpack",        "Чанти за лаптопи"});
+        overrides.add(new String[]{"back pack",      "Чанти за лаптопи"});
+        overrides.add(new String[]{" bp",            "Чанти за лаптопи"});
+        overrides.add(new String[]{"carry case",     "Чанти за лаптопи"});
+        overrides.add(new String[]{"carry bag",      "Чанти за лаптопи"});
+        overrides.add(new String[]{"laptop bag",     "Чанти за лаптопи"});
+        overrides.add(new String[]{"notebook bag",   "Чанти за лаптопи"});
+        overrides.add(new String[]{"shoulder bag",   "Чанти за лаптопи"});
+        overrides.add(new String[]{"sling bag",      "Чанти за лаптопи"});
+        overrides.add(new String[]{"slng bag",       "Чанти за лаптопи"});
+        overrides.add(new String[]{"shoulder",       "Чанти за лаптопи"});
+        overrides.add(new String[]{"sling",          "Чанти за лаптопи"});
+        overrides.add(new String[]{" bag",           "Чанти за лаптопи"});
+        overrides.add(new String[]{"t210",           "Чанти за лаптопи"});
+        overrides.add(new String[]{"sleeve",         "Чанти за лаптопи"});
+        overrides.add(new String[]{"rolltop",        "Чанти за лаптопи"});
+        overrides.add(new String[]{"чанта",          "Чанти за лаптопи"});
+        overrides.add(new String[]{"раница",         "Чанти за лаптопи"});
+
+        // ── Covers / cases / docks / skins / accessories → Аксесоари ───────
+        overrides.add(new String[]{"cover",          "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"tricover",       "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"versasleave",    "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"versasleeve",    "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"magsmart",       "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"protective case","Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"portfolio case", "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"case",           "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"folio",          "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"simpro",         "Аксесоари за лаптопи/таблети"});
+        // Протекторите за екран отиват в „Защитни фолиа и стъкла" (кат. 165),
+        // не при аксесоарите — независимо за телефон, таблет или конзола.
+        // Тези два override-а бяха причината 6-те фолиа ACER да стоят в кат. 47.
+        // Името трябва да съвпада с categories.name_bg — резолвва се по име.
+        overrides.add(new String[]{"protect film",   "Защитни фолиа и стъкла"});
+        overrides.add(new String[]{"screen protector","Защитни фолиа и стъкла"});
+        overrides.add(new String[]{"docking",        "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"dock station",   "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"hybrid dock",    "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"dock",           "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"dongle",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"skin",           "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"disney",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"pocket",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"iconia",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"yoga pen",       "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"stylus",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"stand",          "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"hub",            "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"starter kit",    "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"стикер",         "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"калъф",          "Аксесоари за лаптопи/таблети"});
+        overrides.add(new String[]{"кейс",           "Аксесоари за лаптопи/таблети"});
+
+        // ── Chargers / adapters → Зарядни за лаптопи ────────────────────────
+        // "adap" covers: adapter, adaptr, adapte, adapt — all truncations/misspellings
+        overrides.add(new String[]{"charger",        "Зарядни за лаптопи"});
+        overrides.add(new String[]{"charging",       "Зарядни за лаптопи"});
+        overrides.add(new String[]{"adap",           "Зарядни за лаптопи"});
+        overrides.add(new String[]{"зарядно",        "Зарядни за лаптопи"});
+        overrides.add(new String[]{"адаптер",        "Зарядни за лаптопи"});
+
+        LAPTOP_CATEGORY_NAME_OVERRIDES = Collections.unmodifiableList(overrides);
+    }
+
+    private static final Map<String, String> MOST_CATEGORY_MAPPING;
+
+    static {
+        Map<String, String> map = new HashMap<>();
+
+        // ── Нови категории от portal.mostbg.com ──────────────────────────
+        map.put("MAIN BOARD",   "Дънни платки");
+        map.put("MONITOR",      "Монитори");
+        map.put("PRINTER",      "Принтери, скенери и консумативи");
+        map.put("LAN",          "Мрежов хардуер");
+        map.put("NOTEBOOK",     "Лаптопи");
+        map.put("M - MEDIA",    "Мултимедиен хардуер");
+        map.put("CARTRIDGE",    "Консумативи(тонери) за лазерни устройства");
+        map.put("CD MEDIA",     "Носители CD, DVD, Blu-Ray");
+        map.put("GAMES",        "Игри и мултимедия");
+        map.put("GSM",          "Мобилни телефони");
+        map.put("COMPUTER",     "Настолни компютри");
+        map.put("ALL-IN-ONE",   "Компютър всичко в едно");
+
+        // ── Категории, открити при разширено сканиране ───────────────────
+        // (добавят се при всеки нов unmapped тип от логовете)
+        map.put("CPU",          "Процесори");
+        map.put("VIDEO CARD",   "Видео карти");
+        map.put("MEMORY",       "Памети");
+        map.put("MOTHERBOARD",  "Дънни платки");
+        map.put("SSD",          "SSD");
+        map.put("HDD",          "Твърди дискове");
+        map.put("POWER SUPPLY", "Захранвания");
+        map.put("CASE",         "Кутии за компютри");
+        map.put("COOLING",      "Охладители");
+        map.put("UPS",          "Непрекъсваеми токозахранващи устройства");
+        map.put("HEADSET",      "Слушалки");
+        map.put("KEYBOARD",     "Клавиатури");
+        map.put("MOUSE",        "Мишки");
+        map.put("WEBCAM",       "Уеб камери");
+        map.put("WEB CAMERA",   "Уеб камери");
+        map.put("SPEAKER",      "Звукови системи и тонколони");
+        map.put("TABLET",       "Таблети");
+        map.put("NAS",          "Настолен NAS");
+        map.put("ACCESSORY",    "Аксесоари");
+
+        // ── Категории от unmapped лог (добавени след първи sync) ────────────
+        map.put("RAM",          "Памети");
+        map.put("FAN",          "Охладители");
+        map.put("SCANER",       "Принтери, скенери и консумативи");
+        map.put("CD",           "Носители CD, DVD, Blu-Ray");
+        map.put("HP",           "Консумативи(тонери) за лазерни устройства");
+        map.put("HP_",          "Консумативи(тонери) за лазерни устройства");
+        map.put("FLASH",        "Флаш памети");
+        map.put("CONTR I/O",    "Входно-изходни контролери");
+        map.put("CAMERA",       "Аксесоари");
+
+        // ── Мрежово оборудване ─────────────────────────────────────────────
+        map.put("ROUTER",       "Мрежов хардуер");
+        map.put("SWITCH",       "Мрежов хардуер");
+        map.put("WIRELESS",     "Мрежов хардуер");
+        map.put("ACCESS POINT", "Мрежов хардуер");
+        map.put("AP",           "Мрежов хардуер");
+        map.put("MODEM",        "Мрежов хардуер");
+        map.put("FIREWALL",     "Мрежов хардуер");
+        map.put("NETWORK",      "Мрежов хардуер");
+
+        // ── Съхранение ─────────────────────────────────────────────────────
+        map.put("EXTERNAL HDD", "Твърди дискове");
+        map.put("EXT HDD",      "Твърди дискове");
+        map.put("EXTERNAL SSD", "SSD");
+        map.put("EXT SSD",      "SSD");
+        map.put("FLASH DRIVE",  "Флаш памети");
+        map.put("USB FLASH",    "Флаш памети");
+        map.put("PENDRIVE",     "Флаш памети");
+        map.put("MEMORY CARD",  "Флаш памети");
+        map.put("SD CARD",      "Флаш памети");
+        map.put("NAS DRIVE",    "Настолен NAS");
+
+        // ── Принтери и сканери ─────────────────────────────────────────────
+        map.put("SCANNER",      "Принтери, скенери и консумативи");
+        map.put("MFP",          "Принтери, скенери и консумативи");
+        map.put("MFD",          "Принтери, скенери и консумативи");
+        map.put("LABEL",        "Принтери, скенери и консумативи");
+        map.put("INK",          "Консумативи(тонери) за лазерни устройства");
+        map.put("TONER",        "Консумативи(тонери) за лазерни устройства");
+        map.put("DRUM",         "Консумативи(тонери) за лазерни устройства");
+
+        // ── Геймърска периферия ────────────────────────────────────────────
+        map.put("GAMING MOUSE",     "Геймърски мишки");
+        map.put("GAMING KEYBOARD",  "Геймърски клавиатури");
+        map.put("GAMING HEADSET",   "Геймърски слушалки");
+        map.put("GAMING CHAIR",     "Геймърска периферия");
+        map.put("GAMEPAD",          "Геймърска периферия");
+        map.put("JOYSTICK",         "Геймърска периферия");
+        map.put("GAME CONTROLLER",  "Геймърска периферия");
+        map.put("MOUSEPAD",         "Геймърска периферия");
+        map.put("GAMING MOUSEPAD",  "Геймърска периферия");
+
+        // ── Аксесоари ──────────────────────────────────────────────────────
+        map.put("CABLE",        "Аксесоари");
+        map.put("CABLES",       "Аксесоари");
+        map.put("USB HUB",      "Аксесоари");
+        map.put("HUB",          "Аксесоари");
+        map.put("CHARGER",      "Аксесоари");
+        map.put("ADAPTER",      "Аксесоари");
+        map.put("DOCKING",      "Аксесоари");
+        map.put("DOCK",         "Аксесоари");
+        map.put("PROJECTOR",    "Аксесоари");
+        map.put("SMART WATCH",  "Аксесоари");
+        map.put("SMARTWATCH",   "Аксесоари");
+        map.put("WEARABLE",     "Аксесоари");
+        map.put("LAPTOP BAG",   "Аксесоари");
+        map.put("BAG",          "Аксесоари");
+        map.put("COVER",        "Аксесоари");
+        map.put("STAND",        "Аксесоари");
+
+        MOST_CATEGORY_MAPPING = Collections.unmodifiableMap(map);
+    }
+
+    /**
+     * Feed pair "CATEGORY|SUBCATEGORY" → our category name, consulted before
+     * {@link #MOST_CATEGORY_MAPPING}.
+     * <p>
+     * The feed distinguishes 222 (category, subcategory) pairs but only 29 categories, and
+     * mapping on the category alone collapsed them into at most 29 buckets. That is how 150
+     * phone accessories ended up in "Мобилни телефони", 147 power supplies in "Кутии за
+     * компютри", 143 laptop accessories in "Лаптопи" and 9 televisions in "Монитори".
+     * <p>
+     * Only pairs whose destination already exists in the visible tree are listed here —
+     * this mapping never needs a category to be created, so the hand-curated ordering and
+     * the three-level structure are untouched.
+     */
+    private static final Map<String, String> MOST_SUBCATEGORY_MAPPING;
+
+    static {
+        Map<String, String> map = new HashMap<>();
+
+        map.put("GSM|Accessories",           "Други мобилни аксесоари");
+        map.put("CASE|PSU",                  "Захранвания");
+        map.put("NOTEBOOK|NB Accessories",   "Аксесоари за лаптопи/таблети");
+        // Valid since script 48 moved "Таблети" into the visible tree.
+        map.put("NOTEBOOK|Tablet LENOVO",    "Таблети");
+        map.put("M - MEDIA|Projectors",      "Проектори");
+        map.put("M - MEDIA|Headset and mic", "Слушалки");
+        map.put("LAN|LAN Cable",             "Мрежови кабели");
+        map.put("MONITOR|TV",                "Телевизори");
+        map.put("UPS|Power Bank",            "Външни батерии");
+
+        // LAN and FAN previously resolved to "Мрежов хардуер" and "Охладители", which exist
+        // only as hidden Asbis categories — every product filed there was reachable by search
+        // but not by browsing. Both hold Most products exclusively, and the visible tree
+        // already carries twelve network subcategories and two cooling ones to aim at.
+        map.put("LAN|WL Router",             "Безжични рутери");
+        map.put("LAN|LAN Switch",            "Суичове - неуправляеми");
+        map.put("LAN|WL Card / USB / Device","Безжични адаптери");
+        map.put("LAN|LAN Card",              "Мрежови карти");
+        map.put("LAN|Bluetooth",             "Блутут адаптери");
+        map.put("LAN|LAN Accessories",       "Рутери и мрежово оборудване");
+        map.put("LAN|Other",                 "Рутери и мрежово оборудване");
+        map.put("LAN|TENDA",                 "Рутери и мрежово оборудване");
+        map.put("FAN|CASE fan",              "Вентилатори");
+        map.put("FAN|CPU Cooler",            "Охладители за процесори");
+        map.put("FAN|Water Cooler",          "Водно охлаждане");
+        map.put("FAN|Thermal Grease",        "Термо пасти и подложки");
+        map.put("FAN|Others",                "Вентилатори");
+
+        // Deliberately absent, with reasons:
+        //   HP|PSG Accessories      — 100 products, but a genuinely mixed bag: docking
+        //                             stations, carrying cases and batteries alongside RAM,
+        //                             graphics cards, keyboards and mice. Moving them
+        //                             wholesale would relocate the problem rather than fix
+        //                             it; they need per-product classification.
+
+        MOST_SUBCATEGORY_MAPPING = Collections.unmodifiableMap(map);
+    }
+
+    /**
+     * Resolves which of our categories a Most product belongs in: the (category, subcategory)
+     * pair first, falling back to the category alone.
+     *
+     * @return our category name, or {@code null} when nothing maps
+     */
+    /**
+     * Refines a laptop-ish destination using the product name, which can be more specific
+     * than any feed mapping.
+     * <p>
+     * These overrides take precedence over {@link #MOST_SUBCATEGORY_MAPPING} on purpose.
+     * The feed says only {@code NB Accessories}, while a name can say "чанта" or "зарядно":
+     * 43 products already sit correctly in "Чанти за лаптопи" and 22 in "Зарядни за лаптопи"
+     * because of these rules. Applying the pair mapping over them would pull 65 products back
+     * into a generic bucket in order to place 3 correctly.
+     *
+     * @return the refined name, or the original when nothing matches
+     */
+    static String applyLaptopNameOverride(String targetCategoryName, String productName) {
+        if (productName == null
+                || !("Лаптопи".equals(targetCategoryName)
+                        || "Аксесоари за лаптопи/таблети".equals(targetCategoryName))) {
+            return targetCategoryName;
+        }
+        String nameLower = productName.toLowerCase();
+        for (String[] override : LAPTOP_CATEGORY_NAME_OVERRIDES) {
+            if (nameLower.contains(override[0])) {
+                return override[1];
+            }
+        }
+        return targetCategoryName;
+    }
+
+    /**
+     * Category names are not unique — "Слушалки" and "Мрежови кабели" each exist three times,
+     * once in the visible tree and twice in the invisible Asbis one. With a plain toMap the winner
+     * was whichever the repository happened to return first, so a product could land in a category
+     * nobody can browse to. Visible wins, then lowest id, which makes the choice deterministic as
+     * well as correct. Keyed by lower-cased, trimmed name_bg.
+     */
+    static Map<String, Category> indexCategoriesByName(List<Category> categories) {
+        return categories.stream()
+                .filter(c -> c.getNameBg() != null)
+                .sorted(Comparator
+                        .comparing((Category c) -> !Boolean.TRUE.equals(c.getShow()))
+                        .thenComparing(Category::getId))
+                .collect(Collectors.toMap(
+                        c -> c.getNameBg().toLowerCase().trim(),
+                        c -> c,
+                        (existing, duplicate) -> existing
+                ));
+    }
+
+    static String resolveTargetCategoryName(String category, String subcategory) {
+        if (category == null || category.isBlank()) {
+            return null;
+        }
+        if (subcategory != null && !subcategory.isBlank()) {
+            String byPair = MOST_SUBCATEGORY_MAPPING.get(category + "|" + subcategory);
+            if (byPair != null) {
+                return byPair;
+            }
+        }
+        return MOST_CATEGORY_MAPPING.get(category);
+    }
+
+    // ===========================================
+    // MANUFACTURERS SYNC - CREATE ONLY
+    // ===========================================
 
     @Transactional
     public void syncMostManufacturers() {
-        String syncType = "MOST_MANUFACTURERS";
-        SyncLog syncLog = logHelper.createSyncLogSimple(syncType);
+        SyncLog syncLog = logHelper.createSyncLogSimple("MOST_MANUFACTURERS");
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("Starting Most manufacturers synchronization");
+            log.info("Starting Most manufacturers synchronization - CREATE ONLY mode");
 
-            Set<String> externalManufacturers = mostApiService.extractUniqueManufacturers();
+            List<Map<String, Object>> allProducts = mostApiService.getAllProducts();
+            log.info("Fetched {} products from Most API", allProducts.size());
 
-            if (externalManufacturers.isEmpty()) {
-                log.warn("No manufacturers found in Most API");
-                logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, 0, 0, 0, 0, "No manufacturers found", startTime);
-                return;
+            if (allProducts.isEmpty()) {
+                throw new SyncException("Most returned 0 products — cannot derive manufacturers");
             }
 
-            // Get existing manufacturers
+            Set<String> manufacturerNames = allProducts.stream()
+                    .map(product -> (String) product.get("manufacturer"))
+                    .filter(Objects::nonNull)
+                    .filter(name -> !name.trim().isEmpty())
+                    .collect(Collectors.toSet());
+
+            log.info("Extracted {} unique manufacturers from products", manufacturerNames.size());
+
             Map<String, Manufacturer> existingManufacturers = manufacturerRepository.findAll()
                     .stream()
                     .filter(m -> m.getName() != null && !m.getName().isEmpty())
                     .collect(Collectors.toMap(
                             m -> normalizeManufacturerName(m.getName()),
                             m -> m,
-                            (existing, duplicate) -> {
-                                log.warn("Duplicate manufacturer: {}, IDs: {} and {}, keeping first",
-                                        existing.getName(), existing.getId(), duplicate.getId());
-                                return existing;
-                            }
+                            (existing, duplicate) -> existing
                     ));
 
-            long created = 0, updated = 0;
+            log.info("Found {} existing manufacturers in database", existingManufacturers.size());
 
-            for (String manufacturerName : externalManufacturers) {
-                try {
-                    String normalizedName = normalizeManufacturerName(manufacturerName);
-                    Manufacturer manufacturer = existingManufacturers.get(normalizedName);
+            long created = 0, skipped = 0;
 
-                    if (manufacturer == null) {
-                        manufacturer = createMostManufacturer(manufacturerName);
-                        manufacturer = manufacturerRepository.save(manufacturer);
-                        existingManufacturers.put(normalizedName, manufacturer);
-                        created++;
-                        log.debug("Created manufacturer: {}", manufacturerName);
-                    } else {
-                        updated++;
-                        log.debug("Manufacturer already exists: {}", manufacturerName);
-                    }
+            for (String manufacturerName : manufacturerNames) {
+                String normalizedName = normalizeManufacturerName(manufacturerName);
+                Manufacturer manufacturer = existingManufacturers.get(normalizedName);
 
-                } catch (Exception e) {
-                    log.error("Error processing manufacturer {}: {}", manufacturerName, e.getMessage());
+                if (manufacturer == null) {
+                    manufacturer = new Manufacturer();
+                    manufacturer.setName(manufacturerName);
+                    manufacturer.setPlatform(Platform.MOST);
+                    manufacturer = manufacturerRepository.save(manufacturer);
+                    existingManufacturers.put(normalizedName, manufacturer);
+                    created++;
+                    log.debug("Created manufacturer: {}", manufacturerName);
+                } else {
+                    skipped++;
                 }
             }
 
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS,
-                    (long) externalManufacturers.size(), created, updated, 0, null, startTime);
-            log.info("Most manufacturers sync completed - Created: {}, Updated: {}", created, updated);
+                    (long) manufacturerNames.size(), created, 0, 0,
+                    String.format("Skipped %d existing", skipped), startTime);
+            log.info("Manufacturers sync completed - Created: {}, Skipped: {}", created, skipped);
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
-            log.error("Error during Most manufacturers synchronization", e);
+            log.error("Error during manufacturers synchronization", e);
             throw new RuntimeException(e);
         }
     }
+
+    // ===========================================
+    // CATEGORIES - No sync needed (uses mapping)
+    // ===========================================
 
     @Transactional
     public void syncMostCategories() {
-        String syncType = "MOST_CATEGORIES";
-        SyncLog syncLog = logHelper.createSyncLogSimple(syncType);
+        SyncLog syncLog = logHelper.createSyncLogSimple("MOST_CATEGORIES");
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("Starting Most categories synchronization");
+            log.info("Most categories sync - Using MOST_CATEGORY_MAPPING (no sync needed)");
+            log.info("Mapped categories: {}", MOST_CATEGORY_MAPPING.values().stream().distinct().count());
 
-            Set<String> externalCategories = mostApiService.extractUniqueCategories();
+            Set<String> targetCategories = new HashSet<>(MOST_CATEGORY_MAPPING.values());
 
-            if (externalCategories.isEmpty()) {
-                log.warn("No categories found in Most API");
-                logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, 0, 0, 0, 0, "No categories found", startTime);
-                return;
+            long existing = categoryRepository.findAll().stream()
+                    .filter(cat -> targetCategories.contains(cat.getNameBg()))
+                    .count();
+
+            log.info("Found {}/{} target categories in database", existing, targetCategories.size());
+
+            if (existing < targetCategories.size()) {
+                log.warn("Missing {} categories - they should be created by Vali/Tekra sync",
+                        targetCategories.size() - existing);
             }
 
-            // Get existing categories
-            Map<String, Category> existingCategories = categoryRepository.findAll()
-                    .stream()
-                    .filter(c -> c.getNameBg() != null && !c.getNameBg().isEmpty())
-                    .collect(Collectors.toMap(
-                            c -> normalizeCategoryName(c.getNameBg()),
-                            c -> c,
-                            (existing, duplicate) -> existing
-                    ));
-
-            long created = 0, updated = 0, reused = 0;
-
-            for (String categoryName : externalCategories) {
-                try {
-                    String normalizedName = normalizeCategoryName(categoryName);
-                    Category category = existingCategories.get(normalizedName);
-
-                    if (category == null) {
-                        category = createMostCategory(categoryName);
-                        category = categoryRepository.save(category);
-                        existingCategories.put(normalizedName, category);
-                        created++;
-                        log.debug("Created category: {}", categoryName);
-                    } else {
-                        // Category exists - mark as reused
-                        reused++;
-                        log.debug("Reusing existing category: {}", categoryName);
-                    }
-
-                } catch (Exception e) {
-                    log.error("Error processing category {}: {}", categoryName, e.getMessage());
-                }
-            }
-
-            String message = reused > 0 ? String.format("Reused %d existing categories", reused) : null;
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS,
-                    (long) externalCategories.size(), created, updated, 0, message, startTime);
-            log.info("Most categories sync completed - Created: {}, Reused: {}", created, reused);
+            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, existing, 0, 0, 0,
+                    "Using hardcoded mapping", startTime);
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
-            log.error("Error during Most categories synchronization", e);
-            throw new RuntimeException(e);
+            log.error("Error during categories check", e);
         }
     }
+
+    // ===========================================
+    // PARAMETERS SYNC - НОВА КРИСТАЛНА ЛОГИКА
+    // ===========================================
 
     @Transactional
     public void syncMostParameters() {
-        String syncType = "MOST_PARAMETERS";
-        SyncLog syncLog = logHelper.createSyncLogSimple(syncType);
+        SyncLog syncLog = logHelper.createSyncLogSimple("MOST_PARAMETERS");
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("Starting Most parameters synchronization");
+            log.info("=== Starting GLOBAL Most Parameters Synchronization ===");
+            log.info("Strategy: Deduplicate by NORMALIZED NAME (same as Vali/Tekra)");
 
-            Map<String, Set<String>> parametersMap = mostApiService.extractUniqueParameters();
+            List<Parameter> allExistingParams = parameterRepository.findAll();
 
-            if (parametersMap.isEmpty()) {
-                log.warn("No parameters found in Most API");
-                logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, 0, 0, 0, 0, "No parameters found", startTime);
-                return;
-            }
-
-            long totalCreated = 0, totalUpdated = 0, totalOptionsCreated = 0;
-
-            // Group parameters by category
-            List<Map<String, Object>> allProducts = mostApiService.getAllProducts();
-            Map<String, Map<String, Set<String>>> categorizedParameters = groupParametersByCategory(allProducts);
-
-            for (Map.Entry<String, Map<String, Set<String>>> catEntry : categorizedParameters.entrySet()) {
-                String categoryName = catEntry.getKey();
-                Map<String, Set<String>> categoryParams = catEntry.getValue();
-
-                try {
-                    Optional<Category> categoryOpt = findCategoryByName(categoryName);
-
-                    if (categoryOpt.isEmpty()) {
-                        log.warn("Category not found: {}", categoryName);
-                        continue;
-                    }
-
-                    Category category = categoryOpt.get();
-                    log.info("Processing {} parameters for category: {}", categoryParams.size(), categoryName);
-
-                    // Get existing parameters for this category
-                    Map<String, Parameter> existingParameters = parameterRepository.findByCategoryId(category.getId())
-                            .stream()
-                            .filter(p -> p.getNameBg() != null)
-                            .collect(Collectors.toMap(
-                                    p -> normalizeParameterName(p.getNameBg()),
-                                    p -> p,
-                                    (existing, duplicate) -> existing
-                            ));
-
-                    for (Map.Entry<String, Set<String>> paramEntry : categoryParams.entrySet()) {
-                        try {
-                            String paramName = paramEntry.getKey();
-                            Set<String> paramValues = paramEntry.getValue();
-
-                            String normalizedName = normalizeParameterName(paramName);
-                            Parameter parameter = existingParameters.get(normalizedName);
-
-                            if (parameter == null) {
-                                parameter = createMostParameter(paramName, category);
-                                parameter = parameterRepository.save(parameter);
-                                existingParameters.put(normalizedName, parameter);
-                                totalCreated++;
-                            } else {
-                                totalUpdated++;
-                            }
-
-                            // Sync parameter options
-                            int optionsCreated = syncParameterOptions(parameter, paramValues);
-                            totalOptionsCreated += optionsCreated;
-
-                        } catch (Exception e) {
-                            log.error("Error processing parameter {}: {}", paramEntry.getKey(), e.getMessage());
-                        }
-                    }
-
-                } catch (Exception e) {
-                    log.error("Error processing parameters for category {}: {}", categoryName, e.getMessage());
+            for (Parameter p : allExistingParams) {
+                if (p.getCategories() != null) {
+                    p.getCategories().size();
                 }
             }
 
-            String message = String.format("Parameters: %d created, %d updated. Options: %d created",
-                    totalCreated, totalUpdated, totalOptionsCreated);
+            Map<String, Parameter> globalParamsCache = new HashMap<>();
+            for (Parameter p : allExistingParams) {
+                if (p.getMostKey() != null) {
+                    globalParamsCache.put(p.getMostKey(), p);
+                }
+            }
+
+            // Fallback map by nameBg (cross-platform reuse)
+            Map<String, Parameter> existingByNormalizedNameBg = new HashMap<>();
+            for (Parameter p : allExistingParams) {
+                if (p.getNameBg() != null && p.getMostKey() == null) {
+                    existingByNormalizedNameBg.put(p.getNameBg().toLowerCase().trim(), p);
+                }
+            }
+
+            // Fallback map by nameEn — Most API property names are in English,
+            // so match against existing parameters' English name to avoid duplicates
+            Map<String, Parameter> existingByNormalizedNameEn = new HashMap<>();
+            for (Parameter p : allExistingParams) {
+                if (p.getNameEn() != null && p.getMostKey() == null
+                        && !existingByNormalizedNameBg.containsValue(p)) {
+                    existingByNormalizedNameEn.put(p.getNameEn().toLowerCase().trim(), p);
+                }
+            }
+
+            log.info("Loaded {} existing parameters with mostKey from database", globalParamsCache.size());
+
+            // Guard: categoryId → (normalizedNameBg → parameterId)
+            Map<Long, Map<String, Long>> paramNamesByCategory = new HashMap<>();
+            for (Parameter p : allExistingParams) {
+                if (p.getNameBg() == null || p.getCategories() == null) continue;
+                String norm = p.getNameBg().toLowerCase().trim();
+                for (Category cat : p.getCategories()) {
+                    if (cat.getId() != null) {
+                        paramNamesByCategory.computeIfAbsent(cat.getId(), k -> new HashMap<>())
+                                .put(norm, p.getId());
+                    }
+                }
+            }
+
+            List<ParameterOption> allExistingOptions = parameterOptionRepository.findAll();
+
+            Map<String, ParameterOption> globalOptionsCache = new HashMap<>();
+            for (ParameterOption option : allExistingOptions) {
+                if (option.getParameter() != null &&
+                        option.getParameter().getId() != null &&
+                        option.getNameBg() != null) {
+                    globalOptionsCache.put(
+                            buildOptionCacheKey(option.getParameter().getId(), option.getNameBg()),
+                            option);
+                }
+            }
+
+            log.info("Loaded {} existing options from database", globalOptionsCache.size());
+
+            List<Map<String, Object>> allProducts = mostApiService.getAllProducts();
+            log.info("Processing parameters from {} Most products", allProducts.size());
+
+            if (allProducts.isEmpty()) {
+                throw new SyncException("Most returned 0 products — cannot derive parameters");
+            }
+
+            Map<String, ParameterData> allParametersData = new HashMap<>();
+
+            // Same resolution as product sync, so parameters are linked to the category the product lands in.
+            // findByNameBg used to throw on non-unique names ("Монитори", "Процесори"...) and skip the product.
+            Map<String, Category> categoriesByName = indexCategoriesByName(categoryRepository.findAll());
+
+            for (Map<String, Object> product : allProducts) {
+                try {
+                    String categoryName = (String) product.get("category");
+                    if (categoryName == null) continue;
+
+                    // Resolve category — if unmapped or missing, still collect parameters
+                    Category category = null;
+                    String targetCategoryName = resolveTargetCategoryName(categoryName, (String) product.get("subcategory"));
+                    if (targetCategoryName == null) {
+                        log.debug("Unknown Most category '{}' — collecting parameters without category", categoryName);
+                    } else {
+                        targetCategoryName = applyLaptopNameOverride(targetCategoryName, (String) product.get("name"));
+                        category = categoriesByName.get(targetCategoryName.toLowerCase().trim());
+                        if (category == null) {
+                            log.warn("Target category '{}' not found in database — collecting parameters without category",
+                                    targetCategoryName);
+                        }
+                    }
+
+                    final Category finalCategory = category;
+                    Map<String, String> productParams = extractMostParameters(product);
+
+                    for (Map.Entry<String, String> param : productParams.entrySet()) {
+                        String paramName = param.getKey();
+                        String paramValue = param.getValue();
+
+                        String mostKey = generateMostKey(paramName);
+
+                        ParameterData paramData = allParametersData.computeIfAbsent(
+                                mostKey,
+                                k -> {
+                                    ParameterData pd = new ParameterData();
+                                    pd.nameBg = paramName;
+                                    pd.nameEn = paramName;
+                                    pd.mostKey = mostKey;
+                                    pd.categories = new HashSet<>();
+                                    pd.values = new HashSet<>();
+                                    return pd;
+                                }
+                        );
+
+                        if (finalCategory != null) paramData.categories.add(finalCategory);
+                        paramData.values.add(paramValue);
+                    }
+
+                } catch (Exception e) {
+                    log.error("Error processing product parameters: {}", e.getMessage());
+                }
+            }
+
+            log.info("Collected {} unique parameters across all categories", allParametersData.size());
+
+            long created = 0, reused = 0, optionsCreated = 0;
+
+            for (Map.Entry<String, ParameterData> entry : allParametersData.entrySet()) {
+                String mostKey = entry.getKey();  // ← ПРОМЕНЕНО!
+                ParameterData paramData = entry.getValue();
+
+                try {
+                    Parameter parameter = globalParamsCache.get(mostKey);  // ← ПРОМЕНЕНО!
+
+                    if (parameter == null) {
+                        // Cross-platform fallback 1: match by nameBg
+                        String normalizedName = paramData.nameBg != null
+                                ? paramData.nameBg.toLowerCase().trim() : null;
+                        Parameter byNameBg = normalizedName != null
+                                ? existingByNormalizedNameBg.remove(normalizedName) : null;
+
+                        // Cross-platform fallback 2: match by nameEn (Most properties are in English)
+                        if (byNameBg == null) {
+                            String normalizedNameEn = paramData.nameEn != null
+                                    ? paramData.nameEn.toLowerCase().trim() : null;
+                            byNameBg = normalizedNameEn != null
+                                    ? existingByNormalizedNameEn.remove(normalizedNameEn) : null;
+                            if (byNameBg != null) {
+                                log.debug("↑ Matched parameter '{}' by nameEn='{}' (assigned mostKey={})",
+                                        byNameBg.getNameBg(), paramData.nameEn, paramData.mostKey);
+                            }
+                        }
+
+                        if (byNameBg != null) {
+                            // Adopt existing parameter: assign mostKey and merge categories
+                            byNameBg.setMostKey(paramData.mostKey);
+                            Set<Category> existCats = byNameBg.getCategories();
+                            if (existCats == null) { existCats = new HashSet<>(); byNameBg.setCategories(existCats); }
+                            Set<Long> existCatIds = existCats.stream().map(Category::getId).collect(Collectors.toSet());
+                            for (Category c : paramData.categories) {
+                                if (!existCatIds.contains(c.getId()) &&
+                                        canAddCategoryToParam(byNameBg.getId(), byNameBg.getNameBg(), c, paramNamesByCategory)) {
+                                    existCats.add(c);
+                                    registerParamInCategory(byNameBg.getId(), byNameBg.getNameBg(), c, paramNamesByCategory);
+                                }
+                            }
+                            parameter = parameterRepository.save(byNameBg);
+                            globalParamsCache.put(paramData.mostKey, parameter);
+                            reused++;
+                            log.debug("↑ Adopted parameter '{}' by nameBg (assigned mostKey={})",
+                                    parameter.getNameBg(), paramData.mostKey);
+                        } else {
+                            parameter = new Parameter();
+                            parameter.setNameBg(paramData.nameBg);
+                            parameter.setNameEn(paramData.nameEn);
+                            parameter.setMostKey(paramData.mostKey);
+                            parameter.setPlatform(Platform.MOST);
+                            parameter.setOrder(50);
+                            parameter.setCreatedBy("system");
+                            Set<Category> validCats = new HashSet<>();
+                            for (Category c : paramData.categories) {
+                                if (canAddCategoryToParam(null, paramData.nameBg, c, paramNamesByCategory)) {
+                                    validCats.add(c);
+                                }
+                            }
+                            parameter.setCategories(validCats);
+                            parameter = parameterRepository.save(parameter);
+                            for (Category c : parameter.getCategories()) {
+                                registerParamInCategory(parameter.getId(), parameter.getNameBg(), c, paramNamesByCategory);
+                            }
+                            globalParamsCache.put(paramData.mostKey, parameter);
+                            created++;
+                            log.debug("✓ Created parameter: '{}' (mostKey={}) for {} categories",
+                                    parameter.getNameBg(), paramData.mostKey, validCats.size());
+                        }
+
+                    } else {
+                        Set<Category> existingCategories = parameter.getCategories();
+                        if (existingCategories == null) {
+                            existingCategories = new HashSet<>();
+                            parameter.setCategories(existingCategories);
+                        }
+
+                        Set<Long> existingCategoryIds = existingCategories.stream()
+                                .map(Category::getId)
+                                .collect(Collectors.toSet());
+
+                        boolean updated = false;
+                        for (Category newCat : paramData.categories) {
+                            if (!existingCategoryIds.contains(newCat.getId()) &&
+                                    canAddCategoryToParam(parameter.getId(), parameter.getNameBg(), newCat, paramNamesByCategory)) {
+                                existingCategories.add(newCat);
+                                registerParamInCategory(parameter.getId(), parameter.getNameBg(), newCat, paramNamesByCategory);
+                                updated = true;
+                            }
+                        }
+
+                        if (updated) {
+                            parameterRepository.save(parameter);
+                        }
+
+                        reused++;
+                    }
+
+                    int optionsForThisParam = createOptionsForParameter(
+                            parameter,
+                            paramData.values,
+                            globalOptionsCache
+                    );
+
+                    optionsCreated += optionsForThisParam;
+
+                } catch (Exception e) {
+                    log.error("Error processing parameter: {}", e.getMessage());
+                }
+            }
+
+            String message = String.format("Parameters: %d created, %d reused. Options: %d created",
+                    created, reused, optionsCreated);
 
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS,
-                    totalCreated + totalUpdated, totalCreated, totalUpdated, 0, message, startTime);
-            log.info("Most parameters sync completed - Parameters: {} created, {} updated. Options: {} created",
-                    totalCreated, totalUpdated, totalOptionsCreated);
+                    allParametersData.size(), created, 0, 0, message, startTime);
+
+            log.info("=== Most Parameters Sync Completed ===");
+            log.info("   Unique parameters: {}", allParametersData.size());
+            log.info("   Created: {}, Reused: {}", created, reused);
+            log.info("   Options created: {}", optionsCreated);
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
-            log.error("Error during Most parameters synchronization", e);
-            throw new RuntimeException(e);
+            log.error("Most parameters sync failed", e);
+            throw e;
         }
     }
 
+    private static class ParameterData {
+        String nameBg;
+        String nameEn;
+        String mostKey;
+        Set<Category> categories;
+        Set<String> values;
+    }
+
+    private int createOptionsForParameter(Parameter parameter,
+                                          Set<String> values,
+                                          Map<String, ParameterOption> globalOptionsCache) {
+        int created = 0;
+
+        for (String value : values) {
+            if (value == null || value.trim().isEmpty() || "-".equals(value.trim())) {
+                continue;
+            }
+
+            String cacheKey = buildOptionCacheKey(parameter.getId(), value);
+
+            if (globalOptionsCache.containsKey(cacheKey)) {
+                continue;
+            }
+
+            ParameterOption option = new ParameterOption();
+            option.setParameter(parameter);
+            option.setNameBg(value);
+            option.setNameEn(value);
+            option.setOrder(globalOptionsCache.size());
+
+            option = parameterOptionRepository.save(option);
+            globalOptionsCache.put(cacheKey, option);
+            created++;
+        }
+
+        return created;
+    }
+
+    // ===========================================
+    // PRODUCTS SYNC - ОПРОСТЕНА ЛОГИКА
+    // ===========================================
+
     @Transactional
     public void syncMostProducts() {
-        String syncType = "MOST_PRODUCTS";
-        SyncLog syncLog = logHelper.createSyncLogSimple(syncType);
+        SyncLog syncLog = logHelper.createSyncLogSimple("MOST_PRODUCTS");
         long startTime = System.currentTimeMillis();
 
         try {
-            log.info("Starting Most products synchronization");
+            log.info("=== STARTING Most products synchronization ===");
 
-            List<Map<String, Object>> allProducts = mostApiService.getAllProducts();
-
-            if (allProducts.isEmpty()) {
-                log.warn("No products found in Most API");
-                logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, 0, 0, 0, 0, "No products found", startTime);
-                return;
-            }
-
-            // Load manufacturers map
-            Map<String, Manufacturer> manufacturersMap = manufacturerRepository.findAll()
-                    .stream()
-                    .filter(m -> m.getName() != null)
+            // Load lookup maps as primitive ID maps — safe to share across REQUIRES_NEW transactions
+            // (no managed entity objects crossing transaction boundaries)
+            Map<String, Long> manufacturerIdsByName = manufacturerRepository.findAll().stream()
+                    .filter(m -> m.getName() != null && !m.getName().isEmpty())
                     .collect(Collectors.toMap(
                             m -> normalizeManufacturerName(m.getName()),
-                            m -> m,
+                            Manufacturer::getId,
                             (existing, duplicate) -> existing
                     ));
+            log.info("Loaded {} manufacturers", manufacturerIdsByName.size());
 
-            long totalCreated = 0, totalUpdated = 0, totalErrors = 0, skippedNoCategory = 0;
+            Map<String, Long> categoryIdsByName = indexCategoriesByName(categoryRepository.findAll())
+                    .entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getId()));
+            log.info("Loaded {} categories", categoryIdsByName.size());
 
-            for (int i = 0; i < allProducts.size(); i++) {
-                Map<String, Object> rawProduct = allProducts.get(i);
+            Map<String, Long> parameterIdsByMostKey = parameterRepository.findAll().stream()
+                    .filter(p -> p.getMostKey() != null)
+                    .collect(Collectors.toMap(
+                            Parameter::getMostKey,
+                            Parameter::getId,
+                            (existing, duplicate) -> existing
+                    ));
+            log.info("Loaded {} parameters with mostKey", parameterIdsByMostKey.size());
 
+            Map<Long, Map<String, Long>> optionIdsByParamAndValue = new HashMap<>();
+            for (ParameterOption opt : parameterOptionRepository.findAll()) {
+                if (opt.getParameter() != null && opt.getNameBg() != null) {
+                    optionIdsByParamAndValue
+                            .computeIfAbsent(opt.getParameter().getId(), k -> new HashMap<>())
+                            .put(normalizeName(opt.getNameBg()), opt.getId());
+                }
+            }
+            log.info("Loaded {} option entries", optionIdsByParamAndValue.size());
+
+            List<Map<String, Object>> allProducts = mostApiService.getAllProducts();
+            log.info("Fetched {} products from Most API", allProducts.size());
+
+            if (allProducts.isEmpty()) {
+                // Most has never legitimately sent an empty catalogue — a working night is
+                // ~5 500 products. Recording this as SUCCESS is how the failed run of
+                // 2026-09-23 went unnoticed. The outer catch logs FAILED and rethrows,
+                // which is what raises CRITICAL in CronJobService.
+                throw new SyncException("Most returned 0 products — treating as a failed sync, not an empty feed");
+            }
+
+            long totalProcessed = 0, totalCreated = 0, totalUpdated = 0, totalErrors = 0;
+            long skippedNoCategory = 0, skippedNoManufacturer = 0, skippedNoSku = 0;
+            Set<String> unmappedCategories = new LinkedHashSet<>();
+            Set<String> seenSkus = new HashSet<>();
+
+            for (Map<String, Object> mostProduct : allProducts) {
+                String mostSku = (String) mostProduct.get("partNumber");
+                if (mostSku != null && !mostSku.isBlank()) {
+                    seenSkus.add(mostSku);
+                }
                 try {
-                    String code = (String) rawProduct.get("code");
-                    String name = (String) rawProduct.get("name");
+                    // Each product runs in its own REQUIRES_NEW transaction.
+                    // One failure rolls back only that product — not the entire sync.
+                    int result = self.processOneMostProduct(
+                            mostProduct, manufacturerIdsByName, categoryIdsByName,
+                            parameterIdsByMostKey, optionIdsByParamAndValue, unmappedCategories);
 
-                    if (code == null || code.isEmpty() || name == null || name.isEmpty()) {
-                        log.debug("Skipping product with missing code or name");
-                        totalErrors++;
-                        continue;
-                    }
-
-                    // Find category
-                    Category category = findProductCategory(rawProduct);
-                    if (category == null) {
-                        log.warn("No category found for product: {}", code);
-                        skippedNoCategory++;
-                        continue;
-                    }
-
-                    // Find or create product
-                    Product product = findOrCreateProduct(code, name);
-                    boolean isNew = (product.getId() == null);
-
-                    // Update product fields
-                    updateProductFromMost(product, rawProduct, category, manufacturersMap);
-
-                    // Save product
-                    product = productRepository.save(product);
-
-                    if (isNew) {
-                        totalCreated++;
-                    } else {
-                        totalUpdated++;
-                    }
-
-                    // Set parameters
-                    setMostParametersToProduct(product, rawProduct);
-                    productRepository.save(product);
-
-                    if ((i + 1) % 50 == 0) {
-                        log.info("Progress: {}/{} products processed", i + 1, allProducts.size());
-                        entityManager.flush();
-                        entityManager.clear();
+                    switch (result) {
+                        case 1  -> { totalCreated++;  totalProcessed++; }
+                        case 2  -> { totalUpdated++;  totalProcessed++; }
+                        case 0  -> skippedNoCategory++;
+                        case -1 -> skippedNoSku++;
+                        case -2 -> skippedNoManufacturer++;
+                        default -> totalErrors++;
                     }
 
                 } catch (Exception e) {
                     totalErrors++;
                     log.error("Error processing product: {}", e.getMessage());
                 }
+
+                if (totalProcessed > 0 && totalProcessed % 50 == 0) {
+                    log.info("Progress: processed={}, created={}, updated={}, errors={}",
+                            totalProcessed, totalCreated, totalUpdated, totalErrors);
+                }
             }
 
-            String message = String.format("Created: %d, Updated: %d, Skipped (No Category): %d, Errors: %d",
-                    totalCreated, totalUpdated, skippedNoCategory, totalErrors);
+            if (!unmappedCategories.isEmpty()) {
+                log.warn("=== MOST UNMAPPED CATEGORIES ({}) — add to MOST_CATEGORY_MAPPING: {} ===",
+                        unmappedCategories.size(), unmappedCategories);
+            }
 
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS,
-                    totalCreated + totalUpdated, totalCreated, totalUpdated, totalErrors, message, startTime);
-            log.info("Most products sync completed - {}", message);
+            // Mark products absent from Most API as NOT_AVAILABLE
+            int markedUnavailable = 0;
+            if (!seenSkus.isEmpty()) {
+                markedUnavailable = productRepository.markNotAvailableByPlatformSkuNotIn(Platform.MOST, seenSkus);
+                log.info("Marked {} MOST products as NOT_AVAILABLE (absent from Most API)", markedUnavailable);
+            } else {
+                log.warn("seenSkus is empty — skipping mark-unseen to prevent mass status reset");
+            }
+
+            String message = String.format(
+                    "Total: %d, Created: %d, Updated: %d, Skipped (No SKU): %d, Skipped (No Category): %d, Skipped (No Manufacturer): %d, Errors: %d, Unmapped: %d, MarkedUnavailable: %d",
+                    totalProcessed, totalCreated, totalUpdated, skippedNoSku, skippedNoCategory,
+                    skippedNoManufacturer, totalErrors, unmappedCategories.size(), markedUnavailable);
+
+            // Catch-all: ensure category_parameters rows exist for every parameter
+            // that actually landed on a MOST product. REQUIRES_NEW per-product transactions
+            // do NOT update category_parameters, so some associations may be missing.
+            try {
+                int cpInserted = entityManager.createNativeQuery(
+                        "INSERT INTO category_parameters (category_id, parameter_id) " +
+                        "SELECT DISTINCT pr.category_id, pp.parameter_id " +
+                        "FROM product_parameters pp " +
+                        "JOIN products pr ON pr.id = pp.product_id " +
+                        "WHERE pr.platform = 'MOST' " +
+                        "ON CONFLICT (category_id, parameter_id) DO NOTHING")
+                        .executeUpdate();
+                log.info("MOST catch-all: inserted {} missing category_parameters rows", cpInserted);
+            } catch (Exception e) {
+                log.error("Failed MOST catch-all category_parameters sync: {}", e.getMessage());
+            }
+
+            int deduplicated = productRepository.deduplicateCrossPlatformBySku();
+            log.info("Cross-platform deduplication: hidden {} higher-priced duplicates", deduplicated);
+
+            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, totalCreated,
+                    totalUpdated, totalErrors, message, startTime);
+
+            log.info("=== COMPLETE: Products sync finished ===");
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0, e.getMessage(), startTime);
-            log.error("Error during Most products synchronization", e);
-            throw new RuntimeException(e);
+            log.error("=== FAILED: Products synchronization error ===", e);
+            throw e;
         }
     }
 
-    // ============================================
-    // HELPER METHODS
-    // ============================================
+    /**
+     * Processes a single Most product in its own transaction (REQUIRES_NEW).
+     * Returns: 1=created, 2=updated, 0=skip(no category), -2=skip(no manufacturer), -1=error
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public int processOneMostProduct(
+            Map<String, Object> mostProduct,
+            Map<String, Long> manufacturerIdsByName,
+            Map<String, Long> categoryIdsByName,
+            Map<String, Long> parameterIdsByMostKey,
+            Map<Long, Map<String, Long>> optionIdsByParamAndValue,
+            Set<String> unmappedCategories) {
 
-    private Manufacturer createMostManufacturer(String name) {
-        Manufacturer manufacturer = new Manufacturer();
-        manufacturer.setName(name);
-        manufacturer.setInformationName(name);
-        manufacturer.setPlatform(Platform.MOST);
-        return manufacturer;
-    }
+        String sku = (String) mostProduct.get("partNumber");
+        String name = (String) mostProduct.get("name");
 
-    private Category createMostCategory(String name) {
-        Category category = new Category();
-        category.setNameBg(name);
-        category.setNameEn(name);
-        category.setPlatform(Platform.MOST);
-        category.setShow(true);
-        category.setSortOrder(0);
-
-        // Generate unique slug
-        String baseSlug = syncHelper.createSlugFromName(name);
-        String uniqueSlug = generateUniqueSlug(baseSlug, category);
-        category.setSlug(uniqueSlug);
-
-        return category;
-    }
-
-    private Parameter createMostParameter(String name, Category category) {
-        Parameter parameter = new Parameter();
-        parameter.setNameBg(name);
-        parameter.setNameEn(name);
-        parameter.setCategory(category);
-        parameter.setPlatform(Platform.MOST);
-        parameter.setOrder(50);
-        return parameter;
-    }
-
-    private int syncParameterOptions(Parameter parameter, Set<String> optionValues) {
-        int created = 0;
-
-        try {
-            Map<String, ParameterOption> existingOptions = parameterOptionRepository
-                    .findByParameterIdOrderByOrderAsc(parameter.getId())
-                    .stream()
-                    .filter(opt -> opt.getNameBg() != null)
-                    .collect(Collectors.toMap(
-                            opt -> normalizeParameterValue(opt.getNameBg()),
-                            opt -> opt,
-                            (existing, duplicate) -> existing
-                    ));
-
-            int orderCounter = existingOptions.size();
-
-            for (String optionValue : optionValues) {
-                if (optionValue == null || optionValue.trim().isEmpty() || "-".equals(optionValue.trim())) {
-                    continue;
-                }
-
-                String normalizedValue = normalizeParameterValue(optionValue);
-                ParameterOption option = existingOptions.get(normalizedValue);
-
-                if (option == null) {
-                    option = new ParameterOption();
-                    option.setParameter(parameter);
-                    option.setNameBg(optionValue);
-                    option.setNameEn(optionValue);
-                    option.setOrder(orderCounter++);
-
-                    parameterOptionRepository.save(option);
-                    created++;
-                }
-            }
-
-        } catch (Exception e) {
-            log.error("Error syncing parameter options for {}: {}", parameter.getNameBg(), e.getMessage());
+        if (sku == null || sku.isBlank() || name == null) {
+            return -1;
         }
 
-        return created;
-    }
+        String categoryName = (String) mostProduct.get("category");
+        String subcategoryName = (String) mostProduct.get("subcategory");
+        String targetCategoryName = resolveTargetCategoryName(categoryName, subcategoryName);
+        Long categoryId = null;
 
-    private Map<String, Map<String, Set<String>>> groupParametersByCategory(List<Map<String, Object>> products) {
-        Map<String, Map<String, Set<String>>> categorizedParams = new HashMap<>();
+        if (targetCategoryName == null) {
+            if (categoryName != null) unmappedCategories.add(categoryName);
+        } else {
+            targetCategoryName = applyLaptopNameOverride(targetCategoryName, name);
 
-        for (Map<String, Object> product : products) {
-            String categoryName = getCategoryNameFromProduct(product);
-            if (categoryName == null) continue;
-
-            @SuppressWarnings("unchecked")
-            Map<String, String> properties = (Map<String, String>) product.get("properties");
-            if (properties == null) continue;
-
-            categorizedParams.putIfAbsent(categoryName, new HashMap<>());
-            Map<String, Set<String>> categoryParams = categorizedParams.get(categoryName);
-
-            for (Map.Entry<String, String> prop : properties.entrySet()) {
-                String paramName = prop.getKey();
-                String paramValue = prop.getValue();
-
-                if (paramValue != null && !paramValue.isEmpty() && !"-".equals(paramValue)) {
-                    categoryParams.putIfAbsent(paramName, new HashSet<>());
-                    categoryParams.get(paramName).add(paramValue);
-                }
+            categoryId = categoryIdsByName.get(targetCategoryName.toLowerCase().trim());
+            if (categoryId == null) {
+                log.warn("Category '{}' not found in DB for product {}", targetCategoryName, sku);
             }
         }
 
-        return categorizedParams;
-    }
-
-    private String getCategoryNameFromProduct(Map<String, Object> product) {
-        String subcategory = (String) product.get("subcategory");
-        if (subcategory != null && !subcategory.isEmpty()) {
-            return subcategory;
-        }
-        return (String) product.get("category");
-    }
-
-    private Category findProductCategory(Map<String, Object> product) {
-        // Try subcategory first (more specific)
-        String subcategory = (String) product.get("subcategory");
-        if (subcategory != null && !subcategory.isEmpty()) {
-            Optional<Category> categoryOpt = findCategoryByName(subcategory);
-            if (categoryOpt.isPresent()) {
-                return categoryOpt.get();
+        if (categoryId == null) {
+            // Returning here outright meant a product we already carry was never processed
+            // again once its feed category stopped mapping, freezing its price and stock at
+            // whatever they were that day. Its existing category is a better answer than
+            // dropping it — the same thing AsbisSyncService already does. Only genuinely
+            // new products are skipped, since for those there is nothing to preserve.
+            categoryId = productRepository.findCategoryIdsBySkuAndPlatform(sku, Platform.MOST)
+                    .stream().findFirst().orElse(null);
+            if (categoryId == null) {
+                return 0;
             }
+            log.debug("Category mapping failed for {} — keeping its existing category {}", sku, categoryId);
         }
 
-        // Fallback to main category
-        String category = (String) product.get("category");
-        if (category != null && !category.isEmpty()) {
-            Optional<Category> categoryOpt = findCategoryByName(category);
-            if (categoryOpt.isPresent()) {
-                return categoryOpt.get();
-            }
-        }
-
-        return null;
-    }
-
-    private Optional<Category> findCategoryByName(String categoryName) {
-        if (categoryName == null || categoryName.isEmpty()) {
-            return Optional.empty();
-        }
-
-        String normalizedName = normalizeCategoryName(categoryName);
-
-        return categoryRepository.findAll().stream()
-                .filter(c -> c.getNameBg() != null)
-                .filter(c -> normalizedName.equals(normalizeCategoryName(c.getNameBg())))
-                .findFirst();
-    }
-
-    private Product findOrCreateProduct(String code, String name) {
-        List<Product> existing = productRepository.findProductsBySkuCode(code);
+        List<Product> existing = productRepository.findBySkuAndPlatform(sku, Platform.MOST);
+        Product product;
+        boolean isNew;
 
         if (!existing.isEmpty()) {
+            product = existing.get(0);
+            isNew = false;
             if (existing.size() > 1) {
-                log.warn("Found {} duplicates for SKU: {}, keeping first", existing.size(), code);
-                for (int i = 1; i < existing.size(); i++) {
-                    productRepository.delete(existing.get(i));
-                }
+                log.warn("Found {} duplicates for SKU {} (MOST), keeping first", existing.size(), sku);
+                for (int i = 1; i < existing.size(); i++) productRepository.delete(existing.get(i));
             }
-            return existing.get(0);
+        } else {
+            product = new Product();
+            product.setSku(sku);
+            product.setPlatform(Platform.MOST);
+            isNew = true;
         }
 
-        Product product = new Product();
-        product.setSku(code);
-        product.setReferenceNumber(code);
-        return product;
-    }
-
-    private void updateProductFromMost(Product product, Map<String, Object> rawProduct,
-                                       Category category, Map<String, Manufacturer> manufacturersMap) {
-        // Basic fields
-        product.setCategory(category);
-        product.setPlatform(Platform.MOST);
-
-        String name = (String) rawProduct.get("name");
-        product.setNameBg(name);
-        product.setNameEn(name);
-
-        // Status
-        String productStatus = (String) rawProduct.get("product_status");
-        boolean isAvailable = "Наличен".equals(productStatus);
-        product.setStatus(isAvailable ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
-        product.setShow(isAvailable);
-
-        // Price
-        String priceStr = (String) rawProduct.get("price");
-        String currency = (String) rawProduct.get("currency");
-
-        if (priceStr != null && !priceStr.isEmpty()) {
-            try {
-                BigDecimal price = new BigDecimal(priceStr);
-                BigDecimal priceInBGN = convertPriceToBGN(price, currency);
-                product.setPriceClient(priceInBGN);
-            } catch (NumberFormatException e) {
-                log.warn("Invalid price format: {}", priceStr);
-            }
+        // A hand-set category wins over the feed mapping: this assignment runs on every
+        // sync, so without the guard a manual correction lasts until the next night.
+        if (isNew || !Boolean.TRUE.equals(product.getManuallyCategorized())) {
+            product.setCategory(entityManager.getReference(Category.class, categoryId));
         }
 
-        // Manufacturer
-        String manufacturerName = (String) rawProduct.get("manufacturer");
-        if (manufacturerName != null && !manufacturerName.isEmpty()) {
-            String normalizedManufacturer = normalizeManufacturerName(manufacturerName);
-            Manufacturer manufacturer = manufacturersMap.get(normalizedManufacturer);
-            if (manufacturer != null) {
-                product.setManufacturer(manufacturer);
-            } else {
-                log.warn("Manufacturer not found: {}", manufacturerName);
-            }
-        }
+        if (isNew) {
+            product.setNameBg(name);
+            product.setNameEn(name);
+            product.setCreatedBy("system");
 
-        // Images
-        String mainImage = (String) rawProduct.get("main_picture_url");
-        if (mainImage != null && !mainImage.isEmpty()) {
-            product.setPrimaryImageUrl(mainImage);
-        }
-
-        @SuppressWarnings("unchecked")
-        List<String> gallery = (List<String>) rawProduct.get("gallery");
-        if (gallery != null && gallery.size() > 1) {
-            List<String> additionalImages = gallery.subList(1, gallery.size());
-            if (product.getAdditionalImages() != null) {
-                product.getAdditionalImages().clear();
-                product.getAdditionalImages().addAll(additionalImages);
-            } else {
-                product.setAdditionalImages(new ArrayList<>(additionalImages));
-            }
-        }
-
-        product.calculateFinalPrice();
-    }
-
-    private void setMostParametersToProduct(Product product, Map<String, Object> rawProduct) {
-        try {
-            if (product.getCategory() == null) {
-                log.warn("Product {} has no category, cannot set parameters", product.getSku());
-                return;
+            String description = (String) mostProduct.get("general_description");
+            if (description != null && !description.isBlank()) {
+                product.setDescriptionBg(description);
+                product.setDescriptionEn(description);
             }
 
             @SuppressWarnings("unchecked")
-            Map<String, String> properties = (Map<String, String>) rawProduct.get("properties");
-            if (properties == null || properties.isEmpty()) {
-                return;
+            List<String> gallery = (List<String>) mostProduct.get("gallery");
+            if (gallery != null && !gallery.isEmpty()) {
+                product.setPrimaryImageUrl(gallery.get(0));
             }
 
-            Set<ProductParameter> productParameters = new HashSet<>();
-
-            for (Map.Entry<String, String> prop : properties.entrySet()) {
-                try {
-                    String paramName = prop.getKey();
-                    String paramValue = prop.getValue();
-
-                    if (paramValue == null || paramValue.isEmpty() || "-".equals(paramValue)) {
-                        continue;
-                    }
-
-                    // Find parameter
-                    Optional<Parameter> parameterOpt = findParameterByName(paramName, product.getCategory());
-                    if (parameterOpt.isEmpty()) {
-                        continue;
-                    }
-
-                    Parameter parameter = parameterOpt.get();
-
-                    // Find or create parameter option
-                    ParameterOption option = findOrCreateParameterOption(parameter, paramValue);
-                    if (option == null) {
-                        continue;
-                    }
-
-                    ProductParameter productParam = new ProductParameter();
-                    productParam.setProduct(product);
-                    productParam.setParameter(parameter);
-                    productParam.setParameterOption(option);
-                    productParameters.add(productParam);
-
-                } catch (Exception e) {
-                    log.error("Error mapping parameter {} for product {}: {}",
-                            prop.getKey(), product.getSku(), e.getMessage());
+            String manufacturerName = (String) mostProduct.get("manufacturer");
+            if (manufacturerName != null && !manufacturerName.isBlank()) {
+                Long mfId = manufacturerIdsByName.get(normalizeManufacturerName(manufacturerName));
+                if (mfId == null) {
+                    log.warn("Manufacturer '{}' not found for SKU {}, skipping", manufacturerName, sku);
+                    return -2;
                 }
+                product.setManufacturer(entityManager.getReference(Manufacturer.class, mfId));
+            }
+        }
+
+        Object priceObj = mostProduct.get("price");
+        if (priceObj != null) {
+            BigDecimal price = convertToPrice(priceObj);
+            String currency = (String) mostProduct.get("currency");
+            // priceClient is stored in EUR on every platform (Vali, Asbis, Tekra all store
+            // the supplier price as-is; Asbis states <CURRENCY_CODE>EUR</CURRENCY_CODE>).
+            // The Most feed is requested with ?currency=EUR and returns EUR for every
+            // product, so an EUR price needs no conversion. This used to multiply by
+            // the EUR/BGN rate, storing BGN in a EUR field — every Most price was 1.95583x
+            // too high, which also made Most lose every cross-platform dedup (bug-466).
+            boolean priceUsable = true;
+
+            if ("EUR".equals(currency)) {
+                // no conversion needed — already the target currency
+            } else if ("USD".equals(currency)) {
+                if (usdToEurRate != null && usdToEurRate.compareTo(BigDecimal.ZERO) > 0) {
+                    price = price.multiply(usdToEurRate).setScale(2, RoundingMode.HALF_UP);
+                    log.warn("Most returned a USD price for SKU {} — converted with rate {}", sku, usdToEurRate);
+                } else {
+                    // Fail safe rather than silently storing USD in a EUR field (~16% off).
+                    // Leaving the price unset makes hasValidPrice false, so the product is
+                    // hidden by the existing "no price -> not shown" rule instead of going
+                    // on sale at the wrong price. Set most.exchange.usd-to-eur to enable.
+                    log.error("Most returned a USD price for SKU {} but most.exchange.usd-to-eur "
+                            + "is not configured — skipping price to avoid storing USD as EUR", sku);
+                    priceUsable = false;
+                }
+            } else if (currency != null) {
+                log.warn("Unexpected Most currency '{}' for SKU {} — storing price as-is", currency, sku);
             }
 
-            product.setProductParameters(productParameters);
-
-        } catch (Exception e) {
-            log.error("Error setting Most parameters for product {}: {}", product.getSku(), e.getMessage());
+            if (priceUsable) {
+                product.setPriceClient(price);
+            }
         }
+
+        boolean inStock = Boolean.TRUE.equals(mostProduct.get("inStock"));
+        product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
+        product.calculateFinalPrice();
+        boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
+
+        // Warranty / service products are never shown regardless of stock
+        String nameLowerForHide = name.toLowerCase();
+        boolean isWarranty = nameLowerForHide.contains("warranty")
+                || nameLowerForHide.contains(" warr")
+                || nameLowerForHide.contains("carry-in war")
+                || nameLowerForHide.contains("nbd onsite")
+                || nameLowerForHide.contains("nbd ")
+                || nameLowerForHide.contains("prosupport")
+                || nameLowerForHide.contains("care pack")
+                || nameLowerForHide.contains("carepack")
+                || nameLowerForHide.contains("service plan")
+                || nameLowerForHide.contains("hw sup")
+                || nameLowerForHide.contains("гаранция");
+
+        boolean hasImage = product.getPrimaryImageUrl() != null
+                && !product.getPrimaryImageUrl().isBlank();
+
+        if (isWarranty) {
+            product.setShow(false);
+            product.setStatus(ProductStatus.NOT_AVAILABLE);
+        } else if (Boolean.TRUE.equals(product.getManuallyHidden())) {
+            // An admin hid this on purpose — that decision outlives the sync.
+            product.setShow(false);
+        } else {
+            // Visibility is recomputed from scratch on every run, for new and existing
+            // products alike. This used to be a one-way ratchet for existing products:
+            // the sync could hide but never re-show, so a product that went out of stock
+            // stayed invisible forever once it came back. That left 273 in-stock, priced
+            // products with images permanently missing from the site (bug-460).
+            // Manual hiding is now carried by manuallyHidden above, so show_flag is free
+            // to follow stock and price.
+            product.setShow(inStock && hasValidPrice && hasImage);
+        }
+
+        product = productRepository.save(product);
+
+        setMostParametersToProduct(product, mostProduct, parameterIdsByMostKey, optionIdsByParamAndValue);
+
+        return isNew ? 1 : 2;
     }
 
-    private Optional<Parameter> findParameterByName(String paramName, Category category) {
-        String normalizedName = normalizeParameterName(paramName);
+    private void setMostParametersToProduct(
+            Product product,
+            Map<String, Object> mostProduct,
+            Map<String, Long> parameterIdsByMostKey,
+            Map<Long, Map<String, Long>> optionIdsByParamAndValue) {
 
-        return parameterRepository.findByCategoryId(category.getId())
-                .stream()
-                .filter(p -> p.getNameBg() != null)
-                .filter(p -> normalizedName.equals(normalizeParameterName(p.getNameBg())))
-                .findFirst();
-    }
-
-    private ParameterOption findOrCreateParameterOption(Parameter parameter, String value) {
         try {
-            String normalizedValue = normalizeParameterValue(value);
+            // DELETE existing params for this product via JPQL.
+            // Since this runs inside its own REQUIRES_NEW transaction (no shared session state),
+            // there is no L1 cache conflict — the DELETE executes cleanly before any INSERTs.
+            entityManager.createQuery("DELETE FROM ProductParameter pp WHERE pp.product.id = :productId")
+                    .setParameter("productId", product.getId())
+                    .executeUpdate();
 
-            // Try to find existing
-            List<ParameterOption> options = parameterOptionRepository
-                    .findByParameterIdOrderByOrderAsc(parameter.getId());
+            Map<String, String> parameterMappings = extractMostParameters(mostProduct);
+            Set<String> seenKeys = new HashSet<>();
+            int mappedCount = 0, notFoundCount = 0;
 
-            for (ParameterOption opt : options) {
-                if (opt.getNameBg() != null &&
-                        normalizedValue.equals(normalizeParameterValue(opt.getNameBg()))) {
-                    return opt;
+            for (Map.Entry<String, String> paramEntry : parameterMappings.entrySet()) {
+                String parameterValue = paramEntry.getValue();
+                if (parameterValue == null || parameterValue.isBlank()) continue;
+
+                String mostKey = generateMostKey(paramEntry.getKey());
+                Long parameterId = parameterIdsByMostKey.get(mostKey);
+                if (parameterId == null) { notFoundCount++; continue; }
+
+                Map<String, Long> optionMap = optionIdsByParamAndValue.get(parameterId);
+                if (optionMap == null) { notFoundCount++; continue; }
+
+                Long optionId = optionMap.get(normalizeName(parameterValue));
+                if (optionId == null) {
+                    // Fuzzy fallback: strip all whitespace (handles "16 GB" vs "16GB")
+                    String stripped = parameterValue.toLowerCase().replaceAll("\\s+", "");
+                    optionId = optionMap.entrySet().stream()
+                            .filter(e -> e.getKey().replaceAll("\\s+", "").equals(stripped))
+                            .map(Map.Entry::getValue)
+                            .findFirst().orElse(null);
                 }
+                if (optionId == null) { notFoundCount++; continue; }
+
+                if (!seenKeys.add(parameterId + ":" + optionId)) continue; // dedup
+
+                ProductParameter pp = new ProductParameter();
+                pp.setProduct(product);
+                pp.setParameter(entityManager.getReference(Parameter.class, parameterId));
+                pp.setParameterOption(entityManager.getReference(ParameterOption.class, optionId));
+                entityManager.persist(pp);
+                mappedCount++;
             }
 
-            // Create new
-            ParameterOption newOption = new ParameterOption();
-            newOption.setParameter(parameter);
-            newOption.setNameBg(value);
-            newOption.setNameEn(value);
-            newOption.setOrder(options.size());
-
-            return parameterOptionRepository.save(newOption);
+            if (notFoundCount > 0) {
+                log.warn("Product {}: {} mapped, {} not found", product.getSku(), mappedCount, notFoundCount);
+            }
 
         } catch (Exception e) {
-            log.error("Error finding/creating parameter option: {}", e.getMessage());
-            return null;
+            log.error("ERROR setting Most parameters for product {}: {}", product.getSku(), e.getMessage());
+            throw e;
         }
     }
 
-    private BigDecimal convertPriceToBGN(BigDecimal price, String currency) {
-        if (price == null) {
-            return BigDecimal.ZERO;
+    @SuppressWarnings("unchecked")
+    private Map<String, String> extractMostParameters(Map<String, Object> mostProduct) {
+        Map<String, String> parameters = new HashMap<>();
+
+        // Read from the nested "properties" map — these are the actual product specs
+        // from the Most XML <properties><property name="...">value</property></properties> section.
+        // Top-level product fields (code, partnum, main_picture_url, etc.) are metadata, NOT parameters.
+        Object propertiesObj = mostProduct.get("properties");
+        if (!(propertiesObj instanceof Map)) {
+            return parameters;
         }
 
-        if ("BGN".equalsIgnoreCase(currency)) {
-            return price;
+        Map<String, String> properties = (Map<String, String>) propertiesObj;
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            String name = entry.getKey();
+            String value = entry.getValue();
+
+            if (name == null || name.isBlank() || value == null || value.isBlank()
+                    || "null".equalsIgnoreCase(value.trim())) {
+                continue;
+            }
+
+            // 200 used to be the cap and silently dropped 6.5% of the feed's values — among them
+            // "Memory type" of every motherboard, which is where DDR4/DDR5 is. Only runaway text is cut now.
+            String trimmedValue = value.trim();
+            if (trimmedValue.length() > MAX_PROPERTY_VALUE_LENGTH) {
+                continue;
+            }
+
+            parameters.put(name, trimmedValue);
         }
 
-        if ("USD".equalsIgnoreCase(currency)) {
-            return price.multiply(new BigDecimal(USD_TO_BGN_RATE));
-        }
-
-        if ("EUR".equalsIgnoreCase(currency)) {
-            return price.multiply(new BigDecimal(EUR_TO_BGN_RATE));
-        }
-
-        // Default: assume BGN
-        log.warn("Unknown currency: {}, assuming BGN", currency);
-        return price;
+        return parameters;
     }
 
-    private String generateUniqueSlug(String baseSlug, Category category) {
-        if (!categoryRepository.existsBySlugAndIdNot(baseSlug, category.getId())) {
-            return baseSlug;
-        }
+    private boolean canAddCategoryToParam(Long paramId, String nameBg, Category cat,
+                                          Map<Long, Map<String, Long>> paramNamesByCategory) {
+        if (cat.getId() == null || nameBg == null) return true;
+        Map<String, Long> namesInCat = paramNamesByCategory.get(cat.getId());
+        if (namesInCat == null) return true;
+        Long existingId = namesInCat.get(nameBg.toLowerCase().trim());
+        if (existingId == null) return true;
+        if (existingId.equals(paramId)) return true;
+        log.warn("Blocked duplicate param '{}' in category '{}' — already owned by param id={}",
+                nameBg, cat.getNameBg(), existingId);
+        return false;
+    }
 
-        int counter = 1;
-        String numberedSlug;
-        do {
-            numberedSlug = baseSlug + "-" + counter;
-            counter++;
-        } while (categoryRepository.existsBySlugAndIdNot(numberedSlug, category.getId()));
-
-        return numberedSlug;
+    private void registerParamInCategory(Long paramId, String nameBg, Category cat,
+                                         Map<Long, Map<String, Long>> paramNamesByCategory) {
+        if (paramId == null || cat.getId() == null || nameBg == null) return;
+        paramNamesByCategory.computeIfAbsent(cat.getId(), k -> new HashMap<>())
+                .put(nameBg.toLowerCase().trim(), paramId);
     }
 
     private String normalizeManufacturerName(String name) {
         if (name == null) return "";
-        return name.toLowerCase().trim().replaceAll("\\s+", " ");
+        return name.toLowerCase().trim().replaceAll("\\s+", " ").replaceAll("[^a-zа-я0-9\\s]+", "");
     }
 
-    private String normalizeCategoryName(String name) {
+    private String normalizeName(String name) {
         if (name == null) return "";
         return name.toLowerCase().trim().replaceAll("\\s+", " ");
     }
 
-    private String normalizeParameterName(String name) {
-        if (name == null) return "";
-        return name.toLowerCase().trim().replaceAll("\\s+", " ");
+    private String buildOptionCacheKey(Long parameterId, String optionName) {
+        return parameterId + ":::" + normalizeName(optionName);
     }
 
-    private String normalizeParameterValue(String value) {
-        if (value == null) return "";
-        return value.toLowerCase().trim().replaceAll("\\s+", " ");
+    private BigDecimal convertToPrice(Object value) {
+        if (value == null) return BigDecimal.ZERO;
+
+        if (value instanceof BigDecimal) {
+            return (BigDecimal) value;
+        }
+
+        if (value instanceof Number) {
+            return BigDecimal.valueOf(((Number) value).doubleValue());
+        }
+
+        try {
+            return new BigDecimal(value.toString());
+        } catch (NumberFormatException e) {
+            log.warn("Cannot convert to price: {}", value);
+            return BigDecimal.ZERO;
+        }
+    }
+
+
+    private String generateMostKey(String parameterName) {
+        if (parameterName == null || parameterName.trim().isEmpty()) {
+            return "unknown_param";
+        }
+
+        // Keep Cyrillic (а-яА-Я) and Latin (a-zA-Z), digits, strip everything else
+        return parameterName.toLowerCase()
+                .replaceAll("[^a-z0-9а-яё\\s]+", " ")
+                .trim()
+                .replaceAll("\\s+", "_");
     }
 }

@@ -1,9 +1,18 @@
 package com.techstore.controller;
 
-import com.techstore.dto.request.MessageToAdmin;
-import com.techstore.dto.request.UserRequestDTO;
 import com.techstore.dto.UserResponseDTO;
+import com.techstore.dto.request.ChangePasswordDTO;
+import com.techstore.dto.request.AcceptOfferRequestDto;
+import com.techstore.dto.request.MessageToAdmin;
+import com.techstore.dto.request.UserAddressDTO;
+import com.techstore.dto.request.UserCompanyDTO;
+import com.techstore.dto.request.UserProfileUpdateDTO;
+import com.techstore.dto.request.UserRequestDTO;
+import com.techstore.dto.response.PersonalOfferResponseDto;
+import com.techstore.dto.response.UserAddressResponseDTO;
+import com.techstore.dto.response.UserCompanyResponseDTO;
 import com.techstore.service.EmailService;
+import com.techstore.service.PersonalOfferService;
 import com.techstore.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -14,10 +23,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/users")
@@ -37,9 +46,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+    private final PersonalOfferService personalOfferService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<Page<UserResponseDTO>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -55,14 +65,14 @@ public class UserController {
     }
 
     @GetMapping(value = "/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         UserResponseDTO user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 
     @GetMapping(value = "/email/{email}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserResponseDTO> getUserByEmail(@PathVariable String email) {
         UserResponseDTO user = userService.getUserByEmail(email);
         return ResponseEntity.ok(user);
@@ -76,7 +86,7 @@ public class UserController {
     }
 
     @PutMapping(value = "/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<UserResponseDTO> updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UserRequestDTO requestDTO) {
@@ -95,27 +105,120 @@ public class UserController {
     }
 
 
-    @GetMapping(value = "/profile")
+    @GetMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponseDTO> getCurrentUserProfile() {
-        // Implementation would get current authenticated user
-        return ResponseEntity.ok(new UserResponseDTO());
+        return ResponseEntity.ok(userService.getCurrentUserProfile());
     }
 
-    @PutMapping(value = "/profile")
+    @PutMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponseDTO> updateCurrentUserProfile(
-            @Valid @RequestBody UserRequestDTO requestDTO) {
-        // Implementation would update current authenticated user
-        return ResponseEntity.ok(new UserResponseDTO());
+            @Valid @RequestBody UserProfileUpdateDTO dto) {
+        return ResponseEntity.ok(userService.updateCurrentUserProfile(dto));
     }
 
-    @PutMapping(value = "/profile/password")
+    @PutMapping("/profile/password")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> changePassword(
-            @RequestParam String currentPassword,
-            @RequestParam String newPassword) {
-        // Implementation would change password for current user
-        return ResponseEntity.ok("Password changed successfully");
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordDTO dto) {
+        userService.changePassword(dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ========== ADDRESSES ==========
+
+    @GetMapping("/profile/addresses")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<UserAddressResponseDTO>> getAddresses() {
+        return ResponseEntity.ok(userService.getCurrentUserAddresses());
+    }
+
+    @PostMapping("/profile/addresses")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserAddressResponseDTO> addAddress(@Valid @RequestBody UserAddressDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.addAddress(dto));
+    }
+
+    @PutMapping("/profile/addresses/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserAddressResponseDTO> updateAddress(
+            @PathVariable Long id,
+            @Valid @RequestBody UserAddressDTO dto) {
+        return ResponseEntity.ok(userService.updateAddress(id, dto));
+    }
+
+    @DeleteMapping("/profile/addresses/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteAddress(@PathVariable Long id) {
+        userService.deleteAddress(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ========== COMPANIES ==========
+
+    @GetMapping("/profile/companies")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<UserCompanyResponseDTO>> getCompanies() {
+        return ResponseEntity.ok(userService.getCurrentUserCompanies());
+    }
+
+    @PostMapping("/profile/companies")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserCompanyResponseDTO> addCompany(@Valid @RequestBody UserCompanyDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.addCompany(dto));
+    }
+
+    @PutMapping("/profile/companies/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserCompanyResponseDTO> updateCompany(
+            @PathVariable Long id,
+            @Valid @RequestBody UserCompanyDTO dto) {
+        return ResponseEntity.ok(userService.updateCompany(id, dto));
+    }
+
+    @DeleteMapping("/profile/companies/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteCompany(@PathVariable Long id) {
+        userService.deleteCompany(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ========== PERSONAL OFFERS ==========
+
+    @GetMapping("/profile/offers")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<PersonalOfferResponseDto>> getMyOffers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(personalOfferService.getCurrentUserOffers(pageable));
+    }
+
+    @GetMapping("/profile/offers/unread-count")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Long> getUnreadOffersCount() {
+        return ResponseEntity.ok(personalOfferService.countUnreadForCurrentUser());
+    }
+
+    @PutMapping("/profile/offers/{id}/read")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PersonalOfferResponseDto> markOfferAsRead(@PathVariable Long id) {
+        return ResponseEntity.ok(personalOfferService.markAsRead(id));
+    }
+
+    @PostMapping("/profile/offers/{id}/accept")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PersonalOfferResponseDto> acceptOfferWithDetails(
+            @PathVariable Long id,
+            @Valid @RequestBody AcceptOfferRequestDto dto) {
+        return ResponseEntity.ok(personalOfferService.acceptWithDetails(id, dto));
+    }
+
+    @PutMapping("/profile/offers/{id}/status")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PersonalOfferResponseDto> updateOfferStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
+        return ResponseEntity.ok(personalOfferService.updateStatus(id, status));
     }
 }

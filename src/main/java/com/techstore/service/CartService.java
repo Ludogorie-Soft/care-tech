@@ -7,6 +7,8 @@ import com.techstore.dto.response.ProductSummaryDto;
 import com.techstore.entity.CartItem;
 import com.techstore.entity.Product;
 import com.techstore.entity.User;
+import com.techstore.enums.ProductStatus;
+import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.ResourceNotFoundException;
 import com.techstore.mapper.ParameterMapper;
 import com.techstore.repository.CartItemRepository;
@@ -31,19 +33,27 @@ public class CartService {
     private final ProductRepository productRepository;
     private final ParameterMapper parameterMapper;
 
+    @Transactional(readOnly = true)
     public CartSummaryDto getCartSummary(Long userId, String language) {
         List<CartItem> cartItems = cartItemRepository.findByUserIdOrderByCreatedAtAsc(userId);
 
-        List<CartItemResponseDto> itemDtos = cartItems.stream()
-                .map(cartItem -> {
-                    CartItemResponseDto dto = mapToCartItemResponse(cartItem, cartItem.getProduct(), language);
-                    return dto;
+        List<CartItem> availableItems = cartItems.stream()
+                .filter(ci -> {
+                    Product p = ci.getProduct();
+                    return p != null
+                            && p.getStatus() == ProductStatus.AVAILABLE
+                            && Boolean.TRUE.equals(p.getActive())
+                            && Boolean.TRUE.equals(p.getShow());
                 })
+                .toList();
+
+        List<CartItemResponseDto> itemDtos = availableItems.stream()
+                .map(cartItem -> mapToCartItemResponse(cartItem, cartItem.getProduct(), language))
                 .toList();
 
         CartSummaryDto summary = new CartSummaryDto();
         summary.setItems(itemDtos);
-        summary.setTotalItems(cartItems.stream().mapToInt(CartItem::getQuantity).sum());
+        summary.setTotalItems(availableItems.stream().mapToInt(CartItem::getQuantity).sum());
         summary.setTotalPrice(cartItemRepository.calculateTotalPriceByUserId(userId));
 
         return summary;
@@ -58,6 +68,12 @@ public class CartService {
 
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + request.getProductId()));
+
+        if (product.getStatus() != ProductStatus.AVAILABLE
+                || !Boolean.TRUE.equals(product.getActive())
+                || !Boolean.TRUE.equals(product.getShow())) {
+            throw new BusinessLogicException("Продуктът не е наличен.");
+        }
 
         Optional<CartItem> existingItem = cartItemRepository.findByUserIdAndProductId(userId, request.getProductId());
 

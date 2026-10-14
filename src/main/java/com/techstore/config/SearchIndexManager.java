@@ -24,6 +24,13 @@ public class SearchIndexManager {
     @Value("${app.search.postgresql.enable-trigram:true}")
     private boolean enableTrigram;
 
+    /**
+     * app.search.postgresql.performance-test was already in application.yml but nothing
+     * read it, so the two probe queries ran on every single boot regardless.
+     */
+    @Value("${app.search.postgresql.performance-test:false}")
+    private boolean runPerformanceTest;
+
     @EventListener(ApplicationReadyEvent.class)
     public void initializeSearchIndexes() {
         if (!autoCreateIndexes) {
@@ -49,7 +56,9 @@ public class SearchIndexManager {
             long duration = System.currentTimeMillis() - startTime;
             log.info("Performance search indexes initialization completed in {}ms", duration);
 
-            performanceTest();
+            if (runPerformanceTest) {
+                performanceTest();
+            }
 
         } catch (Exception e) {
             log.error("Failed to initialize search indexes: {}", e.getMessage(), e);

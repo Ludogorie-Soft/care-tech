@@ -1,12 +1,10 @@
 package com.techstore.repository;
 
-import com.techstore.entity.Category;
 import com.techstore.entity.Manufacturer;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,17 +19,7 @@ public interface ManufacturerRepository extends JpaRepository<Manufacturer, Long
 
     List<Manufacturer> findAllByOrderByNameAsc();
 
-    @Query("SELECT m FROM Manufacturer m WHERE m.asbisId = :id")
-    Optional<Manufacturer> findByAsbisId(@Param("id") String id);
-
-    @Query("SELECT m FROM Manufacturer m WHERE m.asbisCode = :code")
-    Optional<Manufacturer> findByAsbisCode(@Param("code") String code);
-
-    @Query("SELECT m FROM Manufacturer m WHERE m.asbisCode IS NOT NULL")
-    List<Manufacturer> findAllAsbisManufacturers();
-
-    @Query("SELECT COUNT(m) FROM Manufacturer m WHERE m.asbisCode IS NOT NULL")
-    Long countAsbisManufacturers();
-
     List<Manufacturer> findByIsPromoActiveTrue();
+
+    List<Manufacturer> findDistinctByProductsMarkupPercentageGreaterThan(BigDecimal markup);
 }

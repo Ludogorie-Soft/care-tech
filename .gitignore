@@ -38,3 +38,5 @@ build/
 /lucene-indexes/
 /logs/
 /uploads/
+
+/.wolf/

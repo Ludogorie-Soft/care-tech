@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Забравихте нещо в количката</title>
+</head>
+<body style="margin:0; padding:0; font-family:Arial,sans-serif; background-color:#0a0a0a;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0a0a;">
+    <tr>
+        <td align="center" style="padding:20px 10px;">
+            <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
+
+                <!-- Header -->
+                <tr th:replace="~{email/fragments/layout :: header('#ed1c24')}"></tr>
+
+                <!-- Icon & Greeting -->
+                <tr>
+                    <td align="center" style="padding:40px 20px 20px; background-color:#1a1a1a;">
+                        <div style="width:80px; height:80px; background-color:#ed1c24; border-radius:50%; margin:0 auto 20px; display:inline-block; text-align:center; line-height:80px;">
+                            <span style="color:#ffffff; font-size:36px;">🛒</span>
+                        </div>
+                        <h2 style="color:#ffffff; font-size:22px; margin:0 0 10px 0;">Забравихте нещо!</h2>
+                        <p style="color:#929497; font-size:15px; line-height:1.6; margin:0;">
+                            Здравейте, <span th:text="${customerName}" style="color:#ffffff;">Клиент</span>!<br/>
+                            В количката Ви чакат продукти. Завършете поръчката си, докато са в наличност.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Cart Items -->
+                <tr>
+                    <td style="padding:10px 30px 20px; background-color:#1a1a1a;">
+                        <h4 style="color:#929497; font-size:12px; text-transform:uppercase; letter-spacing:1px; margin:0 0 12px 0;">Продукти в количката</h4>
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr th:each="item : ${cartItems}">
+                                <td style="padding:12px 0; border-bottom:1px solid #2a2a2a;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <!-- Same rule as the OG pages: a full supplier URL as is, otherwise our image proxy -->
+                                            <td style="width:64px; vertical-align:middle;" th:with="img=${item.product.primaryImageUrl}">
+                                                <img th:if="${img != null}"
+                                                     th:src="${#strings.startsWith(img, 'http')} ? ${img} : ${appUrl} + '/api/images/product/' + ${item.product.id} + '/primary'"
+                                                     width="54" height="54"
+                                                     style="border-radius:6px; object-fit:contain; display:block; background:#2a2a2a;" alt=""/>
+                                                <div th:unless="${img != null}"
+                                                     style="width:54px; height:54px; background-color:#2a2a2a; border-radius:6px;"></div>
+                                            </td>
+                                            <td style="padding-left:14px; vertical-align:middle;">
+                                                <div style="color:#ffffff; font-size:14px; font-weight:600;"
+                                                     th:text="${item.product.nameBg}">Продукт</div>
+                                                <div style="color:#929497; font-size:12px; margin-top:3px;">
+                                                    Количество: <span th:text="${item.quantity}" style="color:#d1d5db;">1</span>
+                                                </div>
+                                            </td>
+                                            <td style="text-align:right; vertical-align:middle; white-space:nowrap;">
+                                                <!-- finalPrice is without VAT; show what the site shows -->
+                                                <div style="color:#ed1c24; font-size:15px; font-weight:bold;">
+                                                    <span th:text="${#numbers.formatDecimal(item.product.finalPrice * 1.2, 1, 'NONE', 2, 'POINT')}">0.00</span> €
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- CTA Button -->
+                <tr>
+                    <td align="center" style="padding:10px 30px 40px; background-color:#1a1a1a;">
+                        <a th:href="${cartUrl}" href="#"
+                           style="display:inline-block; background-color:#ed1c24; color:#ffffff; text-decoration:none; font-size:16px; font-weight:bold; padding:14px 40px; border-radius:8px;">
+                            Завърши поръчката
+                        </a>
+                        <p style="color:#555555; font-size:12px; margin:20px 0 0 0;">
+                            Продуктите са запазени в количката Ви и Ви очакват.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr th:replace="~{email/fragments/layout :: footer('#ed1c24', null, null, null)}"></tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

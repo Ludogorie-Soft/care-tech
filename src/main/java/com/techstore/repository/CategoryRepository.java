@@ -5,9 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -23,29 +23,29 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     boolean existsBySlugAndIdNot(String slug, Long id);
 
-    List<Category> findByShowTrueOrderBySortOrderAscNameEnAsc();
+    Optional<Category> findFirstBySlugAndShowTrueOrderByIdAsc(String slug);
+
+    boolean existsByParentIdAndShowTrue(Long parentId);
+
+    List<Category> findByShowTrue();
 
     Page<Category> findByShowTrue(Pageable pageable);
 
-    Optional<Category> findByTekraSlug(String tekraSlug);
-
     Optional<Category> findByNameBg(String nameBg);
 
-    Optional<Category> findByNameEn(String nameEn);
+    List<Category> findByIsPromoActiveTrue();
+
+    List<Category> findDistinctByProductsMarkupPercentageGreaterThan(BigDecimal markup);
 
     List<Category> findByParentId(Long parentId);
 
-    @Query("SELECT c FROM Category c WHERE c.asbisId = :id")
-    Optional<Category> findByAsbisId(@Param("id") String id);
+    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.parent")
+    List<Category> findAllWithParents();
 
-    @Query("SELECT c FROM Category c WHERE c.asbisCode = :code")
-    Optional<Category> findByAsbisCode(@Param("code") String code);
+    @Query("SELECT c.id AS id, c.slug AS slug, c.updatedAt AS updatedAt FROM Category c WHERE c.show = true AND c.slug IS NOT NULL AND c.slug <> ''")
+    List<SitemapEntry> findSitemapEntries();
 
-    @Query("SELECT c FROM Category c WHERE c.asbisId IS NOT NULL")
-    List<Category> findAllAsbisCategories();
-
-    @Query("SELECT COUNT(c) FROM Category c WHERE c.asbisId IS NOT NULL")
-    Long countAsbisCategories();
-
-    List<Category> findByIsPromoActiveTrue();
+    /** Categories with at least one visible child — React shows them under /category/list/. */
+    @Query("SELECT DISTINCT c.parent.id FROM Category c WHERE c.show = true AND c.parent IS NOT NULL")
+    Set<Long> findVisibleParentIds();
 }

@@ -7,12 +7,14 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "categories")
 @Data
-@EqualsAndHashCode(callSuper = false, exclude = {"parent", "children", "products"})
+@EqualsAndHashCode(callSuper = false, exclude = {"parent", "children", "products", "parameters", "aliasOf"})
 public class Category extends BaseEntity {
 
     @Column(name = "is_promo_active", nullable = false)
@@ -61,11 +63,19 @@ public class Category extends BaseEntity {
     @JoinColumn(name = "parent_id")
     private Category parent;
 
+    /** When set, this category is an alias — products are served from the target category. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "alias_of_id")
+    private Category aliasOf;
+
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Category> children = new ArrayList<>();
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Product> products = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "categories")
+    private Set<Parameter> parameters = new HashSet<>();
 
     public boolean isParentCategory() {
         return parent == null;

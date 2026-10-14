@@ -19,7 +19,7 @@ public class CacheInitializer {
         String[] cacheNames = {
                 "products", "manufacturers", "parameters", "parameterOptions",
                 "categoriesByExternalId", "manufacturersByExternalId",
-                "parametersByCategory", "productsByCategory"
+                "productsByCategory"
         };
 
         for (String cacheName : cacheNames) {

@@ -1,9 +1,13 @@
 package com.techstore.controller;
 
+import com.techstore.dto.filter.CategoryFiltersRequest;
+import com.techstore.dto.filter.CategoryFiltersResponse;
 import com.techstore.dto.request.ProductSearchRequest;
-import com.techstore.dto.response.FacetValue;
 import com.techstore.dto.response.ProductSearchResponse;
 import com.techstore.service.ProductSearchService;
+import com.techstore.service.filter.CategoryFilterService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +26,14 @@ import java.util.Map;
 public class ProductSearchController {
 
     private final ProductSearchService searchService;
+    private final CategoryFilterService categoryFilterService;
 
     @PostMapping("/search")
     public ResponseEntity<ProductSearchResponse> searchProducts(
             @RequestBody ProductSearchRequest request) {
 
-        log.info("Search request: query='{}', filters={}, page={}",
-                request.getQuery(), request.getFilters(), request.getPage());
+        log.info("Search request: query='{}', attributeFilters={}, page={}",
+                request.getQuery(), request.getAttributeFilters(), request.getPage());
 
         ProductSearchResponse response = searchService.searchProducts(request);
 
@@ -66,17 +71,27 @@ public class ProductSearchController {
         return searchProducts(request);
     }
 
-    @GetMapping("/categories/{categoryId}/parameters")
-    public ResponseEntity<Map<String, List<FacetValue>>> getCategoryParameters(
+    /** Filter panel of a category from the canonical filter layer (groups, values, counts). */
+    @PostMapping("/categories/{categoryId}/filters")
+    public ResponseEntity<CategoryFiltersResponse> getCategoryFilters(
             @PathVariable Long categoryId,
-            @RequestParam(defaultValue = "bg") String language) {
+            @RequestBody(required = false) CategoryFiltersRequest request) {
+        return ResponseEntity.ok(categoryFilterService.getFilters(categoryId, request, isAdmin()));
+    }
 
-        log.info("Fetching parameters for category {} in language {}", categoryId, language);
+    /** From the token's authorities, so the call that runs on every filter click costs no user lookup. */
+    private static boolean isAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()) || "ROLE_SUPER_ADMIN".equals(a.getAuthority()));
+    }
 
-        Map<String, List<FacetValue>> parameters =
-                searchService.getAvailableParametersWithCountsForCategory(categoryId, language);
-
-        return ResponseEntity.ok(parameters);
+    /** Translates a pre-V38 {@code param_<id>=<optionIds>} selection into canonical attribute filters. */
+    @PostMapping("/categories/{categoryId}/filters/translate-legacy")
+    public ResponseEntity<Map<Long, List<Long>>> translateLegacyFilters(
+            @PathVariable Long categoryId,
+            @RequestBody Map<Long, List<Long>> legacyFilters) {
+        return ResponseEntity.ok(categoryFilterService.translateLegacy(categoryId, legacyFilters));
     }
 
     @GetMapping("/categories/{categoryId}/products")

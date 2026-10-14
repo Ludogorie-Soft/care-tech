@@ -1,7 +1,6 @@
 package com.techstore.controller;
 
 import com.techstore.dto.response.ManufacturerResponseDto;
-import com.techstore.dto.response.ProductParameterResponseDto;
 import com.techstore.dto.response.ProductResponseDTO;
 import com.techstore.dto.request.ProductCreateRequestDTO;
 import com.techstore.dto.request.ProductImageOperationsDTO;
@@ -23,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/products")
@@ -124,24 +123,6 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-    @GetMapping("/parameters/category")
-    @Operation(summary = "Get products parameters by category")
-    public ResponseEntity<Set<ProductParameterResponseDto>> getProductParametersByCategory(
-            @RequestParam("categoryId") Long categoryId,
-            @RequestParam(name = "lang", defaultValue = "en") String lang
-    ) {
-        Set<ProductParameterResponseDto> response = productService.getProductsParametersByCategory(categoryId, lang);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Parses sortBy parameter and extracts field name and direction.
-     * Supports formats like: "price_asc", "price_desc", or just "price"
-     *
-     * @param sortBy the sort field name (may contain _asc or _desc suffix)
-     * @param defaultDirection the default sort direction if not specified in sortBy
-     * @return SortInfo containing the validated field name and direction
-     */
     private SortInfo parseSortBy(String sortBy, String defaultDirection) {
         if (sortBy == null || sortBy.trim().isEmpty()) {
             return new SortInfo("id", defaultDirection);
@@ -215,6 +196,7 @@ public class ProductController {
         return ResponseEntity.ok(relatedProducts);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Create product", description = "Create a new product with required images in single operation")
     public ResponseEntity<ProductResponseDTO> createProduct(
@@ -233,6 +215,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Update product with image management", description = "Update product and manage images in single operation")
     public ResponseEntity<ProductResponseDTO> updateProduct(
@@ -250,23 +233,17 @@ public class ProductController {
         return ResponseEntity.ok(updatedProduct);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete product", description = "Soft delete a product (Admin only)")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         log.info("Deleting product with id: {}", id);
-        productService.deleteProduct(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/{id}/permanent")
-    @Operation(summary = "Permanently delete product", description = "Permanently delete a product (Super Admin only)")
-    public ResponseEntity<Void> permanentDeleteProduct(@PathVariable Long id) {
-        log.info("Permanently deleting product with id: {}", id);
         productService.permanentDeleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
     @Hidden
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Add image to existing product", description = "Add single image to existing product")
     public ResponseEntity<ProductImageUploadResponseDTO> addImageToProduct(
@@ -280,6 +257,7 @@ public class ProductController {
     }
 
     @Hidden
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @DeleteMapping("/{id}/images")
     @Operation(summary = "Delete product image", description = "Delete specific image from product")
     public ResponseEntity<Void> deleteProductImage(
@@ -292,6 +270,7 @@ public class ProductController {
     }
 
     @Hidden
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PutMapping(value = "/{id}/images/reorder")
     @Operation(summary = "Reorder product images", description = "Reorder existing product images")
     public ResponseEntity<ProductResponseDTO> reorderProductImages(

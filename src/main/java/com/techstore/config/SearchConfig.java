@@ -1,7 +1,6 @@
 package com.techstore.config;
 
 import lombok.Data;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -15,9 +14,26 @@ import javax.sql.DataSource;
 @EnableConfigurationProperties
 public class SearchConfig {
 
+    /**
+     * Seconds a single search query may run before the driver cancels it.
+     * <p>
+     * A search that hangs otherwise holds a pooled connection for as long as the
+     * 30s connection-timeout allows, and with 20 connections a handful of slow
+     * searches can starve the rest of the application. Failing one search fast is
+     * much better than queueing everything behind it.
+     */
+    private static final int SEARCH_QUERY_TIMEOUT_SECONDS = 15;
+
+    /**
+     * Only {@code ProductSearchRepository} uses this template, so the timeout applies
+     * to search alone — the sync jobs run long bulk statements through JPA and must
+     * not be capped by it.
+     */
     @Bean
     public NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource dataSource) {
-        return new NamedParameterJdbcTemplate(dataSource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        jdbcTemplate.setQueryTimeout(SEARCH_QUERY_TIMEOUT_SECONDS);
+        return new NamedParameterJdbcTemplate(jdbcTemplate);
     }
 
     @ConfigurationProperties(prefix = "app.search.postgresql")
@@ -31,9 +47,8 @@ public class SearchConfig {
         private boolean enableQueryLogging = false;
     }
 
-    @Bean
-    @ConditionalOnProperty(name = "app.search.postgresql.auto-create-indexes", havingValue = "true", matchIfMissing = true)
-    public SearchIndexManager searchIndexManager(JdbcTemplate jdbcTemplate) {
-        return new SearchIndexManager(jdbcTemplate);
-    }
+    // SearchIndexManager used to be declared twice — once here as a @Bean and once by
+    // its own @Component annotation. The factory method is the redundant one: the class
+    // already reads app.search.postgresql.auto-create-indexes itself and returns early
+    // when it is false, so the @ConditionalOnProperty added nothing.
 }

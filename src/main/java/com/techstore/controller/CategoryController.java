@@ -1,6 +1,6 @@
 package com.techstore.controller;
 
-import com.techstore.dto.CategoryResponseDTO;
+import com.techstore.dto.response.CategoryResponseDTO;
 import com.techstore.dto.request.CategoryRequestDto;
 import com.techstore.dto.request.CategoryRequestFromExternalDto;
 import com.techstore.service.CategoryService;
@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,33 +68,5 @@ public class CategoryController {
     public ResponseEntity<CategoryResponseDTO> getCategoryBySlug(@PathVariable String slug) {
         CategoryResponseDTO category = categoryService.getCategoryBySlug(slug);
         return ResponseEntity.ok(category);
-    }
-
-    // ===== ADMIN ENDPOINTS =====
-
-    @PostMapping
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
-    public ResponseEntity<CategoryResponseDTO> createCategory(@Valid @RequestBody CategoryRequestDto requestDTO) {
-        CategoryResponseDTO createdCategory = categoryService.createCategory(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
-    }
-
-    @PutMapping(value = "/{id}")
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
-    public ResponseEntity<CategoryResponseDTO> updateCategory(
-            @PathVariable Long id,
-            @Valid @RequestBody CategoryRequestDto requestDTO) {
-
-        log.info("Updating category with id: {}", id);
-        CategoryResponseDTO updatedCategory = categoryService.updateCategory(id, requestDTO);
-        return ResponseEntity.ok(updatedCategory);
-    }
-
-    @DeleteMapping(value = "/{id}")
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
-        log.info("Deleting category with id: {}", id);
-        categoryService.deleteCategory(id);
-        return ResponseEntity.noContent().build();
     }
 }

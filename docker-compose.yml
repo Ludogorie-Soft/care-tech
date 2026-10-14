@@ -32,6 +32,7 @@ services:
       - .env
     environment:
       - JAVA_OPTS=${JAVA_OPTS}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
     volumes:
       - uploads_data:/app/uploads
       - /tmp/lucene:/tmp/lucene:rw
@@ -54,6 +55,18 @@ services:
           memory: 3g
         reservations:
           memory: 1g
+
+  frontend:
+    image: ludogoriesoft/care-tech-ui:latest
+    container_name: care-tech-ui
+    environment:
+      REACT_APP_NODE: PRODUCTION
+      REACT_APP_API_URL: http://localhost:8080
+    ports:
+      - "3000:80"
+    networks:
+      - techstore-network
+    restart: unless-stopped
 
 volumes:
   postgres_data:

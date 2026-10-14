@@ -102,9 +102,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         });
     }
 
+    // /api/products is deliberately not listed: its write endpoints are admin-only, so the token must be
+    // read there. Public reads stay open — a missing or invalid token simply leaves the request anonymous.
     private boolean isPublicEndpoint(String path) {
         return path.startsWith("/api/auth/") ||
-                path.startsWith("/api/products") ||
                 path.startsWith("/api/categories") ||
                 path.startsWith("/api/brands") ||
                 path.startsWith("/v3/api-docs") ||

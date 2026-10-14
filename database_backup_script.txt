@@ -1,0 +1,7 @@
+docker exec -i techstore-postgres psql -U techstore_user -d techstore < /opt/backups/techstore_20260402_0839.sql
+
+
+Ако базата е в лошо състояние и искаш чист restore от нулата:
+docker exec techstore-postgres psql -U techstore_user -d postgres -c "DROP DATABASE techstore;"
+docker exec techstore-postgres psql -U techstore_user -d postgres -c "CREATE DATABASE techstore;"
+docker exec -i techstore-postgres psql -U techstore_user -d techstore < /opt/backups/techstore_20260402_0839.sql

@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -71,43 +72,82 @@ public class SecurityConfig {
     }
 
     @Bean
+    @org.springframework.core.annotation.Order(1)
+    public SecurityFilterChain ogPreviewFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/api/og/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers
+                        .cacheControl(cache -> cache.disable())
+                        .frameOptions(frame -> frame.disable())
+                )
+                .authorizeHttpRequests(authz -> authz.anyRequest().permitAll());
+        return http.build();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        // Public endpoints
+                        // ── Fully public ────────────────────────────────────────────────────
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/users/**").permitAll()
-                        .requestMatchers("/api/products/**").permitAll()
                         .requestMatchers("/api/categories/**").permitAll()
                         .requestMatchers("/api/images/**").permitAll()
-                        .requestMatchers("/api/orders/**").permitAll()
-                        .requestMatchers("/api/cart/**").permitAll()
-                        .requestMatchers("/api/favorites/**").permitAll()
-                        .requestMatchers("/api/upload/**").permitAll()
+                        .requestMatchers("/api/cart/**").authenticated()
                         .requestMatchers("/api/manufacturers/**").permitAll()
-                        .requestMatchers("/api/parameters/**").permitAll()
+
+                        // ── Products & parameters: reads and the public search POSTs are open; every write is admin-only ──
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/products/search",
+                                "/api/products/categories/*/filters", "/api/products/categories/*/filters/translate-legacy").permitAll()
+                        .requestMatchers("/api/products/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/parameters/**").permitAll()
+                        .requestMatchers("/api/parameters/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .requestMatchers("/api/speedy/**").permitAll()
                         .requestMatchers("/api/subscriptions/**").permitAll()
-                        .requestMatchers("/api/sync/**").permitAll()
                         .requestMatchers("/api/contact/**").permitAll()
-                        .requestMatchers("/api/internal/**").permitAll()
+                        .requestMatchers("/api/tbi/webhook").permitAll()
+                        .requestMatchers("/api/og/**").permitAll()
+                        .requestMatchers("/api/sitemap.xml").permitAll()
+                        .requestMatchers("/api/pazaruvaj/feed.xml").permitAll()
+                        .requestMatchers("/api/pazaruvaj/status", "/api/pazaruvaj/refresh", "/api/pazaruvaj/generate", "/api/pazaruvaj/config").hasAnyRole("ADMIN", "SUPER_ADMIN")
 
-                        // Swagger/OpenAPI endpoints
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // ── Blog: GET is public; view tracking is public; write ops via /api/admin/blog/** ──
+                        .requestMatchers(HttpMethod.GET, "/api/blog/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/blog/*/view").permitAll()
 
-                        // Admin panel static files
+                        // ── Reviews: GET is public, POST requires auth ───────────────────────────
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/reviews").authenticated()
+
+                        // ── Orders: POST (guest checkout) is public; everything else requires auth ──
+                        .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
+                        .requestMatchers("/api/orders/**").authenticated()
+
+                        // ── Sync & upload: admin only ────────────────────────────────────────
+                        .requestMatchers("/api/sync/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        .requestMatchers("/api/upload/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        .requestMatchers("/api/internal/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+
+                        // ── User management: method-level @PreAuthorize handles granularity ──
+                        .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/favorites/**").authenticated()
+
+                        // ── Swagger/OpenAPI: admin only in production ────────────────────────
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                            .hasAnyRole("ADMIN", "SUPER_ADMIN")
+
+                        // ── Static assets & health ───────────────────────────────────────────
                         .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**").permitAll()
-
-                        // Health check endpoints
                         .requestMatchers("/actuator/health", "/actuator/info", "/actuator/metrics").permitAll()
 
-                        // Admin endpoints
+                        // ── Admin endpoints ──────────────────────────────────────────────────
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 
-                        // All other requests need authentication
+                        // ── Everything else requires authentication ──────────────────────────
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
@@ -132,7 +172,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of(allowedOrigins));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

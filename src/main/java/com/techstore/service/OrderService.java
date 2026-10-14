@@ -2,11 +2,14 @@ package com.techstore.service;
 
 import com.techstore.config.ShippingConfig;
 import com.techstore.dto.request.OrderCreateRequestDTO;
+import com.techstore.dto.request.OrderItemUpdateDTO;
 import com.techstore.dto.request.OrderStatusUpdateDTO;
+import com.techstore.dto.request.OrderUpdateRequestDTO;
 import com.techstore.dto.request.UserRequestDTO;
 import com.techstore.dto.response.OrderItemResponseDTO;
 import com.techstore.dto.response.OrderResponseDTO;
 import com.techstore.dto.response.OrderStatisticsResponseDTO;
+import com.techstore.dto.response.OrderUserResponseDTO;
 import com.techstore.entity.Order;
 import com.techstore.entity.OrderItem;
 import com.techstore.entity.Product;
@@ -30,10 +33,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -49,7 +55,12 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final UserService userService;
     private final ApplicationEventPublisher eventPublisher;
+    private final FileUploadService fileUploadService;
+    private final S3Service s3Service;
     private final ShippingConfig shippingConfig;
+
+    private static final ZoneId SOFIA = ZoneId.of("Europe/Sofia");
+    private static final DateTimeFormatter NOTE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     /**
      * Creates a new order
@@ -83,7 +94,8 @@ public class OrderService {
         Order order = new Order();
         order.setUser(user);
         order.setOrderNumber(generateOrderNumber());
-        order.setStatus(OrderStatus.PENDING);
+        boolean isLeasing = Boolean.TRUE.equals(request.getIsLeasingOrder());
+        order.setStatus(isLeasing ? OrderStatus.LEASING_PENDING : OrderStatus.PENDING);
         order.setPaymentStatus(PaymentStatus.PENDING);
         order.setPaymentMethod(request.getPaymentMethod());
         order.setShippingMethod(request.getShippingMethod());
@@ -151,28 +163,43 @@ public class OrderService {
             orderItem.setProductModel(product.getModel());
             orderItem.setQuantity(itemDto.getQuantity());
 
-            orderItem.setUnitPrice(product.getFinalPrice() != null ? product.getFinalPrice() : product.getPriceClient());
+            if (itemDto.getCustomPriceEuro() != null) {
+                orderItem.setUnitPrice(itemDto.getCustomPriceEuro());
+                orderItem.setDiscountAmount(
+                    itemDto.getDiscountPercent() != null ? itemDto.getDiscountPercent() : BigDecimal.ZERO
+                );
+            } else {
+                orderItem.setUnitPrice(product.getFinalPrice() != null ? product.getFinalPrice() : product.getPriceClient());
+                orderItem.setDiscountAmount(product.getDiscount());
+            }
             orderItem.setTaxRate(new BigDecimal("20.00"));
-
-            orderItem.setDiscountAmount(product.getDiscount());
 
             orderItem.calculateLineTotals();
             order.addOrderItem(orderItem);
         }
 
         order.calculateTotals();
-        BigDecimal calculatedShippingCost = shippingConfig.calculateShippingCost(order.getSubtotal());
+        // The free-delivery threshold is with VAT, the same amount the customer sees in the cart
+        BigDecimal calculatedShippingCost = shippingConfig.calculateShippingCost(
+                order.getSubtotal().add(order.getTaxAmount()),
+                order.getIsToSpeedyOffice()
+        );
         order.setShippingCost(calculatedShippingCost);
 
         order.calculateTotals();
 
         order = orderRepository.save(order);
 
-        cartItemRepository.deleteByUserEmail(request.getCustomerEmail());
+        if (!Boolean.TRUE.equals(request.getSkipCartClear())) {
+            cartItemRepository.deleteByUserEmail(request.getCustomerEmail());
+        }
 
-        log.info("Order created successfully: {}", order.getOrderNumber());
+        log.info("Order created successfully: {} (status={})", order.getOrderNumber(), order.getStatus());
 
-        eventPublisher.publishEvent(new OrderCreatedEvent(this, order));
+        // Leasing orders skip the confirmation email — it is sent when TBI confirms the contract
+        if (!isLeasing) {
+            eventPublisher.publishEvent(new OrderCreatedEvent(this, order));
+        }
 
         return mapToResponseDTO(order);
     }
@@ -182,6 +209,13 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         return mapToResponseDTO(order);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderUserResponseDTO getOrderByIdForUser(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        return mapToUserResponseDTO(order);
     }
 
     /**
@@ -194,13 +228,20 @@ public class OrderService {
         return mapToResponseDTO(order);
     }
 
+    @Transactional(readOnly = true)
+    public OrderUserResponseDTO getOrderByNumberForUser(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        return mapToUserResponseDTO(order);
+    }
+
     /**
      * Get user's orders
      */
     @Transactional(readOnly = true)
-    public Page<OrderResponseDTO> getUserOrders(Long userId, Pageable pageable) {
+    public Page<OrderUserResponseDTO> getUserOrders(Long userId, Pageable pageable) {
         Page<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
-        return orders.map(this::mapToResponseDTO);
+        return orders.map(this::mapToUserResponseDTO);
     }
 
     /**
@@ -321,12 +362,13 @@ public class OrderService {
         OrderStatus previousStatus = order.getStatus();
         order.setStatus(request.getStatus());
 
+        // Null keeps the stored value, blank clears it
         if (request.getAdminNotes() != null) {
-            order.setAdminNotes(request.getAdminNotes());
+            order.setAdminNotes(blankToNull(request.getAdminNotes()));
         }
 
         if (request.getTrackingNumber() != null) {
-            order.setTrackingNumber(request.getTrackingNumber());
+            order.setTrackingNumber(blankToNull(request.getTrackingNumber()));
         }
 
         // Automatic date setting
@@ -339,14 +381,129 @@ public class OrderService {
             order.setPaymentStatus(PaymentStatus.PAID); // Auto-mark as paid when delivered
         }
 
+        if (request.getStatus() == OrderStatus.CANCELLED
+                && order.getPaymentStatus() != PaymentStatus.PAID
+                && order.getPaymentStatus() != PaymentStatus.REFUNDED) {
+            order.setPaymentStatus(PaymentStatus.CANCELLED);
+        }
+
         order = orderRepository.save(order);
 
         log.info("Order {} status updated from {} to {}",
                 order.getOrderNumber(), previousStatus, request.getStatus());
 
-        // Publish order status changed event
-        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, previousStatus, request.getStatus()));
+        // The event only sends the customer email, so skip it when the admin opted out
+        if (!Boolean.FALSE.equals(request.getNotifyCustomer())) {
+            eventPublisher.publishEvent(new OrderStatusChangedEvent(
+                    this, order, previousStatus, request.getStatus(), order.getAdminNotes()));
+        } else {
+            log.info("Order {} saved without notifying the customer", order.getOrderNumber());
+        }
 
+        return mapToResponseDTO(order);
+    }
+
+    /**
+     * Full admin edit of an order — patch semantics (null = keep existing value).
+     */
+    @Transactional
+    public OrderResponseDTO updateOrder(Long orderId, OrderUpdateRequestDTO request) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        // ── Status ────────────────────────────────────────────────────────────
+        OrderStatus previousStatus = order.getStatus();
+        boolean autoSetPaid = false;
+        if (request.getStatus() != null && request.getStatus() != previousStatus) {
+            order.setStatus(request.getStatus());
+
+            if (request.getStatus() == OrderStatus.SHIPPED && order.getShippedAt() == null) {
+                order.setShippedAt(LocalDateTime.now());
+            }
+            if (request.getStatus() == OrderStatus.DELIVERED && order.getDeliveredAt() == null) {
+                order.setDeliveredAt(LocalDateTime.now());
+                order.setPaymentStatus(PaymentStatus.PAID);
+                autoSetPaid = true;
+            }
+
+            if (request.getStatus() == OrderStatus.CANCELLED
+                    && order.getPaymentStatus() != PaymentStatus.PAID
+                    && order.getPaymentStatus() != PaymentStatus.REFUNDED) {
+                order.setPaymentStatus(PaymentStatus.CANCELLED);
+                autoSetPaid = true; // reuse flag to prevent override below
+            }
+        }
+
+        // Explicit paymentStatus only applies when not auto-set by DELIVERED/CANCELLED transition
+        if (request.getPaymentStatus() != null && !autoSetPaid) {
+            order.setPaymentStatus(request.getPaymentStatus());
+        }
+        if (request.getPaymentMethod() != null) {
+            order.setPaymentMethod(request.getPaymentMethod());
+        }
+        if (request.getTrackingNumber() != null) {
+            order.setTrackingNumber(blankToNull(request.getTrackingNumber()));
+        }
+        if (request.getAdminNotes() != null) {
+            order.setAdminNotes(blankToNull(request.getAdminNotes()));
+        }
+
+        // ── Customer info ─────────────────────────────────────────────────────
+        if (request.getCustomerFirstName() != null) order.setCustomerFirstName(request.getCustomerFirstName().trim());
+        if (request.getCustomerLastName()  != null) order.setCustomerLastName(request.getCustomerLastName().trim());
+        if (request.getCustomerEmail()     != null) order.setCustomerEmail(request.getCustomerEmail().trim());
+        if (request.getCustomerPhone()     != null) order.setCustomerPhone(request.getCustomerPhone().trim());
+        if (request.getCustomerCompany()   != null) order.setCustomerCompany(request.getCustomerCompany().isBlank() ? null : request.getCustomerCompany().trim());
+        if (request.getCustomerVatNumber() != null) order.setCustomerVatNumber(request.getCustomerVatNumber().isBlank() ? null : request.getCustomerVatNumber().trim());
+
+        // ── Shipping address ──────────────────────────────────────────────────
+        if (request.getShippingAddress()    != null) order.setShippingAddress(request.getShippingAddress().trim());
+        if (request.getShippingCity()       != null) order.setShippingCity(request.getShippingCity().trim());
+        if (request.getShippingPostalCode() != null) order.setShippingPostalCode(request.getShippingPostalCode().isBlank() ? null : request.getShippingPostalCode().trim());
+        if (request.getShippingCountry()    != null) order.setShippingCountry(request.getShippingCountry().trim());
+        if (request.getShippingCost()       != null) {
+            order.setShippingCost(request.getShippingCost());
+            order.calculateTotals();
+        }
+
+        // ── Invoice ───────────────────────────────────────────────────────────
+        if (request.getInvoiceNumber() != null) order.setInvoiceNumber(request.getInvoiceNumber().isBlank() ? null : request.getInvoiceNumber().trim());
+        if (request.getInvoiceDate()   != null) order.setInvoiceDate(request.getInvoiceDate());
+
+        // ── Order items ───────────────────────────────────────────────────────
+        if (request.getItems() != null) {
+            for (OrderItemUpdateDTO itemUpdate : request.getItems()) {
+                OrderItem orderItem = order.getOrderItems().stream()
+                        .filter(oi -> oi.getId().equals(itemUpdate.getOrderItemId()))
+                        .findFirst()
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Order item not found: " + itemUpdate.getOrderItemId()));
+
+                if (itemUpdate.getQuantity() == 0) {
+                    order.removeOrderItem(orderItem);
+                } else {
+                    orderItem.setQuantity(itemUpdate.getQuantity());
+                    orderItem.calculateLineTotals();
+                }
+            }
+
+            if (order.getOrderItems().isEmpty()) {
+                throw new BusinessLogicException("Order must contain at least one item");
+            }
+
+            order.calculateTotals();
+        }
+
+        order = orderRepository.save(order);
+
+        // Fire status-changed event only when status actually changed and the admin wants the customer emailed
+        if (request.getStatus() != null && request.getStatus() != previousStatus
+                && !Boolean.FALSE.equals(request.getNotifyCustomer())) {
+            eventPublisher.publishEvent(new OrderStatusChangedEvent(
+                    this, order, previousStatus, order.getStatus(), order.getAdminNotes()));
+        }
+
+        log.info("[Order {}] Updated by admin", order.getOrderNumber());
         return mapToResponseDTO(order);
     }
 
@@ -368,7 +525,14 @@ public class OrderService {
 
         OrderStatus previousStatus = order.getStatus();
         order.setStatus(OrderStatus.CANCELLED);
-        String cancellationNote = "Cancellation reason: " + reason + " (at: " + LocalDateTime.now() + ")";
+        if (order.getPaymentStatus() != PaymentStatus.PAID
+                && order.getPaymentStatus() != PaymentStatus.REFUNDED) {
+            order.setPaymentStatus(PaymentStatus.CANCELLED);
+        }
+        // The admin sees this line on the order; the customer's email shows only the reason itself
+        String customerReason = blankToNull(reason);
+        String cancellationNote = (customerReason != null ? "Причина за отмяна: " + customerReason : "Отменена")
+                + " (" + LocalDateTime.now(SOFIA).format(NOTE_TIME_FORMAT) + ")";
         order.setAdminNotes(order.getAdminNotes() != null ?
                 order.getAdminNotes() + "\n" + cancellationNote : cancellationNote);
 
@@ -377,7 +541,8 @@ public class OrderService {
         log.info("Order {} cancelled. Reason: {}", order.getOrderNumber(), reason);
 
         // Publish order status changed event
-        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, previousStatus, OrderStatus.CANCELLED));
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(
+                this, order, previousStatus, OrderStatus.CANCELLED, customerReason));
 
         return mapToResponseDTO(order);
     }
@@ -401,6 +566,7 @@ public class OrderService {
         return OrderResponseDTO.builder()
                 .id(order.getId())
                 .orderNumber(order.getOrderNumber())
+                .userId(order.getUser() != null ? order.getUser().getId() : null)
                 .customerFirstName(order.getCustomerFirstName())
                 .customerLastName(order.getCustomerLastName())
                 .customerEmail(order.getCustomerEmail())
@@ -442,7 +608,61 @@ public class OrderService {
                 .insuranceOffer(order.getInsuranceOffer())
                 .installmentOffer(order.getInstallmentOffer())
                 .termsAgreed(order.getTermsAgreed())
+                .warrantyFilePath(order.getWarrantyFilePath())
+                .build();
+    }
+
+    private OrderUserResponseDTO mapToUserResponseDTO(Order order) {
+        List<OrderItemResponseDTO> items = order.getOrderItems().stream()
+                .map(this::mapItemToResponseDTO)
+                .collect(Collectors.toList());
+
+        return OrderUserResponseDTO.builder()
+                .id(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .userId(order.getUser() != null ? order.getUser().getId() : null)
+                .customerFirstName(order.getCustomerFirstName())
+                .customerLastName(order.getCustomerLastName())
+                .customerEmail(order.getCustomerEmail())
+                .customerPhone(order.getCustomerPhone())
+                .customerCompany(order.getCustomerCompany())
+                .customerVatNumber(order.getCustomerVatNumber())
+                .status(order.getStatus())
+                .paymentStatus(order.getPaymentStatus())
+                .paymentMethod(order.getPaymentMethod())
+                .shippingMethod(order.getShippingMethod())
+                .subtotal(order.getSubtotal())
+                .taxAmount(order.getTaxAmount())
                 .shippingCost(order.getShippingCost())
+                .discountAmount(order.getDiscountAmount())
+                .total(order.getTotal())
+                .shippingAddress(order.getShippingAddress())
+                .shippingCity(order.getShippingCity())
+                .shippingPostalCode(order.getShippingPostalCode())
+                .shippingCountry(order.getShippingCountry())
+                .billingAddress(order.getBillingAddress())
+                .billingCity(order.getBillingCity())
+                .billingPostalCode(order.getBillingPostalCode())
+                .billingCountry(order.getBillingCountry())
+                .shippingSpeedySiteId(order.getShippingSpeedySiteId())
+                .shippingSpeedyOfficeId(order.getShippingSpeedyOfficeId())
+                .shippingSpeedySiteName(order.getShippingSpeedySiteName())
+                .shippingSpeedyOfficeName(order.getShippingSpeedyOfficeName())
+                .items(items)
+                .customerNotes(order.getCustomerNotes())
+                // adminNotes intentionally excluded
+                .trackingNumber(order.getTrackingNumber())
+                .shippedAt(order.getShippedAt())
+                .deliveredAt(order.getDeliveredAt())
+                .invoiceNumber(order.getInvoiceNumber())
+                .invoiceDate(order.getInvoiceDate())
+                .createdAt(order.getCreatedAt())
+                .updatedAt(order.getUpdatedAt())
+                .isToSpeedyOffice(order.getIsToSpeedyOffice())
+                .insuranceOffer(order.getInsuranceOffer())
+                .installmentOffer(order.getInstallmentOffer())
+                .termsAgreed(order.getTermsAgreed())
+                .warrantyFilePath(order.getWarrantyFilePath())
                 .build();
     }
 
@@ -463,6 +683,44 @@ public class OrderService {
                 .build();
     }
 
+    @Transactional
+    public OrderUserResponseDTO cancelOrderForUser(Long orderId, String reason) {
+        cancelOrder(orderId, reason);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        return mapToUserResponseDTO(order);
+    }
+
+    @Transactional
+    public OrderResponseDTO uploadWarrantyFile(Long orderId, MultipartFile file) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
+
+        if (order.getWarrantyFilePath() != null) {
+            s3Service.deleteWarrantyFile(order.getWarrantyFilePath());
+        }
+
+        String key = s3Service.uploadWarrantyFile(file);
+        order.setWarrantyFilePath(key);
+        order = orderRepository.save(order);
+        log.info("Warranty uploaded to S3 for order {}: {}", orderId, key);
+        return mapToResponseDTO(order);
+    }
+
+    @Transactional
+    public OrderResponseDTO removeWarrantyFile(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
+
+        if (order.getWarrantyFilePath() != null) {
+            s3Service.deleteWarrantyFile(order.getWarrantyFilePath());
+            order.setWarrantyFilePath(null);
+            order = orderRepository.save(order);
+            log.info("Warranty removed for order {}", orderId);
+        }
+        return mapToResponseDTO(order);
+    }
+
     private UserRequestDTO getUserRequestDTO(OrderCreateRequestDTO request) {
         UserRequestDTO userRequestDTO = new UserRequestDTO();
         userRequestDTO.setFirstName(request.getCustomerFirstName());
@@ -473,5 +731,10 @@ public class OrderService {
         userRequestDTO.setPassword(request.getPassword());
         userRequestDTO.setActive(true);
         return userRequestDTO;
+    }
+
+    /** Trims a value from an admin form; blank becomes null, which clears the stored value. */
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

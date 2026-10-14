@@ -1,9 +1,11 @@
 package com.techstore.service;
 
-import lombok.RequiredArgsConstructor;
+import com.techstore.exception.ExternalApiException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -14,27 +16,45 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class MostApiService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${most.api.url:https://most.traveldatabank.biz/ProductXML}")
+    public MostApiService(@Qualifier("mostRestTemplate") RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    @Value("${most.api.url:https://portal.mostbg.com/api/product/xml/all?currency=EUR}")
     private String apiUrl;
 
     @Value("${most.api.enabled:false}")
     private boolean mostApiEnabled;
+
+    @Value("${most.api.retry-attempts:4}")
+    private int retryAttempts;
+
+    @Value("${most.api.retry-delay:5000}")
+    private long retryDelay;
 
     private List<Map<String, Object>> productsCache;
     private long cacheTimestamp = 0;
     private static final long CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 
     /**
-     * Test API connectivity
+     * Test API connectivity.
+     *
+     * <p>Deliberately does not catch: the whole point of this endpoint is to say <em>why</em>
+     * the feed is failing, and a swallowed exception reduced that to a bare "Connection
+     * failed". {@code MostSyncController} turns the exception into a 500 carrying the real
+     * message. Note this inherits the retry policy, so a total outage takes the full backoff
+     * (~35 s by default) before it reports; a success is cached for 10 minutes.
+     *
+     * @throws ExternalApiException if the feed cannot be fetched or parsed
      */
     public boolean testConnection() {
         if (!mostApiEnabled) {
@@ -42,15 +62,10 @@ public class MostApiService {
             return false;
         }
 
-        try {
-            List<Map<String, Object>> products = getAllProducts();
-            boolean isConnected = !products.isEmpty();
-            log.info("Most API connection test: {}", isConnected ? "SUCCESS" : "FAILED");
-            return isConnected;
-        } catch (Exception e) {
-            log.error("Most API connection test failed", e);
-            return false;
-        }
+        List<Map<String, Object>> products = getAllProducts();
+        boolean isConnected = !products.isEmpty();
+        log.info("Most API connection test: {} ({} products)", isConnected ? "SUCCESS" : "FAILED", products.size());
+        return isConnected;
     }
 
     /**
@@ -68,29 +83,75 @@ public class MostApiService {
             return productsCache;
         }
 
-        try {
-            log.info("Fetching products from Most API: {}", apiUrl);
+        String xmlResponse = fetchXmlWithRetry();
+        List<Map<String, Object>> products = parseProductsFromXML(xmlResponse);
 
-            String xmlResponse = restTemplate.getForObject(apiUrl, String.class);
+        // Update cache
+        productsCache = products;
+        cacheTimestamp = System.currentTimeMillis();
 
-            if (xmlResponse == null || xmlResponse.isEmpty()) {
-                log.error("Received null or empty XML response from Most API");
-                return new ArrayList<>();
+        log.info("Successfully fetched {} products from Most API", products.size());
+        return products;
+    }
+
+    /**
+     * Fetch the feed, retrying on transient failures.
+     *
+     * <p>This used to swallow every exception and return an empty list, which the sync
+     * services could not tell apart from a supplier that genuinely had no stock: the
+     * nightly run recorded SUCCESS with 0 products and nobody was alerted. It now throws,
+     * so the caller's existing catch records FAILED and CronJobService raises CRITICAL.
+     *
+     * @throws ExternalApiException if every attempt fails or the body comes back empty
+     */
+    private String fetchXmlWithRetry() {
+        int attempts = Math.max(1, retryAttempts);
+        Exception lastException = null;
+        int lastStatusCode = 0;
+
+        for (int attempt = 1; attempt <= attempts; attempt++) {
+            try {
+                log.info("Fetching products from Most API: {} (attempt {}/{})", apiUrl, attempt, attempts);
+
+                byte[] xmlBytes = restTemplate.getForObject(apiUrl, byte[].class);
+
+                // An empty body is a failed fetch, not an empty catalogue — retry it.
+                if (xmlBytes == null || xmlBytes.length == 0) {
+                    log.warn("Most API returned an empty body on attempt {}/{}", attempt, attempts);
+                    lastException = new IllegalStateException("empty response body");
+                } else {
+                    log.info("Fetched {} bytes from Most API on attempt {}", xmlBytes.length, attempt);
+                    return new String(xmlBytes, StandardCharsets.UTF_8);
+                }
+
+            } catch (RestClientResponseException e) {
+                lastStatusCode = e.getStatusCode().value();
+                lastException = e;
+                log.warn("Most API returned HTTP {} on attempt {}/{}", lastStatusCode, attempt, attempts);
+            } catch (Exception e) {
+                lastException = e;
+                log.warn("Most API fetch failed on attempt {}/{}: {}", attempt, attempts, e.getMessage());
             }
 
-            List<Map<String, Object>> products = parseProductsFromXML(xmlResponse);
-
-            // Update cache
-            productsCache = products;
-            cacheTimestamp = System.currentTimeMillis();
-
-            log.info("Successfully fetched {} products from Most API", products.size());
-            return products;
-
-        } catch (Exception e) {
-            log.error("Error fetching products from Most API", e);
-            return new ArrayList<>();
+            if (attempt < attempts) {
+                // Exponential backoff, same shape as Asbis: 5s → 10s → 20s
+                long delay = retryDelay * (long) Math.pow(2, attempt - 1);
+                log.warn("⟳ Retrying Most API in {}ms", delay);
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new ExternalApiException(
+                            "Most API fetch interrupted during retry backoff", 0, null, ie);
+                }
+            }
         }
+
+        log.error("✗ Most API fetch failed after {} attempts", attempts, lastException);
+        throw new ExternalApiException(
+                "Most API fetch failed after " + attempts + " attempts: "
+                        + (lastException == null ? "unknown cause" : lastException.getMessage()),
+                lastStatusCode, null, lastException);
     }
 
     /**
@@ -121,7 +182,10 @@ public class MostApiService {
             log.info("Successfully parsed {} products from Most XML", products.size());
 
         } catch (Exception e) {
+            // Truncated or malformed XML used to yield an empty list, indistinguishable
+            // from a supplier with no stock. A broken document is a failure.
             log.error("Error parsing Most XML", e);
+            throw new ExternalApiException("Could not parse the Most XML feed: " + e.getMessage(), 0, null, e);
         }
 
         return products;
@@ -134,53 +198,62 @@ public class MostApiService {
         Map<String, Object> product = new HashMap<>();
 
         try {
-            // Basic fields
-            product.put("id", getElementText(productElement, "id"));
-            product.put("uid", getElementText(productElement, "uid"));
-            product.put("code", getElementText(productElement, "code"));
-            product.put("name", getElementText(productElement, "name"));
-            product.put("searchstring", getElementText(productElement, "searchstring"));
-            product.put("product_status", getElementText(productElement, "product_status"));
-            product.put("haspromo", getElementText(productElement, "haspromo"));
-            product.put("general_description", getElementText(productElement, "general_description"));
+            // Product ID (attribute)
+            product.put("id", productElement.getAttribute("id"));
 
-            // Category information
-            product.put("classname", getElementText(productElement, "classname"));
-            product.put("classname_full", getElementText(productElement, "classname_full"));
-            product.put("class_id", getElementText(productElement, "class_id"));
+            // Basic fields
+            product.put("name", getElementText(productElement, "name"));
+            product.put("general_description", getElementText(productElement, "general_description"));
+            product.put("searchstring", getElementText(productElement, "searchstring"));
+
+            // SKU — new API uses <PartNumber>
+            String partNumber = getElementText(productElement, "PartNumber");
+            product.put("partNumber", partNumber);
+
+            // EAN / warranty
+            product.put("ean", getElementText(productElement, "EAN"));
+            product.put("warrantyMonths", getElementText(productElement, "warrantyInMonths"));
+
+            // Availability — only "В наличност" counts as in stock; everything else is unavailable
+            String productStatus = getElementText(productElement, "product_status");
+            product.put("product_status", productStatus);
+            boolean inStock = "В наличност".equalsIgnoreCase(
+                    productStatus != null ? productStatus.trim() : "");
+            product.put("inStock", inStock);
 
             // Pricing
             product.put("price", getElementText(productElement, "price"));
             product.put("currency", getElementText(productElement, "currency"));
 
-            // Images
-            product.put("main_picture_url", getElementText(productElement, "main_picture_url"));
+            // Gallery — new API uses <gallery><pictureUrl>
             product.put("gallery", extractGallery(productElement));
 
-            // Manufacturer and category
+            // Manufacturer — <manufacturer id="N">NAME</manufacturer>
             Element manufacturerElement = (Element) productElement.getElementsByTagName("manufacturer").item(0);
             if (manufacturerElement != null) {
                 product.put("manufacturer_id", manufacturerElement.getAttribute("id"));
-                product.put("manufacturer", manufacturerElement.getTextContent());
+                product.put("manufacturer", manufacturerElement.getTextContent().trim());
             }
 
+            // Category — <category id="N">NAME</category>
             Element categoryElement = (Element) productElement.getElementsByTagName("category").item(0);
             if (categoryElement != null) {
                 product.put("category_id", categoryElement.getAttribute("id"));
-                product.put("category", categoryElement.getTextContent());
+                product.put("category", categoryElement.getTextContent().trim());
             }
 
+            // Subcategory — <subcategory id="N">NAME</subcategory>
+            // The feed carries 222 distinct (category, subcategory) pairs against only 29
+            // categories, and until now only the category was read: every pair collapsed
+            // into at most 29 buckets, which is why 150 phone accessories sat in
+            // "Мобилни телефони" and 147 power supplies in "Кутии за компютри".
             Element subcategoryElement = (Element) productElement.getElementsByTagName("subcategory").item(0);
             if (subcategoryElement != null) {
                 product.put("subcategory_id", subcategoryElement.getAttribute("id"));
-                product.put("subcategory", subcategoryElement.getTextContent());
+                product.put("subcategory", subcategoryElement.getTextContent().trim());
             }
 
-            // Part number
-            product.put("partnum", getElementText(productElement, "partnum"));
-            product.put("vendor_url", getElementText(productElement, "vendor_url"));
-
-            // Properties (parameters)
+            // Properties (parameters) — <property name="..." s="sort_order">value</property>
             product.put("properties", extractProperties(productElement));
 
         } catch (Exception e) {
@@ -201,13 +274,12 @@ public class MostApiService {
             NodeList galleryNodes = productElement.getElementsByTagName("gallery");
             if (galleryNodes.getLength() > 0) {
                 Element galleryElement = (Element) galleryNodes.item(0);
-                NodeList pictureNodes = galleryElement.getElementsByTagName("picture");
-
-                for (int i = 0; i < pictureNodes.getLength(); i++) {
-                    Element pictureElement = (Element) pictureNodes.item(i);
-                    String pictureUrl = getElementText(pictureElement, "picture_url");
-                    if (pictureUrl != null && !pictureUrl.isEmpty()) {
-                        gallery.add(pictureUrl);
+                // New API uses <pictureUrl> directly inside <gallery>
+                NodeList pictureUrlNodes = galleryElement.getElementsByTagName("pictureUrl");
+                for (int i = 0; i < pictureUrlNodes.getLength(); i++) {
+                    String url = pictureUrlNodes.item(i).getTextContent().trim();
+                    if (!url.isEmpty()) {
+                        gallery.add(url);
                     }
                 }
             }

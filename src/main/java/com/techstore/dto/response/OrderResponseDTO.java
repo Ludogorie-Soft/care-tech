@@ -22,6 +22,7 @@ public class OrderResponseDTO {
 
     private Long id;
     private String orderNumber;
+    private Long userId;
 
     // Customer information
     private String customerFirstName;
@@ -85,6 +86,8 @@ public class OrderResponseDTO {
     private Boolean insuranceOffer;
     private Boolean installmentOffer;
     private Boolean termsAgreed;
+
+    private String warrantyFilePath;
 
     // Computed fields
     public String getFullCustomerName() {

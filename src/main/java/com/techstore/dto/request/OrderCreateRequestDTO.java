@@ -88,6 +88,13 @@ public class OrderCreateRequestDTO {
         @Min(value = 1, message = "Quantity must be at least 1")
         @Max(value = 999, message = "Quantity cannot exceed 999")
         private Integer quantity;
+
+        /** Admin-only: when set, overrides the product's current price (used for offer-to-order conversion). */
+        @DecimalMin(value = "0.01", message = "Custom price must be greater than zero")
+        private BigDecimal customPriceEuro;
+
+        /** Admin-only: discount percentage to show alongside the custom price (e.g. 37.5 for 37.5% off). */
+        private BigDecimal discountPercent;
     }
 
     @NotNull(message = "Payment method is required")
@@ -110,4 +117,16 @@ public class OrderCreateRequestDTO {
 
     private String password;
     private String confirmPassword;
+
+    /**
+     * When true: order is created with LEASING_PENDING status and no confirmation email is sent.
+     * The status transitions to PENDING when TBI confirms the leasing contract.
+     */
+    private Boolean isLeasingOrder = false;
+
+    /**
+     * When true: cart is NOT cleared after order creation.
+     * Used when converting a personal offer (which may cover only part of the cart).
+     */
+    private Boolean skipCartClear = false;
 }

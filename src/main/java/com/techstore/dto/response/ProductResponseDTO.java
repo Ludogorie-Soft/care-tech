@@ -1,5 +1,6 @@
 package com.techstore.dto.response;
 
+import com.techstore.enums.DeliveryCharge;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class ProductResponseDTO {
     private Long id;
     private String referenceNumber;
     private String model;
+    private String sku;
     private String barcode;
     private String nameEn;
     private String nameBg;
@@ -33,9 +35,14 @@ public class ProductResponseDTO {
     private List<String> additionalImages;
     private Integer warranty;
     private BigDecimal weight;
+    /** Delivery of this product alone to a Speedy office — the same value the Pazaruvaj feed sends. */
+    private DeliveryCharge deliveryCharge;
     private CategorySummaryDTO category;
     private ManufacturerSummaryDto manufacturer;
     private List<ProductParameterResponseDto> specifications;
+
+    /** Specifications for display: merged per filter attribute, de-duplicated, without logistics fields. */
+    private List<DisplaySpecificationDto> displaySpecifications;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean onSale;
@@ -45,4 +52,6 @@ public class ProductResponseDTO {
     private boolean show;
     private Long workflowId;
     private String slug;
+    private String createdBy;
+    private String platform;
 }

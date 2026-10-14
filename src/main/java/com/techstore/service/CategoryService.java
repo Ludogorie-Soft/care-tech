@@ -1,6 +1,6 @@
 package com.techstore.service;
 
-import com.techstore.dto.CategoryResponseDTO;
+import com.techstore.dto.response.CategoryResponseDTO;
 import com.techstore.dto.request.CategoryRequestDto;
 import com.techstore.dto.response.CategorySummaryDTO;
 import com.techstore.entity.Category;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -35,11 +36,24 @@ public class CategoryService {
         log.debug("Fetching all active categories");
 
         return ExceptionHelper.wrapDatabaseOperation(() ->
-                        categoryRepository.findByShowTrueOrderBySortOrderAscNameEnAsc()
+                        categoryRepository.findByShowTrue()
                                 .stream()
                                 .map(this::convertToResponseDTO)
                                 .toList(),
                 "fetch all categories"
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponseDTO> getAllCategoriesForAdmin() {
+        log.debug("Fetching all categories for admin (including hidden)");
+
+        return ExceptionHelper.wrapDatabaseOperation(() ->
+                        categoryRepository.findAll()
+                                .stream()
+                                .map(this::convertToResponseDTO)
+                                .toList(),
+                "fetch all categories for admin"
         );
     }
 
@@ -163,6 +177,13 @@ public class CategoryService {
         }, context);
     }
 
+    public List<CategoryResponseDTO> findCategoriesWithMarkupProducts() {
+        List<Category> categories = categoryRepository.findDistinctByProductsMarkupPercentageGreaterThan(BigDecimal.ZERO);
+        return categories.stream()
+                .map(this::convertToResponseDTO)
+                .toList();
+    }
+
     // ========== PRIVATE VALIDATION METHODS ==========
 
     private void validateCategoryId(Long id) {
@@ -195,8 +216,8 @@ public class CategoryService {
             throw new ValidationException("External ID is required for category creation");
         }
 
-        if (requestDto.getNameBg() == null || requestDto.getNameEn().isEmpty()) {
-            throw new ValidationException("Category name is required");
+        if (!StringUtils.hasText(requestDto.getNameBg())) {
+            throw new ValidationException("Category name (BG) is required");
         }
 
         if (requestDto.getOrder() != null && requestDto.getOrder() < 0) {

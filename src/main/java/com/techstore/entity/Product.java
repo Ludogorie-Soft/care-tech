@@ -99,14 +99,36 @@ public class Product extends BaseEntity {
     @Column(name = "show_flag")
     private Boolean show = true;
 
+    /**
+     * True when an admin hid this product from the admin panel. The sync recomputes
+     * {@link #show} on every run but never re-shows a product with this flag set, so
+     * manual intent survives a sync. Sync-driven hiding uses {@link #show} only.
+     */
+    @Column(name = "manually_hidden", nullable = false)
+    private Boolean manuallyHidden = false;
+
+    /**
+     * True when this product's category was set by hand rather than derived from a
+     * distributor feed. MOST and TEKRA overwrite {@link #category} on every run and
+     * ASBIS overwrites it whenever its feed mapping succeeds, so without this flag a
+     * manual correction is gone by the next night. The sync skips the category
+     * assignment for a flagged product; VALI needs no guard because it only sets the
+     * category when creating a product.
+     */
+    @Column(name = "manually_categorized", nullable = false)
+    private Boolean manuallyCategorized = false;
+
     private Integer warranty;
 
-    @Column(precision = 8, scale = 2)
+    @Column(precision = 10, scale = 6)
     private BigDecimal discount = BigDecimal.ZERO;
 
     private Boolean active = true;
 
     private Boolean featured = false;
+
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = false;
 
     @Column(name = "image_url", length = 1000)
     private String primaryImageUrl;
@@ -122,10 +144,10 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<ProductParameter> productParameters = new HashSet<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<ProductFlag> productFlags = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -164,9 +186,9 @@ public class Product extends BaseEntity {
         BigDecimal basePrice = priceClient.add(markup);
 
         if (discount != null && discount.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal discountPercent = discount.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            BigDecimal discountPercent = discount.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP);
             BigDecimal discountAmount = basePrice.multiply(discountPercent);
-            this.finalPrice = basePrice.subtract(discountAmount);
+            this.finalPrice = basePrice.subtract(discountAmount).setScale(2, RoundingMode.HALF_UP);
         } else {
             this.finalPrice = basePrice;
         }

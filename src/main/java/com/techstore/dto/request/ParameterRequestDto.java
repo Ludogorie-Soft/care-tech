@@ -13,7 +13,10 @@ public class ParameterRequestDto {
 
     @JsonProperty("category_id")
     private Long categoryId;
+
     private List<NameDto> name;
+
     private List<ParameterOptionRequestDto> options;
+
     private Integer order;
 }

@@ -8,24 +8,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
 @Repository
 public interface SyncLogRepository extends JpaRepository<SyncLog, Long> {
 
-    List<SyncLog> findByStatusAndCreatedAtBefore(String status, LocalDateTime createdAt);
-
-    Optional<SyncLog> findTopBySyncTypeOrderByCreatedAtDesc(String syncType);
-
-    Page<SyncLog> findBySyncTypeOrderByCreatedAtDesc(String syncType, Pageable pageable);
-
-    @Query("SELECT sl FROM SyncLog sl WHERE sl.syncType = :syncType " +
-            "AND sl.createdAt BETWEEN :startDate AND :endDate " +
-            "ORDER BY sl.createdAt DESC")
-    Page<SyncLog> findBySyncTypeAndDateRange(@Param("syncType") String syncType,
-                                             @Param("startDate") LocalDateTime startDate,
-                                             @Param("endDate") LocalDateTime endDate,
-                                             Pageable pageable);
+    @Query("SELECT s FROM SyncLog s WHERE " +
+           "(:syncType IS NULL OR s.syncType = :syncType) AND " +
+           "(:status IS NULL OR s.status = :status)")
+    Page<SyncLog> findByFilters(
+            @Param("syncType") String syncType,
+            @Param("status") String status,
+            Pageable pageable);
 }

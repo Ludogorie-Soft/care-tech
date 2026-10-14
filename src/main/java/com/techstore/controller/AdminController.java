@@ -1,15 +1,23 @@
 package com.techstore.controller;
 
-import com.techstore.dto.request.OrderStatusUpdateDTO;
-import com.techstore.dto.request.ProductPromoRequest;
-import com.techstore.dto.response.CategorySummaryDTO;
-import com.techstore.dto.response.ManufacturerSummaryDto;
-import com.techstore.dto.response.OrderResponseDTO;
-import com.techstore.dto.response.OrderStatisticsResponseDTO;
-import com.techstore.dto.response.ProductResponseDTO;
+import com.techstore.dto.response.CategoryResponseDTO;
+import com.techstore.dto.request.*;
+import com.techstore.dto.response.*;
+import com.techstore.dto.tbi.LeasingApplicationResponseDto;
+import com.techstore.dto.tbi.LeasingApplicationStatisticsDto;
+import com.techstore.service.TbiLeasingService;
+import com.techstore.entity.Product;
 import com.techstore.enums.OrderStatus;
-import com.techstore.service.OrderService;
+import com.techstore.repository.SyncLogRepository;
+import com.techstore.dto.request.ConvertOfferToOrderRequestDto;
+import com.techstore.dto.request.PersonalOfferCreateDto;
+import com.techstore.dto.response.CartSummaryDto;
+import com.techstore.dto.response.PersonalOfferResponseDto;
+import com.techstore.service.*;
+import com.techstore.service.ImageMigrationService;
+import com.techstore.service.PersonalOfferService;
 import com.techstore.service.admin.AdminService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -24,16 +33,125 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 @Slf4j
 public class AdminController {
 
     private final AdminService adminService;
     private final OrderService orderService;
+    private final ProductService productService;
+    private final ParameterService parameterService;
+    private final CategoryService categoryService;
+    private final ManufacturerService manufacturerService;
+    private final SyncLogRepository syncLogRepository;
+    private final TbiLeasingService tbiLeasingService;
+    private final CartService cartService;
+    private final PersonalOfferService personalOfferService;
+    private final ImageMigrationService imageMigrationService;
+
+    @GetMapping("/products/pageable")
+    public ResponseEntity<Page<ProductResponseDTO>> getAllAdminProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(defaultValue = "bg") String lang) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
+        Page<ProductResponseDTO> productsPage = productService.findAllAdminProducts(pageable, lang);
+
+        return ResponseEntity.ok(productsPage);
+    }
+
+    @PostMapping("/categories")
+    public ResponseEntity<CategoryResponseDTO> createCategory(
+            @Valid @RequestBody CategoryRequestDto requestDTO) {
+        CategoryResponseDTO createdCategory = categoryService.createCategory(requestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
+    }
+
+    @PutMapping(value = "/categories/{id}")
+    public ResponseEntity<CategoryResponseDTO> updateCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody CategoryRequestDto requestDTO) {
+
+        log.info("Updating category with id: {}", id);
+        CategoryResponseDTO updatedCategory = categoryService.updateCategory(id, requestDTO);
+        return ResponseEntity.ok(updatedCategory);
+    }
+
+    @DeleteMapping(value = "/categories/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+        log.info("Deleting category with id: {}", id);
+        categoryService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/products/with-markup")
+    public ResponseEntity<Page<ProductResponseDTO>> getProductsWithMarkup(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(defaultValue = "bg") String lang
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
+        Page<ProductResponseDTO>  products = productService.findProductsWithMarkup(pageable, lang);
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/categories/all")
+    public ResponseEntity<List<CategoryResponseDTO>> getAllCategoriesForAdmin() {
+        return ResponseEntity.ok(categoryService.getAllCategoriesForAdmin());
+    }
+
+    @GetMapping("/categories/with-markup")
+    public ResponseEntity<List<CategoryResponseDTO>> getCategoriesWithMarkupProducts() {
+        List<CategoryResponseDTO> categories = categoryService.findCategoriesWithMarkupProducts();
+        return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/manufacturers/with-markup")
+    public ResponseEntity<List<ManufacturerResponseDto>> getManufacturersWithMarkupProducts() {
+        List<ManufacturerResponseDto> manufacturers = manufacturerService.findManufacturersWithMarkupProducts();
+        return ResponseEntity.ok(manufacturers);
+    }
+
+    @PutMapping("/{id}/markup")
+    public ResponseEntity<ProductResponseDTO> updateProductMarkup(
+            @PathVariable Long id,
+            @RequestBody @Valid ProductMarkupUpdateDTO markupData,
+            @RequestParam(defaultValue = "en") String language) {
+
+        log.info("Updating markup for product {} to {}%", id, markupData.getMarkupPercentage());
+        ProductResponseDTO updatedProduct = productService.updateProductMarkup(id, markupData.getMarkupPercentage(), language);
+        return ResponseEntity.ok(updatedProduct);
+    }
+
+    @PutMapping("/categories/{id}/markup")
+    public ResponseEntity<MarkupResponseDTO> applyCategoryMarkup(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductMarkupUpdateDTO markupData) {
+
+        log.info("Applying bulk markup to category {} with {}%", id, markupData.getMarkupPercentage());
+        MarkupResponseDTO response = productService.applyMarkupToCategory(id, markupData);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/manufacturers/{id}/markup")
+    public ResponseEntity<MarkupResponseDTO> applyManufacturerMarkup(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductMarkupUpdateDTO markupData) {
+
+        log.info("Applying bulk markup to manufacturer {} with {}%", id, markupData.getMarkupPercentage());
+        MarkupResponseDTO response = productService.applyMarkupToManufacturer(id, markupData);
+        return ResponseEntity.ok(response);
+    }
 
     @PutMapping("/products/promo")
     public ResponseEntity<ProductResponseDTO> createPromo(@RequestBody ProductPromoRequest request, @RequestParam(defaultValue = "en") String language) {
@@ -205,7 +323,27 @@ public class AdminController {
     }
 
     /**
-     * Update order status
+     * One order for the admin order page. Unlike GET /api/orders/{id} (the customer's view),
+     * this includes the admin note, which the status and edit modals load and send back.
+     */
+    @GetMapping("/orders/{orderId:\\d+}")
+    public ResponseEntity<OrderResponseDTO> getOrder(@PathVariable Long orderId) {
+        return ResponseEntity.ok(orderService.getOrderById(orderId));
+    }
+
+    /**
+     * Full order edit — patch semantics, all fields optional.
+     */
+    @PutMapping("/orders/{orderId}")
+    public ResponseEntity<OrderResponseDTO> updateOrder(
+            @PathVariable Long orderId,
+            @Valid @RequestBody OrderUpdateRequestDTO request) {
+
+        return ResponseEntity.ok(orderService.updateOrder(orderId, request));
+    }
+
+    /**
+     * Quick status update — kept for backwards compatibility.
      */
     @PutMapping("/orders/{orderId}/status")
     public ResponseEntity<OrderResponseDTO> updateOrderStatus(
@@ -214,5 +352,121 @@ public class AdminController {
 
         OrderResponseDTO order = orderService.updateOrderStatus(orderId, request);
         return ResponseEntity.ok(order);
+    }
+
+    @PostMapping(value = "/orders/{orderId}/warranty", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<OrderResponseDTO> uploadOrderWarranty(
+            @PathVariable Long orderId,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+
+        OrderResponseDTO order = orderService.uploadWarrantyFile(orderId, file);
+        return ResponseEntity.ok(order);
+    }
+
+    @DeleteMapping("/orders/{orderId}/warranty")
+    public ResponseEntity<OrderResponseDTO> removeOrderWarranty(@PathVariable Long orderId) {
+        OrderResponseDTO order = orderService.removeWarrantyFile(orderId);
+        return ResponseEntity.ok(order);
+    }
+
+    @PostMapping("/products/backfill-slugs")
+    public ResponseEntity<Map<String, Integer>> backfillProductSlugs() {
+        int updated = productService.backfillMissingSlugs();
+        log.info("Slug backfill completed: {} products updated", updated);
+        return ResponseEntity.ok(Map.of("updated", updated));
+    }
+
+    @PostMapping("/images/migrate-to-s3")
+    public ResponseEntity<Map<String, String>> migrateImagesToS3() {
+        if (imageMigrationService.isMigrationRunning()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("status", "already_running", "message", "Migration is already in progress"));
+        }
+        imageMigrationService.migrateAllValiImagesToS3();
+        return ResponseEntity.accepted()
+                .body(Map.of("status", "started", "message", "Migration started in background. Check server logs for progress."));
+    }
+
+    // ============ TBI LEASING ENDPOINTS ============
+
+    @GetMapping("/leasing/all")
+    public ResponseEntity<Page<LeasingApplicationResponseDto>> getAllLeasingApplications(
+            @RequestParam(defaultValue = "0")    int page,
+            @RequestParam(defaultValue = "20")   int size,
+            @RequestParam(required = false)      String status) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<LeasingApplicationResponseDto> result = status != null && !status.isBlank()
+                ? tbiLeasingService.getApplicationsByStatus(status, pageable)
+                : tbiLeasingService.getAllApplications(pageable);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/leasing/{id}")
+    public ResponseEntity<LeasingApplicationResponseDto> getLeasingApplicationById(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(tbiLeasingService.getApplicationById(id));
+    }
+
+    @GetMapping("/leasing/statistics")
+    public ResponseEntity<LeasingApplicationStatisticsDto> getLeasingStatistics() {
+        return ResponseEntity.ok(tbiLeasingService.getStatistics());
+    }
+
+
+    // ============ USER MANAGEMENT ENDPOINTS ============
+
+    @GetMapping("/users/{userId}/cart")
+    public ResponseEntity<CartSummaryDto> getUserCart(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "bg") String language) {
+        return ResponseEntity.ok(cartService.getCartSummary(userId, language));
+    }
+
+    @GetMapping("/offers")
+    public ResponseEntity<Page<PersonalOfferResponseDto>> getAllOffers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String status) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(personalOfferService.getAllOffers(status, pageable));
+    }
+
+    @PostMapping("/users/{userId}/offers")
+    public ResponseEntity<PersonalOfferResponseDto> sendOffer(
+            @PathVariable Long userId,
+            @Valid @RequestBody PersonalOfferCreateDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(personalOfferService.createAndSend(userId, dto));
+    }
+
+    @PostMapping("/offers/{offerId}/convert-to-order")
+    public ResponseEntity<OrderResponseDTO> convertOfferToOrder(
+            @PathVariable Long offerId,
+            @Valid @RequestBody ConvertOfferToOrderRequestDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(personalOfferService.convertToOrder(offerId, dto));
+    }
+
+    @GetMapping("/users/{userId}/offers")
+    public ResponseEntity<Page<PersonalOfferResponseDto>> getUserOffers(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(personalOfferService.getOffersForUser(userId, pageable));
+    }
+
+    @GetMapping("/sync-logs")
+    public ResponseEntity<Page<SyncLogResponseDTO>> getSyncLogs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String syncType,
+            @RequestParam(required = false) String status) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<SyncLogResponseDTO> logs = syncLogRepository
+                .findByFilters(syncType, status, pageable)
+                .map(SyncLogResponseDTO::new);
+        return ResponseEntity.ok(logs);
     }
 }

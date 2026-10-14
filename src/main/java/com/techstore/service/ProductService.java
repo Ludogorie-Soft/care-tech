@@ -1,10 +1,7 @@
 package com.techstore.service;
 
-import com.techstore.dto.request.ProductCreateRequestDTO;
-import com.techstore.dto.request.ProductImageOperationsDTO;
-import com.techstore.dto.request.ProductImageUpdateDTO;
-import com.techstore.dto.request.ProductParameterCreateDTO;
-import com.techstore.dto.request.ProductUpdateRequestDTO;
+import com.techstore.config.ShippingConfig;
+import com.techstore.dto.request.*;
 import com.techstore.dto.response.*;
 import com.techstore.entity.Category;
 import com.techstore.entity.Manufacturer;
@@ -14,12 +11,15 @@ import com.techstore.entity.Product;
 import com.techstore.entity.ProductParameter;
 import com.techstore.enums.ProductStatus;
 import com.techstore.exception.BusinessLogicException;
+import com.techstore.exception.ResourceNotFoundException;
 import com.techstore.exception.DuplicateResourceException;
 import com.techstore.exception.ValidationException;
 import com.techstore.mapper.ManufacturerMapper;
 import com.techstore.mapper.ParameterMapper;
 import com.techstore.repository.*;
-import com.techstore.util.ExceptionHelper;
+import com.techstore.service.filter.DisplaySpecificationService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -34,6 +34,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,9 +52,14 @@ public class ProductService {
     private final ParameterOptionRepository parameterOptionRepository;
     private final S3Service s3Service;
     private final ParameterMapper parameterMapper;
+    private final DisplaySpecificationService displaySpecificationService;
     private final ManufacturerMapper manufacturerMapper;
     private final ProductParameterRepository productParameterRepository;
     private final CacheManager cacheManager;
+    private final ShippingConfig shippingConfig;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private static final int MAX_IMAGES_PER_PRODUCT = 20;
     private static final int MAX_PARAMETERS_PER_PRODUCT = 100;
@@ -60,7 +67,8 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<ManufacturerResponseDto> getManufacturersByCategory(Long categoryId) {
-        return productRepository.findManufacturersByCategoryId(categoryId).stream()
+        Long resolvedId = resolveAliasId(categoryId);
+        return productRepository.findManufacturersByCategoryId(resolvedId).stream()
                 .map(manufacturerMapper::toResponseDto).toList();
     }
 
@@ -126,6 +134,148 @@ public class ProductService {
         }
     }
 
+    @CacheEvict(value = "products", allEntries = true)
+    public ProductResponseDTO updateProductMarkup(Long productId, BigDecimal markupPercentage, String lang) {
+        log.info("Updating markup for product {} to {}%", productId, markupPercentage);
+
+        validateProductId(productId);
+        validateLanguage(lang);
+        validateMarkupPercentage(markupPercentage);
+
+        Product product = findProductByIdOrThrow(productId);
+
+        // Set new markup percentage
+        product.setMarkupPercentage(markupPercentage);
+
+        // Recalculate final price with new markup
+        product.calculateFinalPrice();
+
+        product.setLastModifiedBy("ADMIN");
+
+        Product savedProduct = productRepository.save(product);
+
+        log.info("Markup updated successfully for product {}. New final price: {}",
+                productId, savedProduct.getFinalPrice());
+
+        clearProductCache();
+
+        return convertToResponseDTO(savedProduct, lang);
+    }
+
+    private void validateMarkupPercentage(BigDecimal markup) {
+        if (markup == null) {
+            throw new ValidationException("Markup percentage cannot be null");
+        }
+        if (markup.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ValidationException("Markup percentage cannot be negative");
+        }
+        if (markup.compareTo(new BigDecimal("500.00")) > 0) {
+            throw new ValidationException("Markup percentage cannot exceed 500%");
+        }
+    }
+
+    @Transactional
+    @CacheEvict(value = "products", allEntries = true)
+    public MarkupResponseDTO applyMarkupToCategory(Long categoryId, ProductMarkupUpdateDTO markupData) {
+        log.info("Applying {}% markup to all active products in category {}",
+                markupData.getMarkupPercentage(), categoryId);
+
+        validateCategoryId(categoryId);
+        validateMarkupPercentage(markupData.getMarkupPercentage());
+
+        Category category = findCategoryByIdOrThrow(categoryId);
+
+        List<Product> productsToUpdate = productRepository.findAllByCategoryId(categoryId);
+
+        int updatedCount = 0;
+        int skippedCount = 0;
+
+        for (Product product : productsToUpdate) {
+            try {
+                product.setMarkupPercentage(markupData.getMarkupPercentage());
+                product.calculateFinalPrice();
+                product.setLastModifiedBy("ADMIN");
+                updatedCount++;
+            } catch (Exception e) {
+                log.error("Failed to update markup for product {}: {}", product.getId(), e.getMessage());
+                skippedCount++;
+            }
+        }
+
+        if (updatedCount > 0) {
+            productRepository.saveAll(productsToUpdate);
+        }
+
+        clearProductCache();
+
+        log.info("Bulk markup completed for category {}: {} updated, {} skipped",
+                categoryId, updatedCount, skippedCount);
+
+        return MarkupResponseDTO.builder()
+                .operationType("CATEGORY")
+                .targetId(categoryId)
+                .targetName(category.getNameEn())
+                .markupPercentage(markupData.getMarkupPercentage())
+                .totalProducts(productsToUpdate.size())
+                .updatedProducts(updatedCount)
+                .skippedProducts(skippedCount)
+                .executedAt(LocalDateTime.now())
+                .message(String.format("Successfully updated markup for %d products in category '%s'",
+                        updatedCount, category.getNameEn()))
+                .build();
+    }
+
+    @Transactional
+    @CacheEvict(value = "products", allEntries = true)
+    public MarkupResponseDTO applyMarkupToManufacturer(Long manufacturerId, ProductMarkupUpdateDTO markupData) {
+        log.info("Applying {}% markup to all active products from manufacturer {}",
+                markupData.getMarkupPercentage(), manufacturerId);
+
+        validateManufacturerId(manufacturerId);
+        validateMarkupPercentage(markupData.getMarkupPercentage());
+
+        Manufacturer manufacturer = findManufacturerByIdOrThrow(manufacturerId);
+
+        List<Product> productsToUpdate = productRepository.findByManufacturerId(manufacturerId);
+
+        int updatedCount = 0;
+        int skippedCount = 0;
+
+        for (Product product : productsToUpdate) {
+            try {
+                product.setMarkupPercentage(markupData.getMarkupPercentage());
+                product.calculateFinalPrice();
+                product.setLastModifiedBy("ADMIN");
+                updatedCount++;
+            } catch (Exception e) {
+                log.error("Failed to update markup for product {}: {}", product.getId(), e.getMessage());
+                skippedCount++;
+            }
+        }
+
+        if (updatedCount > 0) {
+            productRepository.saveAll(productsToUpdate);
+        }
+
+        clearProductCache();
+
+        log.info("Bulk markup completed for manufacturer {}: {} updated, {} skipped",
+                manufacturerId, updatedCount, skippedCount);
+
+        return MarkupResponseDTO.builder()
+                .operationType("MANUFACTURER")
+                .targetId(manufacturerId)
+                .targetName(manufacturer.getName())
+                .markupPercentage(markupData.getMarkupPercentage())
+                .totalProducts(productsToUpdate.size())
+                .updatedProducts(updatedCount)
+                .skippedProducts(skippedCount)
+                .executedAt(LocalDateTime.now())
+                .message(String.format("Successfully updated markup for %d products by manufacturer '%s'",
+                        updatedCount, manufacturer.getName()))
+                .build();
+    }
+
     @Transactional(readOnly = true)
     @Cacheable(value = "products", key = "'all_' + #pageable.pageNumber + '_' + #pageable.pageSize + '_' + #lang")
     public Page<ProductResponseDTO> getAllProducts(Pageable pageable, String lang) {
@@ -134,13 +284,27 @@ public class ProductService {
         return productRepository.findByActiveTrue(pageable).map(p -> convertToResponseDTO(p, lang));
     }
 
+    /** Whether the product page shows this product; only AVAILABLE products are shown on the site. */
+    public static boolean isVisibleOnSite(Product product) {
+        return !Boolean.TRUE.equals(product.getDeleted())
+                && product.getStatus() == ProductStatus.AVAILABLE
+                && Boolean.TRUE.equals(product.getActive())
+                && Boolean.TRUE.equals(product.getShow());
+    }
+
     @Transactional(readOnly = true)
     @Cacheable(value = "products", key = "#id + '_' + #lang")
     public ProductResponseDTO getProductById(Long id, String lang) {
         validateProductId(id);
         validateLanguage(lang);
         Product product = findProductByIdOrThrow(id);
-        return convertToResponseDTO(product, lang);
+        if (!isVisibleOnSite(product)) {
+            throw new ResourceNotFoundException("Product not found with id: " + id);
+        }
+        ProductResponseDTO dto = convertToResponseDTO(product, lang);
+        dto.setDisplaySpecifications(displaySpecificationService.forProducts(List.of(id), lang)
+                .getOrDefault(id, List.of()));
+        return dto;
     }
 
     @Transactional(readOnly = true)
@@ -148,8 +312,8 @@ public class ProductService {
         validateCategoryId(categoryId);
         validatePaginationParameters(pageable);
         validateLanguage(lang);
-        findCategoryByIdOrThrow(categoryId);
-        return productRepository.findActiveByCategoryExcludingNotAvailable(categoryId, pageable)
+        Long resolvedId = resolveAliasId(categoryId);
+        return productRepository.findActiveByCategoryExcludingNotAvailable(resolvedId, pageable)
                 .map(p -> convertToResponseDTO(p, lang));
     }
 
@@ -175,42 +339,6 @@ public class ProductService {
                 .stream().map(p -> convertToResponseDTO(p, lang)).toList();
     }
 
-    @Transactional(readOnly = true)
-    public Set<ProductParameterResponseDto> getProductsParametersByCategory(Long categoryId, String lang) {
-        List<Object[]> results = productParameterRepository.findParameterOptionsByCategoryAndActiveProducts(categoryId);
-        Map<Long, ProductParameterResponseDto> resultMap = new HashMap<>();
-        for (Object[] row : results) {
-            Long parameterId = (Long) row[0];
-            String parameterNameEn = (String) row[1];
-            String parameterNameBg = (String) row[2];
-            Long optionId = (Long) row[3];
-            String optionNameEn = (String) row[4];
-            String optionNameBg = (String) row[5];
-            Integer optionOrder = (Integer) row[6];
-
-            ParameterOptionResponseDto optionDto = ParameterOptionResponseDto.builder()
-                    .id(optionId)
-                    .name("en".equals(lang) ? optionNameEn : optionNameBg)
-                    .order(optionOrder != null ? optionOrder : 0)
-                    .build();
-
-            resultMap.computeIfAbsent(parameterId, k -> ProductParameterResponseDto.builder()
-                            .parameterId(parameterId)
-                            .parameterNameEn(parameterNameEn)
-                            .parameterNameBg(parameterNameBg)
-                            .options(new HashSet<>())
-                            .build())
-                    .getOptions().add(optionDto);
-        }
-        resultMap.values().forEach(param -> {
-            Set<ParameterOptionResponseDto> uniqueOptions = param.getOptions().stream()
-                    .sorted(Comparator.comparing(ParameterOptionResponseDto::getOrder))
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-            param.setOptions(uniqueOptions);
-        });
-        return new HashSet<>(resultMap.values());
-    }
-
     @CacheEvict(value = "products", allEntries = true)
     public ProductResponseDTO updateProductWithImages(
             Long id,
@@ -233,8 +361,9 @@ public class ProductService {
             handleNewImageUploads(product, newPrimaryImage, newAdditionalImages, s3UploadsTracker, s3CleanupList);
             handleImageReordering(product, productData);
             validateProductHasImages(product);
-            updateProductFieldsFromRest(product, productData);
-            product.generateSlug();
+
+            updateProductFieldsByUpdate(product, productData);
+
             Product savedProduct = productRepository.save(product);
 
             if (!s3CleanupList.isEmpty()) {
@@ -250,6 +379,10 @@ public class ProductService {
             cleanupImagesOnError(s3UploadsTracker);
             throw e;
         }
+    }
+
+    public Page<ProductResponseDTO> findProductsWithMarkup(Pageable pageable, String lang) {
+        return productRepository.findByMarkupPercentageGreaterThanAndDeletedFalse(BigDecimal.ZERO, pageable).map(p -> convertToResponseDTO(p,lang));
     }
 
     @CacheEvict(value = "products", allEntries = true)
@@ -369,29 +502,19 @@ public class ProductService {
     }
 
     @CacheEvict(value = "products", allEntries = true)
-    public void deleteProduct(Long id) {
-        log.info("Deleting product with id: {}", id);
-        validateProductId(id);
-        Product product = findProductByIdOrThrow(id);
-        validateProductDeletion(product);
-        List<String> allImages = collectAllProductImages(product);
-        product.setActive(false);
-        productRepository.save(product);
-        cleanupImagesOnError(allImages);
-        log.info("Product soft deleted successfully with id: {}", id);
-        clearProductCache();
-    }
-
-    @CacheEvict(value = "products", allEntries = true)
     public void permanentDeleteProduct(Long id) {
-        log.warn("Permanently deleting product with id: {}", id);
+        log.warn("Soft-deleting product with id: {}", id);
         validateProductId(id);
+
         Product product = findProductByIdOrThrow(id);
-        validatePermanentProductDeletion(product);
-        List<String> allImages = collectAllProductImages(product);
-        productRepository.deleteById(id);
-        cleanupImagesOnError(allImages);
-        log.warn("Product permanently deleted successfully with id: {}", id);
+
+        product.setDeleted(true);
+        product.setShow(false);
+        product.setActive(false);
+        product.setStatus(ProductStatus.NOT_AVAILABLE);
+        productRepository.save(product);
+
+        log.warn("Product soft-deleted successfully with id: {}", id);
         clearProductCache();
     }
 
@@ -435,6 +558,11 @@ public class ProductService {
 
         log.debug("Found image URL for product {}: {}", productId, imageUrl);
         return imageUrl;
+    }
+
+    public Page<ProductResponseDTO> findAllAdminProducts(Pageable pageable, String lang) {
+        return productRepository.findByPlatformIsNullAndDeletedFalse(pageable)
+                .map(p -> convertToResponseDTO(p, lang));
     }
 
     private void validateProductId(Long id) {
@@ -497,15 +625,40 @@ public class ProductService {
         if (r.getWarranty() != null && r.getWarranty() < 0) throw new ValidationException("Product warranty cannot be negative");
     }
     private void validateProductParameters(List<ProductParameterCreateDTO> params) {
-        if (params == null) return;
-        if (params.stream().mapToInt(p -> p.getParameterOptionId().size()).sum() > MAX_PARAMETERS_PER_PRODUCT) throw new ValidationException("Product cannot have more than " + MAX_PARAMETERS_PER_PRODUCT + " parameter options in total");
+        if (params == null) {
+            return;
+        }
+
+        // Проверка за максимален брой опции
+        int totalOptions = params.stream()
+                .mapToInt(p -> p.getParameterOptionId() != null ? p.getParameterOptionId().size() : 0)
+                .sum();
+
+        if (totalOptions > MAX_PARAMETERS_PER_PRODUCT) {
+            throw new ValidationException("Product cannot have more than " + MAX_PARAMETERS_PER_PRODUCT + " parameter options in total");
+        }
+
         Set<String> uniqueParamOptions = new HashSet<>();
-        for (ProductParameterCreateDTO p : params) {
-            if (p.getParameterId() == null) throw new ValidationException("Parameter ID is required");
-            if (p.getParameterOptionId() == null || p.getParameterOptionId().isEmpty()) throw new ValidationException("Parameter option ID list cannot be empty for parameter: " + p.getParameterId());
-            for (Long optionId : p.getParameterOptionId()) {
-                if (optionId == null) throw new ValidationException("Parameter option ID cannot be null");
-                if (!uniqueParamOptions.add(p.getParameterId() + ":" + optionId)) throw new ValidationException("Duplicate parameter-option combination found");
+
+        for (ProductParameterCreateDTO paramDto : params) {
+            if (paramDto.getParameterId() == null) {
+                throw new ValidationException("Parameter ID is required");
+            }
+
+            if (paramDto.getParameterOptionId() == null || paramDto.getParameterOptionId().isEmpty()) {
+                throw new ValidationException("Parameter option ID list cannot be empty for parameter: " + paramDto.getParameterId());
+            }
+
+            for (Long optionId : paramDto.getParameterOptionId()) {
+                if (optionId == null) {
+                    throw new ValidationException("Parameter option ID cannot be null");
+                }
+
+                String uniqueKey = paramDto.getParameterId() + ":" + optionId;
+                if (!uniqueParamOptions.add(uniqueKey)) {
+                    throw new ValidationException("Duplicate parameter-option combination found: parameterId=" +
+                            paramDto.getParameterId() + ", optionId=" + optionId);
+                }
             }
         }
     }
@@ -529,9 +682,6 @@ public class ProductService {
         int currentImageCount = (p.getPrimaryImageUrl() != null ? 1 : 0) + (p.getAdditionalImages() != null ? p.getAdditionalImages().size() : 0);
         if (currentImageCount >= MAX_IMAGES_PER_PRODUCT) throw new BusinessLogicException("Product already has maximum of " + MAX_IMAGES_PER_PRODUCT + " images");
     }
-    private void validateSearchQuery(String q) {
-        if (!StringUtils.hasText(q) || q.trim().length() > 200 || q.trim().length() < 2) throw new ValidationException("Search query must be between 2 and 200 characters");
-    }
     private void validateRelatedProductsLimit(int limit) {
         if (limit <= 0 || limit > 50) throw new ValidationException("Related products limit must be between 1 and 50");
     }
@@ -542,11 +692,7 @@ public class ProductService {
         if (p.getCategory() == null) throw new BusinessLogicException("Product must have a category to find related products");
         if (p.getManufacturer() == null) throw new BusinessLogicException("Product must have a manufacturer to find related products");
     }
-    private void validateProductDeletion(Product p) { /* No-op for now, can add checks for orders etc. */ }
-    private void validatePermanentProductDeletion(Product p) {
-        validateProductDeletion(p);
-        if (p.getActive()) throw new BusinessLogicException("Product must be deactivated before permanent deletion");
-    }
+
     private void validateImageUpdateList(List<ProductImageUpdateDTO> images) {
         if (images.isEmpty()) return;
         for (ProductImageUpdateDTO img : images) if (!StringUtils.hasText(img.getImageUrl())) throw new ValidationException("Image URL cannot be empty in update list");
@@ -558,13 +704,51 @@ public class ProductService {
         if (p.getPrimaryImageUrl() == null && (p.getAdditionalImages() == null || p.getAdditionalImages().isEmpty())) throw new BusinessLogicException("Product must have at least one image");
     }
     public Product findProductByIdOrThrow(Long id) {
-        return productRepository.findById(id).orElseThrow(() -> new BusinessLogicException("Product not found with id: " + id));
+        return productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+    }
+
+    @Transactional
+    public int backfillMissingSlugs() {
+        List<Product> products = productRepository.findProductsWithoutSlug();
+        products.forEach(Product::generateSlug);
+        productRepository.saveAll(products);
+        log.info("Backfilled slugs for {} products", products.size());
+        return products.size();
     }
     private Category findCategoryByIdOrThrow(Long id) {
-        return categoryRepository.findById(id).orElseThrow(() -> new BusinessLogicException("Category not found with id: " + id));
+        return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
     }
+
+    private Category resolveAndActivateCategory(Long categoryId) {
+        Category category = findCategoryByIdOrThrow(categoryId);
+        if (Boolean.FALSE.equals(category.getShow())) {
+            log.info("Auto-activating hidden category '{}' (id: {}) because a product was assigned to it",
+                    category.getNameBg() != null ? category.getNameBg() : category.getNameEn(), categoryId);
+            category.setShow(true);
+            categoryRepository.save(category);
+        }
+        return category;
+    }
+
+    /**
+     * If the category is an alias, returns the ID of the target category.
+     * If the target category is hidden, returns the alias ID (no products served).
+     * Otherwise returns the original categoryId unchanged.
+     */
+    private Long resolveAliasId(Long categoryId) {
+        Category category = findCategoryByIdOrThrow(categoryId);
+        if (category.getAliasOf() != null) {
+            Category target = category.getAliasOf();
+            if (Boolean.FALSE.equals(target.getShow())) {
+                return categoryId; // original hidden — alias has no own products, result is empty
+            }
+            return target.getId();
+        }
+        return categoryId;
+    }
+
     private Manufacturer findManufacturerByIdOrThrow(Long id) {
-        return manufacturerRepository.findById(id).orElseThrow(() -> new BusinessLogicException("Manufacturer not found with id: " + id));
+        return manufacturerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Manufacturer not found with id: " + id));
     }
     private void checkForDuplicateProduct(String ref, Long excludeId) {
         if (!StringUtils.hasText(ref)) return;
@@ -636,6 +820,45 @@ public class ProductService {
         updateProductFieldsFromRest(p, dto);
         return p;
     }
+
+    /**
+     * Applies an admin's visibility choice, recording it as manual intent.
+     * <p>
+     * show_flag alone cannot express this: the sync recomputes it on every run from
+     * stock and price, so a manual decision would be overwritten the same night.
+     * Hiding from the admin panel therefore also sets {@code manuallyHidden}, which
+     * the sync and the cross-platform dedup both honour; showing again clears it.
+     * A null value leaves both flags untouched rather than nulling show_flag.
+     */
+    private void applyAdminVisibility(Product p, Boolean show) {
+        if (show == null) {
+            return;
+        }
+        p.setShow(show);
+        p.setManuallyHidden(!show);
+    }
+
+    /**
+     * Applies an admin's category choice, recording it as manual intent.
+     * <p>
+     * Same problem as {@link #applyAdminVisibility}: MOST and TEKRA reassign the
+     * category on every sync run and ASBIS does so whenever its feed mapping succeeds,
+     * so an admin's choice would be overwritten the same night. Setting
+     * {@code manuallyCategorized} makes the syncs leave this product's category alone.
+     * Only an actual change raises the flag — re-saving a product without touching its
+     * category must not freeze a mapping the admin never chose.
+     */
+    private void applyAdminCategory(Product p, Long categoryId) {
+        Category resolved = resolveAndActivateCategory(categoryId);
+        Long currentId = p.getCategory() != null ? p.getCategory().getId() : null;
+        Long resolvedId = resolved != null ? resolved.getId() : null;
+
+        if (!Objects.equals(currentId, resolvedId)) {
+            p.setCategory(resolved);
+            p.setManuallyCategorized(true);
+        }
+    }
+
     private void updateProductFieldsFromRest(Product p, ProductCreateRequestDTO dto) {
         p.setReferenceNumber(dto.getReferenceNumber());
         p.setNameEn(dto.getNameEn());
@@ -644,7 +867,7 @@ public class ProductService {
         p.setDescriptionBg(dto.getDescriptionBg());
         p.setModel(dto.getModel());
         p.setBarcode(dto.getBarcode());
-        p.setCategory(findCategoryByIdOrThrow(dto.getCategoryId()));
+        applyAdminCategory(p, dto.getCategoryId());
         p.setManufacturer(findManufacturerByIdOrThrow(dto.getManufacturerId()));
         p.setStatus(ProductStatus.fromCode(dto.getStatus()));
         p.setPriceClient(dto.getPriceClient());
@@ -652,34 +875,131 @@ public class ProductService {
         p.setPricePromo(dto.getPricePromo());
         p.setPriceClientPromo(dto.getPriceClientPromo());
         p.setMarkupPercentage(dto.getMarkupPercentage());
-        p.setShow(dto.getShow());
+        applyAdminVisibility(p, dto.getShow());
         p.setWarranty(dto.getWarranty());
         p.setWeight(dto.getWeight());
         p.setActive(dto.getActive());
         p.setFeatured(dto.getFeatured());
         p.calculateFinalPrice();
         setParametersFromRest(p, dto.getParameters());
+        p.generateSlug();
     }
+
+    private void updateProductParameters(Product product, List<ProductParameterCreateDTO> newParameters) {
+        // ВАЖНО: Никога не заменяй Hibernate-managed колекция с orphanRemoval=true чрез setter.
+        // Това тихомълком маркира транзакцията като rollback-only. Винаги мутирай съществуващата колекция.
+        if (product.getProductParameters() == null) {
+            product.setProductParameters(new HashSet<>());
+        }
+
+        if (newParameters == null || newParameters.isEmpty()) {
+            product.getProductParameters().clear();
+            return;
+        }
+
+        // Валидиране на новите параметри
+        validateProductParameters(newParameters);
+
+        // 1. Изграждане на новото множество от параметри
+        Set<ProductParameter> newProductParameters = new HashSet<>();
+
+        for (ProductParameterCreateDTO paramDto : newParameters) {
+            Parameter parameter = parameterRepository.findById(paramDto.getParameterId())
+                    .orElseThrow(() -> new BusinessLogicException("Parameter not found with id: " + paramDto.getParameterId()));
+
+            for (Long optionId : paramDto.getParameterOptionId()) {
+                ParameterOption option = parameterOptionRepository.findById(optionId)
+                        .orElseThrow(() -> new BusinessLogicException("ParameterOption not found with id: " + optionId));
+
+                if (!option.getParameter().getId().equals(parameter.getId())) {
+                    throw new ValidationException(
+                            String.format("Parameter option %d does not belong to parameter %d",
+                                    optionId, paramDto.getParameterId()));
+                }
+
+                ProductParameter productParameter = new ProductParameter();
+                productParameter.setProduct(product);
+                productParameter.setParameter(parameter);
+                productParameter.setParameterOption(option);
+                newProductParameters.add(productParameter);
+            }
+        }
+
+        // 2. Мутираме управляваната от Hibernate колекция вместо да я заменяме.
+        // Flush след clear() е задължителен — принуждава Hibernate да изпрати DELETE-ите
+        // към БД преди INSERT-ите, иначе unique constraint се нарушава.
+        product.getProductParameters().clear();
+        entityManager.flush();
+        product.getProductParameters().addAll(newProductParameters);
+    }
+
+    private void updateProductFieldsByUpdate(Product p, ProductCreateRequestDTO dto) {
+        p.setReferenceNumber(dto.getReferenceNumber());
+        p.setNameEn(dto.getNameEn());
+        p.setNameBg(dto.getNameBg());
+        p.setDescriptionEn(dto.getDescriptionEn());
+        p.setDescriptionBg(dto.getDescriptionBg());
+        p.setModel(dto.getModel());
+        p.setBarcode(dto.getBarcode());
+        applyAdminCategory(p, dto.getCategoryId());
+        p.setManufacturer(findManufacturerByIdOrThrow(dto.getManufacturerId()));
+        p.setStatus(ProductStatus.fromCode(dto.getStatus()));
+        p.setPriceClient(dto.getPriceClient());
+        p.setPricePartner(dto.getPricePartner());
+        p.setPricePromo(dto.getPricePromo());
+        p.setPriceClientPromo(dto.getPriceClientPromo());
+        p.setMarkupPercentage(dto.getMarkupPercentage());
+        applyAdminVisibility(p, dto.getShow());
+        p.setWarranty(dto.getWarranty());
+        p.setWeight(dto.getWeight());
+        p.setActive(dto.getActive());
+        p.setFeatured(dto.getFeatured());
+        p.calculateFinalPrice();
+
+        // Актуализиране на параметрите - най-ефективният подход
+        updateProductParameters(p, dto.getParameters());
+
+        p.setLastModifiedBy("ADMIN");
+        p.generateSlug();
+    }
+
     private void setParametersFromRest(Product p, List<ProductParameterCreateDTO> params) {
-        if (params == null) {
+        if (params == null || params.isEmpty()) {
             p.setProductParameters(new HashSet<>());
             return;
         }
+
+        // Валидиране на параметрите
+        validateProductParameters(params);
+
         Set<ProductParameter> newProductParameters = new HashSet<>();
+
         for (ProductParameterCreateDTO paramDto : params) {
-            Parameter parameter = parameterRepository.findById(paramDto.getParameterId()).orElseThrow(() -> new BusinessLogicException("Parameter not found: " + paramDto.getParameterId()));
+            Parameter parameter = parameterRepository.findById(paramDto.getParameterId())
+                    .orElseThrow(() -> new BusinessLogicException("Parameter not found with id: " + paramDto.getParameterId()));
+
             for (Long optionId : paramDto.getParameterOptionId()) {
-                ParameterOption option = parameterOptionRepository.findById(optionId).orElseThrow(() -> new BusinessLogicException("ParameterOption not found: " + optionId));
-                if (!option.getParameter().getId().equals(parameter.getId())) throw new ValidationException(String.format("Parameter option %d does not belong to parameter %d", optionId, paramDto.getParameterId()));
-                ProductParameter pp = new ProductParameter();
-                pp.setProduct(p);
-                pp.setParameter(parameter);
-                pp.setParameterOption(option);
-                newProductParameters.add(pp);
+                ParameterOption option = parameterOptionRepository.findById(optionId)
+                        .orElseThrow(() -> new BusinessLogicException("ParameterOption not found with id: " + optionId));
+
+                // Проверка дали опцията принадлежи към параметъра
+                if (!option.getParameter().getId().equals(parameter.getId())) {
+                    throw new ValidationException(
+                            String.format("Parameter option %d does not belong to parameter %d",
+                                    optionId, paramDto.getParameterId()));
+                }
+
+                ProductParameter productParameter = new ProductParameter();
+                productParameter.setProduct(p);
+                productParameter.setParameter(parameter);
+                productParameter.setParameterOption(option);
+                newProductParameters.add(productParameter);
             }
         }
+
         p.setProductParameters(newProductParameters);
     }
+
     private ProductResponseDTO convertToResponseDTO(Product p, String lang) {
         ProductResponseDTO dto = new ProductResponseDTO();
         dto.setId(p.getId());
@@ -687,9 +1007,13 @@ public class ProductService {
         dto.setNameBg(p.getNameBg());
         dto.setDescriptionEn(p.getDescriptionEn());
         dto.setDescriptionBg(p.getDescriptionBg());
+        if (p.getSlug() == null || p.getSlug().isEmpty()) {
+            p.generateSlug();
+        }
         dto.setSlug(p.getSlug());
         dto.setReferenceNumber(p.getReferenceNumber());
         dto.setModel(p.getModel());
+        dto.setSku(p.getSku());
         dto.setBarcode(p.getBarcode());
         dto.setPriceClient(p.getPriceClient());
         dto.setPricePartner(p.getPricePartner());
@@ -701,16 +1025,19 @@ public class ProductService {
         dto.setActive(p.getActive());
         dto.setFeatured(p.getFeatured());
         dto.setShow(p.getShow());
-        if (p.getPrimaryImageUrl() != null) dto.setPrimaryImageUrl(p.getPrimaryImageUrl());
-        if (p.getAdditionalImages() != null) dto.setAdditionalImages(p.getAdditionalImages());
-//        if (p.getPrimaryImageUrl() != null) dto.setPrimaryImageUrl("/api/images/product/" + p.getId() + "/primary");
-//        if (p.getAdditionalImages() != null && !p.getAdditionalImages().isEmpty()) {
-//            List<String> proxyUrls = new ArrayList<>();
-//            for (int i = 0; i < p.getAdditionalImages().size(); i++) proxyUrls.add("/api/images/product/" + p.getId() + "/additional/" + i);
-//            dto.setAdditionalImages(proxyUrls);
-//        }
+        if (p.getPrimaryImageUrl() != null) dto.setPrimaryImageUrl("/api/images/product/" + p.getId() + "/primary");
+        if (p.getAdditionalImages() != null && !p.getAdditionalImages().isEmpty()) {
+            List<String> proxyUrls = new ArrayList<>();
+            for (int i = 0; i < p.getAdditionalImages().size(); i++) proxyUrls.add("/api/images/product/" + p.getId() + "/additional/" + i);
+            dto.setAdditionalImages(proxyUrls);
+        }
         dto.setWarranty(p.getWarranty());
         dto.setWeight(p.getWeight());
+        if (p.getFinalPrice() != null) {
+            BigDecimal grossPrice = p.getFinalPrice().multiply(new BigDecimal("1.20")).setScale(2, RoundingMode.HALF_UP);
+            dto.setDeliveryCharge(shippingConfig.singleProductDelivery(
+                    grossPrice, p.getWeight(), p.getCategory() != null ? p.getCategory().getId() : null));
+        }
         Map<Long, ProductParameterResponseDto> uniqueSpecs = new HashMap<>();
         for (ProductParameter pp : p.getProductParameters()) {
             if (pp.getParameter() == null || pp.getParameterOption() == null) continue;
@@ -722,9 +1049,11 @@ public class ProductService {
         if (p.getManufacturer() != null) dto.setManufacturer(convertToManufacturerSummary(p.getManufacturer()));
         dto.setCreatedAt(p.getCreatedAt());
         dto.setUpdatedAt(p.getUpdatedAt());
+        dto.setCreatedBy(p.getCreatedBy());
         dto.setOnSale(p.isOnSale());
         dto.setStatus(p.getStatus() != null ? p.getStatus().getCode() : 0);
         dto.setWorkflowId(p.getWorkflowId());
+        dto.setPlatform(p.getPlatform() != null ? p.getPlatform().name() : null);
         return dto;
     }
     private ProductParameterResponseDto convertToProductParameterResponse(ProductParameter pp, String lang) {
