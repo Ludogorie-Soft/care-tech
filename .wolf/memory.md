@@ -4273,3 +4273,18 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 14:39 | Created ../../care-tech-ui/src/utils/offerPricing.test.js | — | ~444 |
 | 14:41 | Created src/test/java/com/techstore/service/PersonalOfferConvertPricingTest.java | — | ~1222 |
 | 15:00 | Fixed personal offer VAT default: SendOfferModal now uses prices with VAT (utils/offerPricing.js + jest tests), admin/profile crossed price with VAT, backend contract test. Browser E2E: modal defaults 120/48, 10% → 108, email 120→108, order 90 net + 40 net = 156 with VAT. Prod: all 11 offers were sent pre-VAT (not changed). Tests 537/537 + 5 jest | SendOfferModal.jsx, offerPricing.js, PersonalOfferConvertPricingTest.java | done | ~0 |
+| 14:48 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
+| 15:01 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
+| 15:20 | Pushed fix/customer-emails-euro to origin in both repos (backend 0a2157b, frontend 19a18fc); v2/main untouched, not deployed | — | pushed | ~0 |
+| 15:02 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
+| 15:30 | Opened PRs: Ludogorie-Soft/care-tech#1 (→ v2), Ludogorie-Soft/care-tech-ui#1 (→ main); no CI configured | — | open | ~0 |
+| 15:04 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
+| 15:40 | Merged both PRs (care-tech#1 → v2 38ddc87, care-tech-ui#1 → main 037577f); local v2/main fast-forwarded; NOT deployed | — | merged | ~0 |
+| 15:07 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
+| 15:09 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
+| 15:55 | Merged main into v2 (825744d, conflict in CategoryService kept v2), pushed v2, opened Ludogorie-Soft/care-tech#2 (v2 → main, CLEAN). User decision: work continues on main | CategoryService.java | PR open | ~0 |
+| 15:11 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
+| 16:00 | Merged Ludogorie-Soft/care-tech#2 (v2 → main, 1ffb566); local checkout now on main; main tree == v2 tree | — | merged | ~0 |
+| 15:13 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
+| 16:10 | Deleted branches: v2, fix/customer-emails-euro (both repos), crud (72adc10), global-ref (779b4c8, remote; local was merged) — user chose delete without archive. Kept feature/admin-order-items-edit (unmerged, local only) | — | done | ~0 |
+| 15:15 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
