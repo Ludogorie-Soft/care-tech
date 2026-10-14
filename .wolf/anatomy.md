@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-14T11:03:44.501Z
-> Files: 836 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-14T11:41:00.596Z
+> Files: 838 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -27,6 +27,7 @@
 
 - `admin_order_items_edit.md` (~449 tok)
 - `asbis_price_field.md` (~203 tok)
+- `customer_emails_euro.md` (~493 tok)
 - `euro_rate_convention.md` (~351 tok)
 - `feedback_no_feature_removal.md` (~269 tok)
 - `feedback_showtoast_duration.md` — Declares type (~140 tok)
@@ -52,7 +53,6 @@
 
 ## ../../care-tech-ui/public/
 
-- `email-logo.png` — Логото за хедъра на клиентските имейли: logo.png изрязан до рисунката, 480×172, 19 KB; бекендът го зарежда от ${app.url}/email-logo.png — деплой на фронтенда преди бекенда
 - `index.html` — Care Tech – Продажба и ремонт на лаптопи (~1937 tok)
 - `leasing-complete.html` — TBI Complete (~184 tok)
 
@@ -223,6 +223,8 @@
 ## ../../care-tech-ui/src/utils/
 
 - `loginRedirect.js` — Exports setLoginRedirect, consumeLoginRedirect (~73 tok)
+- `offerPricing.js` — The product's price with VAT, as the site shows it. (~388 tok)
+- `offerPricing.test.js` (~444 tok)
 - `partners.js` — Exports partners (~425 tok)
 - `slugify.js` — Exports slugify (~217 tok)
 - `tokenRefresh.js` — Exports setupTokenRefresh (~568 tok)
@@ -1050,6 +1052,7 @@
 - `OrderServiceUpdateItemsTest.java` — Class: OrderServiceUpdateItemsTest (~2132 tok)
 - `OrderServiceUpdateItemsTest.java` — Mockito tests for OrderService.updateOrder: changed unit price resets discount + totals, new items with product/custom price, empty-order rejection. 6 tests. (~2300 tok)
 - `PazaruvajFeedServiceTest.java` — DeliveryTime/DeliveryCost във фийда: 120 € → 3.50 EUR, 132 € → безплатно, прагът е по цената с ДДС (3 теста) (~900 tok)
+- `PersonalOfferConvertPricingTest.java` — The contract the admin offer modal relies on: originalPrice is the product price WITHOUT VAT, (~1222 tok)
 - `ProductServiceDeliveryChargeTest.java` — продуктовото API връща deliveryCharge: FIXED / FREE / COURIER_TARIFF (телевизор) (3 теста) (~1100 tok)
 - `PromotionExpiryServiceDbTest.java` — @DataJpaTest on H2 with the real service: expired product/category/brand cleared, future and no-end promotions untouched. 3 tests (~1299 tok)
 - `PromotionExpiryServiceTest.java` — Mockito: expired product gets full price back, expired category/brand lose flag, nothing due touches nothing. 3 tests (~1200 tok)

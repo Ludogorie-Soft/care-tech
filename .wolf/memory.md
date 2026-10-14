@@ -4266,3 +4266,10 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 14:03 | Edited src/main/java/com/techstore/controller/AdminController.java | modified getOrder() | ~138 |
 | 14:03 | Created src/test/java/com/techstore/controller/AdminOrderControllerTest.java | — | ~1423 |
 | 14:30 | Session summary (2026-10-14): client email review + euro-only. Backend branch fix/customer-emails-euro (3 commits: email fixes, dead lev code, admin GET order), frontend same branch (5 commits: logo+contacts, admin modals, euro-only, admin order endpoint, offer VAT display). Tests 534/534; Mailpit E2E of all status flows, links, logo, mobile; prod DB read-only: 0 lev text in content. Not merged/pushed/deployed. Open: SendOfferModal VAT default (task spawned) | EmailService, OrderService, templates/email/*, care-tech-ui src/* | done, awaiting deploy approval | ~0 |
+| 14:30 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/customer_emails_euro.md | — | ~495 |
+| 14:31 | Session end: 14 writes across 12 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~69656 tok |
+| 14:37 | Session end: 14 writes across 12 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~69656 tok |
+| 14:39 | Created ../../care-tech-ui/src/utils/offerPricing.js | — | ~388 |
+| 14:39 | Created ../../care-tech-ui/src/utils/offerPricing.test.js | — | ~444 |
+| 14:41 | Created src/test/java/com/techstore/service/PersonalOfferConvertPricingTest.java | — | ~1222 |
+| 15:00 | Fixed personal offer VAT default: SendOfferModal now uses prices with VAT (utils/offerPricing.js + jest tests), admin/profile crossed price with VAT, backend contract test. Browser E2E: modal defaults 120/48, 10% → 108, email 120→108, order 90 net + 40 net = 156 with VAT. Prod: all 11 offers were sent pre-VAT (not changed). Tests 537/537 + 5 jest | SendOfferModal.jsx, offerPricing.js, PersonalOfferConvertPricingTest.java | done | ~0 |

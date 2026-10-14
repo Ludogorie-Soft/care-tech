@@ -10586,6 +10586,25 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-639",
+      "timestamp": "2026-10-14T15:00:00.000Z",
+      "error_message": "Лична оферта, изпратена без промяна, дава ~16.7 % неволна отстъпка; процентите се смятат от цената без ДДС",
+      "file": "care-tech-ui/src/pages/admin/Customers/SendOfferModal.jsx",
+      "root_cause": "Модалът попълваше offerPrice = product.finalPrice (БЕЗ ДДС) и смяташе отстъпката от него, а бекендът (PersonalOfferService.convertToOrder) третира offerPrice като цена С ДДС и дели на 1.2. В прод всичките 11 оферти са изпратени така (напр. 16 % от 45.05 € → 31.53 €, реално ~30 %).",
+      "fix": "utils/offerPricing.js (priceWithVat, offerPriceFromDiscount, discountFromOfferPrice, crossedOutPrice) + jest тестове; модалът по подразбиране = цената с ДДС, отстъпка от нея; админ изгледите и профилът зачертават цената с ДДС. originalPrice остава без ДДС. Бекенд тест PersonalOfferConvertPricingTest пази договора. Съществуващите оферти не са пипани.",
+      "tags": [
+        "offers",
+        "vat",
+        "pricing",
+        "money"
+      ],
+      "related_bugs": [
+        "bug-638"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T15:00:00.000Z"
     }
   ]
 }
