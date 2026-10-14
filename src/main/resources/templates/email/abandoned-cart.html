@@ -12,11 +12,7 @@
             <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
 
                 <!-- Header -->
-                <tr>
-                    <td align="center" style="background-color:#ed1c24; padding:40px 20px;">
-                        <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
-                    </td>
-                </tr>
+                <tr th:replace="~{email/fragments/layout :: header('#ed1c24')}"></tr>
 
                 <!-- Icon & Greeting -->
                 <tr>
@@ -41,12 +37,13 @@
                                 <td style="padding:12px 0; border-bottom:1px solid #2a2a2a;">
                                     <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                         <tr>
-                                            <td style="width:64px; vertical-align:middle;">
-                                                <img th:if="${item.product.images != null and !item.product.images.isEmpty()}"
-                                                     th:src="${item.product.images.iterator().next().url}"
+                                            <!-- Same rule as the OG pages: a full supplier URL as is, otherwise our image proxy -->
+                                            <td style="width:64px; vertical-align:middle;" th:with="img=${item.product.primaryImageUrl}">
+                                                <img th:if="${img != null}"
+                                                     th:src="${#strings.startsWith(img, 'http')} ? ${img} : ${appUrl} + '/api/images/product/' + ${item.product.id} + '/primary'"
                                                      width="54" height="54"
                                                      style="border-radius:6px; object-fit:contain; display:block; background:#2a2a2a;" alt=""/>
-                                                <div th:unless="${item.product.images != null and !item.product.images.isEmpty()}"
+                                                <div th:unless="${img != null}"
                                                      style="width:54px; height:54px; background-color:#2a2a2a; border-radius:6px;"></div>
                                             </td>
                                             <td style="padding-left:14px; vertical-align:middle;">
@@ -57,11 +54,9 @@
                                                 </div>
                                             </td>
                                             <td style="text-align:right; vertical-align:middle; white-space:nowrap;">
+                                                <!-- finalPrice is without VAT; show what the site shows -->
                                                 <div style="color:#ed1c24; font-size:15px; font-weight:bold;">
-                                                    <span th:text="${#numbers.formatDecimal(item.product.finalPrice, 1, 2)}">0.00</span> €
-                                                </div>
-                                                <div style="color:#929497; font-size:12px; margin-top:2px;">
-                                                    <span th:text="${#numbers.formatDecimal(item.product.finalPrice * 1.95583, 1, 2)}">0.00</span> лв.
+                                                    <span th:text="${#numbers.formatDecimal(item.product.finalPrice * 1.2, 1, 'NONE', 2, 'POINT')}">0.00</span> €
                                                 </div>
                                             </td>
                                         </tr>
@@ -86,14 +81,7 @@
                 </tr>
 
                 <!-- Footer -->
-                <tr>
-                    <td align="center" style="background-color:#111111; padding:24px 20px;">
-                        <p style="color:#555555; font-size:12px; margin:0;">
-                            © <span th:text="${appName}">CareTech</span> |
-                            <a th:href="${appUrl}" style="color:#ed1c24; text-decoration:none;" th:text="${appUrl}"></a>
-                        </p>
-                    </td>
-                </tr>
+                <tr th:replace="~{email/fragments/layout :: footer('#ed1c24', null, null, null)}"></tr>
 
             </table>
         </td>

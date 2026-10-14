@@ -30,6 +30,9 @@ public class OrderUpdateRequestDTO {
     @Size(max = 2000)
     private String adminNotes;
 
+    /** Whether to email the customer when the status changes. Null means yes. */
+    private Boolean notifyCustomer;
+
     // ── Customer info ─────────────────────────────────────────────────────────
     @Size(max = 100)
     private String customerFirstName;

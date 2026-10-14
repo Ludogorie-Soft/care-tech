@@ -12,11 +12,7 @@
             <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
                 
                 <!-- Header -->
-                <tr>
-                    <td align="center" style="background-color:#10b981; padding:40px 20px;">
-                        <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
-                    </td>
-                </tr>
+                <tr th:replace="~{email/fragments/layout :: header('#10b981')}"></tr>
                 
                 <!-- Delivered Icon -->
                 <tr>
@@ -67,7 +63,10 @@
                 <!-- Content -->
                 <tr>
                     <td style="padding:0 20px 30px; background-color:#1a1a1a;">
-                        
+
+                        <!-- The admin's note, if any -->
+                        <div th:replace="~{email/fragments/layout :: note('Информация', '#10b981')}"></div>
+
                         <!-- Feedback Section -->
                         <table width="100%" cellpadding="25" cellspacing="0" border="0" style="background-color:#262626; border-radius:8px; margin-bottom:20px;">
                             <tr>
@@ -81,34 +80,34 @@
                                     <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 20px;">
                                         <tr>
                                             <td style="padding:0 5px;">
-                                                <div style="width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px;">
+                                                <a th:href="${reviewUrl}" href="https://g.page/r/CeArIZmgBuhGEBE/review" style="display:block; width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px; text-decoration:none;">
                                                     <span style="color:#ed1c24; font-size:20px;">★</span>
-                                                </div>
+                                                </a>
                                             </td>
                                             <td style="padding:0 5px;">
-                                                <div style="width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px;">
+                                                <a th:href="${reviewUrl}" href="https://g.page/r/CeArIZmgBuhGEBE/review" style="display:block; width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px; text-decoration:none;">
                                                     <span style="color:#ed1c24; font-size:20px;">★</span>
-                                                </div>
+                                                </a>
                                             </td>
                                             <td style="padding:0 5px;">
-                                                <div style="width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px;">
+                                                <a th:href="${reviewUrl}" href="https://g.page/r/CeArIZmgBuhGEBE/review" style="display:block; width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px; text-decoration:none;">
                                                     <span style="color:#ed1c24; font-size:20px;">★</span>
-                                                </div>
+                                                </a>
                                             </td>
                                             <td style="padding:0 5px;">
-                                                <div style="width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px;">
+                                                <a th:href="${reviewUrl}" href="https://g.page/r/CeArIZmgBuhGEBE/review" style="display:block; width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px; text-decoration:none;">
                                                     <span style="color:#ed1c24; font-size:20px;">★</span>
-                                                </div>
+                                                </a>
                                             </td>
                                             <td style="padding:0 5px;">
-                                                <div style="width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px;">
+                                                <a th:href="${reviewUrl}" href="https://g.page/r/CeArIZmgBuhGEBE/review" style="display:block; width:36px; height:36px; background-color:#1f1f1f; border-radius:6px; text-align:center; line-height:36px; text-decoration:none;">
                                                     <span style="color:#ed1c24; font-size:20px;">★</span>
-                                                </div>
+                                                </a>
                                             </td>
                                         </tr>
                                     </table>
                                     
-                                    <a href="#" style="display:inline-block; background-color:#10b981; color:#ffffff; text-decoration:none; padding:14px 35px; border-radius:6px; font-size:15px; font-weight:600;">Оставете отзив</a>
+                                    <a th:href="${reviewUrl}" href="https://g.page/r/CeArIZmgBuhGEBE/review" style="display:inline-block; background-color:#10b981; color:#ffffff; text-decoration:none; padding:14px 35px; border-radius:6px; font-size:15px; font-weight:600;">Оставете отзив</a>
                                 </td>
                             </tr>
                         </table>
@@ -195,21 +194,7 @@
                 </tr>
                 
                 <!-- Footer -->
-                <tr>
-                    <td align="center" style="background-color:#0f0f0f; padding:25px 20px; border-top:2px solid #10b981;">
-                        <p style="color:#6c6e70; font-size:13px; margin:0 0 12px 0;">
-                            Радваме се, че избрахте <span th:text="${appName}" style="color:#929497;">CareTech</span>!
-                        </p>
-                        <p style="margin:10px 0;">
-                            <a th:href="${appUrl}" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Начало</a>
-                            <a th:href="${appUrl} + '/contact'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Контакти</a>
-                            <a th:href="${appUrl} + '/support'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Поддръжка</a>
-                        </p>
-                        <p style="color:#6c6e70; font-size:11px; margin:10px 0 0 0;">
-                            &copy; 2025 <span th:text="${appName}">CareTech</span>. Всички права запазени.
-                        </p>
-                    </td>
-                </tr>
+                <tr th:replace="~{email/fragments/layout :: footer('#10b981', |Радваме се, че избрахте ${appName}!|, null, null)}"></tr>
                 
             </table>
         </td>

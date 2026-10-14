@@ -12,11 +12,7 @@
             <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
                 
                 <!-- Header -->
-                <tr>
-                    <td align="center" style="background-color:#ed1c24; padding:40px 20px;">
-                        <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
-                    </td>
-                </tr>
+                <tr th:replace="~{email/fragments/layout :: header('#3b82f6')}"></tr>
                 
                 <!-- Status Update Icon -->
                 <tr>
@@ -24,10 +20,11 @@
                         <div style="width:80px; height:80px; background-color:#3b82f6; border-radius:50%; margin:0 auto 20px; display:inline-block; text-align:center; line-height:80px;">
                             <span style="color:#ffffff; font-size:40px; font-weight:bold;">ℹ</span>
                         </div>
-                        <h2 style="color:#ffffff; font-size:24px; margin:0 0 10px 0;">Промяна в статуса</h2>
+                        <h2 style="color:#ffffff; font-size:24px; margin:0 0 10px 0;"
+                            th:text="${statusChanged} ? 'Промяна в статуса' : 'Актуализация на поръчката'">Промяна в статуса</h2>
                         <p style="color:#929497; font-size:15px; line-height:1.6; margin:0;">
                             Здравейте, <span th:text="${customerName}" style="color:#ffffff;">Клиент</span>!<br/>
-                            Статусът на вашата поръчка е актуализиран.
+                            <span th:text="${statusChanged} ? 'Статусът на вашата поръчка е актуализиран.' : 'Имаме нова информация за вашата поръчка.'">Статусът на вашата поръчка е актуализиран.</span>
                         </p>
                     </td>
                 </tr>
@@ -49,13 +46,16 @@
                 <!-- Content -->
                 <tr>
                     <td style="padding:0 20px 30px; background-color:#1a1a1a;">
-                        
+
+                        <!-- The admin's note, if any -->
+                        <div th:replace="~{email/fragments/layout :: note('Информация', '#3b82f6')}"></div>
+
                         <!-- Status Timeline -->
-                        <h3 style="color:#ffffff; font-size:18px; margin:0 0 20px 0;">Промяна на статус</h3>
+                        <h3 style="color:#ffffff; font-size:18px; margin:0 0 20px 0;" th:text="${statusChanged} ? 'Промяна на статус' : 'Статус'">Промяна на статус</h3>
                         
                         <table width="100%" cellpadding="20" cellspacing="0" border="0" style="background-color:#262626; border-radius:6px; margin-bottom:20px;">
-                            <!-- Previous Status -->
-                            <tr>
+                            <!-- Previous Status (hidden when the status did not change) -->
+                            <tr th:if="${statusChanged}">
                                 <td style="padding:15px; border-bottom:1px solid #333333;">
                                     <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                         <tr>
@@ -130,21 +130,7 @@
                 </tr>
                 
                 <!-- Footer -->
-                <tr>
-                    <td align="center" style="background-color:#0f0f0f; padding:25px 20px; border-top:2px solid #ed1c24;">
-                        <p style="color:#6c6e70; font-size:13px; margin:0 0 12px 0;">
-                            Благодарим Ви за доверието!
-                        </p>
-                        <p style="margin:10px 0;">
-                            <a th:href="${appUrl}" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Начало</a>
-                            <a th:href="${appUrl} + '/contact'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Контакти</a>
-                            <a th:href="${appUrl} + '/orders'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Моите поръчки</a>
-                        </p>
-                        <p style="color:#6c6e70; font-size:11px; margin:10px 0 0 0;">
-                            &copy; 2025 <span th:text="${appName}">CareTech</span>. Всички права запазени.
-                        </p>
-                    </td>
-                </tr>
+                <tr th:replace="~{email/fragments/layout :: footer('#ed1c24', 'Благодарим Ви за доверието!', 'Моите поръчки', '/profile/my-orders')}"></tr>
                 
             </table>
         </td>
