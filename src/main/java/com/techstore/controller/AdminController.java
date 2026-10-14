@@ -323,6 +323,15 @@ public class AdminController {
     }
 
     /**
+     * One order for the admin order page. Unlike GET /api/orders/{id} (the customer's view),
+     * this includes the admin note, which the status and edit modals load and send back.
+     */
+    @GetMapping("/orders/{orderId:\\d+}")
+    public ResponseEntity<OrderResponseDTO> getOrder(@PathVariable Long orderId) {
+        return ResponseEntity.ok(orderService.getOrderById(orderId));
+    }
+
+    /**
      * Full order edit — patch semantics, all fields optional.
      */
     @PutMapping("/orders/{orderId}")
