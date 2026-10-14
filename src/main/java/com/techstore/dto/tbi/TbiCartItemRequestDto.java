@@ -16,9 +16,6 @@ public class TbiCartItemRequestDto {
     /** Unit price in EUR with VAT */
     private Double priceEuro;
 
-    /** Unit price in BGN with VAT — for our records */
-    private Double priceLeva;
-
     private String sku;
     private String imageUrl;
 }

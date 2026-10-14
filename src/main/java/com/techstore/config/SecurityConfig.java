@@ -111,7 +111,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/contact/**").permitAll()
                         .requestMatchers("/api/tbi/webhook").permitAll()
                         .requestMatchers("/api/og/**").permitAll()
-                        .requestMatchers("/og/**").permitAll()
                         .requestMatchers("/api/sitemap.xml").permitAll()
                         .requestMatchers("/api/pazaruvaj/feed.xml").permitAll()
                         .requestMatchers("/api/pazaruvaj/status", "/api/pazaruvaj/refresh", "/api/pazaruvaj/generate", "/api/pazaruvaj/config").hasAnyRole("ADMIN", "SUPER_ADMIN")
