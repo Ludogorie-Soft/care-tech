@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-14T11:41:00.596Z
-> Files: 838 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-14T12:42:03.022Z
+> Files: 841 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -116,6 +116,8 @@
 - `Contact.jsx` — Contact — renders form (~2804 tok)
 - `Cookies.jsx` — Responsive Cookies / Cookie Policy component (~3474 tok)
 - `DeliveryPage.jsx` — maxWeight (~2808 tok)
+- `DeviceInsurancePage.jsx` — Застраховка на техниката: 5-те абзаца на клиента дословно + контакт блок (~1100 tok)
+- `FaqPage.jsx` — ЧЗВ: 20 въпроса в 5 раздела, текстът на клиента дословно (FAQ_SECTIONS); <details> акордеон, бързи връзки, FAQPage JSON-LD (~2900 tok)
 - `ForUs.jsx` — ForUs (~2823 tok)
 - `InstallmentPurchasePage.jsx` — InstallmentPurchasePage (~3844 tok)
 - `OurClients.jsx` — clients (~2829 tok)
@@ -544,7 +546,7 @@
 - `ProductController.java` — Record to hold sort field and direction information (~3884 tok)
 - `ProductSearchController.java` — RestController: ProductSearchController (8 endpoints) (~1491 tok)
 - `ReviewController.java` — RestController: ReviewController (6 endpoints) (~709 tok)
-- `SitemapController.java` — RestController: SitemapController (1 endpoints) (~1292 tok)
+- `SitemapController.java` — /api/sitemap.xml: STATIC_PAGES (трябва да са маршрути от App.js — тест SitemapControllerStaticPagesTest), категории, продукти, блог (~1500 tok)
 - `SpeedyController.java` — RestController: SpeedyController (4 endpoints) (~1716 tok)
 - `SubscriptionController.java` — RestController: SubscriptionController (5 endpoints) (~562 tok)
 - `TbiLeasingController.java` — POST /api/tbi/register (~846 tok)
@@ -1027,6 +1029,7 @@
 
 - `AdminOrderControllerTest.java` — GET /api/admin/orders/{id}: 401/403/админ с adminNotes, литералните пътища печелят; PUT статус приема notifyCustomer и празна бележка (5 теста) (~1423 tok)
 - `OgMetaControllerTest.java` — A product the site shows: AVAILABLE, active, shown, not deleted. (~4064 tok)
+- `SitemapControllerStaticPagesTest.java` — The frontend answers 200 for every path, so a sitemap entry for a page that does not exist is (~656 tok)
 - `TbiLeasingControllerTest.java` — @WebMvcTest security tests: POST /register (401/200), POST /webhook (public 200), GET /application/{id} IDOR (401/200 owner/403 non-owner/200 admin/200 SUPER_ADMIN). 8 tests. (~2081 tok)
 
 ## src/test/java/com/techstore/entity/

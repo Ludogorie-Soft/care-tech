@@ -4288,3 +4288,10 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 15:13 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
 | 16:10 | Deleted branches: v2, fix/customer-emails-euro (both repos), crud (72adc10), global-ref (779b4c8, remote; local was merged) — user chose delete without archive. Kept feature/admin-order-items-edit (unmerged, local only) | — | done | ~0 |
 | 15:15 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
+| 15:15 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
+| 15:16 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
+| 15:27 | Session end: 17 writes across 15 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 34 reads | ~71797 tok |
+| 15:35 | Created ../../care-tech-ui/src/pages/FaqPage.jsx | — | ~3900 |
+| 15:36 | Created ../../care-tech-ui/src/pages/DeviceInsurancePage.jsx | — | ~1203 |
+| 15:42 | Created src/test/java/com/techstore/controller/SitemapControllerStaticPagesTest.java | — | ~656 |
+| 16:30 | FAQ + device insurance pages (client text verbatim, verified 59/59 lines), sitemap static pages fixed (5 wrong paths, 8 added) + test; backend 539/539, FE build OK; branches feature/faq-insurance-content (FE), fix/sitemap-static-pages (BE) | FaqPage.jsx, DeviceInsurancePage.jsx, SitemapController.java | done | ~0 |
