@@ -4234,3 +4234,35 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 12:01 | Edited ../../../../../../tmp/ctu-main-seo/src/pages/ProductPage.jsx | inline fix | ~19 |
 | 12:01 | Edited ../../../../../../tmp/ctu-main-seo/src/pages/ProductPage.jsx | inline fix | ~9 |
 | 16:30 | Step 3 implemented: OgMetaController serves React index.html with page head (SpaHead) + 200/301/404/503; SpaShellService (ETag); hidden products/categories → 404; dropped produces (406 on Accept */*, bug-616) and OGPreviewController; nginx: all /product/ & /category/ → backend, @spa fallback, limit_req on /api/og; compose frontend on techstore-network. Frontend: ProductPage "not available" on itemStatus failed (bug-615). Verified: 479/479 backend tests, prod-fixture head tests, Docker nginx e2e (routing, 301/404, 503 + backend-down fallback), browser check of hidden/visible product, prod build | OgMetaController, SpaShellService, SpaHead, ProductService, ProductRepository, application.yml, docker-compose.yml, nginx.prod.conf, ProductPage.jsx | committed v2 41cb0ff, care-tech-ui main ade745b; not pushed/deployed | ~90k |
+| 12:11 | Session end: 22 writes across 11 files (OgMetaController.java, OgMetaControllerTest.java, CategoryRepositoryCanonicalUrlTest.java, ProductService.java, SpaShellService.java) | 6 reads | ~39561 tok |
+| 16:40 | pushed v2 (41cb0ff, 82cd848); care-tech-ui main ade745b still local | - | origin/v2 = 82cd848 | ~1k |
+| 12:17 | Session end: 22 writes across 11 files (OgMetaController.java, OgMetaControllerTest.java, CategoryRepositoryCanonicalUrlTest.java, ProductService.java, SpaShellService.java) | 6 reads | ~39561 tok |
+| 16:45 | pushed care-tech-ui main (97c613f, ade745b) | - | origin/main = ade745b | ~1k |
+| 12:24 | Session end: 22 writes across 11 files (OgMetaController.java, OgMetaControllerTest.java, CategoryRepositoryCanonicalUrlTest.java, ProductService.java, SpaShellService.java) | 6 reads | ~39561 tok |
+| 16:55 | step 3 live check: backend OK (all clients 200 shell, 301/404 correct, sitemap 224 cats + 281 products self-canonical); FRONTEND deployed from local feature/admin-order-items-edit (not main) → ProductPage fix missing + admin feature UI live against v2 backend without its endpoints; user asked to write in Bulgarian | - | reported, awaiting decision | ~10k |
+| 12:47 | Session end: 22 writes across 11 files (OgMetaController.java, OgMetaControllerTest.java, CategoryRepositoryCanonicalUrlTest.java, ProductService.java, SpaShellService.java) | 6 reads | ~39561 tok |
+| 17:00 | switched care-tech-ui checkout feature/admin-order-items-edit → main at user's request (clean tree; main = origin/main = ade745b) | - | ready for frontend rebuild | ~1k |
+| 12:49 | Session end: 22 writes across 11 files (OgMetaController.java, OgMetaControllerTest.java, CategoryRepositoryCanonicalUrlTest.java, ProductService.java, SpaShellService.java) | 6 reads | ~39561 tok |
+| 17:10 | frontend redeployed from main (main.0c8a8dd0.js): ProductPage fix live, no feature-only strings in bundle; hidden product shows 'Продуктът не е наличен'; backend statuses unchanged | - | step 3 fully live and verified | ~6k |
+| 15:18 | Session end: 22 writes across 11 files (OgMetaController.java, OgMetaControllerTest.java, CategoryRepositoryCanonicalUrlTest.java, ProductService.java, SpaShellService.java) | 6 reads | ~39561 tok |
+
+## Session: 2026-10-14 12:09
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:24 | Created ../../../../.claude/plans/frolicking-baking-fog.md | — | ~464 |
+| 12:24 | Session end: 1 writes across 1 files (frolicking-baking-fog.md) | 20 reads | ~39767 tok |
+| 12:33 | Edited ../../../../.claude/plans/frolicking-baking-fog.md | expanded (+28 lines) | ~1136 |
+| 12:33 | Session end: 2 writes across 1 files (frolicking-baking-fog.md) | 33 reads | ~49700 tok |
+| 12:42 | Created ../../../../.claude/plans/frolicking-baking-fog.md | — | ~4354 |
+| 13:35 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/euro_rate_convention.md | — | ~375 |
+| 13:37 | Created src/main/java/com/techstore/service/EmailFormatting.java | — | ~1590 |
+| 13:39 | Created src/main/resources/templates/email/fragments/layout.html | — | ~882 |
+| 13:42 | Created src/test/java/com/techstore/service/EmailFormattingTest.java | — | ~1962 |
+| 13:44 | Created src/test/java/com/techstore/service/EmailServiceTemplatesTest.java | — | ~4612 |
+| 13:46 | Created src/test/java/com/techstore/service/OrderServiceStatusNotificationTest.java | — | ~2055 |
+| 13:46 | Created src/test/java/com/techstore/listener/OrderEventListenerTest.java | — | ~556 |
+| 13:58 | Created .claude/launch.json | — | ~198 |
+| 14:03 | Edited src/main/java/com/techstore/controller/AdminController.java | modified getOrder() | ~138 |
+| 14:03 | Created src/test/java/com/techstore/controller/AdminOrderControllerTest.java | — | ~1423 |
+| 14:30 | Session summary (2026-10-14): client email review + euro-only. Backend branch fix/customer-emails-euro (3 commits: email fixes, dead lev code, admin GET order), frontend same branch (5 commits: logo+contacts, admin modals, euro-only, admin order endpoint, offer VAT display). Tests 534/534; Mailpit E2E of all status flows, links, logo, mobile; prod DB read-only: 0 lev text in content. Not merged/pushed/deployed. Open: SendOfferModal VAT default (task spawned) | EmailService, OrderService, templates/email/*, care-tech-ui src/* | done, awaiting deploy approval | ~0 |
