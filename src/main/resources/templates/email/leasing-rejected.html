@@ -12,10 +12,12 @@
             <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
 
                 <!-- Header -->
+                <tr th:replace="~{email/fragments/layout :: header('#F07800')}"></tr>
+
+                <!-- TBI subtitle -->
                 <tr>
-                    <td align="center" style="background-color:#F07800; padding:40px 20px;">
-                        <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
-                        <p style="color:rgba(255,255,255,0.85); font-size:13px; margin:8px 0 0 0;">TBI Fusion Pay — Лизинг</p>
+                    <td align="center" style="background-color:#1a1a1a; padding:18px 20px 0;">
+                        <p style="color:#F07800; font-size:13px; font-weight:600; margin:0;">TBI Fusion Pay — Лизинг</p>
                     </td>
                 </tr>
 
@@ -137,7 +139,7 @@
                             <tr>
                                 <td align="center" style="padding:10px 0;">
                                     <a th:href="${appUrl}" style="display:inline-block; background-color:#ed1c24; color:#ffffff; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:15px; font-weight:600; margin:5px;">Разгледайте продуктите</a>
-                                    <a th:href="${appUrl} + '/contact'" style="display:inline-block; background-color:#6c6e70; color:#ffffff; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:15px; font-weight:600; margin:5px;">Свържете се с нас</a>
+                                    <a th:href="${appUrl} + '/contacts'" style="display:inline-block; background-color:#6c6e70; color:#ffffff; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:15px; font-weight:600; margin:5px;">Свържете се с нас</a>
                                 </td>
                             </tr>
                         </table>
@@ -146,21 +148,7 @@
                 </tr>
 
                 <!-- Footer -->
-                <tr>
-                    <td align="center" style="background-color:#0f0f0f; padding:25px 20px; border-top:2px solid #F07800;">
-                        <p style="color:#6c6e70; font-size:13px; margin:0 0 12px 0;">
-                            Благодарим Ви за доверието към <span th:text="${appName}">CareTech</span>!
-                        </p>
-                        <p style="margin:10px 0;">
-                            <a th:href="${appUrl}" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Начало</a>
-                            <a th:href="${appUrl} + '/contact'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Контакти</a>
-                            <a th:href="${appUrl} + '/orders'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Моите поръчки</a>
-                        </p>
-                        <p style="color:#6c6e70; font-size:11px; margin:10px 0 0 0;">
-                            &copy; 2025 <span th:text="${appName}">CareTech</span>. Всички права запазени.
-                        </p>
-                    </td>
-                </tr>
+                <tr th:replace="~{email/fragments/layout :: footer('#F07800', |Благодарим Ви за доверието към ${appName}!|, 'Моите поръчки', '/profile/my-orders')}"></tr>
 
             </table>
         </td>

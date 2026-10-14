@@ -10,11 +10,7 @@
         <td align="center" style="padding:20px 10px;">
             <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
                 <!-- Header -->
-                <tr>
-                    <td align="center" style="background-color:#ed1c24; padding:40px 20px;">
-                        <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
-                    </td>
-                </tr>
+                <tr th:replace="~{email/fragments/layout :: header('#ed1c24')}"></tr>
 
                 <!-- New Order Icon -->
                 <tr>
@@ -41,15 +37,15 @@
                             </tr>
                             <tr>
                                 <td style="color:#929497; font-size:14px;">Метод на доставка:</td>
-                                <td align="right" style="color:#ffffff; font-size:14px;" th:text="${order.shippingMethod}">Speedy</td>
+                                <td align="right" style="color:#ffffff; font-size:14px;" th:text="${shippingMethodLabel}">Speedy</td>
                             </tr>
 
                             <!-- Добавете информация за типа доставка -->
                             <tr>
                                 <td style="color:#929497; font-size:14px;">Тип доставка:</td>
                                 <td align="right" style="color:#ffffff; font-size:14px;">
-                                    <span th:if="${order.isToSpeedyOffice}">До офис на Speedy</span>
-                                    <span th:unless="${order.isToSpeedyOffice}">До адрес</span>
+                                    <span th:if="${toOffice}">До офис на Speedy</span>
+                                    <span th:unless="${toOffice}">До адрес</span>
                                 </td>
                             </tr>
 
@@ -57,14 +53,14 @@
                             <tr>
                                 <td style="color:#929497; font-size:14px;">Цена доставка:</td>
                                 <td align="right" style="font-size:14px;">
-                    <span th:if="${order.isToSpeedyOffice}">
+                    <span th:if="${toOffice}">
                         <span th:if="${order.shippingCost > 0}"
                               style="color:#ffffff;"
-                              th:text="${#numbers.formatDecimal(order.shippingCost, 1, 2)} + ' лв.'">5.90 лв.</span>
+                              th:text="${#numbers.formatDecimal(order.shippingCost, 1, 'NONE', 2, 'POINT')} + ' €'">5.90 €</span>
                         <span th:if="${order.shippingCost == 0}"
                               style="color:#4ade80; font-weight:600;">БЕЗПЛАТНО</span>
                     </span>
-                                    <span th:unless="${order.isToSpeedyOffice}"
+                                    <span th:unless="${toOffice}"
                                           style="color:#fb923c; font-size:13px;">
                         Според тарифите на куриера
                     </span>
@@ -74,11 +70,11 @@
                             <tr>
                                 <td style="color:#929497; font-size:14px;">Общо:</td>
                                 <td align="right" style="color:#ed1c24; font-size:16px; font-weight:bold;"
-                                    th:text="${#numbers.formatDecimal(order.total, 1, 2)} + ' лв.'">154.80 лв.</td>
+                                    th:text="${#numbers.formatDecimal(order.total, 1, 'NONE', 2, 'POINT')} + ' €'">154.80 €</td>
                             </tr>
 
                             <!-- Добавете бележка ако е до адрес -->
-                            <tr th:if="${!order.isToSpeedyOffice}">
+                            <tr th:if="${!toOffice}">
                                 <td colspan="2" style="padding-top:10px;">
                                     <div style="background-color:#3a2417; border-left:3px solid #fb923c; padding:10px; border-radius:4px;">
                                         <p style="color:#fb923c; font-size:12px; margin:0; line-height:1.5;">

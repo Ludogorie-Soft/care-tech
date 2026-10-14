@@ -1,5 +1,6 @@
 package com.techstore.service;
 
+import com.techstore.config.ShippingConfig;
 import com.techstore.dto.request.MessageToAdmin;
 import com.techstore.entity.CartItem;
 import com.techstore.entity.Order;
@@ -20,6 +21,8 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.LocalDateTime;
+import java.time.Year;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +39,7 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
     private final S3Service s3Service;
+    private final ShippingConfig shippingConfig;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -49,7 +53,18 @@ public class EmailService {
     @Value("${app.email.info:info@caretech.bg}")
     private String infoEmail;
 
+    /** Logo in the email header. Served by the frontend, so it follows APP_URL in local runs. */
+    @Value("${app.email.logo-url:${app.url:https://www.caretech.bg}/email-logo.png}")
+    private String logoUrl;
+
+    /** Google review form for the shop, linked from the "delivered" email. */
+    @Value("${app.email.review-url:https://g.page/r/CeArIZmgBuhGEBE/review}")
+    private String reviewUrl;
+
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+    private static final ZoneId SOFIA = ZoneId.of("Europe/Sofia");
+    private static final String CONTACT_PHONE = "0899 850 777";
+    private static final String CONTACT_PHONE_TEL = "+359899850777";
 
     /**
      * Send order confirmation email
@@ -68,6 +83,9 @@ public class EmailService {
             variables.put("appName", appName);
             variables.put("appUrl", appUrl);
             variables.put("orderUrl", appUrl + "/orders/" + order.getId());
+            variables.put("toOffice", EmailFormatting.toSpeedyOffice(order));
+            variables.put("deliveryLines", EmailFormatting.deliveryLines(order));
+            variables.put("shippingMethodLabel", shippingMethodLabel(order));
 
             String subject = appName + " - Потвърждение на поръчка #" + order.getOrderNumber();
             sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-confirmation", variables);
@@ -95,6 +113,8 @@ public class EmailService {
             variables.put("appName", appName);
             variables.put("appUrl", appUrl);
             variables.put("orderUrl", appUrl + "/admin/dashboard/orders/" + order.getId());
+            variables.put("toOffice", EmailFormatting.toSpeedyOffice(order));
+            variables.put("shippingMethodLabel", shippingMethodLabel(order));
 
             String subject = appName + " - Нова поръчка #" + order.getOrderNumber();
             sendHtmlEmail(fromEmail, fromEmail, subject, "admin-new-order", variables);
@@ -110,7 +130,7 @@ public class EmailService {
      * Send order status update email
      */
     @Async
-    public void sendOrderStatusUpdateEmail(Order order, OrderStatus previousStatus) {
+    public void sendOrderStatusUpdateEmail(Order order, OrderStatus previousStatus, String customerNote) {
         try {
             log.info("Sending order status update email to: {} (status changed from {} to {})",
                     order.getCustomerEmail(), previousStatus, order.getStatus());
@@ -124,7 +144,10 @@ public class EmailService {
             variables.put("appName", appName);
             variables.put("appUrl", appUrl);
             variables.put("orderUrl", appUrl + "/orders/" + order.getId());
-            variables.put("trackingNumber", order.getTrackingNumber());
+            variables.put("trackingNumber", blankToNull(order.getTrackingNumber()));
+            // Saving the same status again (e.g. only to add a note) should not say "X → X"
+            variables.put("statusChanged", previousStatus != order.getStatus());
+            variables.put("noteHtml", EmailFormatting.noteHtml(customerNote));
 
             String subject = appName + " - Промяна в статуса на поръчка #" + order.getOrderNumber();
             sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-status-update", variables);
@@ -139,15 +162,20 @@ public class EmailService {
      * Send order shipped email with tracking information
      */
     @Async
-    public void sendOrderShippedEmail(Order order) {
+    public void sendOrderShippedEmail(Order order, String customerNote) {
         try {
             log.info("Sending order shipped email to: {}", order.getCustomerEmail());
 
             Map<String, Object> variables = new HashMap<>();
             variables.put("customerName", order.getCustomerFirstName() + " " + order.getCustomerLastName());
             variables.put("orderNumber", order.getOrderNumber());
-            variables.put("trackingNumber", order.getTrackingNumber());
-            variables.put("shippingMethod", order.getShippingMethod());
+            variables.put("trackingNumber", blankToNull(order.getTrackingNumber()));
+            variables.put("trackingUrl", EmailFormatting.trackingUrl(order.getTrackingNumber()));
+            variables.put("shippingMethodLabel", shippingMethodLabel(order));
+            variables.put("deliveryDaysText", EmailFormatting.deliveryDaysText(shippingConfig.getDeliveryDays()));
+            variables.put("toOffice", EmailFormatting.toSpeedyOffice(order));
+            variables.put("deliveryLines", EmailFormatting.deliveryLines(order));
+            variables.put("noteHtml", EmailFormatting.noteHtml(customerNote));
             variables.put("order", order);
             variables.put("appName", appName);
             variables.put("appUrl", appUrl);
@@ -166,7 +194,7 @@ public class EmailService {
      * Send order delivered email
      */
     @Async
-    public void sendOrderDeliveredEmail(Order order) {
+    public void sendOrderDeliveredEmail(Order order, String customerNote) {
         try {
             log.info("Sending order delivered email to: {}", order.getCustomerEmail());
 
@@ -177,6 +205,8 @@ public class EmailService {
             variables.put("appName", appName);
             variables.put("appUrl", appUrl);
             variables.put("orderUrl", appUrl + "/orders/" + order.getId());
+            variables.put("reviewUrl", reviewUrl);
+            variables.put("noteHtml", EmailFormatting.noteHtml(customerNote));
 
             String subject = appName + " - Вашата поръчка е доставена #" + order.getOrderNumber();
             sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-delivered", variables);
@@ -191,7 +221,7 @@ public class EmailService {
      * Send order cancelled email
      */
     @Async
-    public void sendOrderCancelledEmail(Order order) {
+    public void sendOrderCancelledEmail(Order order, String customerNote) {
         try {
             log.info("Sending order cancelled email to: {}", order.getCustomerEmail());
 
@@ -201,6 +231,7 @@ public class EmailService {
             variables.put("order", order);
             variables.put("appName", appName);
             variables.put("appUrl", appUrl);
+            variables.put("noteHtml", EmailFormatting.noteHtml(customerNote));
 
             String subject = appName + " - Вашата поръчка е отменена #" + order.getOrderNumber();
             sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-cancelled", variables);
@@ -409,10 +440,7 @@ public class EmailService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        Context context = new Context();
-        context.setVariables(variables);
-
-        String htmlContent = templateEngine.process("email/" + templateName, context);
+        String htmlContent = renderTemplate(templateName, variables);
 
         helper.setFrom(from);
         helper.setTo(to);
@@ -435,6 +463,34 @@ public class EmailService {
         }
 
         mailSender.send(message);
+    }
+
+    /**
+     * Renders an email template. The shared header and footer need the same values in every email,
+     * so they are added here; a method's own variables win if both set the same key.
+     */
+    String renderTemplate(String templateName, Map<String, Object> variables) {
+        Map<String, Object> all = new HashMap<>();
+        all.put("appName", appName);
+        all.put("appUrl", appUrl);
+        all.put("logoUrl", logoUrl);
+        all.put("currentYear", Year.now(SOFIA).getValue());
+        all.put("contactEmail", infoEmail);
+        all.put("contactPhone", CONTACT_PHONE);
+        all.put("contactPhoneTel", CONTACT_PHONE_TEL);
+        all.putAll(variables);
+
+        Context context = new Context();
+        context.setVariables(all);
+        return templateEngine.process("email/" + templateName, context);
+    }
+
+    private static String shippingMethodLabel(Order order) {
+        return order.getShippingMethod() != null ? order.getShippingMethod().getDisplayName() : null;
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 
     /**

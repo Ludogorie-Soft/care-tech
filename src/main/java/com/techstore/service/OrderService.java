@@ -38,6 +38,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -56,6 +58,9 @@ public class OrderService {
     private final FileUploadService fileUploadService;
     private final S3Service s3Service;
     private final ShippingConfig shippingConfig;
+
+    private static final ZoneId SOFIA = ZoneId.of("Europe/Sofia");
+    private static final DateTimeFormatter NOTE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     /**
      * Creates a new order
@@ -357,12 +362,13 @@ public class OrderService {
         OrderStatus previousStatus = order.getStatus();
         order.setStatus(request.getStatus());
 
+        // Null keeps the stored value, blank clears it
         if (request.getAdminNotes() != null) {
-            order.setAdminNotes(request.getAdminNotes());
+            order.setAdminNotes(blankToNull(request.getAdminNotes()));
         }
 
         if (request.getTrackingNumber() != null) {
-            order.setTrackingNumber(request.getTrackingNumber());
+            order.setTrackingNumber(blankToNull(request.getTrackingNumber()));
         }
 
         // Automatic date setting
@@ -386,8 +392,13 @@ public class OrderService {
         log.info("Order {} status updated from {} to {}",
                 order.getOrderNumber(), previousStatus, request.getStatus());
 
-        // Publish order status changed event
-        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, previousStatus, request.getStatus()));
+        // The event only sends the customer email, so skip it when the admin opted out
+        if (!Boolean.FALSE.equals(request.getNotifyCustomer())) {
+            eventPublisher.publishEvent(new OrderStatusChangedEvent(
+                    this, order, previousStatus, request.getStatus(), order.getAdminNotes()));
+        } else {
+            log.info("Order {} saved without notifying the customer", order.getOrderNumber());
+        }
 
         return mapToResponseDTO(order);
     }
@@ -431,10 +442,10 @@ public class OrderService {
             order.setPaymentMethod(request.getPaymentMethod());
         }
         if (request.getTrackingNumber() != null) {
-            order.setTrackingNumber(request.getTrackingNumber().isBlank() ? null : request.getTrackingNumber().trim());
+            order.setTrackingNumber(blankToNull(request.getTrackingNumber()));
         }
         if (request.getAdminNotes() != null) {
-            order.setAdminNotes(request.getAdminNotes().isBlank() ? null : request.getAdminNotes().trim());
+            order.setAdminNotes(blankToNull(request.getAdminNotes()));
         }
 
         // ── Customer info ─────────────────────────────────────────────────────
@@ -485,9 +496,11 @@ public class OrderService {
 
         order = orderRepository.save(order);
 
-        // Fire status-changed event only when status actually changed
-        if (request.getStatus() != null && request.getStatus() != previousStatus) {
-            eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, previousStatus, order.getStatus()));
+        // Fire status-changed event only when status actually changed and the admin wants the customer emailed
+        if (request.getStatus() != null && request.getStatus() != previousStatus
+                && !Boolean.FALSE.equals(request.getNotifyCustomer())) {
+            eventPublisher.publishEvent(new OrderStatusChangedEvent(
+                    this, order, previousStatus, order.getStatus(), order.getAdminNotes()));
         }
 
         log.info("[Order {}] Updated by admin", order.getOrderNumber());
@@ -516,7 +529,10 @@ public class OrderService {
                 && order.getPaymentStatus() != PaymentStatus.REFUNDED) {
             order.setPaymentStatus(PaymentStatus.CANCELLED);
         }
-        String cancellationNote = "Cancellation reason: " + reason + " (at: " + LocalDateTime.now() + ")";
+        // The admin sees this line on the order; the customer's email shows only the reason itself
+        String customerReason = blankToNull(reason);
+        String cancellationNote = (customerReason != null ? "Причина за отмяна: " + customerReason : "Отменена")
+                + " (" + LocalDateTime.now(SOFIA).format(NOTE_TIME_FORMAT) + ")";
         order.setAdminNotes(order.getAdminNotes() != null ?
                 order.getAdminNotes() + "\n" + cancellationNote : cancellationNote);
 
@@ -525,7 +541,8 @@ public class OrderService {
         log.info("Order {} cancelled. Reason: {}", order.getOrderNumber(), reason);
 
         // Publish order status changed event
-        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order, previousStatus, OrderStatus.CANCELLED));
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(
+                this, order, previousStatus, OrderStatus.CANCELLED, customerReason));
 
         return mapToResponseDTO(order);
     }
@@ -714,5 +731,10 @@ public class OrderService {
         userRequestDTO.setPassword(request.getPassword());
         userRequestDTO.setActive(true);
         return userRequestDTO;
+    }
+
+    /** Trims a value from an admin form; blank becomes null, which clears the stored value. */
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

@@ -12,11 +12,7 @@
             <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#1a1a1a;">
 
                 <!-- Header -->
-                <tr>
-                    <td align="center" style="background-color:#ed1c24; padding:40px 20px;">
-                        <h1 style="color:#ffffff; font-size:28px; margin:0; font-weight:bold;" th:text="${appName}">CareTech</h1>
-                    </td>
-                </tr>
+                <tr th:replace="~{email/fragments/layout :: header('#ed1c24')}"></tr>
 
                 <!-- Offer Icon & Title -->
                 <tr>
@@ -70,10 +66,11 @@
                                                 <div style="color:#ffffff; font-size:14px; font-weight:600;"
                                                      th:text="${item.productName}">Продукт</div>
                                                 <div style="margin-top:4px;">
-                                                    <span th:if="${item.originalPrice != null and item.offerPrice != null and item.originalPrice != item.offerPrice}"
-                                                          th:text="${#numbers.formatDecimal(item.originalPrice,1,2)} + ' лв.'"
+                                                    <!-- originalPrice is without VAT, offerPrice already includes it -->
+                                                    <span th:if="${item.originalPrice != null and item.offerPrice != null and item.originalPrice * 1.2 > item.offerPrice}"
+                                                          th:text="${#numbers.formatDecimal(item.originalPrice * 1.2, 1, 'NONE', 2, 'POINT')} + ' €'"
                                                           style="color:#929497; font-size:12px; text-decoration:line-through; margin-right:8px;"></span>
-                                                    <span th:text="${#numbers.formatDecimal(item.offerPrice,1,2)} + ' лв.'"
+                                                    <span th:text="${#numbers.formatDecimal(item.offerPrice, 1, 'NONE', 2, 'POINT')} + ' €'"
                                                           style="color:#ed1c24; font-size:14px; font-weight:bold;"></span>
                                                 </div>
                                             </td>
@@ -105,14 +102,7 @@
                 </tr>
 
                 <!-- Footer -->
-                <tr>
-                    <td align="center" style="background-color:#111111; padding:24px 20px;">
-                        <p style="color:#555555; font-size:12px; margin:0;">
-                            © <span th:text="${appName}">CareTech</span> |
-                            <a th:href="${appUrl}" style="color:#ed1c24; text-decoration:none;" th:text="${appUrl}"></a>
-                        </p>
-                    </td>
-                </tr>
+                <tr th:replace="~{email/fragments/layout :: footer('#ed1c24', null, null, null)}"></tr>
 
             </table>
         </td>

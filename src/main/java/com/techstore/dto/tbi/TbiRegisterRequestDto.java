@@ -20,9 +20,6 @@ public class TbiRegisterRequestDto {
     /** Price in EUR (with VAT) — TBI requires EUR */
     private Double priceEuro;
 
-    /** Price in BGN (with VAT) — stored for our records */
-    private Double priceLeva;
-
     private String sku;
 
     private Integer quantity;

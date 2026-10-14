@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="bg">
+<!--
+  Shared parts of the customer emails. Every call must pass every parameter (use null for "none").
+  Needs these variables, which EmailService.renderTemplate sets for every email:
+  appName, appUrl, logoUrl, currentYear; the note block also needs noteHtml.
+-->
+<body>
+<table>
+
+    <!-- Header: dark like the website header, logo in its own colours, a thin line in the email's colour -->
+    <tr th:fragment="header(accent)">
+        <td align="center" bgcolor="#1a1a1a"
+            th:style="'background-color:#1a1a1a; padding:28px 20px; border-bottom:4px solid ' + ${accent} + ';'">
+            <a th:href="${appUrl}" style="text-decoration:none;">
+                <img th:src="${logoUrl}" src="https://www.caretech.bg/email-logo.png" width="200" height="72" alt="CareTech"
+                     style="display:block; margin:0 auto; border:0; outline:none; text-decoration:none; height:auto; color:#ed1c24; font-family:Arial,sans-serif; font-size:26px; font-weight:bold;"/>
+            </a>
+        </td>
+    </tr>
+
+    <!-- Footer: optional tagline, the site links and the copyright line -->
+    <tr th:fragment="footer(accent, tagline, extraLabel, extraPath)">
+        <td align="center"
+            th:style="'background-color:#0f0f0f; padding:25px 20px; border-top:2px solid ' + ${accent} + ';'">
+            <p th:if="${tagline != null}" style="color:#6c6e70; font-size:13px; margin:0 0 12px 0;" th:text="${tagline}">
+                Благодарим Ви, че избрахте CareTech!
+            </p>
+            <p style="margin:10px 0;">
+                <a th:href="${appUrl}" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Начало</a>
+                <a th:if="${extraLabel != null}" th:href="${appUrl} + ${extraPath}" th:text="${extraLabel}"
+                   style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Моите поръчки</a>
+                <a th:href="${appUrl} + '/contacts'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">Контакти</a>
+                <a th:href="${appUrl} + '/about'" style="color:#929497; text-decoration:none; margin:0 10px; font-size:12px;">За нас</a>
+            </p>
+            <p style="color:#6c6e70; font-size:11px; margin:10px 0 0 0;">
+                &copy; <span th:text="${currentYear}">2026</span> <span th:text="${appName}">CareTech</span>. Всички права запазени.
+            </p>
+        </td>
+    </tr>
+
+</table>
+
+<!-- The admin's note from the status change ("Информация" / "Причина за отмяна"); hidden when there is none -->
+<div th:fragment="note(label, accent)" th:if="${noteHtml != null}">
+    <table width="100%" cellpadding="15" cellspacing="0" border="0"
+           th:style="'background-color:#262626; border-left:4px solid ' + ${accent} + '; border-radius:6px; margin-bottom:20px;'">
+        <tr>
+            <td>
+                <p style="color:#ffffff; font-size:14px; font-weight:600; margin:0 0 8px 0;" th:text="${label}">Информация</p>
+                <p style="color:#e5e5e5; font-size:14px; line-height:1.6; margin:0; word-break:break-word;" th:utext="${noteHtml}">
+                    Текст на бележката
+                </p>
+            </td>
+        </tr>
+    </table>
+</div>
+
+</body>
+</html>

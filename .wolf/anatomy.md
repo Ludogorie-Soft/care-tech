@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-12T09:01:03.771Z
-> Files: 828 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-14T11:41:00.596Z
+> Files: 838 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -18,6 +18,7 @@
 ## ../../../../.claude/plans/
 
 - `buzzing-dancing-hare.md` — Параметри и филтри по категории: одит и план (~3946 tok)
+- `frolicking-baking-fog.md` — План: Имейли към клиентите + само евро навсякъде (~4082 tok)
 - `pazaruvaj-valiant-possum.md` — Pazaruvaj: верни DeliveryTime / DeliveryCost + един праг за безплатна доставка (~1720 tok)
 - `purring-soaring-codd.md` — План: чекаут, търсачки и промоции/надценки в админа (~2723 tok)
 - `zippy-juggling-hearth.md` — Продуктови линкове `/product/{id}/{id}` вместо `/product/{slug}/{id}` (~1068 tok)
@@ -26,7 +27,8 @@
 
 - `admin_order_items_edit.md` (~449 tok)
 - `asbis_price_field.md` (~203 tok)
-- `euro_rate_convention.md` (~361 tok)
+- `customer_emails_euro.md` (~493 tok)
+- `euro_rate_convention.md` (~351 tok)
 - `feedback_no_feature_removal.md` (~269 tok)
 - `feedback_showtoast_duration.md` — Declares type (~140 tok)
 - `gsc_alternate_canonical_audit.md` (~421 tok)
@@ -173,7 +175,7 @@
 
 - `AddOrderProductSearch.jsx` — Admin product search (GET products/search, debounced) for adding a product to an existing order; disables products already in the order (~1024 tok)
 - `EditOrderModal.jsx` — Admin order edit, 5 tabs; Продукти tab: quantity, unit price with VAT (sent as net unitPrice), add product (newItems), totals summary (~8900 tok)
-- `OrderDetailPage.jsx` — OrderDetailPage (~5639 tok)
+- `OrderDetailPage.jsx` — Админ страница на поръчка; зарежда fetchAdminOrderById (с adminNotes); модали за статус и редакция (~5639 tok)
 - `useOrderUtils.js` — Exports useOrderUtils (~802 tok)
 
 ## ../../care-tech-ui/src/pages/admin/Pazaruvaj/
@@ -200,7 +202,7 @@
 ## ../../care-tech-ui/src/pages/profile/
 
 - `AcceptOfferModal.jsx` — EURO_RATE — renders form (~6210 tok)
-- `MyOffers.jsx` — EURO_RATE (~2344 tok)
+- `MyOffers.jsx` — Личните оферти на клиента; само €; зачертана цена = originalPrice × 1.2 (~2344 tok)
 - `OrderDetails.jsx` — OrderDetails (~3809 tok)
 - `ProfileLayout.jsx` — links (~1930 tok)
 - `WarrantyCards.jsx` — WarrantyCards (~886 tok)
@@ -212,7 +214,7 @@
 - `compareSlice.js` — Exports selectCompareItems, selectCompareCount, selectIsInCompare (~386 tok)
 - `leasingSlice.js` — 4 async thunks: fetchLeasingApplications, fetchLeasingById, fetchLeasingStatistics, registerLeasingApplication. registerError stores true (flag only, not backend payload). State: registerStatus, registeredUrl, registeredApplicationId. (~1100 tok)
 - `offersSlice.js` — API routes: GET, PUT, POST (10 endpoints) (~2807 tok)
-- `orderSlice.js` — orderSlice.js (~3037 tok)
+- `orderSlice.js` — Поръчки: fetchOrderById (клиент), fetchAdminOrderById (админ, с бележка), updateOrderStatus (notifyCustomer, "" = изчисти), updateOrder (~3200 tok)
 - `paramSlice.js` — API routes: GET, POST, PUT, PATCH, DELETE (15 endpoints) (~5217 tok)
 - `productSlice.js` — API routes: GET, POST, PUT (11 endpoints) (~7093 tok)
 - `reviewsSlice.js` — API routes: GET, POST, PUT, DELETE (7 endpoints) (~1554 tok)
@@ -221,6 +223,8 @@
 ## ../../care-tech-ui/src/utils/
 
 - `loginRedirect.js` — Exports setLoginRedirect, consumeLoginRedirect (~73 tok)
+- `offerPricing.js` — The product's price with VAT, as the site shows it. (~388 tok)
+- `offerPricing.test.js` (~444 tok)
 - `partners.js` — Exports partners (~425 tok)
 - `slugify.js` — Exports slugify (~217 tok)
 - `tokenRefresh.js` — Exports setupTokenRefresh (~568 tok)
@@ -265,7 +269,7 @@
 
 ## .claude/
 
-- `launch.json` (~550 tok)
+- `launch.json` (~198 tok)
 - `settings.json` (~441 tok)
 - `settings.local.json` (~96 tok)
 
@@ -516,7 +520,7 @@
 
 ## src/main/java/com/techstore/controller/
 
-- `AdminController.java` — Get all orders with pagination and sorting (~5781 tok)
+- `AdminController.java` — Админ API: поръчки (GET /orders/{id} с adminNotes, PUT статус/редакция), продукти, промоции, оферти, лизинг (~5500 tok)
 - `AuthController.java` — RestController: AuthController (9 endpoints) (~1192 tok)
 - `BlogCategoryController.java` — RestController: BlogCategoryController (6 endpoints) (~750 tok)
 - `BlogPostController.java` — RestController: BlogPostController (9 endpoints) (~1487 tok)
@@ -584,7 +588,6 @@
 - `CategoryFiltersResponse.java` — record(categoryId, total, groups[Group(attributeId, slug, name, unit, type, visible, values)], manufacturers[Option(id, name, count, selected)]) (~300 tok)
 - `FilterConfigDto.java` — Вложени records за админ API на филтрите (AttributeSummary/Detail, Value, ValueRule, NameRule, Source, RawParameter, UnmappedValue, PreviewRow, CategoryConfig/Group, заявките) (~900 tok)
 - `FilterOptionDTO.java` — FilterOptionDTO: isAvailable, getDisplayLabel (~228 tok)
-- `PriceRangeDTO.java` — PriceRangeDTO: getDefault, isValid, getFormattedMin, getFormattedMax + 3 more (~648 tok)
 - `RangeDTO.java` — RangeDTO: isValid, getFormattedRange, contains (~269 tok)
 - `SpecificationFilterValueDTO.java` — SpecificationFilterValueDTO: hasValues, hasTextValue, hasBooleanValue, hasNumericRange + 1 more (~367 tok)
 
@@ -771,14 +774,14 @@
 - `Platform.java` — Platform/Source of data integration (~339 tok)
 - `ProductStatus.java` — ProductStatus: fromCode, getCode, getNameBg, getNameEn (~271 tok)
 - `ReviewStatus.java` — Class: ReviewStatus (~27 tok)
-- `ShippingMethod.java` — Class: ShippingMethod (~31 tok)
+- `ShippingMethod.java` — SPEEDY/FREE/STANDARD/EXPRESS с displayName („Speedy“ в имейлите) (~90 tok)
 
 ## src/main/java/com/techstore/event/
 
 - `OnPasswordChangedEvent.java` — Class: OnPasswordChangedEvent (~100 tok)
 - `OnPasswordResetRequestEvent.java` — Class: OnPasswordResetRequestEvent (~99 tok)
 - `OrderCreatedEvent.java` — Event fired when a new order is created (~117 tok)
-- `OrderStatusChangedEvent.java` — Event fired when order status is changed (~195 tok)
+- `OrderStatusChangedEvent.java` — order, previous/newStatus и customerNote (бележката към клиента, взета при публикуване) (~260 tok)
 
 ## src/main/java/com/techstore/exception/
 
@@ -801,7 +804,7 @@
 
 ## src/main/java/com/techstore/listener/
 
-- `OrderEventListener.java` — Event listener for order-related events (~700 tok)
+- `OrderEventListener.java` — @Async: създадена поръчка → потвърждение + админ; смяна на статус → shipped/delivered/cancelled/status-update имейл с customerNote (~720 tok)
 - `PasswordChangedEventListener.java` — Event listener for password changed events (~467 tok)
 - `PasswordResetEventListener.java` — Event listener for password reset requests (~515 tok)
 
@@ -849,7 +852,8 @@
 - `CategoryReorganizationService.java` — CategoryReorganizationService - FINAL VERSION (~12606 tok)
 - `CategoryService.java` — Service: CategoryService (~4270 tok)
 - `CronJobService.java` — Service: CronJobService (~1046 tok)
-- `EmailService.java` — Service for sending email notifications (~5028 tok)
+- `EmailFormatting.java` — Чисти функции за имейлите: noteHtml (escape + линкове + <br/>), deliveryLines (офис/улица + град без повторения), trackingUrl (Speedy ?shipmentNumber=), deliveryDaysText (~1590 tok)
+- `EmailService.java` — Всички имейли. renderTemplate слага общите променливи (лого, година, контакти); статус имейлите приемат customerNote → noteHtml; reviewUrl/logoUrl от app.email.*. Методите са @Async и поглъщат грешките (~5600 tok)
 - `FileUploadService.java` — Service: FileUploadService (~7260 tok)
 - `ImageMigrationService.java` — Service: ImageMigrationService (~1434 tok)
 - `ManufacturerService.java` — Service: ManufacturerService (~4027 tok)
@@ -931,7 +935,6 @@
 - `CriticalMarkerFilter.java` — Custom logback filter: ACCEPT only if event has marker "CRITICAL", else DENY. Used by SLACK_ASYNC appender. (~142 tok)
 - `CyrillicTransliterator.java` — Turns a Cyrillic search word into the Latin form the catalogue actually stores. (~1367 tok)
 - `ExceptionHelper.java` — Wraps database operations and converts common exceptions to business exceptions (~1811 tok)
-- `FilterUtils.java` — FilterUtils: calculatePriceRange, calculateNumericRange, createFilterOptions (~861 tok)
 - `JwtUtil.java` — Component: JwtUtil (~1188 tok)
 - `LogHelper.java` — Service: LogHelper (~398 tok)
 - `Markers.java` — SLF4J marker constants. Markers.CRITICAL = MarkerFactory.getMarker("CRITICAL"). Use with log.error(Markers.CRITICAL, ...) to route to Slack. (~60 tok)
@@ -1008,6 +1011,10 @@
 - `password-reset-email.html` — Нулиране на парола (~2270 tok)
 - `personal-offer.html` — Лична оферта (~1925 tok)
 
+## src/main/resources/templates/email/fragments/
+
+- `layout.html` — Общи фрагменти: header(accent) с лого, footer(accent, tagline, extraLabel, extraPath) с Контакти/За нас/година, note(label, accent) (~882 tok)
+
 ## src/test/java/com/techstore/
 
 - `TechStoreApiApplicationTests.java` — @SpringBootTest @ActiveProfiles("test") context-load smoke test. Uses H2 + application-test.properties. (~78 tok)
@@ -1018,12 +1025,17 @@
 
 ## src/test/java/com/techstore/controller/
 
+- `AdminOrderControllerTest.java` — GET /api/admin/orders/{id}: 401/403/админ с adminNotes, литералните пътища печелят; PUT статус приема notifyCustomer и празна бележка (5 теста) (~1423 tok)
 - `OgMetaControllerTest.java` — A product the site shows: AVAILABLE, active, shown, not deleted. (~4064 tok)
 - `TbiLeasingControllerTest.java` — @WebMvcTest security tests: POST /register (401/200), POST /webhook (public 200), GET /application/{id} IDOR (401/200 owner/403 non-owner/200 admin/200 SUPER_ADMIN). 8 tests. (~2081 tok)
 
 ## src/test/java/com/techstore/entity/
 
 - `ProductFinalPriceTest.java` — calculateFinalPrice: fractional markup kept exactly (12.5%), whole markup + discount unchanged. 2 tests (~350 tok)
+
+## src/test/java/com/techstore/listener/
+
+- `OrderEventListenerTest.java` — бележката стига до четирите статус имейла (~556 tok)
 
 ## src/test/java/com/techstore/repository/
 
@@ -1033,10 +1045,14 @@
 
 - `AsbisApiServiceAttrListTest.java` — ASBIS repeats an attribute name inside one product with a different value each time (1,170 times (~532 tok)
 - `AsbisApiServiceAttrListTest.java` — extractAttrList: повторено име пази всички различни стойности в реда от фийда (~450 tok)
+- `EmailFormattingTest.java` — noteHtml (XSS, линкове, нови редове), deliveryLines с реалните прод форми, trackingUrl, deliveryDaysText (20 теста) (~1962 tok)
+- `EmailServiceTemplatesTest.java` — Renders every customer email through EmailService with the real templates and checks what the (~4612 tok)
 - `MostApiServiceTest.java` — 11 теста с Mockito за провалите на MOST feed-а: празно/null тяло, connection error, изчерпани опити, възстановяване след преходен отказ, HTTP статус, счупен XML, изключен feed, кеширане на успех и НЕкеширане на провал (~1999 tok)
+- `OrderServiceStatusNotificationTest.java` — notifyCustomer, празно = изчисти, същия статус, бележката в event-а, клиентска отмяна с български одит ред (10 теста) (~2055 tok)
 - `OrderServiceUpdateItemsTest.java` — Class: OrderServiceUpdateItemsTest (~2132 tok)
 - `OrderServiceUpdateItemsTest.java` — Mockito tests for OrderService.updateOrder: changed unit price resets discount + totals, new items with product/custom price, empty-order rejection. 6 tests. (~2300 tok)
 - `PazaruvajFeedServiceTest.java` — DeliveryTime/DeliveryCost във фийда: 120 € → 3.50 EUR, 132 € → безплатно, прагът е по цената с ДДС (3 теста) (~900 tok)
+- `PersonalOfferConvertPricingTest.java` — The contract the admin offer modal relies on: originalPrice is the product price WITHOUT VAT, (~1222 tok)
 - `ProductServiceDeliveryChargeTest.java` — продуктовото API връща deliveryCharge: FIXED / FREE / COURIER_TARIFF (телевизор) (3 теста) (~1100 tok)
 - `PromotionExpiryServiceDbTest.java` — @DataJpaTest on H2 with the real service: expired product/category/brand cleared, future and no-end promotions untouched. 3 tests (~1299 tok)
 - `PromotionExpiryServiceTest.java` — Mockito: expired product gets full price back, expired category/brand lose flag, nothing due touches nothing. 3 tests (~1200 tok)
@@ -1085,9 +1101,6 @@
 - `DisplaySpecificationLinesTest.java` — displayLines: <br/>-списъци на редове, тагове за форматиране, </br>, <a>/<img>, „<5 ms“ остава (5 теста) (~500 tok)
 - `FilterConfigControllerTest.java` — @WebMvcTest: анонимен 401, USER 403, ADMIN 200, невалиден израз 400 (~500 tok)
 - `FilterConfigServiceTest.java` — validatePattern: съобщението на PostgreSQL без „ERROR:“, валиден израз минава, >500 знака се отказва без база (~400 tok)
-- `src/test/java/com/techstore/repository/CategoryRepositoryCanonicalUrlTest.java` — @DataJpaTest (H2): findFirstBySlugAndShowTrueOrderByIdAsc, existsByParentIdAndShowTrue, findVisibleParentIds (~700 tok)
-- `src/main/java/com/techstore/service/seo/SpaShellService.java` — fetches the frontend index.html (SPA_INDEX_URL) with If-None-Match on every call; keeps the last good copy (~600 tok)
 - `src/main/java/com/techstore/service/seo/SpaHead.java` — replaces title/description/robots/canonical/og/twitter tags in index.html with the page's own (~900 tok)
-- `src/test/java/com/techstore/service/seo/SpaHeadTest.java` — SpaHead against the production index.html fixture (6 tests)
-- `src/test/java/com/techstore/service/seo/SpaShellServiceTest.java` — JDK HttpServer: ETag/304, new deploy, frontend down, never reachable (4 tests)
-- `src/test/resources/spa/index.html` — production care-tech-ui index.html captured 2026-10-12 (fixture)
+- `src/main/java/com/techstore/service/seo/SpaShellService.java` — fetches the frontend index.html (SPA_INDEX_URL) with If-None-Match on every call; keeps the last good copy (~600 tok)
+- `src/test/java/com/techstore/repository/CategoryRepositoryCanonicalUrlTest.java` — @DataJpaTest (H2): findFirstBySlugAndShowTrueOrderByIdAsc, existsByParentIdAndShowTrue, findVisibleParentIds (~700 tok)

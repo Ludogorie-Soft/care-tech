@@ -10389,6 +10389,222 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-10-12T09:01:03.040Z"
+    },
+    {
+      "id": "bug-627",
+      "timestamp": "2026-10-14T12:00:00.000Z",
+      "error_message": "Клиентът: линковете Контакти и Поддръжка в имейлите не работят, годината е 2025",
+      "file": "src/main/resources/templates/email/*.html",
+      "root_cause": "Шаблоните сочеха към /contact и /support, които не съществуват в React (има /contacts и /about); © 2025 беше твърдо написано; „Моите поръчки“ → /orders и „Условия“ → /terms също бяха 404.",
+      "fix": "Общи фрагменти email/fragments/layout.html (header/footer/note); футър Начало · Контакти(/contacts) · За нас(/about), година от EmailService (Europe/Sofia); /profile/my-orders и /policy. Тест: EmailServiceTemplatesTest проверява всеки линк срещу маршрутите в App.js.",
+      "tags": [
+        "email",
+        "links",
+        "footer",
+        "thymeleaf",
+        "client-report"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-628",
+      "timestamp": "2026-10-14T12:00:00.000Z",
+      "error_message": "Имейл „Отменена“: support@caretech.com, +359888123456, бутон Чат с href=#",
+      "file": "src/main/resources/templates/email/order-cancelled.html",
+      "root_cause": "Измислени контакти в шаблона, никога не са били реални.",
+      "fix": "mailto:info@caretech.bg (app.email.info) и tel:+359899850777 от EmailService; Чат махнат; „Свържете се с нас“ → /contacts; махната стъпка „Потвърждение“.",
+      "tags": [
+        "email",
+        "contacts",
+        "client-report"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-629",
+      "timestamp": "2026-10-14T12:00:00.000Z",
+      "error_message": "„Оставете отзив“ и „Проследи пратката“ водят до #",
+      "file": "src/main/resources/templates/email/order-delivered.html, order-shipped.html",
+      "root_cause": "href=\"#\" без реален адрес.",
+      "fix": "reviewUrl = https://g.page/r/CeArIZmgBuhGEBE/review (главно I — с малко l води към google.com) на бутона и петте звезди; trackingUrl = Speedy track-shipment?shipmentNumber=<номер>.",
+      "tags": [
+        "email",
+        "review",
+        "speedy",
+        "client-report"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-630",
+      "timestamp": "2026-10-14T12:00:00.000Z",
+      "error_message": "Имейл „Изпратена“ показва само града, „SPEEDY“, „1-3 работни дни“, „Важно: на адреса“ и при офис",
+      "file": "src/main/resources/templates/email/order-shipped.html",
+      "root_cause": "Шаблонът печаташе order.shippingCity и суровия enum; срокът беше твърд текст.",
+      "fix": "EmailFormatting.deliveryLines (офис или улица + град без дублиран пощ. код), ShippingMethod.displayName, deliveryDaysText от ShippingConfig, „Важно“ според toOffice.",
+      "tags": [
+        "email",
+        "address",
+        "shipping"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-631",
+      "timestamp": "2026-10-14T12:00:00.000Z",
+      "error_message": "Админ бележката излиза само при „Отменена“; клиентска отмяна показваше английски „Cancellation reason … (at: raw)“ с всички стари бележки",
+      "file": "src/main/java/com/techstore/service/OrderService.java, OrderEventListener.java, EmailService.java",
+      "root_cause": "Само order-cancelled.html четеше order.adminNotes; cancelOrder добавяше английски одит ред към бележките.",
+      "fix": "OrderStatusChangedEvent.customerNote (взима се при публикуване), noteHtml (escape + линкове + <br/>) във всички 4 имейла; cancelOrder пише български одит ред, а имейлът показва само причината.",
+      "tags": [
+        "email",
+        "admin-notes",
+        "client-report",
+        "xss-safe"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-632",
+      "timestamp": "2026-10-14T12:00:00.000Z",
+      "error_message": "Празно поле за бележка/номер не изчиства стойността; същият статус праща „X → X“",
+      "file": "care-tech-ui/src/redux/orderSlice.js, UpdateOrderStatusModal.jsx, EditOrderModal.jsx, OrderService.java",
+      "root_cause": "Фронтендът пропускаше празните стойности (|| undefined / || null), бекендът третираше null като „без промяна“.",
+      "fix": "Празно се праща като \"\" → blankToNull; отметка „Уведоми клиента по имейл“ (notifyCustomer); statusChanged скрива „Предишен статус“.",
+      "tags": [
+        "admin",
+        "orders",
+        "validation"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-633",
+      "timestamp": "2026-10-14T12:00:00.000Z",
+      "error_message": "Админ страницата на поръчка не показва админ бележката; с новото „празно = изчисти“ всяка редакция би я изтрила",
+      "file": "care-tech-ui/src/pages/admin/Orders/OrderDetailPage.jsx, AdminController.java",
+      "root_cause": "Страницата зареждаше GET /api/orders/{id} (клиентски DTO, нарочно без adminNotes) → модалите винаги с празна бележка. Хванато при E2E теста.",
+      "fix": "Нов GET /api/admin/orders/{id} (OrderResponseDTO) + fetchAdminOrderById. Тест: AdminOrderControllerTest.",
+      "tags": [
+        "admin",
+        "orders",
+        "regression",
+        "e2e-found"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-634",
+      "timestamp": "2026-10-14T12:00:00.000Z",
+      "error_message": "Имейлът за забравена количка гърми при всяко изпращане",
+      "file": "src/main/resources/templates/email/abandoned-cart.html",
+      "root_cause": "Шаблонът четеше item.product.images, а Product има primaryImageUrl/additionalImages → SpelEvaluationException EL1008E; EmailService само логваше грешката.",
+      "fix": "primaryImageUrl (абсолютен URL директно, иначе /api/images/product/{id}/primary); цената с ДДС. Хванато от EmailServiceTemplatesTest.",
+      "tags": [
+        "email",
+        "thymeleaf",
+        "silent-failure",
+        "test-found"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-635",
+      "timestamp": "2026-10-14T12:00:00.000Z",
+      "error_message": "Суми в евро с етикет „лв.“ в имейлите, JSON-LD priceCurrency BGN, GA4/Meta currency BGN",
+      "file": "order-confirmation.html, admin-new-order.html, personal-offer.html, ProductPage.jsx, gtag.js, fbpixel.js, Cart.jsx",
+      "root_cause": "Остатък от времето с лева; InitiateCheckout пращаше левов междинен сбор + евро доставка.",
+      "fix": "Само € навсякъде (решение 2026-10-14), курсът изтрит от кода; JSON-LD EUR + евро с ДДС; аналитика EUR.",
+      "tags": [
+        "euro",
+        "currency",
+        "seo",
+        "analytics"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-636",
+      "timestamp": "2026-10-14T12:00:00.000Z",
+      "error_message": "Редът под ценовия филтър показва грешно число",
+      "file": "care-tech-ui/src/components/products/Filter.jsx",
+      "root_cause": "Делеше евро стойността на плъзгача на 1.95583 и я етикетираше „€“.",
+      "fix": "Редът е махнат (плъзгачът вече е в евро).",
+      "tags": [
+        "filter",
+        "euro"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-637",
+      "timestamp": "2026-10-14T12:00:00.000Z",
+      "error_message": "Телефонът на /contacts набира +359878123456",
+      "file": "care-tech-ui/src/pages/Contact.jsx",
+      "root_cause": "Грешен tel: линк при правилен видим текст.",
+      "fix": "tel:+359899850777.",
+      "tags": [
+        "contacts",
+        "phone"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-638",
+      "timestamp": "2026-10-14T12:00:00.000Z",
+      "error_message": "Зачертаната цена в личната оферта е без ДДС до офертна цена с ДДС",
+      "file": "personal-offer.html, care-tech-ui/src/pages/profile/MyOffers.jsx",
+      "root_cause": "originalPrice се пази без ДДС, offerPrice — с ДДС.",
+      "fix": "Показва се originalPrice × 1.2 и само ако е по-висока. Остава отворено: SendOfferModal попълва офертата по подразбиране без ДДС (отделна задача).",
+      "tags": [
+        "offers",
+        "vat",
+        "euro"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T12:00:00.000Z"
+    },
+    {
+      "id": "bug-639",
+      "timestamp": "2026-10-14T15:00:00.000Z",
+      "error_message": "Лична оферта, изпратена без промяна, дава ~16.7 % неволна отстъпка; процентите се смятат от цената без ДДС",
+      "file": "care-tech-ui/src/pages/admin/Customers/SendOfferModal.jsx",
+      "root_cause": "Модалът попълваше offerPrice = product.finalPrice (БЕЗ ДДС) и смяташе отстъпката от него, а бекендът (PersonalOfferService.convertToOrder) третира offerPrice като цена С ДДС и дели на 1.2. В прод всичките 11 оферти са изпратени така (напр. 16 % от 45.05 € → 31.53 €, реално ~30 %).",
+      "fix": "utils/offerPricing.js (priceWithVat, offerPriceFromDiscount, discountFromOfferPrice, crossedOutPrice) + jest тестове; модалът по подразбиране = цената с ДДС, отстъпка от нея; админ изгледите и профилът зачертават цената с ДДС. originalPrice остава без ДДС. Бекенд тест PersonalOfferConvertPricingTest пази договора. Съществуващите оферти не са пипани.",
+      "tags": [
+        "offers",
+        "vat",
+        "pricing",
+        "money"
+      ],
+      "related_bugs": [
+        "bug-638"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T15:00:00.000Z"
     }
   ]
 }

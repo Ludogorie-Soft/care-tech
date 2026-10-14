@@ -56,13 +56,14 @@ public class OrderEventListener {
         try {
             Order order = event.getOrder();
             OrderStatus newStatus = event.getNewStatus();
+            String note = event.getCustomerNote();
 
             // Send specific email based on status
             switch (newStatus) {
-                case SHIPPED -> emailService.sendOrderShippedEmail(order);
-                case DELIVERED -> emailService.sendOrderDeliveredEmail(order);
-                case CANCELLED -> emailService.sendOrderCancelledEmail(order);
-                default -> emailService.sendOrderStatusUpdateEmail(order, event.getPreviousStatus());
+                case SHIPPED -> emailService.sendOrderShippedEmail(order, note);
+                case DELIVERED -> emailService.sendOrderDeliveredEmail(order, note);
+                case CANCELLED -> emailService.sendOrderCancelledEmail(order, note);
+                default -> emailService.sendOrderStatusUpdateEmail(order, event.getPreviousStatus(), note);
             }
         } catch (Exception e) {
             log.error("Error handling order status changed event", e);
