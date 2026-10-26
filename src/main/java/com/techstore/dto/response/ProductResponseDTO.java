@@ -29,6 +29,7 @@ public class ProductResponseDTO {
     private BigDecimal pricePromo;
     private BigDecimal priceClientPromo;
     private BigDecimal discount;
+    private LocalDateTime promoEndsAt;
     private Boolean active;
     private Boolean featured;
     private String primaryImageUrl;

@@ -3,11 +3,13 @@ package com.techstore.service.admin;
 import com.techstore.dto.request.ProductPromoRequest;
 import com.techstore.dto.response.*;
 import com.techstore.entity.*;
+import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.ResourceNotFoundException;
 import com.techstore.mapper.ParameterMapper;
 import com.techstore.repository.CategoryRepository;
 import com.techstore.repository.ManufacturerRepository;
 import com.techstore.repository.ProductRepository;
+import com.techstore.service.PromotionExpiryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,23 +34,24 @@ public class AdminService {
     private final CacheManager cacheManager;
 
     @Transactional
-    public List<ProductResponseDTO> createPromoByManufacturer(Long manufacturerId, BigDecimal discount, String lang) {
+    public List<ProductResponseDTO> createPromoByManufacturer(Long manufacturerId, BigDecimal discount,
+                                                              LocalDateTime endsAt, String lang) {
+        validatePromo(discount, endsAt);
         Manufacturer manufacturer = manufacturerRepository.findById(manufacturerId).orElseThrow(
                 () -> new ResourceNotFoundException("Manufacturer not found with id " + manufacturerId)
         );
 
-        if (discount.compareTo(BigDecimal.ZERO) > 0) {
-            manufacturer.setIsPromoActive(true);
-        } else {
-            manufacturer.setIsPromoActive(false);
-        }
+        boolean active = discount.compareTo(BigDecimal.ZERO) > 0;
+        manufacturer.setIsPromoActive(active);
+        manufacturer.setPromoDiscount(active ? discount : null);
+        manufacturer.setPromoEndsAt(active ? endsAt : null);
         manufacturerRepository.save(manufacturer);
 
         List<Product> products = productRepository.findByManufacturerId(manufacturerId);
 
         if (!products.isEmpty()) {
             for (Product product : products) {
-                setDiscountToProduct(discount, product);
+                setDiscountToProduct(discount, endsAt, product);
             }
         }
 
@@ -69,24 +73,24 @@ public class AdminService {
     }
 
     @Transactional
-    public List<ProductResponseDTO> createPromoByCategory(Long categoryId, BigDecimal discount, String language) {
+    public List<ProductResponseDTO> createPromoByCategory(Long categoryId, BigDecimal discount,
+                                                          LocalDateTime endsAt, String language) {
+        validatePromo(discount, endsAt);
         Category category = categoryRepository.findById(categoryId).orElseThrow(
                 () -> new ResourceNotFoundException("Category not found with id " + categoryId)
         );
 
-        if (discount.compareTo(BigDecimal.ZERO) > 0) {
-            category.setIsPromoActive(true);
-        } else {
-            category.setIsPromoActive(false);
-        }
-
+        boolean active = discount.compareTo(BigDecimal.ZERO) > 0;
+        category.setIsPromoActive(active);
+        category.setPromoDiscount(active ? discount : null);
+        category.setPromoEndsAt(active ? endsAt : null);
         categoryRepository.save(category);
 
         List<Product> products = productRepository.findAllByCategoryId(category.getId());
 
         if (!products.isEmpty()) {
             for (Product product : products) {
-                setDiscountToProduct(discount, product);
+                setDiscountToProduct(discount, endsAt, product);
             }
         }
 
@@ -97,9 +101,10 @@ public class AdminService {
 
     @Transactional
     public ProductResponseDTO createPromo(ProductPromoRequest request, String lang) {
+        validatePromo(request.getDiscount(), request.getPromoEndsAt());
         Product product = getProduct(request.getId());
 
-        setDiscountToProduct(request.getDiscount(), product);
+        setDiscountToProduct(request.getDiscount(), request.getPromoEndsAt(), product);
 
         clearProductCache();
 
@@ -137,6 +142,7 @@ public class AdminService {
         dto.setMarkupPercentage(product.getMarkupPercentage());
         dto.setFinalPrice(product.getFinalPrice());
         dto.setDiscount(product.getDiscount());
+        dto.setPromoEndsAt(product.getPromoEndsAt());
 
         dto.setActive(product.getActive());
         dto.setFeatured(product.getFeatured());
@@ -343,6 +349,8 @@ public class AdminService {
                 .slug(category.getSlug())
                 .show(category.getShow())
                 .isPromoActive(category.getIsPromoActive())
+                .promoDiscount(category.getPromoDiscount())
+                .promoEndsAt(category.getPromoEndsAt())
                 .build();
     }
 
@@ -351,6 +359,8 @@ public class AdminService {
                 .id(manufacturer.getId())
                 .name(manufacturer.getName())
                 .isPromoActive(manufacturer.getIsPromoActive())
+                .promoDiscount(manufacturer.getPromoDiscount())
+                .promoEndsAt(manufacturer.getPromoEndsAt())
                 .build();
     }
 
@@ -361,8 +371,20 @@ public class AdminService {
         }
     }
 
-    private void setDiscountToProduct(BigDecimal discount, Product product) {
+    private void validatePromo(BigDecimal discount, LocalDateTime endsAt) {
+        if (discount == null || discount.compareTo(BigDecimal.ZERO) < 0
+                || discount.compareTo(BigDecimal.valueOf(100)) >= 0) {
+            throw new BusinessLogicException("Discount must be at least 0 and below 100");
+        }
+        if (endsAt != null && discount.compareTo(BigDecimal.ZERO) > 0
+                && !endsAt.isAfter(LocalDateTime.now(PromotionExpiryService.PROMO_ZONE))) {
+            throw new BusinessLogicException("Promotion end must be in the future");
+        }
+    }
+
+    private void setDiscountToProduct(BigDecimal discount, LocalDateTime endsAt, Product product) {
         product.setDiscount(discount);
+        product.setPromoEndsAt(discount.compareTo(BigDecimal.ZERO) > 0 ? endsAt : null);
         product.calculateFinalPrice();
         productRepository.save(product);
     }

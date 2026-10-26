@@ -565,6 +565,29 @@ public class ProductService {
                 .map(p -> convertToResponseDTO(p, lang));
     }
 
+    @Transactional(readOnly = true)
+    public Page<ProductResponseDTO> searchAdminProducts(String query, boolean onSale, boolean withMarkup,
+                                                        Pageable pageable, String lang) {
+        validateLanguage(lang);
+        return productRepository.findAll(AdminProductSpecifications.adminSearch(query, onSale, withMarkup), pageable)
+                .map(p -> convertToResponseDTO(p, lang));
+    }
+
+    /** Admin view of a product — unlike {@link #getProductById} it also returns hidden and unavailable ones. */
+    @Transactional(readOnly = true)
+    public ProductResponseDTO getProductByIdForAdmin(Long id, String lang) {
+        validateProductId(id);
+        validateLanguage(lang);
+        Product product = findProductByIdOrThrow(id);
+        if (Boolean.TRUE.equals(product.getDeleted())) {
+            throw new ResourceNotFoundException("Product not found with id: " + id);
+        }
+        ProductResponseDTO dto = convertToResponseDTO(product, lang);
+        dto.setDisplaySpecifications(displaySpecificationService.forProducts(List.of(id), lang)
+                .getOrDefault(id, List.of()));
+        return dto;
+    }
+
     private void validateProductId(Long id) {
         if (id == null || id <= 0) throw new ValidationException("Product ID must be a positive number");
     }
@@ -1022,6 +1045,7 @@ public class ProductService {
         dto.setMarkupPercentage(p.getMarkupPercentage());
         dto.setFinalPrice(p.getFinalPrice());
         dto.setDiscount(p.getDiscount());
+        dto.setPromoEndsAt(p.getPromoEndsAt());
         dto.setActive(p.getActive());
         dto.setFeatured(p.getFeatured());
         dto.setShow(p.getShow());

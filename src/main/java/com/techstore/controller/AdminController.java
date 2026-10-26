@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -90,6 +91,31 @@ public class AdminController {
         log.info("Deleting category with id: {}", id);
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Admin product search across all products, including hidden and unavailable ones.
+     * Example: GET /api/admin/products/search?q=imou камера&onSale=true&page=0&size=12
+     */
+    @GetMapping("/products/search")
+    public ResponseEntity<Page<ProductResponseDTO>> searchAdminProducts(
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "false") boolean onSale,
+            @RequestParam(defaultValue = "false") boolean withMarkup,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "bg") String lang) {
+
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
+                Sort.by("nameBg").and(Sort.by("id")));
+        return ResponseEntity.ok(productService.searchAdminProducts(q, onSale, withMarkup, pageable, lang));
+    }
+
+    @GetMapping("/products/{id}")
+    public ResponseEntity<ProductResponseDTO> getProductForAdmin(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "bg") String language) {
+        return ResponseEntity.ok(productService.getProductByIdForAdmin(id, language));
     }
 
     @GetMapping("/products/with-markup")
@@ -175,9 +201,10 @@ public class AdminController {
     public ResponseEntity<List<ProductResponseDTO>> createPromoByCategory(
             @RequestParam("categoryId") Long categoryId,
             @RequestParam("discount")BigDecimal discount,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endsAt,
             @RequestParam(defaultValue = "en", name = "lang") String lang
     ) {
-        List<ProductResponseDTO> response = adminService.createPromoByCategory(categoryId, discount, lang);
+        List<ProductResponseDTO> response = adminService.createPromoByCategory(categoryId, discount, endsAt, lang);
         return ResponseEntity.ok(response);
     }
 
@@ -185,9 +212,10 @@ public class AdminController {
     public ResponseEntity<List<ProductResponseDTO>> createPromoByManufacturer(
             @RequestParam("manufacturerId") Long manufacturerId,
             @RequestParam("discount") BigDecimal discount,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endsAt,
             @RequestParam(defaultValue = "en", name = "lang") String lang
     ) {
-        List<ProductResponseDTO> response = adminService.createPromoByManufacturer(manufacturerId, discount, lang);
+        List<ProductResponseDTO> response = adminService.createPromoByManufacturer(manufacturerId, discount, endsAt, lang);
         return ResponseEntity.ok(response);
     }
 

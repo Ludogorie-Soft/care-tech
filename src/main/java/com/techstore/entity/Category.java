@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +21,13 @@ public class Category extends BaseEntity {
 
     @Column(name = "is_promo_active", nullable = false)
     private Boolean isPromoActive = false;
+
+    /** Discount of the active promotion; null when there is none. */
+    @Column(name = "promo_discount", precision = 10, scale = 6)
+    private BigDecimal promoDiscount;
+
+    @Column(name = "promo_ends_at")
+    private LocalDateTime promoEndsAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "platform")

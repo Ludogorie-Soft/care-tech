@@ -8,6 +8,7 @@ import com.techstore.exception.DuplicateResourceException;
 import com.techstore.exception.ValidationException;
 import com.techstore.mapper.ManufacturerMapper;
 import com.techstore.repository.ManufacturerRepository;
+import com.techstore.repository.ProductRepository;
 import com.techstore.util.ExceptionHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +20,10 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class ManufacturerService {
 
     private final ManufacturerRepository manufacturerRepository;
     private final ManufacturerMapper manufacturerMapper;
+    private final ProductRepository productRepository;
 
     // Email validation pattern
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
@@ -159,8 +163,15 @@ public class ManufacturerService {
     public List<ManufacturerResponseDto> findManufacturersWithMarkupProducts() {
         List<Manufacturer> manufacturers = manufacturerRepository
                 .findDistinctByProductsMarkupPercentageGreaterThan(BigDecimal.ZERO);
+        Map<Long, BigDecimal> markups = productRepository.findMostCommonMarkupPerManufacturer().stream()
+                .collect(Collectors.toMap(ProductRepository.TargetMarkup::getTargetId,
+                        ProductRepository.TargetMarkup::getMarkupPercentage));
         return manufacturers.stream()
-                .map(manufacturerMapper::toResponseDto)
+                .map(manufacturer -> {
+                    ManufacturerResponseDto dto = manufacturerMapper.toResponseDto(manufacturer);
+                    dto.setMarkupPercentage(markups.get(manufacturer.getId()));
+                    return dto;
+                })
                 .toList();
     }
 

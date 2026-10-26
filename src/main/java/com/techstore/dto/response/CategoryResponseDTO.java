@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -25,4 +26,6 @@ public class CategoryResponseDTO {
     private Boolean isParentCategory;
     private Boolean show;
     private Boolean isPromoActive;
+    /** Only in the admin "with markup" list: the most common markup among the products. */
+    private BigDecimal markupPercentage;
 }

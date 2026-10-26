@@ -9,6 +9,7 @@ import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.DuplicateResourceException;
 import com.techstore.exception.ValidationException;
 import com.techstore.repository.CategoryRepository;
+import com.techstore.repository.ProductRepository;
 import com.techstore.repository.SyncLogRepository;
 import com.techstore.util.ExceptionHelper;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,8 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final SyncLogRepository syncLogRepository;
+    private final ProductRepository productRepository;
 
     @Transactional(readOnly = true)
     public List<CategoryResponseDTO> getAllCategories() {
@@ -179,8 +183,15 @@ public class CategoryService {
 
     public List<CategoryResponseDTO> findCategoriesWithMarkupProducts() {
         List<Category> categories = categoryRepository.findDistinctByProductsMarkupPercentageGreaterThan(BigDecimal.ZERO);
+        Map<Long, BigDecimal> markups = productRepository.findMostCommonMarkupPerCategory().stream()
+                .collect(Collectors.toMap(ProductRepository.TargetMarkup::getTargetId,
+                        ProductRepository.TargetMarkup::getMarkupPercentage));
         return categories.stream()
-                .map(this::convertToResponseDTO)
+                .map(category -> {
+                    CategoryResponseDTO dto = convertToResponseDTO(category);
+                    dto.setMarkupPercentage(markups.get(category.getId()));
+                    return dto;
+                })
                 .toList();
     }
 

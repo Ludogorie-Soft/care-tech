@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,4 +16,6 @@ public class ManufacturerSummaryDto {
     private Long id;
     private String name;
     private Boolean isPromoActive;
+    private BigDecimal promoDiscount;
+    private LocalDateTime promoEndsAt;
 }

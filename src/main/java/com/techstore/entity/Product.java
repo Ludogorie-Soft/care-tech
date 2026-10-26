@@ -10,6 +10,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmb
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -123,6 +124,10 @@ public class Product extends BaseEntity {
     @Column(precision = 10, scale = 6)
     private BigDecimal discount = BigDecimal.ZERO;
 
+    /** When set, the discount is removed automatically at this moment (Europe/Sofia). */
+    @Column(name = "promo_ends_at")
+    private LocalDateTime promoEndsAt;
+
     private Boolean active = true;
 
     private Boolean featured = false;
@@ -180,7 +185,7 @@ public class Product extends BaseEntity {
 
         BigDecimal markup = BigDecimal.ZERO;
         if (markupPercentage != null && markupPercentage.compareTo(BigDecimal.ZERO) > 0) {
-            markup = priceClient.multiply(markupPercentage.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+            markup = priceClient.multiply(markupPercentage.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP));
         }
 
         BigDecimal basePrice = priceClient.add(markup);

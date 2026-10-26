@@ -16,6 +16,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +52,27 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
                                       Pageable pageable);
 
     List<Product> findAllByCategoryId(Long categoryId);
+
+    List<Product> findByPromoEndsAtLessThanEqual(LocalDateTime moment);
+
+    /** A category's or brand's markup: the most common one among its products. */
+    interface TargetMarkup {
+        Long getTargetId();
+
+        BigDecimal getMarkupPercentage();
+    }
+
+    @Query(value = "SELECT DISTINCT ON (category_id) category_id AS \"targetId\", markup_percentage AS \"markupPercentage\" " +
+            "FROM products WHERE deleted = false AND markup_percentage > 0 AND category_id IS NOT NULL " +
+            "GROUP BY category_id, markup_percentage " +
+            "ORDER BY category_id, count(*) DESC, markup_percentage DESC", nativeQuery = true)
+    List<TargetMarkup> findMostCommonMarkupPerCategory();
+
+    @Query(value = "SELECT DISTINCT ON (manufacturer_id) manufacturer_id AS \"targetId\", markup_percentage AS \"markupPercentage\" " +
+            "FROM products WHERE deleted = false AND markup_percentage > 0 AND manufacturer_id IS NOT NULL " +
+            "GROUP BY manufacturer_id, markup_percentage " +
+            "ORDER BY manufacturer_id, count(*) DESC, markup_percentage DESC", nativeQuery = true)
+    List<TargetMarkup> findMostCommonMarkupPerManufacturer();
 
     @Query("SELECT p FROM Product p WHERE p.slug IS NULL OR p.slug = ''")
     List<Product> findProductsWithoutSlug();
