@@ -54,6 +54,7 @@ public class AdminController {
     private final CartService cartService;
     private final PersonalOfferService personalOfferService;
     private final ImageMigrationService imageMigrationService;
+    private final SyncHealthService syncHealthService;
 
     @GetMapping("/products/pageable")
     public ResponseEntity<Page<ProductResponseDTO>> getAllAdminProducts(
@@ -496,5 +497,11 @@ public class AdminController {
                 .findByFilters(syncType, status, pageable)
                 .map(SyncLogResponseDTO::new);
         return ResponseEntity.ok(logs);
+    }
+
+    /** Every nightly sync type and whether it has succeeded within the last 26 hours. */
+    @GetMapping("/sync-logs/health")
+    public ResponseEntity<List<SyncHealthDto>> getSyncHealth() {
+        return ResponseEntity.ok(syncHealthService.nightlyHealth());
     }
 }

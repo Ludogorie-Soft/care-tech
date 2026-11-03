@@ -14,6 +14,7 @@ import com.techstore.service.OrderService;
 import com.techstore.service.ParameterService;
 import com.techstore.service.PersonalOfferService;
 import com.techstore.service.ProductService;
+import com.techstore.service.SyncHealthService;
 import com.techstore.service.TbiLeasingService;
 import com.techstore.util.JwtUtil;
 import com.techstore.util.SecurityHelper;
@@ -59,6 +60,7 @@ class AdminOrderControllerTest {
     @MockBean CartService cartService;
     @MockBean PersonalOfferService personalOfferService;
     @MockBean ImageMigrationService imageMigrationService;
+    @MockBean SyncHealthService syncHealthService;
     @MockBean SecurityHelper securityHelper;
     @MockBean UserRepository userRepository;
     @MockBean JwtUtil jwtUtil;

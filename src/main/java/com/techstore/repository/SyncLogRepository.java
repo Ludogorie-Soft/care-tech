@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface SyncLogRepository extends JpaRepository<SyncLog, Long> {
 
@@ -18,4 +20,8 @@ public interface SyncLogRepository extends JpaRepository<SyncLog, Long> {
             @Param("syncType") String syncType,
             @Param("status") String status,
             Pageable pageable);
+
+    Optional<SyncLog> findTopBySyncTypeOrderByCreatedAtDesc(String syncType);
+
+    Optional<SyncLog> findTopBySyncTypeAndStatusOrderByCreatedAtDesc(String syncType, String status);
 }
