@@ -499,9 +499,9 @@ public class AdminController {
         return ResponseEntity.ok(logs);
     }
 
-    /** Every nightly sync type and whether it has succeeded within the last 26 hours. */
+    /** Every scheduled sync type and whether it has succeeded within the last 8 hours. */
     @GetMapping("/sync-logs/health")
     public ResponseEntity<List<SyncHealthDto>> getSyncHealth() {
-        return ResponseEntity.ok(syncHealthService.nightlyHealth());
+        return ResponseEntity.ok(syncHealthService.health());
     }
 }

@@ -15,7 +15,7 @@ import java.util.Optional;
 import static com.techstore.util.LogHelper.LOG_STATUS_SUCCESS;
 
 /**
- * Tells whether every nightly sync has succeeded recently. The sync log list alone cannot: from
+ * Tells whether every scheduled sync has succeeded recently. The sync log list alone cannot: from
  * 23.10 to 03.11.2026 VALI_PRODUCTS rolled back together with its own log row, so the list showed
  * only successful runs while the VALI prices and stock were twelve days old.
  */
@@ -23,26 +23,26 @@ import static com.techstore.util.LogHelper.LOG_STATUS_SUCCESS;
 @RequiredArgsConstructor
 public class SyncHealthService {
 
-    /** What CronJobService.syncApis writes every night, in that order. */
-    static final List<String> NIGHTLY_SYNC_TYPES = List.of(
+    /** What CronJobService.syncApis writes on every run, in that order. */
+    static final List<String> SCHEDULED_SYNC_TYPES = List.of(
             "VALI_MANUFACTURERS", "VALI_PARAMETERS", "VALI_PRODUCTS",
             "TEKRA_PARAMETERS", "TEKRA_PRODUCTS",
             "MOST_MANUFACTURERS", "MOST_PARAMETERS", "MOST_PRODUCTS",
             "ASBIS_PARAMETERS", "ASBIS_PRODUCTS", "ASBIS_PRICE_AVAIL");
 
-    /** The run starts at 01:00 and takes about 25 minutes: a day plus two hours of slack. */
-    static final Duration MAX_AGE = Duration.ofHours(26);
+    /** Runs start every six hours (app.sync.cron) and take about half an hour: six hours plus two of slack. */
+    static final Duration MAX_AGE = Duration.ofHours(8);
 
     private final SyncLogRepository syncLogRepository;
 
     @Transactional(readOnly = true)
-    public List<SyncHealthDto> nightlyHealth() {
-        return nightlyHealth(LocalDateTime.now());
+    public List<SyncHealthDto> health() {
+        return health(LocalDateTime.now());
     }
 
-    List<SyncHealthDto> nightlyHealth(LocalDateTime now) {
+    List<SyncHealthDto> health(LocalDateTime now) {
         LocalDateTime oldestAccepted = now.minus(MAX_AGE);
-        return NIGHTLY_SYNC_TYPES.stream()
+        return SCHEDULED_SYNC_TYPES.stream()
                 .map(type -> {
                     Optional<SyncLog> last = syncLogRepository.findTopBySyncTypeOrderByCreatedAtDesc(type);
                     LocalDateTime lastSuccessAt = syncLogRepository
