@@ -4597,3 +4597,20 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 09:50 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 2 reads | ~23011 tok |
 | 09:59 | Предупреждение за закъсняла нощна синхронизация: бекенд GET /api/admin/sync-logs/health (SyncHealthService, 26 ч) + caretech-next панел в SyncLogsLayout (бранч feat/sync-health-warning); бекенд 572/572, фронт 545/545; без commit | SyncHealthService, SyncHealthDto, SyncLogRepository, AdminController, SyncLogsLayout.jsx(+test) | ok | ~15000 |
 | 09:59 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 2 reads | ~23011 tok |
+| 10:05 | care-tech#6 слят (b03e787); caretech-next#3 отворен, CI тече; auto-merge не е разрешен в двете репота | git | бекенд слят, фронт чака CI | ~5000 |
+| 10:06 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 2 reads | ~23011 tok |
+| 10:12 | caretech-next#3 слят (2d8b772) след зелен CI; двете репота на main | git | ok, чака деплой | ~1000 |
+| 10:12 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 2 reads | ~23011 tok |
+| 10:17 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 2 reads | ~23011 tok |
+| 10:18 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 2 reads | ~23011 tok |
+| 10:38 | Проверен ръчният VALI sync след деплоя: лог 1880 SUCCESS, 112 нови, 27 неналични, 689 s; видео карти 0 разлики; ASRock B65 NOT_AVAILABLE/скрита; белият WD = 38573 | prod DB (read-only), Vali API | ok | ~4000 |
+| 10:38 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 2 reads | ~23011 tok |
+
+## Сесия 2026-11-03 — VALI_PRODUCTS тих rollback
+- Въпрос: ASRock ARC Pro B65 налична при нас, неналична при Вали от 26.10. Корен: VALI_PRODUCTS не записваше от 23.10 (Вали прехвърли кода WD-HDD-PASSPORT-6TB-BK от 33385 към нов 38141 → продукт 3362 хванат два пъти в партида → дублиран ред в product_parameters → rollback на целия прогон и на лога му).
+- Данни: relink 3362 → 38141 (пуснат от потребителя). Код: care-tech#6 (транзакция на партида, fallback по ref само за несвързани, пазач, LogHelper REQUIRES_NEW, /api/admin/sync-logs/health) + caretech-next#3 (панел в „Синхронизации“). Слети, деплойнати.
+- Ръчен sync 10:25: SUCCESS, 112 нови, 27 неналични, 689 s; „Видео карти“ 0 разлики. Отворено: сравни времето на нощния прогон (~300 s преди).
+| 10:44 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 2 reads | ~23011 tok |
+| 11:05 | Проверка на наличности MOST/ASBIS/TEKRA спрямо feed-овете: няма системен бъг, 1.5–3.4 % дневно разминаване; примерният MOST лаптоп е коректен; кошница: значка брои фантомни редове (2 от 5 клиента); гаранции: проучено | prod DB read-only, feeds | чака решения | ~40000 |
+| 11:36 | Бранч feat/sync-6h-warranty-email-cart (бекенд + caretech-next): cron 05/11/17/23 + праг 8 ч; имейл с гаранционната карта до всеки клиент (order-warranty.html, AFTER_COMMIT, без файл → без имейл + CRITICAL), без приложение в „изпратена“; кошница: значка/сума/напомняне само с наличните, админ вижда неналичните сиви. Бекенд 583/583, jest 550/550, e2e админ 14/14; без commit | много | ok | ~60000 |
+| 11:37 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 14 reads | ~44556 tok |
