@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
 
@@ -45,6 +46,7 @@ class ValiManufacturersSyncTest {
     @Mock private EntityManager entityManager;
     @Mock private SyncHelper syncHelper;
     @Mock private LogHelper logHelper;
+    @Mock private PlatformTransactionManager transactionManager;
 
     private ValiSyncService service;
 
@@ -57,7 +59,7 @@ class ValiManufacturersSyncTest {
     void setUp() {
         service = new ValiSyncService(valiApiService, categoryRepository, manufacturerRepository,
                 productRepository, parameterRepository, parameterOptionRepository, entityManager,
-                syncHelper, logHelper);
+                syncHelper, logHelper, transactionManager);
 
         scufFromAsbis = manufacturer(459L, null, "SCUF", Platform.ASBIS);
         ubiquitiOldId = manufacturer(328L, 191L, "UBIQUITI", Platform.VALI);
