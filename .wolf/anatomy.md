@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-14T12:42:03.022Z
-> Files: 841 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-03T07:45:41.864Z
+> Files: 995 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -19,6 +19,7 @@
 
 - `buzzing-dancing-hare.md` — Параметри и филтри по категории: одит и план (~3946 tok)
 - `frolicking-baking-fog.md` — План: Имейли към клиентите + само евро навсякъде (~4082 tok)
+- `modular-whistling-fairy.md` — Миграция на care-tech-ui към Next.js → `caretech-next` (~3454 tok)
 - `pazaruvaj-valiant-possum.md` — Pazaruvaj: верни DeliveryTime / DeliveryCost + един праг за безплатна доставка (~1720 tok)
 - `purring-soaring-codd.md` — План: чекаут, търсачки и промоции/надценки в админа (~2723 tok)
 - `zippy-juggling-hearth.md` — Продуктови линкове `/product/{id}/{id}` вместо `/product/{slug}/{id}` (~1068 tok)
@@ -33,6 +34,7 @@
 - `feedback_showtoast_duration.md` — Declares type (~140 tok)
 - `gsc_alternate_canonical_audit.md` (~421 tok)
 - `MEMORY.md` — Memory Index (~512 tok)
+- `order_shipped_email_wording.md` (~228 tok)
 - `parameter_filters_canonical_layer.md` (~493 tok)
 - `pazaruvaj_delivery_fields.md` (~360 tok)
 - `personal_offer_flow.md` — Declares stored (~373 tok)
@@ -44,6 +46,7 @@
 - `speedy_autocomplete_pattern.md` (~297 tok)
 - `tbi_leasing_integration.md` — Status: Backend + Frontend COMPLETE (2026-06-03 — updated credentials + modal fix) (~881 tok)
 - `user_role_and_workflow.md` (~279 tok)
+- `vali_products_sync_rollback.md` (~565 tok)
 - `vali_sync_status_bug.md` (~502 tok)
 
 ## ../../care-tech-ui/
@@ -232,6 +235,320 @@
 - `tokenRefresh.js` — Exports setupTokenRefresh (~568 tok)
 - `utils.js` — Exports SITE_URL, displaySpecs, ORDER_FORMS, getStatusBadge + 10 more (~808 tok)
 
+## ../../caretech-next-admin/e2e/mock-api/
+
+- `admin.mjs` — The admin panel's routes in the mock API, spread at the head of server.mjs's (~1488 tok)
+
+## ../../caretech-next-admin/e2e/mock-api/fixtures/
+
+- `admin.mjs` — The admin panel's side of the mock API: an administrator account that (~700 tok)
+
+## ../../caretech-next-admin/e2e/specs/
+
+- `admin.spec.mjs` — A session stored before the first page load only, as session.spec stores it. (~2208 tok)
+
+## ../../caretech-next-admin/src/app/admin/
+
+- `adminRoutes.test.jsx` — The admin panel as routes: app/admin/dashboard/layout.js around each page, (~2989 tok)
+
+## ../../caretech-next-admin/src/views/admin/
+
+- `AdminShell.jsx` — The admin panel's frame, ported from care-tech-ui's pages/admin/Dashboard.jsx (~899 tok)
+
+## ../../caretech-next-admin/src/views/admin/Blog/
+
+- `BlogPostPreviewModal.test.jsx` — The admin's preview of a blog post: the post's HTML as the blog will show (~611 tok)
+
+## ../../caretech-next-admin/src/views/admin/Customers/
+
+- `SendOfferModal.test.jsx` — A personal offer to a customer, from the products in their cart: prices (~989 tok)
+
+## ../../caretech-next-admin/src/views/admin/Filters/
+
+- `filterAdminApi.test.jsx` — The filter admin's client: each call goes to tech-store-api's (~2296 tok)
+
+## ../../caretech-next-admin/src/views/admin/Orders/
+
+- `OrderDetailPage.test.jsx` — An order's page in the admin panel: the order the URL names, and its (~1208 tok)
+- `useOrderUtils.test.js` — The labels, colours and formats the order screens (list, cards, detail) (~931 tok)
+
+## ../../caretech-next-checkout/e2e/mock-api/
+
+- `checkout.mjs` — The mock API's answers for phase 5: the cart and the order, Speedy, the (~2012 tok)
+
+## ../../caretech-next-checkout/e2e/mock-api/fixtures/
+
+- `checkout.mjs` — What the mock API answers for the cart, the orders and the profile (phase 5), (~998 tok)
+
+## ../../caretech-next-checkout/e2e/specs/
+
+- `checkout.spec.mjs` — care-tech-ui's stored session, before the first page load only (init scripts run on every navigation (~4329 tok)
+
+## ../../caretech-next-checkout/src/app/
+
+- `phase5Routes.test.jsx` — TBI's page inside its iframe: care-tech-ui gave it no title, so the site's stands. (~1111 tok)
+
+## ../../caretech-next-checkout/src/app/cart/
+
+- `page.js` — A visitor's own cart, filled in the browser: nothing to index. CartView reads (~146 tok)
+
+## ../../caretech-next-checkout/src/components/cart/
+
+- `CartView.jsx` — The cart has been loaded once (NavBar loads it when the session has been read). (~16722 tok)
+- `CartView.test.jsx` — A guest's cart as cartSlice builds it from localStorage. (~5068 tok)
+- `sharedCart.js` — The cart's share link (/cart?share=…): its products as base64 JSON, the (~265 tok)
+
+## ../../caretech-next-checkout/src/lib/orders/
+
+- `purchase.js` — The Purchase event's items and total for an order as POST orders returns it, (~322 tok)
+
+## ../../caretech-next-checkout/src/views/
+
+- `Favorites.jsx` — Favorites (~825 tok)
+- `LeasingComplete.jsx` — Landing page for TBI successRedirectURL. (~208 tok)
+- `OrderPlaced.jsx` — The order just placed is in the store (makeOrder). care-tech-ui tested (~769 tok)
+- `phase5Views.test.jsx` — The server's render, and the browser's until the session is read: nothing said yet. (~2045 tok)
+- `ResetPassword.jsx` — The link in the password-reset email: /reset-password?token=… (~1400 tok)
+
+## ../../caretech-next-checkout/src/views/profile/
+
+- `MyOffers.test.jsx` — care-tech-ui's handler had no catch: an unhandled rejection, and no word to the visitor. (~2836 tok)
+- `OrderDetails.jsx` — /orders/{id}, the link in the order emails. Signed out, it asks the visitor (~3894 tok)
+- `OrderDetails.test.jsx` — care-tech-ui rendered whatever order the store held until this one came. (~1460 tok)
+- `profile.test.jsx` — Reads the sign-in dropdown's state, as NavBar would show it. (~3994 tok)
+- `ProfileLayout.jsx` — care-tech-ui's ProfileLayout; its <Outlet/> is `children`, the profile page (~2150 tok)
+
+## ../../caretech-next-cutover/deploy/
+
+- `compose.service.yml` — The `frontend` service of the /opt compose project on the production server, (~298 tok)
+
+## ../../caretech-next-cutover/docs/
+
+- `CUTOVER.md` — Подмяна: care-tech-ui (CRA) → caretech-next (~2592 tok)
+
+## ../../caretech-next/
+
+- `CLAUDE.md` — caretech-next (~260 tok)
+- `Dockerfile` — Docker container definition (~360 tok)
+- `eslint.config.mjs` — Declares eslintConfig (~404 tok)
+- `jest.config.js` — Declares nextJest (~145 tok)
+- `jest.setup.js` — Matchers that describe a rendered page in its own terms — toBeInTheDocument, (~536 tok)
+- `jsconfig.json` (~22 tok)
+- `next.config.mjs` — In production the host nginx sends /api and /sitemap.xml to the Spring Boot (~422 tok)
+- `package.json` — Node.js package manifest (~226 tok)
+- `playwright.config.mjs` — End-to-end tests: a production build (`next start`) in a real browser, (~406 tok)
+- `playwright.smoke.config.mjs` — Smoke tests: this app against the live API (www.caretech.bg), read-only — (~307 tok)
+- `postcss.config.js` (~24 tok)
+- `README.md` — Project documentation (~948 tok)
+- `tailwind.config.js` (~176 tok)
+
+## ../../caretech-next/.github/workflows/
+
+- `ci.yml` — CI: CI (~1096 tok)
+
+## ../../caretech-next/e2e/
+
+- `fixtures.mjs` — Third-party hosts the site loads: answered empty, and counted. (~512 tok)
+
+## ../../caretech-next/e2e/mock-api/
+
+- `server.mjs` — A stand-in for tech-store-api in the e2e suite. The app is built and run as (~1169 tok)
+
+## ../../caretech-next/e2e/mock-api/fixtures/
+
+- `data.mjs` — What the mock API answers besides the categories (categories.json is GET (~368 tok)
+
+## ../../caretech-next/e2e/smoke/
+
+- `shell.smoke.spec.mjs` — Read-only against the live API: no sign-in, no cart, no order. (~388 tok)
+
+## ../../caretech-next/e2e/specs/
+
+- `catalog.spec.mjs` — The page as a crawler gets it: status, Location, and the HTML's parts. (~2240 tok)
+- `consent.spec.mjs` — Declares banner (~982 tok)
+- `home-blog.spec.mjs` — SITE: crawl (~1668 tok)
+- `session.spec.mjs` — A session stored before the first page load only (init scripts run on every navigation). (~1249 tok)
+- `shell.spec.mjs` — The cookie banner is consent.spec's subject; here it has been answered. (~1058 tok)
+- `static-pages.spec.mjs` — On www.caretech.bg, /clients is a 301 to /clients/ and a 403: public/clients is a folder of logos. (~1439 tok)
+
+## ../../caretech-next/scripts/
+
+- `parity-crawl.mjs` — Parity crawl — what www.caretech.bg serves today (care-tech-ui, with (~2405 tok)
+
+## ../../caretech-next/src/
+
+- `proxy.js` — Local development only, alongside next.config.mjs's /api rewrite: where (~273 tok)
+
+## ../../caretech-next/src/app/
+
+- `catalogRoutes.test.jsx` — The catalogue's routes as the server runs them: which URL is a page, which (~2161 tok)
+- `error.js` — What a page shows when it cannot be rendered — the API down or answering (~246 tok)
+- `globals.css` — Styles: 66 rules (~2763 tok)
+- `layout.js` — The menu and the footer are built from the categories, so the server asks (~1488 tok)
+- `not-found.js` — Ported from care-tech-ui/src/pages/ErrorPage.jsx. care-tech-ui answered every (~258 tok)
+- `not-found.test.jsx` (~186 tok)
+- `page.js` — As care-tech-ui's SEO component titled a page without a title of its own. (~319 tok)
+- `phase4Routes.test.jsx` — query (~1664 tok)
+- `staticPages.test.jsx` — The information pages, as routes: what each puts in the head and that each (~845 tok)
+
+## ../../caretech-next/src/app/brands/[id]/
+
+- `page.js` — /brands/{id} — a manufacturer's products. The URL is care-tech-ui's; an (~519 tok)
+
+## ../../caretech-next/src/app/category/[...path]/
+
+- `page.js` — /category/{slug}/{id} and /category/list/{slug}/{id} — resolved by (~1393 tok)
+
+## ../../caretech-next/src/app/product/[...path]/
+
+- `not-found.js` — The 404 of a product the site does not show — care-tech-ui's ProductPage (~303 tok)
+- `page.js` — /product/{slug}/{id} — as tech-store-api's OgMetaController answered it: (~820 tok)
+
+## ../../caretech-next/src/components/
+
+- `AuthDropdownProvider.jsx` — Whether the sign-in dropdown is open. care-tech-ui kept this in App and (~191 tok)
+- `Breadcrumbs.jsx` — The trail above and below a catalogue page. Items are { name, path }; the (~347 tok)
+- `ChromeGate.jsx` — The admin panel has its own chrome; care-tech-ui hid the NavBar and the (~291 tok)
+- `ChromeGate.test.jsx` — care-tech-ui tested pathname.includes("/admin"). (~376 tok)
+- `CookieConsentPopup.jsx` — panelVariants (~2840 tok)
+- `CookieConsentPopup.test.jsx` — The banner: when it appears, what each answer does, and the footer link that (~1143 tok)
+- `Footer.test.jsx` — reopened (~475 tok)
+- `JsonLd.jsx` — Structured data, rendered into the page's HTML on the server — care-tech-ui (~182 tok)
+- `PageViewTracker.jsx` — PageViewTracker (~292 tok)
+- `PazaruvajStrip.jsx` — The strip under every page — Pazaruvaj's badge and the copyright line — (~631 tok)
+- `SessionBootstrap.jsx` — What care-tech-ui did on page load in index.js (PersistGate), App and (~547 tok)
+- `SessionBootstrap.test.jsx` — boot (~827 tok)
+
+## ../../caretech-next/src/components/Toast/
+
+- `useToast.test.jsx` — care-tech-ui called showToast(message, "error") and (…, "success") in places; (~362 tok)
+
+## ../../caretech-next/src/components/blog/
+
+- `blog.test.jsx` — In Bulgarian time: the server and the browser must print the same date. (~1103 tok)
+
+## ../../caretech-next/src/components/catalog/
+
+- `BrandView.test.jsx` — care-tech-ui titled the page "МАРКА 205" until the first product had loaded. (~574 tok)
+- `CategoryListView.jsx` — A parent category: the list of its subcategories — ported from (~753 tok)
+- `CategoryView.test.jsx` — laptops (~1209 tok)
+- `phase4Views.test.jsx` — Strict Mode unmounts and mounts again at once; that must not empty the list. (~988 tok)
+- `ProductView.test.jsx` — care-tech-ui reported a failed inquiry as sent. (~1299 tok)
+
+## ../../caretech-next/src/components/compare/
+
+- `CompareTray.test.jsx` — withItems (~554 tok)
+
+## ../../caretech-next/src/components/home/
+
+- `home.test.jsx` — care-tech-ui shuffled in render: a server and a browser that shuffle apart disagree on the HTML. (~956 tok)
+- `HomeView.jsx` — The home page — ported from care-tech-ui's Home.jsx. `promotions` come from (~440 tok)
+- `ReviewsCard.test.jsx` — care-tech-ui called window.open(...)() and threw right after opening the tab. (~328 tok)
+
+## ../../caretech-next/src/components/navbar/
+
+- `AuthDropDown.test.jsx` — open (~757 tok)
+- `NavBar.test.jsx` — ANSWERS (~1444 tok)
+- `SearchBar.test.jsx` — type (~648 tok)
+
+## ../../caretech-next/src/components/products/
+
+- `Pagination.jsx` — Page links for a product listing. Each page is a real link (`hrefFor`), so a (~814 tok)
+- `Pagination.test.jsx` — care-tech-ui's pages were buttons: nothing after page 1 could be crawled. (~640 tok)
+- `ProductCard.test.jsx` — The card is a link. care-tech-ui's buttons only stopped propagation, so the (~752 tok)
+
+## ../../caretech-next/src/components/providers/
+
+- `StoreProvider.jsx` — On the server, a store per render: a shared one would carry one visitor's (~566 tok)
+
+## ../../caretech-next/src/lib/
+
+- `router.js` — react-router's API, the parts care-tech-ui uses, on top of next/navigation — so a (~1797 tok)
+
+## ../../caretech-next/src/lib/analytics/
+
+- `consent.js` — Consent to cookies, and the trackers that wait for it. (~1952 tok)
+- `consent.test.js` — The gtag() calls, as the data layer received them. (~1522 tok)
+
+## ../../caretech-next/src/lib/api/
+
+- `axiosConfigs.js` — The browser's API client. Same-origin /api/...: in production host nginx (~332 tok)
+- `server.js` — The API root, e.g. http://techstore-api:8080/api — paths are as care-tech-ui's thunks wrote them. (~984 tok)
+- `server.test.js` — returned: response (~1737 tok)
+- `tokenRefresh.js` — Installs the interceptor once per page. The refresh thunk is passed in, as (~882 tok)
+- `tokenRefresh.test.js` — The 401 handling, against the real API client with a stand-in adapter: what (~1142 tok)
+
+## ../../caretech-next/src/lib/blog/
+
+- `blog.test.js` — Declares html (~562 tok)
+- `post.js` — A blog post's trail and structured data. care-tech-ui gave a post none (~322 tok)
+
+## ../../caretech-next/src/lib/catalog/
+
+- `breadcrumbs.js` — The trails above the catalogue pages, as ProductPage.jsx and Category.jsx (~428 tok)
+- `breadcrumbs.test.js` — Declares laptops (~399 tok)
+- `categories.js` — Where a category lives, from the list GET categories returns (the visible (~666 tok)
+- `categories.test.js` — OgMetaController's URL rules, against the categories www.caretech.bg (~898 tok)
+- `listing.test.js` — Declares answer (~434 tok)
+- `listingQuery.js` — A category listing's state in its URL, and the API request for it — shared (~1095 tok)
+- `listingQuery.test.js` — Declares parse (~840 tok)
+- `product.js` — A product as its page shows and describes it — ported from ProductPage.jsx, (~992 tok)
+- `product.test.js` — Declares laptop (~1061 tok)
+- `sanitize.test.js` — Declares html (~361 tok)
+- `server.js` — The catalogue as Server Components load it, through apiFetch (cached). Each (~1183 tok)
+
+## ../../caretech-next/src/lib/seo/
+
+- `home.js` — The home page's structured data, from care-tech-ui's Home.jsx — with what (~868 tok)
+- `home.test.js` — care-tech-ui's Organization had a placeholder phone and profiles that were not the store's. (~472 tok)
+- `jsonLd.js` — Structured data for the catalogue pages, as care-tech-ui built it in (~726 tok)
+- `jsonLd.test.js` — Declares data (~732 tok)
+- `localBusiness.js` — The store as a LocalBusiness, from care-tech-ui's public/index.html, where it (~297 tok)
+- `localBusiness.test.js` — Search engines compare the business's name, address and phone across the (~237 tok)
+- `metadata.js` — A page's metadata as care-tech-ui's SEO component wrote it into the head — (~471 tok)
+- `metadata.test.js` — Declares page (~462 tok)
+
+## ../../caretech-next/src/redux/
+
+- `authSlice.js` — `hydrated` is new: the server renders every page signed out, and the stored (~2278 tok)
+- `authSlice.test.js` — Declares store (~808 tok)
+- `compareSlice.js` — care-tech-ui read localStorage while this module was imported. The module (~433 tok)
+- `compareSlice.test.js` — Declares start (~311 tok)
+- `store.js` — The Redux DevTools extension exposes the whole store, the access token (~601 tok)
+- `storedSession.js` — What care-tech-ui kept in localStorage, under the same keys and in the same (~744 tok)
+- `storedSession.test.js` — Exactly what care-tech-ui's redux-persist left in a signed-in browser: the (~1039 tok)
+
+## ../../caretech-next/src/test-utils/
+
+- `fixtures.js` — Data shaped as tech-store-api returns it, cut down to what the tests read. (~419 tok)
+- `navigation.js` — next/navigation for tests: an in-memory URL that components read and write (~1436 tok)
+- `renderWithProviders.jsx` — Rendering a component the way the app renders it. (~1009 tok)
+
+## ../../caretech-next/src/views/
+
+- `views.test.jsx` — care-tech-ui rendered only the open section, so the HTML held one of them. (~1492 tok)
+
+## ../../caretech-next/src/views/admin/
+
+- `useAdminCategoryTree.test.jsx` — The category tree behind the admin's category pickers, built from GET (~706 tok)
+- `useAdminProductSearch.js` — Admin product search (GET admin/products/search) — also finds hidden and unavailable (~828 tok)
+- `useAdminProductSearch.test.js` — The admin product search behind Products, Promotions and Markup: it asks (~916 tok)
+
+## ../../caretech-next/src/views/admin/Markup/
+
+- `MarkupModal.test.jsx` — Adding and editing a markup of a product, category or brand. A category's (~1065 tok)
+
+## ../../caretech-next/src/views/admin/Orders/
+
+- `AddOrderProductFromCategory.jsx` — Adding a product to an order by browsing a category — e.g. a replacement for (~1615 tok)
+- `AddOrderProductFromCategory.test.jsx` — Adding a product to an order from a category, e.g. a replacement for an (~1534 tok)
+- `EditOrderModal.test.jsx` — The products of an order in the admin's order editor: the admin can change (~1243 tok)
+- `OrderProductOption.jsx` — A product the admin can add to an order: image, name and price with VAT, or why it cannot be added. (~376 tok)
+
+## ../../caretech-next/src/views/admin/Promotions/
+
+- `PromoModal.test.jsx` — Creating and editing a promotion of a product, category or brand: an (~1196 tok)
+
 ## ./
 
 - `.dockerignore` — Docker ignore rules (~97 tok)
@@ -271,7 +588,7 @@
 
 ## .claude/
 
-- `launch.json` (~198 tok)
+- `launch.json` (~133 tok)
 - `settings.json` (~441 tok)
 - `settings.local.json` (~96 tok)
 
@@ -522,7 +839,7 @@
 
 ## src/main/java/com/techstore/controller/
 
-- `AdminController.java` — Админ API: поръчки (GET /orders/{id} с adminNotes, PUT статус/редакция), продукти, промоции, оферти, лизинг (~5500 tok)
+- `AdminController.java` — Админ API: поръчки (GET /orders/{id} с adminNotes, PUT статус/редакция), продукти, промоции, оферти, лизинг, GET /sync-logs и /sync-logs/health (~5600 tok)
 - `AuthController.java` — RestController: AuthController (9 endpoints) (~1192 tok)
 - `BlogCategoryController.java` — RestController: BlogCategoryController (6 endpoints) (~750 tok)
 - `BlogPostController.java` — RestController: BlogPostController (9 endpoints) (~1487 tok)
@@ -683,6 +1000,7 @@
 - `ReviewResponseDto.java` — ReviewResponseDto: from (~322 tok)
 - `ShippingPreviewResponseDTO.java` — Class: ShippingPreviewResponseDTO (~209 tok)
 - `SubscriptionDto.java` — Class: SubscriptionDto (~81 tok)
+- `SyncHealthDto.java` — record: syncType, lastRunAt, lastStatus, lastSuccessAt, overdue (~120 tok)
 - `SyncLogResponseDTO.java` — Class: SyncLogResponseDTO (~273 tok)
 - `UserAddressResponseDTO.java` — Class: UserAddressResponseDTO (~130 tok)
 - `UserCompanyResponseDTO.java` — Class: UserCompanyResponseDTO (~131 tok)
@@ -835,7 +1153,7 @@
 - `ProductSearchRepository.java` — Guards against a pathological query turning into dozens of ANDed ILIKEs. (~11934 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
-- `SyncLogRepository.java` — Repository: SyncLogRepository (~214 tok)
+- `SyncLogRepository.java` — findByFilters; findTopBySyncTypeOrderByCreatedAtDesc; findTopBySyncTypeAndStatusOrderByCreatedAtDesc (~260 tok)
 - `UserAddressRepository.java` — Repository: UserAddressRepository (~261 tok)
 - `UserCompanyRepository.java` — Repository: UserCompanyRepository (~261 tok)
 - `UserFavoriteRepository.java` — Repository: UserFavoriteRepository (~286 tok)
@@ -865,6 +1183,7 @@
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3679 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Returns the given category ID plus all descendant IDs (recursive). (~2597 tok)
+- `SyncHealthService.java` — 11-те нощни типа от CronJobService.syncApis; overdue = няма SUCCESS ред от 26 ч (MAX_AGE). Липсващ ред също е закъснение (~550 tok)
 - `ProductService.java` — Whether the product page shows this product; only AVAILABLE products are shown on the site. (~13728 tok)
 - `PromotionExpiryService.java` — @Scheduled every 60s: products with promo_ends_at <= now (Europe/Sofia) → discount 0 + price recalculated; categories/brands → promo flag/discount/end cleared. PROMO_ZONE constant (~827 tok)
 - `ReviewService.java` — Service: ReviewService (~946 tok)
@@ -930,7 +1249,7 @@
 - `TekraFeedValues.java` — Turns the text of one TEKRA feed property into the values it holds. (~917 tok)
 - `TekraFeedValues.java` — Стойностите на едно TEKRA свойство: повторен таг (List), разделяне по <br/>, „A,A“→„A“, лимит 2000 знака, Stats за sync лога (~900 tok)
 - `TekraSyncService.java` — Service: TekraSyncService; extractTekraParameters → Map<key, List<value>> (една опция на стойност) (~23500 tok)
-- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~16279 tok)
+- `ValiSyncService.java` — VALI sync. syncProducts НЕ е @Transactional: кешове в една транзакция, всяка партида (30) в своя REQUIRES_NEW (inNewTransaction), markUnseen и dedup отделно; fallback по reference_number само за продукти без external_id; повторен Vali id в партида се пропуска; FailedChunks → FAILED + CRITICAL (~16600 tok)
 
 ## src/main/java/com/techstore/util/
 
@@ -938,7 +1257,7 @@
 - `CyrillicTransliterator.java` — Turns a Cyrillic search word into the Latin form the catalogue actually stores. (~1367 tok)
 - `ExceptionHelper.java` — Wraps database operations and converts common exceptions to business exceptions (~1811 tok)
 - `JwtUtil.java` — Component: JwtUtil (~1188 tok)
-- `LogHelper.java` — Service: LogHelper (~398 tok)
+- `LogHelper.java` — create/updateSyncLogSimple в REQUIRES_NEW: записът в sync_logs оцелява, когато sync транзакцията се върне (~450 tok)
 - `Markers.java` — SLF4J marker constants. Markers.CRITICAL = MarkerFactory.getMarker("CRITICAL"). Use with log.error(Markers.CRITICAL, ...) to route to Slack. (~60 tok)
 - `SecurityHelper.java` — Component: SecurityHelper (~640 tok)
 - `SlugUtils.java` — SlugUtils: generateSlug (~624 tok)
@@ -1057,6 +1376,8 @@
 - `PazaruvajFeedServiceTest.java` — DeliveryTime/DeliveryCost във фийда: 120 € → 3.50 EUR, 132 € → безплатно, прагът е по цената с ДДС (3 теста) (~900 tok)
 - `PersonalOfferConvertPricingTest.java` — The contract the admin offer modal relies on: originalPrice is the product price WITHOUT VAT, (~1222 tok)
 - `ProductServiceDeliveryChargeTest.java` — продуктовото API връща deliveryCharge: FIXED / FREE / COURIER_TARIFF (телевизор) (3 теста) (~1100 tok)
+- `ValiProductsSyncDbTest.java` — @DataJpaTest на H2 без тестова транзакция (партидите commit-ват сами): кодът минава към нов запис на Вали → пропуска се; отказана партида се връща сама, другите категории се записват, логът е FAILED; дублиран запис в партидата → веднъж. dedup е подменен (PG-only SQL). 3 теста (~2400 tok)
+- `SyncHealthServiceTest.java` — Mockito: ред на типовете, 22.10 → overdue, FAILED след вчерашен успех, никога пускан, граница 26 ч. 5 теста (~1300 tok)
 - `PromotionExpiryServiceDbTest.java` — @DataJpaTest on H2 with the real service: expired product/category/brand cleared, future and no-end promotions untouched. 3 tests (~1299 tok)
 - `PromotionExpiryServiceTest.java` — Mockito: expired product gets full price back, expired category/brand lose flag, nothing due touches nothing. 3 tests (~1200 tok)
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
@@ -1090,8 +1411,10 @@
 - `MostCategoryResolutionTest.java` — The Most feed carries 222 distinct (category, subcategory) pairs against only 29 (~2405 tok)
 - `TekraFeedValuesTest.java` — Повторени тагове, <br/>, „A,A“, лимит 2000, боклук (10 теста) (~900 tok)
 - `TekraFeedValuesTest.java` — One TEKRA property can hold several values; each has to become its own option. Before, a repeated (~840 tok)
+- `ValiDuplicateParamReproTest.java` — TEMPORARY reproduction of the 2026-11-03 VALI_PRODUCTS rollback — not to be committed. (~1360 tok)
 - `ValiManufacturersSyncTest.java` — Every night VALI_PRODUCTS reported "Errors: 33": 33 VALI products whose manufacturer had no (~1359 tok)
 - `ValiProductNameTest.java` — VALI's own products came with its brand in the name ("Настолен компютър VALI OFFICE BASIC"). (~599 tok)
+- `ValiProductsSyncDbTest.java` — From 23.10 to 03.11.2026 the VALI products sync saved nothing: Vali moved the reference number (~2759 tok)
 
 ## src/test/java/com/techstore/util/
 

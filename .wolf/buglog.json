@@ -10637,6 +10637,704 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-10-14T16:30:00.000Z"
+    },
+    {
+      "id": "bug-642",
+      "timestamp": "2026-10-14T16:45:00.000Z",
+      "error_message": "После превключване към main: конфликти в .env, Dockerfile, docker-compose.yaml и др. в care-tech-ui",
+      "file": "(git workflow) care-tech-ui",
+      "root_cause": "Скриптът правеше `git stash push -- .wolf` и после `git stash pop`; в care-tech-ui няма .wolf промени, push не създаде запис, а pop извади стария stash@{0} на потребителя (2025-11-27).",
+      "fix": "git reset --hard HEAD (всички променени файлове бяха от stash-а, без untracked); stash@{0} остана непокътнат (pop при конфликт не трие). Do-Not-Repeat в cerebrum.",
+      "tags": [
+        "git",
+        "stash",
+        "workflow",
+        "self-inflicted"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-14T16:45:00.000Z"
+    },
+    {
+      "id": "bug-643",
+      "timestamp": "2026-10-16T06:12:10.332Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../caretech-next/src/app/globals.css",
+      "root_cause": "Had \"NeoSansPro\"",
+      "fix": "Changed to \"Segoe UI\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "css"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T06:12:10.332Z"
+    },
+    {
+      "id": "bug-644",
+      "timestamp": "2026-10-16T06:30:49.163Z",
+      "error_message": "Null/undefined access in ",
+      "file": "../../caretech-next/src/redux/authSlice.js",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T06:30:49.163Z"
+    },
+    {
+      "id": "bug-645",
+      "timestamp": "2026-10-16T06:31:32.867Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../caretech-next/src/lib/api/tokenRefresh.js",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 11→4 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T06:31:32.867Z"
+    },
+    {
+      "id": "bug-646",
+      "timestamp": "2026-10-16T06:34:10.576Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../caretech-next/src/components/CookieConsentPopup.jsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T06:34:10.576Z"
+    },
+    {
+      "id": "bug-647",
+      "timestamp": "2026-10-16T06:39:45.343Z",
+      "error_message": "Wrong condition in logic",
+      "file": "../../caretech-next/src/lib/api/tokenRefresh.js",
+      "root_cause": "Condition was: if (error.response?.status === 401 && originalRequest )",
+      "fix": "Changed to: if (originalRequest?.url?.startsWith(REFRESH_URL)",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T06:39:45.343Z"
+    },
+    {
+      "id": "bug-648",
+      "error_message": "Session with an expired token hangs: every later 401 request waits forever (found while porting to caretech-next)",
+      "file": "care-tech-ui/src/utils/tokenRefresh.js (ported fix: caretech-next/src/lib/api/tokenRefresh.js)",
+      "root_cause": "POST auth/refresh with an expired token answers 401; the response interceptor treats it like any 401, dispatches a second refresh which queues behind the first while the first awaits it — neither settles, isRefreshing stays true",
+      "fix": "caretech-next: the interceptor rejects 401s of auth/refresh itself, so refreshToken.rejected signs the visitor out. care-tech-ui still has the bug (not fixed there).",
+      "tags": [
+        "auth",
+        "token-refresh",
+        "axios",
+        "interceptor",
+        "deadlock",
+        "care-tech-ui",
+        "caretech-next"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T10:03:32+03:00",
+      "timestamp": "2026-10-16T10:03:32+03:00"
+    },
+    {
+      "id": "bug-649",
+      "error_message": "Toasts called as showToast(msg, \"error\"/\"success\") vanish immediately (9 call sites in care-tech-ui)",
+      "file": "caretech-next/src/components/Toast/useToast.js",
+      "root_cause": "showToast's 2nd argument is a duration in ms; a string gives setTimeout(fn, NaN) which fires at once",
+      "fix": "useToast treats a non-finite duration as the 2000 ms default, so every call site works unchanged. care-tech-ui unchanged.",
+      "tags": [
+        "toast",
+        "showToast",
+        "setTimeout",
+        "NaN",
+        "caretech-next"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T10:03:32+03:00",
+      "timestamp": "2026-10-16T10:03:32+03:00"
+    },
+    {
+      "id": "bug-650",
+      "error_message": "NavBar/Footer hidden on any page whose path contains \"/admin\" (e.g. /product/admin-tool/5)",
+      "file": "caretech-next/src/components/ChromeGate.jsx",
+      "root_cause": "care-tech-ui App.js used location.pathname.includes(\"/admin\")",
+      "fix": "isAdminPath: pathname === \"/admin\" || startsWith(\"/admin/\")",
+      "tags": [
+        "routing",
+        "admin",
+        "navbar",
+        "caretech-next"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T10:03:32+03:00",
+      "timestamp": "2026-10-16T10:03:32+03:00"
+    },
+    {
+      "id": "bug-651",
+      "error_message": "404 page had two robots metas: Next's noindex and the layout's \"index, follow, max-image-preview…\"",
+      "file": "caretech-next/src/app/not-found.js",
+      "root_cause": "not-found inherits the root layout's metadata.robots; Next adds its own noindex for 404s",
+      "fix": "metadata.robots = null in not-found.js drops the inherited tag",
+      "tags": [
+        "seo",
+        "robots",
+        "404",
+        "metadata",
+        "nextjs",
+        "caretech-next"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T10:03:32+03:00",
+      "timestamp": "2026-10-16T10:03:32+03:00"
+    },
+    {
+      "id": "bug-652",
+      "timestamp": "2026-10-16T10:37:05+03:00",
+      "error_message": "Contact forms (/contacts, /services) show \"✅ Съобщението беше изпратено успешно!\" even when POST contact/contact-us fails — the inquiry is lost",
+      "file": "care-tech-ui/src/pages/Contact.jsx, OurServices.jsx (ported fix: caretech-next/src/views/Contact.jsx, OurServices.jsx)",
+      "root_cause": "await dispatch(contactAdmin(values)) without .unwrap(): a rejected createAsyncThunk resolves, so the catch never runs",
+      "fix": "caretech-next: dispatch(...).unwrap(). care-tech-ui unchanged; ProductPage.jsx:796 has the same call (phase 3). Phase 3: ProductPage inquiry fixed the same way in caretech-next ProductView.",
+      "tags": [
+        "contact-form",
+        "redux",
+        "createAsyncThunk",
+        "unwrap",
+        "silent-failure",
+        "care-tech-ui",
+        "caretech-next"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-10-16T11:26:18+03:00"
+    },
+    {
+      "id": "bug-653",
+      "timestamp": "2026-10-16T10:37:05+03:00",
+      "error_message": "Clicking a Facebook review card throws TypeError after opening the tab",
+      "file": "care-tech-ui/src/components/home/ReviewsCard.jsx (ported fix: caretech-next/src/components/home/ReviewsCard.jsx)",
+      "root_cause": "window.open(url)() calls the returned Window object as a function",
+      "fix": "drop the trailing ()",
+      "tags": [
+        "reviews",
+        "window.open",
+        "typeerror",
+        "caretech-next"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T10:37:05+03:00"
+    },
+    {
+      "id": "bug-654",
+      "timestamp": "2026-10-16T10:37:05+03:00",
+      "error_message": "Live www.caretech.bg/clients → 301 to http://www.caretech.bg/clients/ → 403 Forbidden (page is in the sitemap)",
+      "file": "care-tech-ui/nginx.conf (image nginx)",
+      "root_cause": "try_files $uri $uri/ /index.html; public/clients/ is a directory of logos, so $uri/ matches: directory redirect (absolute, http scheme of the container) then 403 (no index, autoindex off). Same for /partners, /banner, /ads (not pages).",
+      "fix": "Not fixed in care-tech-ui yet (task suggested: try_files $uri /index.html; absolute_redirect off). caretech-next serves /clients as the page (Next does not serve public/ directories).",
+      "tags": [
+        "nginx",
+        "seo",
+        "403",
+        "sitemap",
+        "try_files",
+        "care-tech-ui",
+        "live"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T10:37:05+03:00"
+    },
+    {
+      "id": "bug-655",
+      "timestamp": "2026-10-16T11:26:18+03:00",
+      "error_message": "Live: clicking a product card's cart/buy-now/favourite/compare button navigates (full page load) to the product page; the cart stays empty",
+      "file": "care-tech-ui/src/components/products/ProductCard.jsx, CompareButton.jsx (fixed in caretech-next)",
+      "root_cause": "The card is a react-router <Link>; the inner buttons call only e.stopPropagation(): React's propagation to the Link stops, but nothing prevents the anchor's native default navigation",
+      "fix": "caretech-next: e.preventDefault() before stopPropagation in handleAddToCart, handleToggleFavorite, CompareButton.handleClick. Task suggested for care-tech-ui.",
+      "tags": [
+        "product-card",
+        "link",
+        "preventDefault",
+        "stopPropagation",
+        "cart",
+        "care-tech-ui",
+        "live"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T11:26:18+03:00"
+    },
+    {
+      "id": "bug-656",
+      "timestamp": "2026-10-16T11:26:18+03:00",
+      "error_message": "Next server: TypeError: Invalid character in header content [\"Link\"] on category/product/clients pages",
+      "file": "caretech-next/src/components/catalog/CategoryView.jsx, ProductView.jsx, src/views/OurClients.jsx",
+      "root_cause": "React/Next send image preloads in the Link response header; /banner/1400х400.png (Cyrillic х) and several client logos have non-ASCII names, and Node rejects non-ASCII header values",
+      "fix": "encodeURI() the paths where rendered (browser requests the same file)",
+      "tags": [
+        "nextjs",
+        "link-header",
+        "preload",
+        "non-ascii",
+        "images",
+        "caretech-next"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T11:26:18+03:00"
+    },
+    {
+      "id": "bug-657",
+      "timestamp": "2026-10-16T11:26:18+03:00",
+      "error_message": "Local dev against the live API: POST /api/products/categories/{id}/filters → 403 (filter panel empty)",
+      "file": "caretech-next/src/proxy.js",
+      "root_cause": "next.config rewrites forward the browser's Origin (http://localhost:3010); tech-store-api's CORS rejects unknown origins for POST",
+      "fix": "src/proxy.js (Next 16 middleware) sets Origin to API_PROXY_ORIGIN for /api requests when API_PROXY_ORIGIN is set; production never reaches it (nginx routes /api)",
+      "tags": [
+        "cors",
+        "dev-proxy",
+        "nextjs",
+        "proxy",
+        "403",
+        "caretech-next"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T11:26:18+03:00"
+    },
+    {
+      "id": "bug-658",
+      "timestamp": "2026-10-16T11:26:18+03:00",
+      "error_message": "Category page re-fetched the server-rendered first page in dev (the SSR skip used once, StrictMode runs effects twice)",
+      "file": "caretech-next/src/components/catalog/CategoryView.jsx, BrandView.jsx",
+      "root_cause": "A ref cleared on the first effect run let the StrictMode second run fetch",
+      "fix": "Skip while nothing else has been fetched (fetchedRef), not just once",
+      "tags": [
+        "strictmode",
+        "useEffect",
+        "ssr",
+        "double-fetch",
+        "caretech-next"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T11:26:18+03:00"
+    },
+    {
+      "id": "bug-659",
+      "timestamp": "2026-10-16T12:10:00+03:00",
+      "error_message": "caretech-next e2e: 46 random failures in one local run, different ones in the next",
+      "file": "caretech-next/playwright.config.mjs",
+      "root_cause": "The admin worktree (caretech-next-admin) ran its e2e on the same ports 3100/4010; outside CI reuseExistingServer reused the other checkout's server (without Phase 4) or failed with EADDRINUSE",
+      "fix": "Ports configurable: E2E_APP_PORT / MOCK_API_PORT (config, mock server env, fixtures MOCK_API); a second checkout runs e.g. E2E_APP_PORT=3200 MOCK_API_PORT=4020",
+      "tags": [
+        "caretech-next",
+        "e2e",
+        "playwright",
+        "ports",
+        "worktree",
+        "flaky"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T12:10:00+03:00"
+    },
+    {
+      "id": "bug-660",
+      "timestamp": "2026-10-16T12:10:00+03:00",
+      "error_message": "e2e compare: only 'Сравни (1)' after clicking two cards' 'ДОБАВИ ЗА СРАВНЕНИЕ' with force",
+      "file": "caretech-next/e2e/specs/home-blog.spec.mjs",
+      "root_cause": "Clicks before React hydrated the button do nothing; force:true also skips the hover the button needs",
+      "fix": "hydrated(locator) helper in e2e/fixtures.mjs (polls for __reactProps$ on the element), hover the card, click without force, then expect the button renamed to 'ПРЕМАХНИ ОТ СРАВНЕНИЕ'",
+      "tags": [
+        "caretech-next",
+        "e2e",
+        "hydration",
+        "compare",
+        "flaky"
+      ],
+      "related_bugs": [
+        "bug-659"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T12:10:00+03:00"
+    },
+    {
+      "id": "bug-661",
+      "timestamp": "2026-10-16T12:10:00+03:00",
+      "error_message": "e2e blog view counted 0 times (expected 1) on mobile",
+      "file": "caretech-next/e2e/specs/home-blog.spec.mjs",
+      "root_cause": "The test reloaded before the first POST /blog/{id}/view left: sessionStorage key already set, request aborted (same behaviour as care-tech-ui)",
+      "fix": "Poll for the first POST before reload, then assert it stays 1",
+      "tags": [
+        "caretech-next",
+        "e2e",
+        "blog",
+        "race"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T12:10:00+03:00"
+    },
+    {
+      "id": "bug-662",
+      "timestamp": "2026-10-16T12:10:00+03:00",
+      "error_message": "shell.spec: expected no rel=canonical on /",
+      "file": "caretech-next/e2e/specs/shell.spec.mjs",
+      "root_cause": "Phase 1 checked 'no default canonical' on the home placeholder; Phase 4 gave home its own canonical",
+      "fix": "Check the layout's no-default-canonical on the 404 page instead",
+      "tags": [
+        "caretech-next",
+        "e2e",
+        "seo",
+        "canonical"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T12:10:00+03:00"
+    },
+    {
+      "id": "bug-663",
+      "timestamp": "2026-10-16T12:10:00+03:00",
+      "error_message": "e2e brand link: Element is outside of the viewport",
+      "file": "caretech-next/e2e/specs/home-blog.spec.mjs",
+      "root_cause": "react-slick clones slides off-screen; the first a[href^=/brands/] in the DOM is a clone",
+      "fix": "Click '.slick-active a[href^=\"/brands/\"]'",
+      "tags": [
+        "caretech-next",
+        "e2e",
+        "slick",
+        "carousel"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T12:10:00+03:00"
+    },
+    {
+      "id": "bug-664",
+      "timestamp": "2026-10-16T09:20:08.983Z",
+      "error_message": "Missing await",
+      "file": "../../caretech-next-checkout/src/components/cart/CartView.jsx",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T09:20:08.983Z"
+    },
+    {
+      "id": "bug-665",
+      "timestamp": "2026-10-16T09:20:09.291Z",
+      "error_message": "Wrong return value",
+      "file": "../../caretech-next-checkout/src/components/cart/CartView.jsx",
+      "root_cause": "Was returning: `${window.location.origin}/cart?share=${encoded}`;",
+      "fix": "Now returns: `${window.location.origin}/cart?share=${encodeURIC",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T09:20:09.291Z"
+    },
+    {
+      "id": "bug-666",
+      "timestamp": "2026-10-16T09:20:30.581Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../caretech-next-checkout/src/components/cart/CartView.jsx",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 6→7 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T09:20:30.581Z"
+    },
+    {
+      "id": "bug-667",
+      "timestamp": "2026-10-16T09:23:31.858Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../caretech-next-checkout/src/views/profile/OrderDetails.jsx",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 12→25 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T09:23:31.858Z"
+    },
+    {
+      "id": "bug-668",
+      "timestamp": "2026-10-16T09:26:41.878Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../caretech-next-cutover/deploy/compose.service.yml",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 4→3 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "yml"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T09:26:41.878Z"
+    },
+    {
+      "id": "bug-664",
+      "timestamp": "2026-10-16T12:45:00+03:00",
+      "error_message": "caretech-next production page: 58-74 requests to Next in the first second (148 after scroll, 74 of them RSC prefetches) — host nginx limit_req general 50r/s burst 30 nodelay would 503 part of them, a 503 on a JS chunk breaks the page",
+      "file": "caretech-next/src/lib/link.js, deploy/nginx.caretech.bg.conf",
+      "root_cause": "Next prefetches every <Link> entering the viewport; all routes are dynamic without loading.js so the prefetch is useless; Next also loads ~29 JS/CSS chunks vs CRA's few, all under location / with the general limit",
+      "fix": "src/lib/link.js wraps next/link with prefetch={false} by default (router shim + all imports; ESLint no-restricted-imports next/link); cutover nginx gets location ^~ /_next/static/ with its own zone (100r/s burst 200); e2e load.spec asserts zero prefetches",
+      "tags": [
+        "caretech-next",
+        "nginx",
+        "limit_req",
+        "prefetch",
+        "next-link",
+        "performance",
+        "cutover"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T12:45:00+03:00"
+    },
+    {
+      "id": "bug-665",
+      "timestamp": "2026-10-16T12:55:00+03:00",
+      "error_message": "CI lint failed on PR #6: 'next/link' import is restricted (src/lib/link.test.jsx)",
+      "file": "caretech-next/eslint.config.mjs",
+      "root_cause": "The new no-restricted-imports rule also hit the test that mocks next/link; locally missed because `eslint | tail -2` shows the 'N errors and M warnings potentially fixable' line, not the totals",
+      "fix": "Add src/lib/link.test.jsx to the rule's ignores; read eslint's '✖ N problems (X errors, Y warnings)' line",
+      "tags": [
+        "caretech-next",
+        "eslint",
+        "ci",
+        "lint"
+      ],
+      "related_bugs": [
+        "bug-664"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T12:55:00+03:00"
+    },
+    {
+      "id": "bug-666",
+      "timestamp": "2026-10-16T13:05:00+03:00",
+      "error_message": "e2e static-pages 'the pages load without errors in the console': page.goto /about timed out (30 s) under load",
+      "file": "caretech-next/e2e/fixtures.mjs",
+      "root_cause": "/about and /contacts embed a Google map iframe loaded from the internet; page.goto waits for the load event, iframes included",
+      "fix": "trackers fixture answers www.google.com/maps/embed with an empty 204, like the trackers; test.slow() for the 14-page test",
+      "tags": [
+        "caretech-next",
+        "e2e",
+        "flaky",
+        "google-maps",
+        "iframe"
+      ],
+      "related_bugs": [
+        "bug-659"
+      ],
+      "occurrences": 2,
+      "last_seen": "2026-10-16T13:05:00+03:00"
+    },
+    {
+      "id": "bug-667",
+      "timestamp": "2026-10-16T13:20:00+03:00",
+      "error_message": "Cart: the first click on 'Приемам общите условия' right after typing in a field is lost (care-tech-ui behaviour)",
+      "file": "caretech-next/src/components/cart/CartView.jsx",
+      "root_cause": "On blur the 'Моля поправете следните грешки' list rendered above the terms row and pushed the checkbox down from under the pointer between mousedown and click",
+      "fix": "The list renders below the terms checkbox and the buttons (approved by the user); e2e ticks the terms straight from the field",
+      "tags": [
+        "caretech-next",
+        "cart",
+        "layout-shift",
+        "checkout",
+        "ux"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T13:20:00+03:00"
+    },
+    {
+      "id": "bug-668",
+      "timestamp": "2026-10-16T13:50:00+03:00",
+      "error_message": "CUTOVER.md trial check `date +%Z` in the caretech-next container prints UTC although TZ=Europe/Sofia",
+      "file": "caretech-next/docs/CUTOVER.md",
+      "root_cause": "node:24-alpine has no tzdata, so busybox date ignores TZ; Node itself resolves Europe/Sofia through its bundled ICU (dates are right)",
+      "fix": "The check asks node: `node -e \"console.log(new Date().toString())\"` → GMT+0300 (EEST)",
+      "tags": [
+        "caretech-next",
+        "docker",
+        "alpine",
+        "timezone",
+        "docs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T13:50:00+03:00"
+    },
+    {
+      "id": "bug-669",
+      "timestamp": "2026-10-16T14:30:00+03:00",
+      "error_message": "caretech-next: after signing in on the home page 'Успешен вход' shows but the sign-in dropdown stays open (mobile and desktop) — reported by the user against prod",
+      "file": "caretech-next/src/lib/router.js",
+      "root_cause": "NavBar (ported from care-tech-ui) closes the dropdown in an effect on [location]; sign-in navigates to '/' — react-router made a new location (new key) on every navigate even to the same path, the shim's useLocation only changed with pathname/query",
+      "fix": "useLocation carries a key bumped by every navigate() and plain <Link> click (useSyncExternalStore counter, 'default' on server/first render); e2e session.spec asserts the dropdown closes after signing in on '/'",
+      "tags": [
+        "caretech-next",
+        "router",
+        "react-router",
+        "navbar",
+        "login",
+        "dropdown",
+        "porting"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T14:30:00+03:00"
+    },
+    {
+      "id": "bug-670",
+      "timestamp": "2026-10-16T14:30:00+03:00",
+      "error_message": "Admin cards show 'ПРОМО -13.466667%'; My Offers shows '27.8 €' (both as in care-tech-ui)",
+      "file": "caretech-next/src/views/admin/{Products/AdminProductCard,Promotions/PromoCard,Markup/MarkupCard}.jsx, src/views/profile/MyOffers.jsx",
+      "root_cause": "Raw API numbers printed without rounding/formatting",
+      "fix": "Math.round(discount*100)/100 on the admin cards; Number(offerPrice).toFixed(2) in My Offers",
+      "tags": [
+        "caretech-next",
+        "admin",
+        "formatting",
+        "offers"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T14:30:00+03:00"
+    },
+    {
+      "id": "bug-671",
+      "timestamp": "2026-10-16T15:05:00+03:00",
+      "error_message": "After signing in, half of the '✅ Успешен вход!' toast stays under the navbar (live, after cutover; also in care-tech-ui)",
+      "file": "caretech-next/src/components/Toast/Toast.jsx",
+      "root_cause": "Toast strip fixed top-5 z-50; sticky header z-[200] covers it; admin modals z-[9999..100000] hide toasts entirely",
+      "fix": "Toast strip z-[100001] (pointer-events-none strip); e2e checks elementFromPoint at the toast's top edge is the toast",
+      "tags": [
+        "caretech-next",
+        "toast",
+        "z-index",
+        "navbar",
+        "ui"
+      ],
+      "related_bugs": [
+        "bug-669"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T15:05:00+03:00"
+    },
+    {
+      "id": "bug-672",
+      "timestamp": "2026-10-16T15:05:00+03:00",
+      "error_message": "Contact form shows phone '00886474390' for a stored '0886474390' (contact, services, product inquiry; also in care-tech-ui)",
+      "file": "caretech-next/src/utils/phone.js",
+      "root_cause": "Forms prefilled `0${user.phone}` unconditionally; prod: 16/20 phones stored with leading 0, 4 without",
+      "fix": "phoneForForm: prefix 0 only when missing, keep '+…', '359…' → '+359…'; used in Contact, OurServices, ProductView; unit + form tests",
+      "tags": [
+        "caretech-next",
+        "phone",
+        "forms",
+        "prefill"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-10-16T15:05:00+03:00"
+    },
+    {
+      "id": "bug-673",
+      "timestamp": "2026-11-03T10:00:00+02:00",
+      "error_message": "Видеокарта ASRock Intel ARC Pro B65 Creator 32GB (VALI ext 37970) е налична при нас, а при Вали е неналична от 26.10",
+      "file": "src/main/java/com/techstore/service/sync/ValiSyncService.java",
+      "root_cause": "Vali преименува своя запис 33385 от WD-HDD-PASSPORT-6TB-BK в -WH и пусна черния като нов запис 38141 със стария код. Нашият продукт 3362 (ref -BK, external_id 33385) се намира ДВА пъти в една партида: по external_id (белия) и по резервното търсене по reference_number (черния) — резервното търсене не проверява, че продуктът вече е свързан с друг Vali id. Белият маха 'Черен', черният го добавя като НОВ ред; IDENTITY INSERT-ът минава веднага, а DELETE-ът на стария ред чака flush → uq_product_parameters_unique (3362, 6723, 139629). Целият syncProducts е една транзакция → aborted → rollback на всичко + на sync_logs (LogHelper без REQUIRES_NEW). Всяка нощ от 23.10.",
+      "fix": "Данни: 2026-11-03 потребителят пусна UPDATE products SET external_id=38141, workflow_id=124019 WHERE id=3362 (проверено, сканирането на целия каталог е чисто). Код (fallback само за продукти без external_id, пазач за двойно попадение, транзакция на партида, LogHelper REQUIRES_NEW) — предстои.",
+      "tags": [
+        "fallback",
+        "hibernate-flush-order",
+        "reference_number",
+        "rollback",
+        "silent-failure",
+        "status",
+        "sync",
+        "sync_logs",
+        "unique-constraint",
+        "vali"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-11-03T10:00:00+02:00"
+    },
+    {
+      "id": "bug-679",
+      "timestamp": "2026-11-03T07:36:14.405Z",
+      "error_message": "Wrong reference: Why should be 2026",
+      "file": "../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/vali_products_sync_rollback.md",
+      "root_cause": "Used \"Why\" instead of \"2026\"",
+      "fix": "Changed Why → 2026",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-11-03T07:36:14.405Z"
+    },
+    {
+      "id": "bug-680",
+      "timestamp": "2026-11-03T07:38:27.562Z",
+      "error_message": "Incorrect value in code",
+      "file": "../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/vali_products_sync_rollback.md",
+      "root_cause": "Had `REQUIRES_NEW`",
+      "fix": "Changed to `sync_logs`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-11-03T07:38:27.562Z"
     }
   ]
 }

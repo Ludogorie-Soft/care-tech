@@ -5,6 +5,8 @@
 > Last updated: 2026-05-15
 
 ## User Preferences
+- **2026-10-16:** templates/email/order-shipped.html — „Вашата поръчка е на път.“ (without „към вас“) is the user's own wording; keep it, never revert.
+- **2026-10-16 caretech-next images:** the user builds and pushes the Docker images to Docker Hub themselves; no CI publishing/automation for now (publish job removed). Docs give the manual `docker build --platform linux/amd64` + `sha-<7>` tag.
 
 - **САМО ЕВРО, навсякъде (решение 2026-10-14, отменя старото „първо €, после лв.“).** Левовата равностойност е премахната от целия проект — UI, имейли, текстове, SEO, аналитика (`currency: "EUR"`). Никога не добавяй „лв.“, `euroRate`/`EURO_RATE`/1.95583 или `priceLeva`. Курсът е изтрит от кода.
 
@@ -21,6 +23,7 @@
 <!-- How the user likes things done. Code style, tools, patterns, communication. -->
 
 ## Key Learnings
+- **caretech-next e2e (2026-10-16):** ports 3100/4010 by default; a second checkout (e.g. the caretech-next-admin worktree) must run with E2E_APP_PORT/MOCK_API_PORT of its own, or reuseExistingServer silently tests the other checkout's build. Click only after `hydrated(locator)` (e2e/fixtures.mjs) — a pre-hydration click is lost. react-slick clones slides off-screen: click inside `.slick-active`.
 
 - **Project:** tech-store-api
 - **Description:** A comprehensive Spring Boot REST API for a tech store, featuring complete product management, admin panel, and advanced e-commerce functionality.
@@ -58,7 +61,16 @@
 
 - **Локален браузър тест на целия стек (проверено 2026-10-09):** временна база `docker run --rm postgres:15` на 127.0.0.1:55434 (Flyway пуска V1..V43 сам при старт). `preview_start` НЕ може да изпълни `./mvnw` в tech-store-api (EPERM от macOS) → `./mvnw -DskipTests package`, копирай jar-а в /tmp и стартирай `java -jar` от там чрез launch.json конфигурация. Порт 8080 е зает от друг проект (budgetnik) → SERVER_PORT=8089, фронтенд на 3001 с `REACT_APP_API_URL=http://localhost:8089` (shell env бие .env). Нужни env: всички `${...}` без default от application.yml + `SPRING_DATASOURCE_URL`/`SPRING_FLYWAY_URL` (yml има твърд host `postgres`), `AWS_S3_BUCKET_NAME`, `AWS_S3_REGION`, `SLACK_WEBHOOK_URL`; за безопасност `SPRING_MAIL_HOST=127.0.0.1 SPRING_MAIL_PORT=1` (или Mailpit на 1025 — виж „E2E с Mailpit“ 2026-10-14) и фиктивни URL-и на доставчиците/TBI. Няма bootstrap админ — създай users ред (role ADMIN, email_verified true, BCrypt хеш). Login е от иконата „Профил“ в хедъра (desktop viewport 1440×900).
 
+- **CodeRabbit НЕ прави автоматичен review в Ludogorie-Soft/care-tech** (repo-то има под 10 звезди) — единствената „проверка“ на бекенд PR-ите е формално зелена; няма CI. Локалният `./mvnw test` е единствената реална проверка.
+- **caretech-next e2e: етикетите на бутоните в админ картите (РЕДАКТИРАЙ, НАПРАВИ ПРОМОЦИЯ…) са скрити tooltip-ове над иконата** → `click({force:true})` върху текста не уцелва бутона. Кликай `card.locator("div.group").filter({ hasText: "…" })`. Mock API-то не пази телата на заявките → проверявай PUT/POST с `page.waitForRequest(...).postDataJSON()`.
+- **Порт от care-tech-ui към caretech-next:** админ файловете се различават само по `"use client"` и `@/` импорти → `git diff` от care-tech-ui с пренаписани пътища (`src/pages/admin/` → `src/views/admin/`) + `patch -p1 -F3` минава почти без отказани блокове; новите `.jsx` получават `"use client"`, API клиентът е `@/lib/api/axiosConfigs`.
+
+- **caretech-next: дървото с категории за админ прозорците е `src/views/admin/useAdminCategoryTree.js`** (2026-10-29; преди беше копирано в Products/Promotions/Markup). Ползвай го за всеки нов избор на категория в админа, не копирай логиката.
+- **`Promotions/CategoryModal.jsx` има бутони без `type`** → вътре във `<form>` (напр. EditOrderModal) кликът изпраща формата. Рендерирай го с `createPortal(..., document.body)` и `layerClassName="z-[10000]"` (редакторът на поръчка е z-[9999]).
+
 ## Do-Not-Repeat
+- **2026-10-16:** A walkthrough that reads text and network only misses layout bugs (toast under the sticky header). On UI walkthroughs also check overlap: `document.elementFromPoint` at the element's edges, or a screenshot at real size.
+- **2026-10-16:** Checking eslint with `| tail -2` reads the 'potentially fixable' line, not the totals: grep for `problems` (`✖ N problems (X errors, Y warnings)`) instead.
 
 - [2026-08-20] NEVER call `fetchCategoryParameters` (paramSlice) with an object `{ categoryId, language }` — the thunk accepts a plain number as first arg. Passing an object produces URL `parameters/category/[object Object]` → 404. `language=bg` is hardcoded inside the thunk. Correct: `dispatch(fetchCategoryParameters(categoryId))`.
 
@@ -182,6 +194,7 @@
 - **Category tree в React:** `buildTree()` + `flattenTree()` изграждат плосък масив с `depth` поле от flat API response. Tree view: indentation по `depth * 18px` + `└` символ. При активно търсене — превключва към flat view с родителя вдясно.
 
 ## Decision Log
+- **2026-10-16 caretech-next cutover order:** nginx first (deploy/nginx.caretech.bg.conf works with the CRA container through its SPA fallback), then the frontend image; rollback in reverse (OgMetaController fetches http://care-tech-ui/index.html). Links never prefetch by default (src/lib/link.js): dynamic routes without loading.js gain nothing and the host nginx limit_req would 503 the flood.
 
 - [2026-10-12] **Step 3 SEO architecture:** for /product/ and /category/ the backend serves the React index.html with a page-specific head (title, description, canonical, og, twitter) and the real status (200/301/404), instead of a bare OG page plus cookie and JS redirect. Rejected: routing Googlebot straight to React by User-Agent, because it bypasses the step-4 301s and leaves soft 404s. **Hidden products and categories return 404** (user's choice over 200 + noindex).
 
@@ -959,3 +972,68 @@ spring-retry — не посягай към `@Retryable`. VALI ползва WebC
 - [2026-10-14] **Работата се води само в `main` (бекенд), решение на потребителя.** `v2` (откъдето беше цялата разработка от 2025-11-24) се слива в `main` с Ludogorie-Soft/care-tech#2; единственият конфликт (76ffcae в main, сортирана заявка за категории) е решен в полза на v2 — дървото на main = v2. Нови бранчове от `main`, продукция се build-ва от `main`; не създавай нищо от `v2`. Фронтендът (care-tech-ui) винаги е бил на `main`.
 - [2026-10-14] **Sitemap `STATIC_PAGES` трябва да са маршрути от `care-tech-ui/src/App.js`.** Фронтендът отговаря 200 за всеки път, така че грешен адрес не дава грешка — Google го вижда като мек 404. Реалните: /contacts (не /contact), /why-caretech, /services, /clients; /brands няма индекс страница. Тест: `SitemapControllerStaticPagesTest`.
 - [2026-10-14] **Съдържанието на ЧЗВ и „Застраховка на техниката“ е текстът на клиента дословно** (документи от 2026-10-14). Потребителят не иска вътрешни връзки и добавки в текста. За акордеони с SEO съдържание ползвай `<details>` (текстът остава в HTML-а), не `{isOpen && ...}` като в ReturnPolicyPage.
+- [2026-10-14] NEVER pair `git stash push -- <path>` with an unconditional `git stash pop`. When there is nothing to stash (care-tech-ui has no .wolf changes), push does nothing and pop applies the user's OLD stash (here a 2025-11-27 WIP) on top of main → conflicts in .env, Dockerfile and more. Compare `git stash list` before/after the push and pop only if a new entry appeared — or commit/leave the .wolf notes instead of stashing. care-tech-ui has 3 old user stashes; never pop or drop them.
+
+## Decision Log (Next.js миграция, 2026-10-16)
+
+- [2026-10-16] **care-tech-ui → Next.js (`/Users/user/Documents/projects/caretech-next`).** Одобрен план в `~/.claude/plans/modular-whistling-fairy.md`; модел и шаблон е `/Users/user/Documents/projects/qhti-next` (мигриран от qhti-ui). Решения на потребителя: всичко наведнъж (вкл. админ); SEO подобренията влизат с миграцията (`?page=N`, `<Link>` за марки, поправени canonical, истински 404); consent за аналитиката се поправя в Next (Consent Mode v2, Clarity/FB Pixel само след съгласие). Бекендът не се пипа; при превключването nginx спира `/product/` и `/category/` rewrites към `/api/og` В СЪЩИЯ момент, иначе OgMetaController инжектира head в HTML-а на Next началната страница.
+- [2026-10-16] **User preference:** докладите на subagent-ите, които потребителят вижда, също трябва да са на български — спря Explore агент по средата, защото пишеше на английски. Винаги искай изрично в prompt-а докладът да е на български.
+
+## Key Learnings (одит за Next, 2026-10-16)
+
+- `SEO.jsx` в care-tech-ui НЕ ползва react-helmet-async (пакетът е мъртъв) — пипа `document.head` в `useEffect`. redux-persist пази само `auth`, НЕкриптиран, под `localStorage["persist:root"]` (`redux-persist-transform-encrypt` е инсталиран, но не се импортира).
+- `GET /api/products/{id}` вече хвърля 404 за невидим продукт (`ProductService.isVisibleOnSite`: !deleted, AVAILABLE, active, show) — Next страницата може директно да мапне 404 → `notFound()`.
+- Публичните API-та са permitAll в `SecurityConfig.java:96-127` (GET products/**, POST products/search и /filters, categories, manufacturers, blog, reviews GET, parameters GET). SSR сървърът може да ги вика по `http://techstore-api:8080` без CORS.
+- Бекендът линква към фронтенда в имейлите: `/reset-password?token=`, `/cart`, `/profile/my-offers` (EmailService) — трябва да работят и в Next.
+- [2026-10-16] NEVER pin Next 16.0.0–16.3.7 (qhti-next's 16.3.6 included): npm audit reports high advisories, among them ISR cache poisoning in self-hosted apps. caretech-next uses 16.3.8 (0 prod vulnerabilities).
+- [2026-10-16] caretech-next `apiFetch(path)` prefixes `/api` to `API_INTERNAL_URL` (backend origin), so server paths read exactly like care-tech-ui's thunks (`products/1?language=bg`, `categories`). Dev: `npx next dev -p 3010` (launch.json "caretech-next"), proxies /api and /sitemap.xml to www.caretech.bg — writes are real.
+
+## Key Learnings (caretech-next фаза 1, 2026-10-16)
+
+- **tech-store-api `POST auth/refresh` ползва Authorization хедъра (access токена), НЕ бисквитка.** Без хедър → 500 (MissingRequestHeaderException), с изтекъл токен → 401, с повреден → 403. care-tech-ui-ът казва „refresh token е httpOnly cookie“ — грешно.
+- **care-tech-ui tokenRefresh interceptor-ът зацикля** при 401 на самия refresh (втори refresh чака първия). В caretech-next е поправено (bug-648); в care-tech-ui НЕ.
+- **Next 16: `not-found.js` наследява `robots` от root layout-а** → два robots тага на 404. `robots: null` в not-found го маха.
+- **Next/React 19 preload-ва всеки eager `<img>` от server HTML**, вкл. този в not-found (рендерира се с всяка страница). Изображения под видимата част → `loading="lazy"`.
+- **Next rewrites се фиксират при `next build`** → e2e build-ът е с `API_PROXY_ORIGIN` към mock API-то; production Docker build-ът е без.
+- **GitHub Free: няма branch protection/rulesets за частно repo** (и за org Ludogorie-Soft) → caretech-next: само PR, merge ръчно след зелено CI; gh auto-merge също не работи без protection.
+
+## Decision Log (caretech-next, 2026-10-16)
+
+- [2026-10-16] Repo https://github.com/ignatIgnatov/caretech-next (частно). Потребителят избра: без техническа защита на main (само процес), CD = image в Docker Hub `ludogoriesoft/caretech-next:main` + `:sha-<7>` при зелен main (secrets DOCKERHUB_USERNAME/DOCKERHUB_TOKEN ги добавя той), deploy ръчен до фаза 7; e2e срещу mock API с фикстури + ръчен read-only smoke срещу живото API.
+- [2026-10-16] Потребителят иска „всички видове тестове, включително e2e“: Jest unit + RTL компонентни, Playwright e2e (desktop + mobile) в CI, smoke ръчно.
+
+## Key Learnings (caretech-next фаза 2, 2026-10-16)
+
+- **care-tech-ui акордеоните (Policy, Cookies, ReturnPolicyPage) рендерират САМО отворената секция** (`isOpen && …`) → в HTML-а е една секция. В caretech-next всички секции се рендерират, затворените са `max-h-0` + `aria-hidden`.
+- **`await dispatch(thunk())` без `.unwrap()` никога не хвърля** — care-tech-ui формите за контакт показват успех и при грешка (bug-652). При пренасяне на всяка форма проверявай за `.unwrap()`.
+- **На живо `/clients` е 403** заради `public/clients/` + `try_files $uri $uri/` в nginx на CRA image-а (bug-654). Next не обслужва папки от public/ → няма проблем.
+- **Next static import на `.svg` връща обект** (`{ src, width, height }`), не низ като в CRA → `src={logo.src}`.
+- **react-slick в Jest иска `window.matchMedia`** — стъб в jest.setup.js.
+- **Пренасяне на `<Link to=` → `next/link`:** заменяй и многоредовите `<Link\n  to=` (пропуснатите дадоха 500 „href undefined“).
+
+## Key Learnings (caretech-next фаза 3, 2026-10-16)
+
+- **`GET /api/categories` връща само видимите** (`findByShowTrue`) → в Next „родител“ = има дете в този списък; slug-ът сред тях избира категорията (min id), ID-то е резерва — точно `OgMetaController`. Правилата са в `caretech-next/src/lib/catalog/categories.js`.
+- **tech-store-api CORS отказва POST с чужд Origin (403)** — при dev proxy през Next rewrites се препраща `Origin: localhost`; `src/proxy.js` го подменя. Директен curl към прод с `Origin: http://localhost` → 403.
+- **Next/React 19 изпраща preload-ите за картинки в `Link` HTTP хедър** → файлове с кирилица в името (`/banner/1400х400.png`, логата в `/clients/`) чупят хедъра (ERR_INVALID_CHAR). Кодирай с `encodeURI()` при рендериране.
+- **Всичко подадено на client component се сериализира в HTML-а (RSC payload)** — не подавай сурови/големи полета (описанието на доставчика), които клиентът не ползва.
+- **React SSR вмъква `<!-- -->` между съседни текстови възли** (`{price} €` → `558.76<!-- --> €`) — при проверка на HTML с regex/contains ги махай.
+- **`history.replaceState` за синхронизиране на query-то** не кара Next да рендерира страницата наново на сървъра (а `router.replace` кара); `useSearchParams` остава в синхрон.
+- **Function от `"use client"` модул не може да се вика от server component** („Attempted to call X() from the server“) — чистите помощни функции в отделен модул без директива.
+- **На живо (bug-655): бутоните в картата на продукт следват линка на картата** — количката остава празна. Поправено в Next; задача предложена за care-tech-ui.
+
+## Key Learnings (VALI_PRODUCTS тих rollback, 2026-11-03)
+- **`LogHelper` НЯМА собствена транзакция** (няма `REQUIRES_NEW`). Извикан от `@Transactional` метод като `ValiSyncService.syncProducts()`, записът в `sync_logs` (IN_PROGRESS, после SUCCESS/FAILED) се връща назад заедно с всичко останало. Провален прогон НЕ оставя следа в базата — изглежда сякаш изобщо не е пускан.
+- **`products_external_id_key` е UNIQUE за цялата таблица**, но само VALI попълва `external_id` (MOST/TEKRA/ASBIS са NULL) — затова няма колизии между платформите.
+- **Как да провериш дали VALI продуктите реално са синхронизирани:** `SELECT max(created_at) FROM sync_logs WHERE sync_type='VALI_PRODUCTS'` + `SELECT date_trunc('day',updated_at), count(*) FROM products WHERE platform='VALI' GROUP BY 1`. Работен прогон: ~10 460 processed, ~5 мин, стотици-хиляди `updated_at` за нощта.
+- **Сравнение API ↔ база за една категория:** `GET {VALI_API_BASE_URL}/products/by_category/{category.external_id}/full` с Bearer `VALI_API_TOKEN`; полета `id` (= external_id), `status` (0 = NOT_AVAILABLE), `price_client`.
+
+## Do-Not-Repeat (диагностика на sync, 2026-11-03)
+- [2026-11-03] NEVER приемай, че липсващ запис в `sync_logs` значи „не е пускан“ за VALI_PRODUCTS — при rollback записът изчезва. Гледай пролуката във времето между съседните логове (VALI_PARAMETERS свършва ~01:02, TEKRA почва ~01:08 → 5 мин работа, които са върнати назад).
+- [2026-11-03] NEVER давай `docker logs --since` с часа от `sync_logs` без зона. JVM-ът е Europe/Sofia (`AuditConfig:25`), сървърът е UTC: нощният крон в 01:00 София е 23:00Z предния ден (22:00Z през лятото). Пиши времената с `Z`.
+- **Hibernate: IDENTITY INSERT се изпълнява веднага при persist/merge, а orphan DELETE чака flush.** Ако в една партида от колекция се махне ред и после се добави нов със същия уникален ключ (продукт, параметър, опция) → `uq_product_parameters_unique`. Става, когато два реда от API-то стигнат до един и същ Product обект.
+- **Вали преизползва id-та:** може да смени reference_number на съществуващ запис (33385: -BK → -WH) и да пусне стария код като нов запис. Резервното търсене по reference_number в `ValiSyncService.processProductsChunk` трябва да осиновява САМО продукти без external_id.
+- **Сканиране на целия каталог на Вали за сблъсъци:** 223 категории, ~61 MB, ~10 мин с 1 s пауза; скриптът е логиката на партидите (по 30) върху износ на (id, external_id, reference_number).
+- **Админ табът „Синхронизации“ показва само редовете в `sync_logs`** — провал, който е върнат назад заедно с лога си, там изобщо не се вижда; всичко изглежда „успешно“. Липсващ тип за нощта е единственият признак (виж VALI_PRODUCTS 23.10–03.11.2026).
+- **H2 не изпълнява `ProductRepository.deduplicateCrossPlatformBySku`** (WITH … UPDATE … FROM). В DB тестове през sync-а: `@MockitoSpyBean ProductRepository` + `doReturn(0)`. Тест, който проверява REQUIRES_NEW транзакции, трябва да е `@Transactional(propagation = NOT_SUPPORTED)` + `@DirtiesContext(AFTER_EACH_TEST_METHOD)`.
+- **caretech-next локално работи срещу продукционното API** (`.env.local`, API_INTERNAL_URL/API_PROXY_ORIGIN). Нов бекенд endpoint не може да се види в браузъра, преди да е деплойнат. Затова фронт промяна, която зависи от него, се проверява с jest тестове, а деплоят е бекенд първи.

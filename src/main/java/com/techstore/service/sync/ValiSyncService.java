@@ -16,11 +16,16 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.Objects;
@@ -54,6 +59,7 @@ public class ValiSyncService {
     private final EntityManager entityManager;
     private final SyncHelper syncHelper;
     private final LogHelper logHelper;
+    private final PlatformTransactionManager transactionManager;
 
     @Value("#{'${excluded.categories.external-ids}'.split(',')}")
     private Set<Long> excludedCategories;
@@ -712,86 +718,47 @@ public class ValiSyncService {
         return parameter;
     }
 
-    @Transactional
+    /**
+     * Not {@code @Transactional} on purpose: every chunk commits in its own transaction, so a product
+     * the database refuses costs that chunk, not the night. As one transaction, a single duplicate key
+     * rolled back every VALI price and stock change, and this sync log with them, from 23.10 to 03.11.2026.
+     */
     public void syncProducts() {
         String syncType = "VALI_PRODUCTS";
         log.info("Starting products synchronization");
         SyncLog syncLog = logHelper.createSyncLogSimple(syncType);
         long startTime = System.currentTimeMillis();
 
-        long totalProcessed = 0, created = 0, updated = 0, errors = 0;
+        long totalProcessed = 0, created = 0, updated = 0, errors = 0, skipped = 0, failedChunks = 0;
 
         try {
-            Map<Long, Manufacturer> manufacturersMap = manufacturerRepository.findAll()
-                    .stream()
-                    .filter(m -> m.getExternalId() != null)
-                    .collect(Collectors.toMap(
-                            Manufacturer::getExternalId,
-                            m -> m,
-                            (existing, duplicate) -> existing
-                    ));
+            ProductSyncCaches caches = inNewTransaction(this::loadProductSyncCaches);
 
-            log.info("Loaded {} manufacturers", manufacturersMap.size());
-
-            if (manufacturersMap.isEmpty()) {
+            if (caches.manufacturers().isEmpty()) {
                 log.error("⚠️ NO MANUFACTURERS FOUND! Run syncManufacturers() first!");
                 logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, 0, 0, 0, 0,
                         "No manufacturers found", startTime);
                 return;
             }
 
-            Map<Long, Parameter> globalParametersCache = parameterRepository.findAll()
-                    .stream()
-                    .filter(p -> p.getExternalId() != null)
-                    .collect(Collectors.toMap(
-                            Parameter::getExternalId,
-                            p -> p,
-                            (existing, duplicate) -> existing
-                    ));
-
-            log.info("Loaded {} parameters globally", globalParametersCache.size());
-
-            Map<String, ParameterOption> globalOptionsCache = parameterOptionRepository.findAll()
-                    .stream()
-                    .filter(o -> o.getExternalId() != null && o.getExternalId() != 0)
-                    .filter(o -> o.getParameter() != null && o.getParameter().getExternalId() != null)
-                    .collect(Collectors.toMap(
-                            o -> o.getParameter().getExternalId() + "_" + o.getExternalId(),
-                            o -> o,
-                            (existing, duplicate) -> existing
-                    ));
-
-            log.info("Loaded {} options globally", globalOptionsCache.size());
-
-            List<Category> categories = categoryRepository.findAll();
-            log.info("Found {} categories to process", categories.size());
-
             // Tracks every Vali product externalId seen in the API response this run.
             // Used at the end to detect products no longer returned by the API.
             Set<Long> seenExternalIds = new HashSet<>();
 
-            int categoryCounter = 0;
-
-            for (Category category : categories) {
-                categoryCounter++;
-
+            for (Category category : caches.categories()) {
                 if (category.getExternalId() == null || category.getPlatform() != Platform.VALI) {
                     continue;
                 }
 
                 try {
-                    CategorySyncResult result = syncProductsByCategory(
-                            category,
-                            manufacturersMap,
-                            globalParametersCache,
-                            globalOptionsCache,
-                            seenExternalIds
-                    );
+                    CategorySyncResult result = syncProductsByCategory(category, caches, seenExternalIds);
 
                     totalProcessed += result.processed;
                     created += result.created;
                     updated += result.updated;
                     errors += result.errors;
+                    skipped += result.skipped;
+                    failedChunks += result.failedChunks;
 
                 } catch (Exception e) {
                     log.error("Error processing products for category {}: {}",
@@ -801,19 +768,28 @@ public class ValiSyncService {
             }
 
             // Mark VALI products absent from API as NOT_AVAILABLE
-            long markedUnavailable = markUnseenAsUnavailable(seenExternalIds);
+            long markedUnavailable = inNewTransaction(() -> markUnseenAsUnavailable(seenExternalIds));
 
-            int deduplicated = productRepository.deduplicateCrossPlatformBySku();
+            int deduplicated = inNewTransaction(productRepository::deduplicateCrossPlatformBySku);
             log.info("Cross-platform deduplication: hidden {} higher-priced duplicates", deduplicated);
 
-            String note = String.format("MarkedUnavailable: %d%s",
-                    markedUnavailable, errors > 0 ? ", Errors: " + errors : "");
-            logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_SUCCESS, totalProcessed, created, updated, errors,
-                    note, startTime);
+            if (failedChunks > 0) {
+                log.error(Markers.CRITICAL, "Vali products: {} chunk(s) rolled back — their products keep the "
+                        + "previous price and stock until the cause is fixed (see the errors above)", failedChunks);
+            }
+
+            String note = String.format("MarkedUnavailable: %d%s%s%s",
+                    markedUnavailable,
+                    skipped > 0 ? ", Skipped: " + skipped : "",
+                    failedChunks > 0 ? ", FailedChunks: " + failedChunks : "",
+                    errors > 0 ? ", Errors: " + errors : "");
+            logHelper.updateSyncLogSimple(syncLog, failedChunks > 0 ? LOG_STATUS_FAILED : LOG_STATUS_SUCCESS,
+                    totalProcessed, created, updated, errors, note, startTime);
 
             log.info("=== Products Sync Completed ===");
-            log.info("   Total: {}, Created: {}, Updated: {}, MarkedUnavailable: {}, Deduplicated: {}, Errors: {}",
-                    totalProcessed, created, updated, markedUnavailable, deduplicated, errors);
+            log.info("   Total: {}, Created: {}, Updated: {}, Skipped: {}, MarkedUnavailable: {}, Deduplicated: {}, "
+                            + "FailedChunks: {}, Errors: {}",
+                    totalProcessed, created, updated, skipped, markedUnavailable, deduplicated, failedChunks, errors);
 
         } catch (Exception e) {
             logHelper.updateSyncLogSimple(syncLog, LOG_STATUS_FAILED, totalProcessed, created, updated, errors,
@@ -823,18 +799,57 @@ public class ValiSyncService {
         }
     }
 
-    private CategorySyncResult syncProductsByCategory(Category category,
-                                                      Map<Long, Manufacturer> manufacturersMap,
-                                                      Map<Long, Parameter> globalParametersCache,
-                                                      Map<String, ParameterOption> globalOptionsCache,
+    /** Runs in a transaction: the options cache reads each option's lazy parameter. */
+    private ProductSyncCaches loadProductSyncCaches() {
+        Map<Long, Manufacturer> manufacturersMap = manufacturerRepository.findAll()
+                .stream()
+                .filter(m -> m.getExternalId() != null)
+                .collect(Collectors.toMap(
+                        Manufacturer::getExternalId,
+                        m -> m,
+                        (existing, duplicate) -> existing
+                ));
+
+        log.info("Loaded {} manufacturers", manufacturersMap.size());
+
+        Map<Long, Parameter> globalParametersCache = parameterRepository.findAll()
+                .stream()
+                .filter(p -> p.getExternalId() != null)
+                .collect(Collectors.toMap(
+                        Parameter::getExternalId,
+                        p -> p,
+                        (existing, duplicate) -> existing
+                ));
+
+        log.info("Loaded {} parameters globally", globalParametersCache.size());
+
+        Map<String, ParameterOption> globalOptionsCache = parameterOptionRepository.findAll()
+                .stream()
+                .filter(o -> o.getExternalId() != null && o.getExternalId() != 0)
+                .filter(o -> o.getParameter() != null && o.getParameter().getExternalId() != null)
+                .collect(Collectors.toMap(
+                        o -> o.getParameter().getExternalId() + "_" + o.getExternalId(),
+                        o -> o,
+                        (existing, duplicate) -> existing
+                ));
+
+        log.info("Loaded {} options globally", globalOptionsCache.size());
+
+        List<Category> categories = categoryRepository.findAll();
+        log.info("Found {} categories to process", categories.size());
+
+        return new ProductSyncCaches(manufacturersMap, globalParametersCache, globalOptionsCache, categories);
+    }
+
+    private CategorySyncResult syncProductsByCategory(Category category, ProductSyncCaches caches,
                                                       Set<Long> seenExternalIds) {
-        long totalProcessed = 0, created = 0, updated = 0, errors = 0;
+        CategorySyncResult total = new CategorySyncResult();
 
         try {
             List<ProductRequestDto> allProducts = valiApiService.getProductsByCategory(category.getExternalId());
 
             if (allProducts.isEmpty()) {
-                return new CategorySyncResult(0, 0, 0, 0);
+                return total;
             }
 
             List<List<ProductRequestDto>> chunks = partitionList(allProducts, batchSize);
@@ -842,56 +857,54 @@ public class ValiSyncService {
             for (int i = 0; i < chunks.size(); i++) {
                 List<ProductRequestDto> chunk = chunks.get(i);
 
+                // Seen before the attempt: a chunk that rolls back must not have its products
+                // marked unavailable at the end of the run.
+                chunk.stream()
+                        .map(ProductRequestDto::getId)
+                        .filter(Objects::nonNull)
+                        .forEach(seenExternalIds::add);
+
                 try {
-                    ChunkResult result = processProductsChunk(
+                    total.add(inNewTransaction(() -> processProductsChunk(
                             chunk,
-                            manufacturersMap,
+                            caches.manufacturers(),
                             category,
-                            globalParametersCache,
-                            globalOptionsCache,
-                            seenExternalIds
-                    );
-
-                    totalProcessed += result.processed;
-                    created += result.created;
-                    updated += result.updated;
-                    errors += result.errors;
-
-                    if (i < chunks.size() - 1) {
-                        entityManager.flush();
-                        entityManager.clear();
-                    }
+                            caches.parameters(),
+                            caches.options()
+                    )));
 
                 } catch (Exception e) {
-                    log.error("Error processing product chunk {}/{} for category {}: {}",
-                            i + 1, chunks.size(), category.getExternalId(), e.getMessage(), e);
-                    errors += chunk.size();
+                    log.error("Vali products chunk {}/{} of category {} rolled back: {}",
+                            i + 1, chunks.size(), category.getExternalId(),
+                            NestedExceptionUtils.getMostSpecificCause(e).getMessage(), e);
+                    total.errors += chunk.size();
+                    total.failedChunks++;
                 }
             }
 
         } catch (Exception e) {
             log.error("Error getting products for category {}: {}", category.getExternalId(), e.getMessage(), e);
-            errors++;
+            total.errors++;
         }
 
-        return new CategorySyncResult(totalProcessed, created, updated, errors);
+        return total;
     }
 
+    /**
+     * Runs in its own transaction (see syncProductsByCategory) and lets database errors through,
+     * so that a refused product rolls back this chunk only.
+     */
     private ChunkResult processProductsChunk(List<ProductRequestDto> products,
                                              Map<Long, Manufacturer> manufacturersMap,
                                              Category category,
                                              Map<Long, Parameter> globalParametersCache,
-                                             Map<String, ParameterOption> globalOptionsCache,
-                                             Set<Long> seenExternalIds) {
-        long processed = 0, created = 0, updated = 0, errors = 0;
+                                             Map<String, ParameterOption> globalOptionsCache) {
+        long processed = 0, created = 0, updated = 0, errors = 0, skipped = 0;
 
         Set<Long> externalProductIdsInChunk = products.stream()
                 .map(ProductRequestDto::getId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-
-        // Register every product returned by the API as "seen" this sync run
-        seenExternalIds.addAll(externalProductIdsInChunk);
 
         Map<Long, Product> existingProductsMap = productRepository.findByExternalIdIn(externalProductIdsInChunk)
                 .stream()
@@ -910,8 +923,20 @@ public class ValiSyncService {
 
         List<Product> productsToSave = new ArrayList<>();
 
+        // A product must be synced at most once per chunk. A second pass removes what the first one
+        // added and adds back what it removed; the added row is inserted before the removed one is
+        // deleted, and uq_product_parameters_unique fails.
+        Set<Long> handledIds = new HashSet<>();
+
         for (ProductRequestDto extProduct : products) {
             try {
+                if (!handledIds.add(extProduct.getId())) {
+                    log.warn("Vali item {} ({}) is listed twice in category {} — the second row is skipped",
+                            extProduct.getId(), extProduct.getReferenceNumber(), category.getExternalId());
+                    skipped++;
+                    continue;
+                }
+
                 Manufacturer manufacturer = manufacturersMap.get(extProduct.getManufacturerId());
                 if (manufacturer == null) {
                     log.warn("Manufacturer {} not found for product {}, skipping",
@@ -929,12 +954,22 @@ public class ValiSyncService {
                     updated++;
                 } else if (existingByRefNum.containsKey(extProduct.getReferenceNumber())) {
                     product = existingByRefNum.get(extProduct.getReferenceNumber());
-                    // Backfill externalId so future syncs find it correctly
-                    if (product.getExternalId() == null) {
-                        product.setExternalId(extProduct.getId());
-                        log.info("Backfilling externalId={} for product referenceNumber={}",
-                                extProduct.getId(), extProduct.getReferenceNumber());
+                    if (product.getExternalId() != null) {
+                        // Vali moved this reference number to a new item: 38141 took "WD-HDD-PASSPORT-6TB-BK"
+                        // from 33385, which became "...-WH". Adopting the product would sync it twice, and a
+                        // new product cannot take a reference number that is already in use.
+                        log.warn("Vali item {} has reference number {}, but our product {} with that number is "
+                                        + "linked to Vali item {} — skipped. Relink the product by hand if it is "
+                                        + "the same one.",
+                                extProduct.getId(), extProduct.getReferenceNumber(), product.getId(),
+                                product.getExternalId());
+                        skipped++;
+                        continue;
                     }
+                    // Backfill externalId so future syncs find it correctly
+                    product.setExternalId(extProduct.getId());
+                    log.info("Backfilling externalId={} for product referenceNumber={}",
+                            extProduct.getId(), extProduct.getReferenceNumber());
                     updateProductFieldsFromExternal(product, extProduct, manufacturer, category,
                             globalParametersCache, globalOptionsCache);
                     updated++;
@@ -955,25 +990,9 @@ public class ValiSyncService {
             }
         }
 
-        if (!productsToSave.isEmpty()) {
-            try {
-                productRepository.saveAll(productsToSave);
-            } catch (Exception e) {
-                log.error("Error saving products batch: {}", e.getMessage(), e);
-                errors += productsToSave.size();
-            }
-        }
+        productRepository.saveAll(productsToSave);
 
-        try {
-            entityManager.flush();
-        } catch (Exception e) {
-            log.error("Flush failed for chunk — session will be cleared: {}", e.getMessage());
-            errors += productsToSave.size();
-        } finally {
-            entityManager.clear();
-        }
-
-        return new ChunkResult(processed, created, updated, errors);
+        return new ChunkResult(processed, created, updated, errors, skipped);
     }
 
     private void updateProductFieldsFromExternal(Product product, ProductRequestDto extProduct,
@@ -1262,10 +1281,11 @@ public class ValiSyncService {
      * Skips the operation entirely if seenExternalIds is empty as a safety guard
      * (would otherwise mark every product unavailable on a total API failure).
      *
+     * Runs in its own transaction, started by syncProducts.
+     *
      * @return number of products marked NOT_AVAILABLE
      */
-    @Transactional
-    public long markUnseenAsUnavailable(Set<Long> seenExternalIds) {
+    private long markUnseenAsUnavailable(Set<Long> seenExternalIds) {
         if (seenExternalIds.isEmpty()) {
             log.warn("seenExternalIds is empty — skipping markUnseenAsUnavailable to avoid mass status reset");
             return 0;
@@ -1307,23 +1327,40 @@ public class ValiSyncService {
         return partitions;
     }
 
+    /** Commits on its own, also when the caller is inside a transaction. */
+    private <T> T inNewTransaction(Supplier<T> work) {
+        TransactionTemplate tx = new TransactionTemplate(transactionManager);
+        tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        return tx.execute(status -> work.get());
+    }
+
+    /** Loaded once per products run; every chunk looks things up here. */
+    private record ProductSyncCaches(Map<Long, Manufacturer> manufacturers,
+                                     Map<Long, Parameter> parameters,
+                                     Map<String, ParameterOption> options,
+                                     List<Category> categories) {
+    }
+
     private static class CategorySyncResult {
-        long processed, created, updated, errors;
-        CategorySyncResult(long processed, long created, long updated, long errors) {
-            this.processed = processed;
-            this.created = created;
-            this.updated = updated;
-            this.errors = errors;
+        long processed, created, updated, errors, skipped, failedChunks;
+
+        void add(ChunkResult chunk) {
+            processed += chunk.processed;
+            created += chunk.created;
+            updated += chunk.updated;
+            errors += chunk.errors;
+            skipped += chunk.skipped;
         }
     }
 
     private static class ChunkResult {
-        long processed, created, updated, errors;
-        ChunkResult(long processed, long created, long updated, long errors) {
+        long processed, created, updated, errors, skipped;
+        ChunkResult(long processed, long created, long updated, long errors, long skipped) {
             this.processed = processed;
             this.created = created;
             this.updated = updated;
             this.errors = errors;
+            this.skipped = skipped;
         }
     }
 }
