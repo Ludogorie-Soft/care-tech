@@ -538,7 +538,7 @@ public class UserService {
     }
 
     private UserResponseDTO convertToResponseDTO(User user) {
-        Integer cartCount = cartItemRepository.countTotalItemsByUserId(user.getId());
+        Integer cartCount = cartItemRepository.countAvailableItemsByUserId(user.getId());
         return UserResponseDTO.builder()
                 .id(user.getId())
                 .email(user.getEmail())

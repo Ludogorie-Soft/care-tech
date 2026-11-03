@@ -449,7 +449,7 @@ public class AdminController {
     public ResponseEntity<CartSummaryDto> getUserCart(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "bg") String language) {
-        return ResponseEntity.ok(cartService.getCartSummary(userId, language));
+        return ResponseEntity.ok(cartService.getCartSummaryForAdmin(userId, language));
     }
 
     @GetMapping("/offers")

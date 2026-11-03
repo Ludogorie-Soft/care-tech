@@ -46,7 +46,11 @@ public class AbandonedCartService {
 
         for (User user : users) {
             try {
-                List<CartItem> items = cartItemRepository.findByUserIdOrderByCreatedAtAsc(user.getId());
+                // Only what can still be bought: a reminder about unavailable products leads to a cart
+                // that shows nothing.
+                List<CartItem> items = cartItemRepository.findByUserIdOrderByCreatedAtAsc(user.getId()).stream()
+                        .filter(ci -> ci.getProduct() != null && ProductService.isVisibleOnSite(ci.getProduct()))
+                        .toList();
                 if (items.isEmpty()) continue;
 
                 emailService.sendAbandonedCartEmail(user, items);
