@@ -7,6 +7,8 @@ import com.techstore.entity.Order;
 import com.techstore.entity.PersonalOffer;
 import com.techstore.entity.User;
 import com.techstore.enums.OrderStatus;
+import com.techstore.util.Markers;
+import com.techstore.util.WarrantyFiles;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -182,11 +184,48 @@ public class EmailService {
             variables.put("orderUrl", appUrl + "/orders/" + order.getId());
 
             String subject = appName + " - Вашата поръчка е изпратена #" + order.getOrderNumber();
-            sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-shipped", variables, order.getWarrantyFilePath());
+            // No warranty attached here any more: it has an email of its own, sent when the admin
+            // attaches it (sendOrderWarrantyEmail); attaching it here too sent it twice.
+            sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-shipped", variables);
 
             log.info("Order shipped email sent successfully to: {}", order.getCustomerEmail());
         } catch (Exception e) {
             log.error("Failed to send order shipped email to: {}", order.getCustomerEmail(), e);
+        }
+    }
+
+    /**
+     * The warranty card the admin attached to the order, as a file in the email, to the order's
+     * address. A customer without an account had no other way to get it: the profile page needs a
+     * login. Not sent without the file — an email about an attachment that is not there is worse
+     * than none, so the failure goes to Slack instead.
+     *
+     * @param registered whether the order belongs to an account, read before the async hand-off
+     */
+    @Async
+    public void sendOrderWarrantyEmail(Order order, boolean registered) {
+        String key = order.getWarrantyFilePath();
+        if (key == null) {
+            return;
+        }
+        try {
+            byte[] file = s3Service.downloadFileBytes(key);
+            String fileName = WarrantyFiles.customerFileName(order.getOrderNumber(), key);
+
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("customerName", order.getCustomerFirstName() + " " + order.getCustomerLastName());
+            variables.put("orderNumber", order.getOrderNumber());
+            variables.put("fileName", fileName);
+            variables.put("registered", registered);
+
+            String subject = appName + " - Гаранционна карта към поръчка #" + order.getOrderNumber();
+            sendHtmlEmail(fromEmail, order.getCustomerEmail(), subject, "order-warranty", variables,
+                    new Attachment(fileName, file, WarrantyFiles.contentType(WarrantyFiles.extension(key))));
+
+            log.info("Warranty email sent to {} for order {}", order.getCustomerEmail(), order.getOrderNumber());
+        } catch (Exception e) {
+            log.error(Markers.CRITICAL, "Warranty card for order {} was not emailed to {}: {}",
+                    order.getOrderNumber(), order.getCustomerEmail(), e.getMessage(), e);
         }
     }
 
@@ -430,11 +469,15 @@ public class EmailService {
         sendHtmlEmail(from, to, subject, templateName, variables, null);
     }
 
+    /** A file sent with an email, under the name and type the customer should see. */
+    private record Attachment(String fileName, byte[] bytes, String contentType) {
+    }
+
     /**
      * Send HTML email with optional file attachment
      */
     private void sendHtmlEmail(String from, String to, String subject, String templateName,
-                                Map<String, Object> variables, String attachmentPath)
+                                Map<String, Object> variables, Attachment attachment)
             throws MessagingException {
 
         MimeMessage message = mailSender.createMimeMessage();
@@ -452,14 +495,9 @@ public class EmailService {
             message.addHeader("Sender", fromEmail);
         }
 
-        if (attachmentPath != null) {
-            try {
-                byte[] fileBytes = s3Service.downloadFileBytes(attachmentPath);
-                String filename = attachmentPath.substring(attachmentPath.lastIndexOf('/') + 1);
-                helper.addAttachment(filename, new ByteArrayResource(fileBytes));
-            } catch (Exception e) {
-                log.warn("Could not attach warranty file from S3, skipping: {}", attachmentPath, e);
-            }
+        if (attachment != null) {
+            helper.addAttachment(attachment.fileName(), new ByteArrayResource(attachment.bytes()),
+                    attachment.contentType());
         }
 
         mailSender.send(message);

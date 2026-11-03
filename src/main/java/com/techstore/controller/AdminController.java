@@ -386,9 +386,10 @@ public class AdminController {
     @PostMapping(value = "/orders/{orderId}/warranty", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<OrderResponseDTO> uploadOrderWarranty(
             @PathVariable Long orderId,
-            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @RequestParam(required = false) Boolean notifyCustomer) {
 
-        OrderResponseDTO order = orderService.uploadWarrantyFile(orderId, file);
+        OrderResponseDTO order = orderService.uploadWarrantyFile(orderId, file, notifyCustomer);
         return ResponseEntity.ok(order);
     }
 

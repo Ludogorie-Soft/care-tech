@@ -1,5 +1,6 @@
 package com.techstore.listener;
 
+import com.techstore.event.OrderWarrantyAttachedEvent;
 import com.techstore.entity.Order;
 import com.techstore.enums.OrderStatus;
 import com.techstore.event.OrderStatusChangedEvent;
@@ -53,5 +54,15 @@ class OrderEventListenerTest {
     private OrderStatusChangedEvent event(OrderStatus from, OrderStatus to, String note) {
         order.setOrderNumber("ORD-2026-00001");
         return new OrderStatusChangedEvent(this, order, from, to, note);
+    }
+
+    @Test
+    void warrantyAttachedSendsTheWarrantyEmail() {
+        Order order = new Order();
+        order.setOrderNumber("ORD-2026-00043");
+
+        listener.handleWarrantyAttached(new OrderWarrantyAttachedEvent(order, true));
+
+        verify(emailService).sendOrderWarrantyEmail(order, true);
     }
 }
