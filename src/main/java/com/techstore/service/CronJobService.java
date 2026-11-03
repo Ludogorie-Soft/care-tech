@@ -24,7 +24,9 @@ public class CronJobService {
     private final AsbisSyncService asbisSyncService;
     private final FilterIndexService filterIndexService;
 
-    @Scheduled(cron = "0 0 1 * * ?")
+    // Every six hours from 05:00 (app.sync.cron). Once a night left a supplier's stock change up to
+    // a day old on the site; the shop owner chose 05, 11, 17 and 23 (2026-11-03).
+    @Scheduled(cron = "${app.sync.cron}", zone = "Europe/Sofia")
     public void syncApis() {
         log.info("Starting scheduled synchronization at {}", LocalDateTime.now());
 

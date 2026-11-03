@@ -7,6 +7,7 @@ import com.techstore.entity.Order;
 import com.techstore.enums.OrderStatus;
 import com.techstore.enums.PaymentStatus;
 import com.techstore.event.OrderStatusChangedEvent;
+import com.techstore.event.OrderWarrantyAttachedEvent;
 import com.techstore.repository.CartItemRepository;
 import com.techstore.repository.OrderRepository;
 import com.techstore.repository.ProductRepository;
@@ -20,6 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -60,6 +63,34 @@ class OrderServiceStatusNotificationTest {
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         lenient().when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    // ── Warranty card ───────────────────────────────────────────────────────────
+
+    @Test
+    void attachingAWarrantyEmailsItUnlessTheAdminSaysNo() {
+        MultipartFile file = new MockMultipartFile("file", "karta.pdf", "application/pdf", new byte[]{1});
+        when(s3Service.uploadWarrantyFile(file)).thenReturn("warranties/abc.pdf");
+
+        service.uploadWarrantyFile(1L, file, null);
+
+        ArgumentCaptor<Object> event = ArgumentCaptor.forClass(Object.class);
+        verify(eventPublisher).publishEvent(event.capture());
+        assertThat(event.getValue()).isInstanceOfSatisfying(OrderWarrantyAttachedEvent.class, e -> {
+            assertThat(e.order().getWarrantyFilePath()).isEqualTo("warranties/abc.pdf");
+            assertThat(e.registered()).isFalse();
+        });
+    }
+
+    @Test
+    void attachingAWarrantyWithoutNotifyingSendsNothing() {
+        MultipartFile file = new MockMultipartFile("file", "karta.pdf", "application/pdf", new byte[]{1});
+        when(s3Service.uploadWarrantyFile(file)).thenReturn("warranties/abc.pdf");
+
+        service.uploadWarrantyFile(1L, file, false);
+
+        assertThat(order.getWarrantyFilePath()).isEqualTo("warranties/abc.pdf");
+        verifyNoInteractions(eventPublisher);
     }
 
     // ── Quick status change (UpdateOrderStatusModal) ────────────────────────────

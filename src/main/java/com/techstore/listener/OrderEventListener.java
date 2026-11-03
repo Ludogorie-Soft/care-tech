@@ -4,12 +4,15 @@ import com.techstore.entity.Order;
 import com.techstore.enums.OrderStatus;
 import com.techstore.event.OrderCreatedEvent;
 import com.techstore.event.OrderStatusChangedEvent;
+import com.techstore.event.OrderWarrantyAttachedEvent;
 import com.techstore.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * Event listener for order-related events
@@ -68,5 +71,14 @@ public class OrderEventListener {
         } catch (Exception e) {
             log.error("Error handling order status changed event", e);
         }
+    }
+
+    /**
+     * After commit: the email reads the file the transaction just stored, and a rolled-back upload
+     * must not reach the customer. EmailService sends it async.
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    public void handleWarrantyAttached(OrderWarrantyAttachedEvent event) {
+        emailService.sendOrderWarrantyEmail(event.order(), event.registered());
     }
 }

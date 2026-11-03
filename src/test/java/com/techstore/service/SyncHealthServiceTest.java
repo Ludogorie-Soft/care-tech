@@ -21,11 +21,11 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("SyncHealthService — нощна синхронизация без успех от над 26 ч")
+@DisplayName("SyncHealthService — автоматична синхронизация без успех от над 8 ч")
 class SyncHealthServiceTest {
 
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 11, 3, 10, 0);
-    private static final LocalDateTime TONIGHT = LocalDateTime.of(2026, 11, 3, 1, 5);
+    private static final LocalDateTime THIS_MORNING = LocalDateTime.of(2026, 11, 3, 5, 5);
 
     @Mock SyncLogRepository syncLogRepository;
 
@@ -34,19 +34,19 @@ class SyncHealthServiceTest {
     @BeforeEach
     void setUp() {
         service = new SyncHealthService(syncLogRepository);
-        // Unless a test says otherwise, every type succeeded tonight.
+        // Unless a test says otherwise, every type succeeded in the 05:00 run.
         lenient().when(syncLogRepository.findTopBySyncTypeOrderByCreatedAtDesc(anyString()))
-                .thenAnswer(inv -> Optional.of(log(inv.getArgument(0), "SUCCESS", TONIGHT)));
+                .thenAnswer(inv -> Optional.of(log(inv.getArgument(0), "SUCCESS", THIS_MORNING)));
         lenient().when(syncLogRepository.findTopBySyncTypeAndStatusOrderByCreatedAtDesc(anyString(), eq("SUCCESS")))
-                .thenAnswer(inv -> Optional.of(log(inv.getArgument(0), "SUCCESS", TONIGHT)));
+                .thenAnswer(inv -> Optional.of(log(inv.getArgument(0), "SUCCESS", THIS_MORNING)));
     }
 
     @Test
-    @DisplayName("Всички нощни типове, в реда на cron-а; при успех тази нощ нищо не закъснява")
+    @DisplayName("Всички типове, в реда на cron-а; при успех в 05:00 нищо не закъснява")
     void everyNightlyTypeInCronOrder() {
-        List<SyncHealthDto> health = service.nightlyHealth(NOW);
+        List<SyncHealthDto> health = service.health(NOW);
 
-        assertThat(health).extracting(SyncHealthDto::syncType).containsExactlyElementsOf(SyncHealthService.NIGHTLY_SYNC_TYPES);
+        assertThat(health).extracting(SyncHealthDto::syncType).containsExactlyElementsOf(SyncHealthService.SCHEDULED_SYNC_TYPES);
         assertThat(health).noneMatch(SyncHealthDto::overdue);
     }
 
@@ -59,26 +59,26 @@ class SyncHealthServiceTest {
         when(syncLogRepository.findTopBySyncTypeAndStatusOrderByCreatedAtDesc("VALI_PRODUCTS", "SUCCESS"))
                 .thenReturn(Optional.of(log("VALI_PRODUCTS", "SUCCESS", oct22)));
 
-        SyncHealthDto vali = byType(service.nightlyHealth(NOW), "VALI_PRODUCTS");
+        SyncHealthDto vali = byType(service.health(NOW), "VALI_PRODUCTS");
 
         assertThat(vali.overdue()).isTrue();
         assertThat(vali.lastSuccessAt()).isEqualTo(oct22);
-        assertThat(byType(service.nightlyHealth(NOW), "TEKRA_PRODUCTS").overdue()).isFalse();
+        assertThat(byType(service.health(NOW), "TEKRA_PRODUCTS").overdue()).isFalse();
     }
 
     @Test
-    @DisplayName("Последният прогон е FAILED, а успехът е от предната нощ → закъснява и показва FAILED")
-    void failedTonightAfterSuccessYesterday() {
+    @DisplayName("Прогонът в 05:00 е FAILED, а успехът е от 23:00 → закъснява и показва FAILED")
+    void failedThisMorningAfterSuccessAtEleven() {
         when(syncLogRepository.findTopBySyncTypeOrderByCreatedAtDesc("MOST_PRODUCTS"))
-                .thenReturn(Optional.of(log("MOST_PRODUCTS", "FAILED", TONIGHT)));
+                .thenReturn(Optional.of(log("MOST_PRODUCTS", "FAILED", THIS_MORNING)));
         when(syncLogRepository.findTopBySyncTypeAndStatusOrderByCreatedAtDesc("MOST_PRODUCTS", "SUCCESS"))
-                .thenReturn(Optional.of(log("MOST_PRODUCTS", "SUCCESS", TONIGHT.minusDays(1))));
+                .thenReturn(Optional.of(log("MOST_PRODUCTS", "SUCCESS", THIS_MORNING.minusHours(6))));
 
-        SyncHealthDto most = byType(service.nightlyHealth(NOW), "MOST_PRODUCTS");
+        SyncHealthDto most = byType(service.health(NOW), "MOST_PRODUCTS");
 
         assertThat(most.overdue()).isTrue();
         assertThat(most.lastStatus()).isEqualTo("FAILED");
-        assertThat(most.lastRunAt()).isEqualTo(TONIGHT);
+        assertThat(most.lastRunAt()).isEqualTo(THIS_MORNING);
     }
 
     @Test
@@ -88,7 +88,7 @@ class SyncHealthServiceTest {
         when(syncLogRepository.findTopBySyncTypeAndStatusOrderByCreatedAtDesc("ASBIS_PRICE_AVAIL", "SUCCESS"))
                 .thenReturn(Optional.empty());
 
-        SyncHealthDto asbis = byType(service.nightlyHealth(NOW), "ASBIS_PRICE_AVAIL");
+        SyncHealthDto asbis = byType(service.health(NOW), "ASBIS_PRICE_AVAIL");
 
         assertThat(asbis.overdue()).isTrue();
         assertThat(asbis.lastRunAt()).isNull();
@@ -97,14 +97,14 @@ class SyncHealthServiceTest {
     }
 
     @Test
-    @DisplayName("Границата е 26 ч: 25:59 е наред, 26:01 закъснява")
-    void twentySixHourBoundary() {
+    @DisplayName("Границата е 8 ч: 7:59 е наред, 8:01 закъснява")
+    void eightHourBoundary() {
         when(syncLogRepository.findTopBySyncTypeAndStatusOrderByCreatedAtDesc("VALI_PARAMETERS", "SUCCESS"))
-                .thenReturn(Optional.of(log("VALI_PARAMETERS", "SUCCESS", NOW.minusHours(25).minusMinutes(59))));
+                .thenReturn(Optional.of(log("VALI_PARAMETERS", "SUCCESS", NOW.minusHours(7).minusMinutes(59))));
         when(syncLogRepository.findTopBySyncTypeAndStatusOrderByCreatedAtDesc("VALI_MANUFACTURERS", "SUCCESS"))
-                .thenReturn(Optional.of(log("VALI_MANUFACTURERS", "SUCCESS", NOW.minusHours(26).minusMinutes(1))));
+                .thenReturn(Optional.of(log("VALI_MANUFACTURERS", "SUCCESS", NOW.minusHours(8).minusMinutes(1))));
 
-        List<SyncHealthDto> health = service.nightlyHealth(NOW);
+        List<SyncHealthDto> health = service.health(NOW);
 
         assertThat(byType(health, "VALI_PARAMETERS").overdue()).isFalse();
         assertThat(byType(health, "VALI_MANUFACTURERS").overdue()).isTrue();

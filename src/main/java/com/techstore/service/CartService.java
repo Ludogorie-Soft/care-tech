@@ -21,7 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,18 +38,25 @@ public class CartService {
 
     @Transactional(readOnly = true)
     public CartSummaryDto getCartSummary(Long userId, String language) {
-        List<CartItem> cartItems = cartItemRepository.findByUserIdOrderByCreatedAtAsc(userId);
+        return summarize(userId, language, false);
+    }
 
-        List<CartItem> availableItems = cartItems.stream()
-                .filter(ci -> {
-                    Product p = ci.getProduct();
-                    return p != null
-                            && p.getStatus() == ProductStatus.AVAILABLE
-                            && Boolean.TRUE.equals(p.getActive())
-                            && Boolean.TRUE.equals(p.getShow());
-                })
-                .toList();
+    /**
+     * The customer's cart as the admin sees it: what can be bought, plus what the customer put in and
+     * can no longer buy (a product that went unavailable stays in cart_items), listed apart.
+     */
+    @Transactional(readOnly = true)
+    public CartSummaryDto getCartSummaryForAdmin(Long userId, String language) {
+        return summarize(userId, language, true);
+    }
 
+    private CartSummaryDto summarize(Long userId, String language, boolean withUnavailable) {
+        Map<Boolean, List<CartItem>> byAvailability = cartItemRepository.findByUserIdOrderByCreatedAtAsc(userId)
+                .stream()
+                .filter(ci -> ci.getProduct() != null)
+                .collect(Collectors.partitioningBy(ci -> ProductService.isVisibleOnSite(ci.getProduct())));
+
+        List<CartItem> availableItems = byAvailability.get(true);
         List<CartItemResponseDto> itemDtos = availableItems.stream()
                 .map(cartItem -> mapToCartItemResponse(cartItem, cartItem.getProduct(), language))
                 .toList();
@@ -54,7 +64,16 @@ public class CartService {
         CartSummaryDto summary = new CartSummaryDto();
         summary.setItems(itemDtos);
         summary.setTotalItems(availableItems.stream().mapToInt(CartItem::getQuantity).sum());
-        summary.setTotalPrice(cartItemRepository.calculateTotalPriceByUserId(userId));
+        // From the listed items only: a sum over every row priced products the customer cannot buy.
+        summary.setTotalPrice(itemDtos.stream()
+                .map(CartItemResponseDto::getItemTotal)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        if (withUnavailable) {
+            summary.setUnavailableItems(byAvailability.get(false).stream()
+                    .map(cartItem -> mapToCartItemResponse(cartItem, cartItem.getProduct(), language))
+                    .toList());
+        }
 
         return summary;
     }
@@ -137,7 +156,9 @@ public class CartService {
         dto.setId(cartItem.getId());
         dto.setProduct(convertProductToResponseDTO(cartItem.getProduct(), language));
         dto.setQuantity(cartItem.getQuantity());
-        dto.setItemTotal(cartItem1.getFinalPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+        // An unavailable product in the admin's view may have no price left.
+        dto.setItemTotal(cartItem1.getFinalPrice() == null ? null
+                : cartItem1.getFinalPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
         dto.setCreatedAt(cartItem.getCreatedAt());
         dto.setUpdatedAt(cartItem.getUpdatedAt());
         return dto;

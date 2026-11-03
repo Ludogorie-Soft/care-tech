@@ -11287,7 +11287,7 @@
       "error_message": "Видеокарта ASRock Intel ARC Pro B65 Creator 32GB (VALI ext 37970) е налична при нас, а при Вали е неналична от 26.10",
       "file": "src/main/java/com/techstore/service/sync/ValiSyncService.java",
       "root_cause": "Vali преименува своя запис 33385 от WD-HDD-PASSPORT-6TB-BK в -WH и пусна черния като нов запис 38141 със стария код. Нашият продукт 3362 (ref -BK, external_id 33385) се намира ДВА пъти в една партида: по external_id (белия) и по резервното търсене по reference_number (черния) — резервното търсене не проверява, че продуктът вече е свързан с друг Vali id. Белият маха 'Черен', черният го добавя като НОВ ред; IDENTITY INSERT-ът минава веднага, а DELETE-ът на стария ред чака flush → uq_product_parameters_unique (3362, 6723, 139629). Целият syncProducts е една транзакция → aborted → rollback на всичко + на sync_logs (LogHelper без REQUIRES_NEW). Всяка нощ от 23.10.",
-      "fix": "Данни: 2026-11-03 потребителят пусна UPDATE products SET external_id=38141, workflow_id=124019 WHERE id=3362 (проверено, сканирането на целия каталог е чисто). Код (fallback само за продукти без external_id, пазач за двойно попадение, транзакция на партида, LogHelper REQUIRES_NEW) — предстои.",
+      "fix": "Данни: relink 3362 → external_id 38141 (2026-11-03). Код: care-tech#6 (транзакция на партида, fallback по ref само за продукти без external_id, пазач за дублиран id, LogHelper REQUIRES_NEW) + GET /api/admin/sync-logs/health и панел в caretech-next#3; деплойнати. Ръчен sync 2026-11-03 10:25: SUCCESS, 10447 обработени, 112 нови, 27 маркирани неналични; „Видео карти“ — 0 разлики с API-то на Вали.",
       "tags": [
         "fallback",
         "hibernate-flush-order",
@@ -11302,7 +11302,7 @@
       ],
       "related_bugs": [],
       "occurrences": 1,
-      "last_seen": "2026-11-03T10:00:00+02:00"
+      "last_seen": "2026-11-03T10:40:00+02:00"
     },
     {
       "id": "bug-679",
@@ -11335,6 +11335,26 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-11-03T07:38:27.562Z"
+    },
+    {
+      "id": "bug-674",
+      "timestamp": "2026-11-03T15:00:00+02:00",
+      "error_message": "Админ „Клиенти“: значката казва, че клиентът има продукт в кошницата, а при клик кошницата е празна",
+      "file": "src/main/java/com/techstore/repository/CartItemRepository.java",
+      "root_cause": "countTotalItemsByUserId сумираше всички cart_items, а CartService.getCartSummary показва само AVAILABLE+active+show (bug-420 филтрира само прегледа). Sync-овете не чистят cart_items, затова продукт, станал неналичен, остава завинаги: в прод 2 от 5 клиента със значка имаха празна кошница. totalPrice и имейлът за изоставена кошница също ползваха нефилтрирани редове.",
+      "fix": "countAvailableItemsByUserId (правилото на ProductService.isVisibleOnSite); getCartSummary сумира само показаните редове; getCartSummaryForAdmin връща и unavailableItems, които caretech-next UserCartModal показва сиви под „Вече не са налични“; AbandonedCartService праща само наличните, а без тях не праща нищо; itemTotal е null при продукт без цена.",
+      "tags": [
+        "cart",
+        "admin",
+        "badge",
+        "unavailable",
+        "abandoned-cart"
+      ],
+      "related_bugs": [
+        "bug-420"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-11-03T15:00:00+02:00"
     }
   ]
 }

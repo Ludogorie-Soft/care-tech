@@ -10,7 +10,9 @@ import com.techstore.entity.User;
 import com.techstore.enums.OrderStatus;
 import com.techstore.enums.PaymentMethod;
 import com.techstore.enums.ShippingMethod;
+import jakarta.mail.BodyPart;
 import jakarta.mail.Multipart;
+import jakarta.mail.Part;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +36,8 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +61,7 @@ class EmailServiceTemplatesTest {
     private static final Pattern HREF = Pattern.compile("href=\"([^\"]*)\"");
 
     private final JavaMailSender mailSender = mock(JavaMailSender.class);
+    private final S3Service s3Service = mock(S3Service.class);
     private EmailService emailService;
 
     @BeforeEach
@@ -73,7 +78,7 @@ class EmailServiceTemplatesTest {
         ShippingConfig shippingConfig = new ShippingConfig();
         ReflectionTestUtils.setField(shippingConfig, "deliveryDays", 2);
 
-        emailService = new EmailService(mailSender, engine, mock(S3Service.class), shippingConfig);
+        emailService = new EmailService(mailSender, engine, s3Service, shippingConfig);
         ReflectionTestUtils.setField(emailService, "fromEmail", "orders@caretech.bg");
         ReflectionTestUtils.setField(emailService, "appName", "CareTech");
         ReflectionTestUtils.setField(emailService, "appUrl", APP_URL);
@@ -302,6 +307,69 @@ class EmailServiceTemplatesTest {
         assertThat(countOccurrences(html, ">12.00 €<")).isEqualTo(1);
     }
 
+    // ── Warranty card ───────────────────────────────────────────────────────────
+
+    @Test
+    void warrantyEmailCarriesTheFileForACustomerWithoutAnAccount() throws Exception {
+        Order order = officeOrder();
+        order.setWarrantyFilePath("warranties/3f2c9a.pdf");
+        when(s3Service.downloadFileBytes("warranties/3f2c9a.pdf")).thenReturn("%PDF-1.4".getBytes());
+
+        emailService.sendOrderWarrantyEmail(order, false);
+
+        MimeMessage message = sentMessage();
+        String html = htmlOf(message.getContent());
+        assertCustomerEmail(html);
+        assertThat(message.getSubject()).isEqualTo("CareTech - Гаранционна карта към поръчка #ORD-2026-00043");
+        assertThat(message.getAllRecipients()[0].toString()).isEqualTo(order.getCustomerEmail());
+        assertThat(html).contains("Гаранционна карта", "ORD-2026-00043", "garantsia-ORD-2026-00043.pdf")
+                .doesNotContain("/profile/my-orders", "от профила си");
+
+        BodyPart file = attachmentOf(message.getContent());
+        assertThat(file).as("attachment").isNotNull();
+        assertThat(file.getFileName()).isEqualTo("garantsia-ORD-2026-00043.pdf");
+        assertThat(file.getContentType()).startsWith("application/pdf");
+    }
+
+    @Test
+    void warrantyEmailPointsARegisteredCustomerToTheProfileToo() throws Exception {
+        Order order = officeOrder();
+        order.setWarrantyFilePath("warranties/77ab.docx");
+        when(s3Service.downloadFileBytes("warranties/77ab.docx")).thenReturn(new byte[]{1, 2, 3});
+
+        emailService.sendOrderWarrantyEmail(order, true);
+
+        MimeMessage message = sentMessage();
+        String html = htmlOf(message.getContent());
+        assertCustomerEmail(html);
+        assertThat(html).contains("от профила си", "href=\"" + APP_URL + "/profile/my-orders\"");
+        // docx is not in Spring's mime.types: the type is stated, not guessed
+        assertThat(attachmentOf(message.getContent()).getContentType())
+                .startsWith("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    }
+
+    @Test
+    void warrantyEmailIsNotSentWithoutTheFile() {
+        Order order = officeOrder();
+        order.setWarrantyFilePath("warranties/gone.pdf");
+        when(s3Service.downloadFileBytes("warranties/gone.pdf")).thenThrow(new RuntimeException("NoSuchKey"));
+
+        emailService.sendOrderWarrantyEmail(order, false);
+
+        verify(mailSender, never()).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void shippedEmailNoLongerAttachesTheWarranty() throws Exception {
+        Order order = officeOrder();
+        order.setWarrantyFilePath("warranties/3f2c9a.pdf");
+
+        emailService.sendOrderShippedEmail(order, null);
+
+        assertThat(attachmentOf(sentMessage().getContent())).isNull();
+        verify(s3Service, never()).downloadFileBytes(any());
+    }
+
     // ── Shared checks ───────────────────────────────────────────────────────────
 
     /** What every customer email must have after the client's review. */
@@ -327,6 +395,31 @@ class EmailServiceTemplatesTest {
                         .as("link to a page that exists: %s", url).isTrue();
             }
         }
+    }
+
+    /** Headers as the transport writes them: a part's Content-Type is set by saveChanges(). */
+    private MimeMessage sentMessage() throws Exception {
+        ArgumentCaptor<MimeMessage> captor = ArgumentCaptor.forClass(MimeMessage.class);
+        verify(mailSender).send(captor.capture());
+        MimeMessage message = captor.getValue();
+        message.saveChanges();
+        return message;
+    }
+
+    private static BodyPart attachmentOf(Object content) throws Exception {
+        if (content instanceof Multipart multipart) {
+            for (int i = 0; i < multipart.getCount(); i++) {
+                BodyPart part = multipart.getBodyPart(i);
+                if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
+                    return part;
+                }
+                BodyPart nested = attachmentOf(part.getContent());
+                if (nested != null) {
+                    return nested;
+                }
+            }
+        }
+        return null;
     }
 
     /** The send methods catch their own exceptions, so always check the email actually went out. */

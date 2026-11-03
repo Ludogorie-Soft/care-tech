@@ -386,9 +386,10 @@ public class AdminController {
     @PostMapping(value = "/orders/{orderId}/warranty", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<OrderResponseDTO> uploadOrderWarranty(
             @PathVariable Long orderId,
-            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @RequestParam(required = false) Boolean notifyCustomer) {
 
-        OrderResponseDTO order = orderService.uploadWarrantyFile(orderId, file);
+        OrderResponseDTO order = orderService.uploadWarrantyFile(orderId, file, notifyCustomer);
         return ResponseEntity.ok(order);
     }
 
@@ -449,7 +450,7 @@ public class AdminController {
     public ResponseEntity<CartSummaryDto> getUserCart(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "bg") String language) {
-        return ResponseEntity.ok(cartService.getCartSummary(userId, language));
+        return ResponseEntity.ok(cartService.getCartSummaryForAdmin(userId, language));
     }
 
     @GetMapping("/offers")
@@ -499,9 +500,9 @@ public class AdminController {
         return ResponseEntity.ok(logs);
     }
 
-    /** Every nightly sync type and whether it has succeeded within the last 26 hours. */
+    /** Every scheduled sync type and whether it has succeeded within the last 8 hours. */
     @GetMapping("/sync-logs/health")
     public ResponseEntity<List<SyncHealthDto>> getSyncHealth() {
-        return ResponseEntity.ok(syncHealthService.nightlyHealth());
+        return ResponseEntity.ok(syncHealthService.health());
     }
 }

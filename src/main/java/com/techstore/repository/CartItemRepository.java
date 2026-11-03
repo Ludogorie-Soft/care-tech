@@ -28,12 +28,15 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     @Query("DELETE FROM CartItem ci WHERE ci.user.id = :userId AND ci.product.id IN :productIds")
     void deleteByUserIdAndProductIdIn(@Param("userId") Long userId, @Param("productIds") java.util.Collection<Long> productIds);
 
-    @Query("SELECT SUM(ci.quantity * p.finalPrice) FROM CartItem ci " +
-            "JOIN ci.product p WHERE ci.user.id = :userId")
-    BigDecimal calculateTotalPriceByUserId(@Param("userId") Long userId);
-
-    @Query("SELECT SUM(ci.quantity) FROM CartItem ci WHERE ci.user.id = :userId")
-    Integer countTotalItemsByUserId(@Param("userId") Long userId);
+    /**
+     * Units the customer can still buy, by the rule of ProductService.isVisibleOnSite. Counting every
+     * row made the admin's customer list show a cart that opened empty: rows of products that later
+     * went unavailable stay in cart_items.
+     */
+    @Query("SELECT SUM(ci.quantity) FROM CartItem ci JOIN ci.product p WHERE ci.user.id = :userId " +
+            "AND p.status = com.techstore.enums.ProductStatus.AVAILABLE " +
+            "AND p.active = true AND p.show = true AND (p.deleted IS NULL OR p.deleted = false)")
+    Integer countAvailableItemsByUserId(@Param("userId") Long userId);
 
     /**
      * Find users with abandoned carts:

@@ -19,6 +19,7 @@ import com.techstore.enums.PaymentStatus;
 import com.techstore.enums.ShippingMethod;
 import com.techstore.event.OrderCreatedEvent;
 import com.techstore.event.OrderStatusChangedEvent;
+import com.techstore.event.OrderWarrantyAttachedEvent;
 import com.techstore.exception.BusinessLogicException;
 import com.techstore.exception.ResourceNotFoundException;
 import com.techstore.exception.ValidationException;
@@ -708,8 +709,12 @@ public class OrderService {
         return mapToUserResponseDTO(order);
     }
 
+    /**
+     * @param notifyCustomer email the file to the order's address, the only way a customer without an
+     *                       account gets it; null means yes, as for status changes
+     */
     @Transactional
-    public OrderResponseDTO uploadWarrantyFile(Long orderId, MultipartFile file) {
+    public OrderResponseDTO uploadWarrantyFile(Long orderId, MultipartFile file, Boolean notifyCustomer) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
 
@@ -721,6 +726,9 @@ public class OrderService {
         order.setWarrantyFilePath(key);
         order = orderRepository.save(order);
         log.info("Warranty uploaded to S3 for order {}: {}", orderId, key);
+        if (!Boolean.FALSE.equals(notifyCustomer)) {
+            eventPublisher.publishEvent(new OrderWarrantyAttachedEvent(order, order.getUser() != null));
+        }
         return mapToResponseDTO(order);
     }
 

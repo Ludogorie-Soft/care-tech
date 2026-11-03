@@ -10,6 +10,7 @@ import com.techstore.util.SecurityHelper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.techstore.util.WarrantyFiles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -118,28 +119,11 @@ public class OrderController {
 
         String key = order.getWarrantyFilePath();
         byte[] fileBytes = s3Service.downloadFileBytes(key);
-        String filename = key.contains("/") ? key.substring(key.lastIndexOf('/') + 1) : key;
-        String extension = filename.contains(".") ? filename.substring(filename.lastIndexOf('.') + 1).toLowerCase() : "";
-        String contentType = switch (extension) {
-            case "pdf"  -> "application/pdf";
-            case "doc"  -> "application/msword";
-            case "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-            case "xls"  -> "application/vnd.ms-excel";
-            case "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            case "odt"  -> "application/vnd.oasis.opendocument.text";
-            case "ods"  -> "application/vnd.oasis.opendocument.spreadsheet";
-            case "rtf"  -> "application/rtf";
-            case "txt"  -> "text/plain";
-            case "jpg", "jpeg" -> "image/jpeg";
-            case "png"  -> "image/png";
-            case "webp" -> "image/webp";
-            case "heic" -> "image/heic";
-            default     -> "application/octet-stream";
-        };
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"garantsia-" + order.getOrderNumber() + "." + extension + "\"")
+                .contentType(MediaType.parseMediaType(WarrantyFiles.contentType(WarrantyFiles.extension(key))))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + WarrantyFiles.customerFileName(order.getOrderNumber(), key) + "\"")
                 .body(fileBytes);
     }
 
