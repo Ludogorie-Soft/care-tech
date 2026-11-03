@@ -4295,3 +4295,305 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 15:36 | Created ../../care-tech-ui/src/pages/DeviceInsurancePage.jsx | — | ~1203 |
 | 15:42 | Created src/test/java/com/techstore/controller/SitemapControllerStaticPagesTest.java | — | ~656 |
 | 16:30 | FAQ + device insurance pages (client text verbatim, verified 59/59 lines), sitemap static pages fixed (5 wrong paths, 8 added) + test; backend 539/539, FE build OK; branches feature/faq-insurance-content (FE), fix/sitemap-static-pages (BE) | FaqPage.jsx, DeviceInsurancePage.jsx, SitemapController.java | done | ~0 |
+| 15:45 | Session end: 20 writes across 18 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 35 reads | ~77602 tok |
+| 16:45 | Merged care-tech-ui#2 (c53e397) and care-tech#3 (76af397); deleted merged branches. Mistake: stash pop applied the user old stash in care-tech-ui → reset --hard to main, stash kept (3/3) | — | fixed | ~0 |
+| 15:47 | Session end: 20 writes across 18 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 35 reads | ~77602 tok |
+| 16:55 | Verified prod after deploy: /faq (20 questions, 5 sections, FAQPage JSON-LD 20), /device-insurance (client text, /contacts link), sitemap.xml 17 static pages incl. /faq and /device-insurance, old wrong paths gone (7346 URLs) | — | verified | ~0 |
+| 15:58 | Session end: 20 writes across 18 files (frolicking-baking-fog.md, euro_rate_convention.md, EmailFormatting.java, layout.html, EmailFormattingTest.java) | 35 reads | ~77602 tok |
+
+## Session: 2026-10-16 08:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 09:02 | Created ../../../../.claude/plans/modular-whistling-fairy.md | — | ~3477 |
+| 09:04 | Edited ../../../../.claude/plans/modular-whistling-fairy.md | 1→6 lines | ~141 |
+| 09:04 | Edited ../../../../.claude/plans/modular-whistling-fairy.md | expanded (+6 lines) | ~114 |
+| 09:04 | Edited ../../../../.claude/plans/modular-whistling-fairy.md | inline fix | ~106 |
+| 09:08 | Одит + план за Next миграция (caretech-next), одобрен; memory + cerebrum обновени | .wolf/cerebrum.md, ~/.claude/plans/modular-whistling-fairy.md | ok | ~15000 |
+| 09:10 | Created ../../caretech-next/package.json | — | ~226 |
+| 09:10 | Created ../../caretech-next/next.config.mjs | — | ~422 |
+| 09:10 | Created ../../caretech-next/jsconfig.json | — | ~22 |
+| 09:10 | Created ../../caretech-next/eslint.config.mjs | — | ~404 |
+| 09:10 | Created ../../caretech-next/jest.config.js | — | ~145 |
+| 09:10 | Created ../../caretech-next/jest.setup.js | — | ~424 |
+| 09:10 | Created ../../caretech-next/postcss.config.js | — | ~24 |
+| 09:10 | Created ../../caretech-next/tailwind.config.js | — | ~176 |
+| 09:11 | Edited ../../caretech-next/src/test-utils/navigation.js | 4→4 lines | ~89 |
+| 09:11 | Created ../../caretech-next/src/lib/api/server.js | — | ~984 |
+| 09:11 | Created ../../caretech-next/src/lib/api/server.test.js | — | ~1737 |
+| 09:12 | Edited ../../caretech-next/src/app/globals.css | 6→2 lines | ~27 |
+| 09:12 | Edited ../../caretech-next/src/app/globals.css | "NeoSansPro" → "Segoe UI" | ~24 |
+| 09:12 | Created ../../caretech-next/src/app/layout.js | — | ~692 |
+| 09:12 | Created ../../caretech-next/src/app/page.js | — | ~97 |
+| 09:12 | Created ../../caretech-next/Dockerfile | — | ~360 |
+| 09:12 | Created ../../caretech-next/.github/workflows/ci.yml | — | ~349 |
+| 09:12 | Created ../../caretech-next/CLAUDE.md | — | ~277 |
+| 09:13 | Created ../../caretech-next/README.md | — | ~1011 |
+| 09:13 | Created ../../caretech-next/scripts/parity-crawl.mjs | — | ~2405 |
+| 09:16 | Created .claude/launch.json | — | ~133 |
+| 09:17 | Фаза 0 на caretech-next: scaffold, тестове 21/21, lint, build, браузърна проверка; commit 8bb5f33 | /Users/user/Documents/projects/caretech-next/*, .claude/launch.json | ok | ~25000 |
+| 09:17 | Session end: 25 writes across 21 files (modular-whistling-fairy.md, package.json, next.config.mjs, jsconfig.json, eslint.config.mjs) | 20 reads | ~56176 tok |
+| 09:30 | Created ../../caretech-next/src/redux/compareSlice.js | — | ~433 |
+| 09:30 | Edited ../../caretech-next/src/redux/authSlice.js | added nullish coalescing | ~201 |
+| 09:30 | Edited ../../caretech-next/src/redux/authSlice.js | inline fix | ~28 |
+| 09:31 | Created ../../caretech-next/src/redux/store.js | — | ~601 |
+| 09:31 | Created ../../caretech-next/src/redux/storedSession.js | — | ~744 |
+| 09:31 | Created ../../caretech-next/src/lib/api/axiosConfigs.js | — | ~332 |
+| 09:31 | Created ../../caretech-next/src/lib/api/tokenRefresh.js | — | ~770 |
+| 09:31 | Edited ../../caretech-next/src/lib/api/tokenRefresh.js | removed 11 lines | ~4 |
+| 09:32 | Created ../../caretech-next/src/lib/analytics/consent.js | — | ~1952 |
+| 09:34 | Edited ../../caretech-next/src/components/CookieConsentPopup.jsx | added error handling | ~54 |
+| 09:34 | Created ../../caretech-next/src/components/AuthDropdownProvider.jsx | — | ~191 |
+| 09:34 | Created ../../caretech-next/src/components/providers/StoreProvider.jsx | — | ~566 |
+| 09:34 | Created ../../caretech-next/src/components/SessionBootstrap.jsx | — | ~547 |
+| 09:34 | Created ../../caretech-next/src/components/ChromeGate.jsx | — | ~291 |
+| 09:34 | Created ../../caretech-next/src/components/PageViewTracker.jsx | — | ~292 |
+| 09:34 | Created ../../caretech-next/src/components/JsonLd.jsx | — | ~182 |
+| 09:35 | Created ../../caretech-next/src/components/PazaruvajStrip.jsx | — | ~631 |
+| 09:35 | Created ../../caretech-next/src/lib/seo/localBusiness.js | — | ~297 |
+| 09:36 | Created ../../caretech-next/src/app/layout.js | — | ~1488 |
+| 09:36 | Created ../../caretech-next/src/app/not-found.js | — | ~258 |
+| 09:39 | Edited ../../caretech-next/src/lib/api/tokenRefresh.js | added 1 condition(s) | ~175 |
+| 09:39 | Edited ../../caretech-next/src/lib/api/tokenRefresh.js | 2→5 lines | ~49 |
+| 09:42 | Created ../../caretech-next/src/test-utils/renderWithProviders.jsx | — | ~1009 |
+| 09:42 | Created ../../caretech-next/src/app/page.js | — | ~98 |
+| 09:42 | Created ../../caretech-next/src/redux/storedSession.test.js | — | ~1039 |
+| 09:42 | Created ../../caretech-next/src/redux/compareSlice.test.js | — | ~311 |
+| 09:42 | Created ../../caretech-next/src/redux/authSlice.test.js | — | ~808 |
+| 09:43 | Created ../../caretech-next/src/lib/api/tokenRefresh.test.js | — | ~1142 |
+| 09:43 | Created ../../caretech-next/src/lib/analytics/consent.test.js | — | ~1522 |
+| 09:43 | Created ../../caretech-next/src/components/Toast/useToast.test.jsx | — | ~362 |
+| 09:44 | Edited ../../caretech-next/src/lib/router.js | 2→2 lines | ~40 |
+| 09:46 | Created ../../caretech-next/src/test-utils/fixtures.js | — | ~419 |
+| 09:46 | Created ../../caretech-next/src/components/navbar/NavBar.test.jsx | — | ~1444 |
+| 09:46 | Created ../../caretech-next/src/components/navbar/SearchBar.test.jsx | — | ~648 |
+| 09:48 | Created ../../caretech-next/src/components/navbar/AuthDropDown.test.jsx | — | ~757 |
+| 09:48 | Created ../../caretech-next/src/components/Footer.test.jsx | — | ~475 |
+| 09:48 | Created ../../caretech-next/src/components/CookieConsentPopup.test.jsx | — | ~1143 |
+| 09:48 | Created ../../caretech-next/src/components/compare/CompareTray.test.jsx | — | ~554 |
+| 09:48 | Created ../../caretech-next/src/components/ChromeGate.test.jsx | — | ~376 |
+| 09:48 | Created ../../caretech-next/src/components/SessionBootstrap.test.jsx | — | ~827 |
+| 09:48 | Created ../../caretech-next/src/app/not-found.test.jsx | — | ~186 |
+| 09:51 | Created ../../caretech-next/e2e/mock-api/fixtures/data.mjs | — | ~368 |
+| 09:51 | Created ../../caretech-next/e2e/mock-api/server.mjs | — | ~1169 |
+| 09:51 | Created ../../caretech-next/playwright.config.mjs | — | ~406 |
+| 09:51 | Created ../../caretech-next/e2e/fixtures.mjs | — | ~512 |
+| 09:52 | Created ../../caretech-next/e2e/specs/shell.spec.mjs | — | ~1058 |
+| 09:52 | Created ../../caretech-next/e2e/specs/consent.spec.mjs | — | ~982 |
+| 09:52 | Created ../../caretech-next/e2e/specs/session.spec.mjs | — | ~1249 |
+| 10:00 | Created ../../caretech-next/playwright.smoke.config.mjs | — | ~307 |
+| 10:00 | Created ../../caretech-next/e2e/smoke/shell.smoke.spec.mjs | — | ~388 |
+| 10:00 | Created ../../caretech-next/.github/workflows/ci.yml | — | ~1096 |
+| 10:03 | caretech-next фаза 1: shell, сесия, consent, тестове (147 jest, 34 e2e, 4 smoke), CI/CD; PR ignatIgnatov/caretech-next#1 | caretech-next/* | CI pending | ~120000 |
+| 10:04 | Session end: 76 writes across 65 files (modular-whistling-fairy.md, package.json, next.config.mjs, jsconfig.json, eslint.config.mjs) | 20 reads | ~87415 tok |
+| 10:19 | caretech-next PR #1 (фаза 1) слят след зелено CI (build/test/lint/e2e); auto-fix включен | caretech-next main baa4965 | ok | ~3000 |
+| 10:19 | Session end: 76 writes across 65 files (modular-whistling-fairy.md, package.json, next.config.mjs, jsconfig.json, eslint.config.mjs) | 20 reads | ~87415 tok |
+| 10:31 | Edited ../../caretech-next/jest.setup.js | added 1 condition(s) | ~154 |
+| 10:31 | Created ../../caretech-next/src/lib/seo/metadata.test.js | — | ~462 |
+| 10:31 | Created ../../caretech-next/src/app/staticPages.test.jsx | — | ~845 |
+| 10:31 | Created ../../caretech-next/src/views/views.test.jsx | — | ~1492 |
+| 10:31 | Created ../../caretech-next/src/components/home/ReviewsCard.test.jsx | — | ~328 |
+| 10:32 | Created ../../caretech-next/e2e/specs/static-pages.spec.mjs | — | ~1439 |
+| 10:37 | caretech-next фаза 2: 14 статични страници с metadata, canonical/h1 поправки, акордеони в HTML, форми .unwrap(); PR #2 | caretech-next/src/app, src/views | CI pending | ~90000 |
+| 10:37 | Session end: 82 writes across 70 files (modular-whistling-fairy.md, package.json, next.config.mjs, jsconfig.json, eslint.config.mjs) | 20 reads | ~92238 tok |
+| 10:42 | Created ../../caretech-next/src/lib/seo/localBusiness.test.js | — | ~237 |
+| 10:48 | Created ../../caretech-next/src/components/Breadcrumbs.jsx | — | ~347 |
+| 10:48 | Created ../../caretech-next/src/components/products/Pagination.jsx | — | ~814 |
+| 10:50 | Created ../../caretech-next/src/lib/catalog/categories.js | — | ~666 |
+| 10:50 | Created ../../caretech-next/src/lib/catalog/listingQuery.js | — | ~1095 |
+| 10:50 | Created ../../caretech-next/src/lib/catalog/product.js | — | ~992 |
+| 10:50 | Created ../../caretech-next/src/lib/seo/jsonLd.js | — | ~726 |
+| 10:50 | Created ../../caretech-next/src/lib/catalog/server.js | — | ~1183 |
+| 10:57 | Created ../../caretech-next/src/lib/catalog/breadcrumbs.js | — | ~428 |
+| 10:57 | Created ../../caretech-next/src/lib/seo/metadata.js | — | ~471 |
+| 10:57 | Created ../../caretech-next/src/components/catalog/CategoryListView.jsx | — | ~753 |
+| 10:58 | Created ../../caretech-next/src/app/product/[...path]/page.js | — | ~820 |
+| 10:58 | Created ../../caretech-next/src/app/product/[...path]/not-found.js | — | ~303 |
+| 10:58 | Created ../../caretech-next/src/app/category/[...path]/page.js | — | ~1393 |
+| 10:58 | Created ../../caretech-next/src/app/brands/[id]/page.js | — | ~519 |
+| 10:58 | Created ../../caretech-next/src/app/error.js | — | ~246 |
+| 11:02 | Created ../../caretech-next/src/proxy.js | — | ~273 |
+| 11:09 | Created ../../caretech-next/src/lib/catalog/categories.test.js | — | ~898 |
+| 11:09 | Created ../../caretech-next/src/lib/catalog/listingQuery.test.js | — | ~840 |
+| 11:09 | Created ../../caretech-next/src/lib/catalog/product.test.js | — | ~1061 |
+| 11:09 | Created ../../caretech-next/src/lib/seo/jsonLd.test.js | — | ~732 |
+| 11:09 | Created ../../caretech-next/src/lib/catalog/sanitize.test.js | — | ~361 |
+| 11:09 | Created ../../caretech-next/src/lib/catalog/breadcrumbs.test.js | — | ~399 |
+| 11:09 | Created ../../caretech-next/src/lib/catalog/listing.test.js | — | ~434 |
+| 11:11 | Created ../../caretech-next/src/components/products/ProductCard.test.jsx | — | ~752 |
+| 11:11 | Created ../../caretech-next/src/components/products/Pagination.test.jsx | — | ~640 |
+| 11:11 | Created ../../caretech-next/src/components/catalog/CategoryView.test.jsx | — | ~1209 |
+| 11:11 | Created ../../caretech-next/src/components/catalog/ProductView.test.jsx | — | ~1299 |
+| 11:11 | Created ../../caretech-next/src/components/catalog/BrandView.test.jsx | — | ~574 |
+| 11:12 | Created ../../caretech-next/src/app/catalogRoutes.test.jsx | — | ~2161 |
+| 11:13 | Created ../../caretech-next/e2e/specs/catalog.spec.mjs | — | ~2240 |
+| 11:26 | caretech-next фаза 3: продукт/категория/марка SSR с правилата на OgMetaController, ?page=N, JSON-LD, sanitize, NAP fix; PR #3 | caretech-next/src/app/{product,category,brands}, src/lib/catalog | CI pending | ~250000 |
+| 11:26 | Session end: 113 writes across 96 files (modular-whistling-fairy.md, package.json, next.config.mjs, jsconfig.json, eslint.config.mjs) | 20 reads | ~117264 tok |
+| 11:40 | Created ../../caretech-next/src/lib/seo/home.js | — | ~868 |
+| 11:40 | Created ../../caretech-next/src/components/home/HomeView.jsx | — | ~440 |
+| 11:40 | Created ../../caretech-next/src/app/page.js | — | ~319 |
+| 11:44 | Created ../../caretech-next/src/lib/blog/post.js | — | ~322 |
+| 11:44 | Created ../../caretech-next-admin/src/views/admin/AdminShell.jsx | — | ~888 |
+| 11:44 | Edited ../../caretech-next-admin/src/views/admin/AdminShell.jsx | 13→13 lines | ~166 |
+| 11:47 | Created ../../caretech-next/src/lib/seo/home.test.js | — | ~472 |
+| 11:47 | Created ../../caretech-next/src/lib/blog/blog.test.js | — | ~562 |
+| 11:47 | Created ../../caretech-next/src/components/home/home.test.jsx | — | ~956 |
+| 11:47 | Created ../../caretech-next/src/components/blog/blog.test.jsx | — | ~1103 |
+| 11:47 | Created ../../caretech-next/src/components/catalog/phase4Views.test.jsx | — | ~988 |
+| 11:49 | Created ../../caretech-next-admin/e2e/mock-api/fixtures/admin.mjs | — | ~700 |
+| 11:49 | Created ../../caretech-next/src/app/phase4Routes.test.jsx | — | ~1664 |
+| 11:49 | Created ../../caretech-next/e2e/specs/home-blog.spec.mjs | — | ~1668 |
+| 11:50 | Created ../../caretech-next-admin/e2e/mock-api/admin.mjs | — | ~1488 |
+
+## Session: 2026-10-16 11:51
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:52 | Created ../../caretech-next-admin/e2e/specs/admin.spec.mjs | — | ~2190 |
+| 11:52 | Edited ../../caretech-next-admin/e2e/specs/admin.spec.mjs | 2→4 lines | ~72 |
+| 11:54 | Created ../../caretech-next-admin/src/app/admin/adminRoutes.test.jsx | — | ~2989 |
+| 11:56 | Created ../../caretech-next-admin/src/views/admin/Orders/useOrderUtils.test.js | — | ~931 |
+| 11:56 | Created ../../caretech-next-admin/src/views/admin/Filters/filterAdminApi.test.jsx | — | ~2296 |
+| 11:56 | Created ../../caretech-next-admin/src/views/admin/Orders/OrderDetailPage.test.jsx | — | ~1208 |
+| 12:04 | Created ../../caretech-next-admin/src/views/admin/Customers/SendOfferModal.test.jsx | — | ~989 |
+| 12:04 | Created ../../caretech-next-admin/src/views/admin/Blog/BlogPostPreviewModal.test.jsx | — | ~611 |
+| 12:10 | caretech-next Phase 4: e2e home-blog spec (12 tests), configurable e2e ports, hydrated() helper; jest 335/335, e2e 148 passed, smoke 8; PR ignatIgnatov/caretech-next#4 opened, auto-fix on | caretech-next/e2e/*, playwright.config.mjs, README.md | CI pending | ~6000 |
+| 12:20 | Edited ../../caretech-next-checkout/src/components/cart/CartView.jsx | CSS: loaded, another | ~1164 |
+| 12:20 | Edited ../../caretech-next-checkout/src/components/cart/CartView.jsx | 5→4 lines | ~64 |
+| 12:20 | Created ../../caretech-next-checkout/src/components/cart/sharedCart.js | — | ~265 |
+| 12:20 | Edited ../../caretech-next-checkout/src/components/cart/CartView.jsx | CSS: it | ~108 |
+| 12:20 | Edited ../../caretech-next-checkout/src/components/cart/CartView.jsx | CSS: loaded | ~111 |
+| 12:21 | Created ../../caretech-next-checkout/src/app/cart/page.js | — | ~146 |
+| 12:21 | Created ../../caretech-next-checkout/src/views/Favorites.jsx | — | ~825 |
+| 12:21 | Created ../../caretech-next-checkout/src/views/OrderPlaced.jsx | — | ~769 |
+| 12:21 | Created ../../caretech-next-checkout/src/lib/orders/purchase.js | — | ~322 |
+| 12:21 | Created ../../caretech-next-checkout/src/views/LeasingComplete.jsx | — | ~208 |
+| 12:21 | Created ../../caretech-next-checkout/src/views/ResetPassword.jsx | — | ~1400 |
+| 12:22 | Created ../../caretech-next-checkout/src/views/profile/ProfileLayout.jsx | — | ~2150 |
+| 12:23 | Edited ../../caretech-next-checkout/src/views/profile/OrderDetails.jsx | CSS: order, storedOrder | ~345 |
+| 12:26 | Created ../../caretech-next-checkout/src/components/cart/CartView.test.jsx | — | ~5068 |
+| 12:26 | Created ../../caretech-next-cutover/deploy/compose.service.yml | — | ~286 |
+| 12:26 | Edited ../../caretech-next-cutover/deploy/compose.service.yml | 4→3 lines | ~33 |
+| 12:27 | Created ../../caretech-next-cutover/docs/CUTOVER.md | — | ~2765 |
+| 12:28 | Created ../../caretech-next-checkout/src/views/profile/profile.test.jsx | — | ~4023 |
+| 12:28 | Edited ../../caretech-next-checkout/src/views/profile/profile.test.jsx | 7→6 lines | ~94 |
+| 12:30 | Created ../../caretech-next-checkout/src/views/profile/MyOffers.test.jsx | — | ~2836 |
+| 12:45 | caretech-next: admin PR ignatIgnatov/caretech-next#5 (merged phase 4 in, 414 jest, 155 e2e); Phase 7 PR #6 (lib/link no prefetch, CUTOVER.md, deploy nginx+compose); parity crawl 301 URLs vs live — only intended diffs; Phase 5 delegated to agent (worktree caretech-next-checkout); Docker Hub secrets missing | caretech-next-*/ | PRs open, CI pending | ~25000 |
+| 12:30 | Created ../../caretech-next-checkout/src/views/profile/OrderDetails.test.jsx | — | ~1460 |
+| 12:30 | Session end: 29 writes across 23 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~36087 tok |
+| 12:31 | Created ../../caretech-next-checkout/src/views/phase5Views.test.jsx | — | ~2045 |
+| 12:32 | Created ../../caretech-next-checkout/src/app/phase5Routes.test.jsx | — | ~1111 |
+| 12:33 | Created ../../caretech-next-checkout/e2e/mock-api/fixtures/checkout.mjs | — | ~998 |
+| 12:33 | Created ../../caretech-next-checkout/e2e/mock-api/checkout.mjs | — | ~2012 |
+| 12:35 | Created ../../caretech-next-checkout/e2e/specs/checkout.spec.mjs | — | ~4329 |
+| 12:37 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 13:05 | caretech-next: removed CI publish job per user (manual image builds); README/CUTOVER/compose updated | caretech-next-cutover/.github, README.md, docs/CUTOVER.md | pushed 370be43 to PR #6 | ~2000 |
+| 12:44 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 13:00 | caretech-next: merged PR #4 (959d97a) and #5 (e48c777) on green CI per user; merged main into #6, README conflict resolved, test.slow for 14-page console test | caretech-next-cutover | #6 CI running | ~3000 |
+| 12:56 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 12:56 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 13:05 | caretech-next: merged PR #6 (477cfc8); Phase 5 from agent merged with main (README + server.mjs ADMIN/CHECKOUT routes conflicts), map iframe intercepted in e2e; jest 494, e2e 194; PR #7 opened, auto-fix on | caretech-next-checkout | CI running | ~6000 |
+| 13:04 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 13:20 | caretech-next: cart error list moved below terms+buttons (user approved), e2e ticks terms straight from field, cart-open wait 15 s; pushed 6ebe29b to PR #7 | caretech-next-checkout/src/components/cart/CartView.jsx, e2e/specs/checkout.spec.mjs | CI running | ~4000 |
+| 13:25 | caretech-next: PR #7 merged (9e6778a) on green CI — all phases on main; main checkout switched to main | caretech-next | done | ~1000 |
+| 13:21 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 13:24 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 13:50 | caretech-next pre-cutover rehearsal: image + cutover nginx in docker, runbook checks, browser (0×503), parity 361 URLs, API-down test; CUTOVER tz check fix → PR #8 | caretech-next/docs/CUTOVER.md | all green | ~15000 |
+| 13:37 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 13:40 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 14:30 | caretech-next walkthrough vs prod with the user's admin session: all 16 admin screens + order + product edit modal + blog preview, profile (7), cart, favorites — no failed requests; fixed login dropdown not closing (router location key) + promo % / offer price formatting → PR #9 | caretech-next/src/lib/router.js etc. | PR #9 CI | ~30000 |
+| 14:03 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 14:10 | caretech-next: merged PR #8 (82bbef9) and #9 (9625392) on green CI; main checkout on main — ready for the image build | caretech-next | done | ~2000 |
+| 14:07 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 14:11 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 14:12 | Session end: 34 writes across 27 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47106 tok |
+| 14:13 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/order_shipped_email_wording.md | — | ~212 |
+| 14:13 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 14:20 | tech-store-api: user's order-shipped wording committed → PR Ludogorie-Soft/care-tech#4 (email template tests 16+4 pass locally; repo has no build CI, CodeRabbit pass) → merged cd15b61 | src/main/resources/templates/email/order-shipped.html | merged | ~2000 |
+| 14:18 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 14:25 | stopped local prod server (:3011); removed worktrees caretech-next-{admin,checkout,cutover} (clean, all merged) | caretech-next | done | ~500 |
+| 14:20 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 14:20 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 14:30 | deleted merged branches: caretech-next (6, local+remote; only main left) and tech-store-api fix/order-shipped-wording (local+remote) | git | done | ~500 |
+| 14:22 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 14:26 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 14:28 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 14:30 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 14:45 | CUTOVER DONE (user): nginx + frontend caretech-next:sha-9625392; verified live: runbook checks, browser 0×5xx/429, sitemap crawl 444/444, TTFB 0.33–0.87s | live | ok | ~6000 |
+| 15:05 | caretech-next post-cutover fixes: toast z-[100001] above header/modals; phoneForForm (no '00' prefix; prod 16/20 phones stored with 0) → PR #10 (jest 509, e2e 194) | Toast.jsx, utils/phone.js, Contact/OurServices/ProductView | CI running | ~8000 |
+| 14:51 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 15:00 | caretech-next PR #10 merged (7eda30a) on green CI; branch deleted; next image tag sha-7eda30a | caretech-next | done | ~500 |
+| 14:59 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 15:05 | live redeploy (user, :latest) verified from outside: toast z-index:100001 in CSS, phone fix in /contacts JS, pages 200 | live | ok | ~1000 |
+| 15:05 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 15:07 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 15:10 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 15:12 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 15:14 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 15:20 | GSC: new sitemap www/sitemap.xml Success 7376, live test OK; advised removing the two old sitemaps + Validate fix | GSC | ok | ~500 |
+| 15:17 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 15:40 | caretech-next moved to Ludogorie-Soft/caretech-next (push main, 36 commits; origin=new, old=ignatIgnatov); first CI green | git/GitHub | done | ~1500 |
+| 15:39 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 09:01 | Audit: feature/admin-order-items-edit vs caretech-next (Next, live since 10-16) — no frontend feature ported; backend branch unmerged, merges cleanly into main (V43 free) | caretech-next/src/views/admin/*, CartView.jsx | report, awaiting decision | ~20k |
+| 09:01 | Session end: 35 writes across 28 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~47334 tok |
+| 09:09 | Created ../../caretech-next/src/views/admin/useAdminProductSearch.js | — | ~828 |
+| 09:11 | Created ../../caretech-next/src/views/admin/useAdminProductSearch.test.js | — | ~916 |
+| 09:12 | Created ../../caretech-next/src/views/admin/Orders/EditOrderModal.test.jsx | — | ~1243 |
+| 09:12 | Created ../../caretech-next/src/views/admin/Promotions/PromoModal.test.jsx | — | ~1196 |
+| 09:13 | Created ../../caretech-next/src/views/admin/Markup/MarkupModal.test.jsx | — | ~1065 |
+| 09:23 | Backend branch rebased onto main (564 tests) → PR care-tech#5; ported all 6 features to caretech-next → PR caretech-next#1 (jest 534, e2e 199, lint = main) | caretech-next src/views/admin/*, CartView, e2e/* | PRs open, CI pending | ~120k |
+| 09:23 | Session end: 40 writes across 33 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~52582 tok |
+| 09:24 | Session end: 40 writes across 33 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~52582 tok |
+| 09:37 | Session end: 40 writes across 33 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~52582 tok |
+| 09:38 | User merged care-tech#5 (7f7c8a1); local main fast-forwarded, merged local branch deleted; caretech-next#1 waits for the user's merge | - | done | ~2k |
+| 09:38 | Session end: 40 writes across 33 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~52582 tok |
+| 09:39 | User merged caretech-next#1 (d0fed8d); local caretech-next on main, merged branch deleted. Pending: deploy (backend first), care-tech-ui obsolete branch deletion awaits user | - | done | ~2k |
+| 09:39 | Session end: 40 writes across 33 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~52582 tok |
+| 09:40 | Deleted obsolete local care-tech-ui branch feature/admin-order-items-edit (6170456, never pushed) at user's request | care-tech-ui | done | ~1k |
+| 09:40 | Session end: 40 writes across 33 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~52582 tok |
+| 08:24 | Session end: 40 writes across 33 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 14 reads | ~52582 tok |
+| 08:28 | Created ../../caretech-next/src/views/admin/Orders/OrderProductOption.jsx | — | ~376 |
+| 08:28 | Created ../../caretech-next/src/views/admin/Orders/AddOrderProductFromCategory.jsx | — | ~1615 |
+| 08:30 | Created ../../caretech-next/src/views/admin/useAdminCategoryTree.test.jsx | — | ~706 |
+| 08:30 | Created ../../caretech-next/src/views/admin/Orders/AddOrderProductFromCategory.test.jsx | — | ~1534 |
+| 08:35 | Order editor 'Избери от категория' (category picker → category products → add) + shared useAdminCategoryTree hook; jest 542, e2e 200, lint = main → PR caretech-next#2 | caretech-next src/views/admin/Orders/*, useAdminCategoryTree.js, CategoryModal.jsx | PR open, CI pending | ~60k |
+| 08:35 | Session end: 44 writes across 37 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 16 reads | ~56813 tok |
+| 08:36 | Session end: 44 writes across 37 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 16 reads | ~56813 tok |
+| 08:44 | Merged caretech-next#2 at green CI (1baf9bf); local main synced, branch deleted | - | done | ~2k |
+| 08:44 | Session end: 44 writes across 37 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 16 reads | ~56813 tok |
+| 08:45 | Session end: 44 writes across 37 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 16 reads | ~56813 tok |
+| 08:48 | Session end: 44 writes across 37 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 16 reads | ~56813 tok |
+| 08:50 | Session end: 44 writes across 37 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 16 reads | ~56813 tok |
+| 08:52 | Session end: 44 writes across 37 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 16 reads | ~56813 tok |
+| 08:52 | Session end: 44 writes across 37 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 16 reads | ~56813 tok |
+| 08:52 | Session end: 44 writes across 37 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 16 reads | ~56813 tok |
+| 08:53 | Session end: 44 writes across 37 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 16 reads | ~56813 tok |
+| 08:54 | Session end: 44 writes across 37 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 16 reads | ~56813 tok |
+| 08:56 | Session end: 44 writes across 37 files (admin.spec.mjs, adminRoutes.test.jsx, useOrderUtils.test.js, filterAdminApi.test.jsx, OrderDetailPage.test.jsx) | 16 reads | ~56813 tok |
+
+## Session: 2026-11-03 09:00
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 09:03 | Диагностика: VALI_PRODUCTS не записва от 22.10 (тих rollback); API на Вали дава status 0 за ext 37970 | prod DB (read-only), Vali API | открито, не е поправено | ~15000 |
+| 09:03 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/vali_products_sync_rollback.md | — | ~382 |
+| 09:03 | Session end: 1 writes across 1 files (vali_products_sync_rollback.md) | 0 reads | ~409 tok |
+| 09:09 | docker logs празен: грешен прозорец (София vs UTC); дадена команда с 22:55Z–23:15Z | logback-spring.xml, AuditConfig | чака логове | ~2000 |
+| 09:10 | Session end: 1 writes across 1 files (vali_products_sync_rollback.md) | 0 reads | ~409 tok |
+| 09:16 | Created src/test/java/com/techstore/service/sync/ValiDuplicateParamReproTest.java | — | ~1360 |
+| 09:19 | Корен: uq_product_parameters_unique в кат. 490 партида 2 → aborted tx → rollback. Симулация + repro (локален PG) с WD Passport WH/BK минава чисто; чака Detail: Key от логовете | ValiDuplicateParamReproTest (временен) | в процес | ~25000 |
+| 09:19 | Session end: 2 writes across 2 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java) | 1 reads | ~3226 tok |
+| 09:36 | Корен намерен и възпроизведен: Vali преименува 33385 BK→WH, нов 38141=BK; ref fallback хваща 3362 втори път → дублиран ред → rollback. Сканиран целият каталог: само този сблъсък | ValiSyncService, prod read-only, Vali API | чака одобрение за поправка | ~30000 |
+| 09:36 | Edited ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/vali_products_sync_rollback.md | 1→3 lines | ~143 |
+| 09:36 | Session end: 3 writes across 2 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java) | 1 reads | ~3379 tok |
+| 09:37 | Session end: 3 writes across 2 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java) | 1 reads | ~3379 tok |
+| 09:38 | Прод: потребителят пусна relink 3362 → external_id 38141 / workflow 124019; проверено; повторното сканиране на каталога е чисто | products (prod) | ok | ~3000 |
+| 09:38 | Edited ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/vali_products_sync_rollback.md | "REQUIRES_NEW" → "sync_logs" | ~82 |
+| 09:38 | Session end: 4 writes across 2 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java) | 1 reads | ~3467 tok |
+| 09:42 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | added 5 import(s) | ~144 |
+| 09:42 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | 4→5 lines | ~57 |
+| 09:45 | Created src/test/java/com/techstore/service/sync/ValiProductsSyncDbTest.java | — | ~2759 |
+| 09:49 | Поправка в кода на бранч fix/vali-sync-chunk-isolation: транзакция на партида, fallback по ref само за несвързани, пазач за дублиран id, LogHelper REQUIRES_NEW, ValiProductsSyncDbTest (3 теста, падат на стария код); 567/567 зелени; без commit | ValiSyncService, LogHelper, ValiManufacturersSyncTest, ValiProductsSyncDbTest | ok | ~20000 |
+| 09:50 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 2 reads | ~23011 tok |
+| 09:59 | Предупреждение за закъсняла нощна синхронизация: бекенд GET /api/admin/sync-logs/health (SyncHealthService, 26 ч) + caretech-next панел в SyncLogsLayout (бранч feat/sync-health-warning); бекенд 572/572, фронт 545/545; без commit | SyncHealthService, SyncHealthDto, SyncLogRepository, AdminController, SyncLogsLayout.jsx(+test) | ok | ~15000 |
+| 09:59 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 2 reads | ~23011 tok |
