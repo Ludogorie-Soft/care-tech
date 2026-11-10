@@ -11355,6 +11355,126 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-11-03T15:00:00+02:00"
+    },
+    {
+      "id": "bug-682",
+      "timestamp": "2026-11-10T06:23:58.248Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-11-10T06:23:58.248Z"
+    },
+    {
+      "id": "bug-683",
+      "timestamp": "2026-11-10T06:24:40.812Z",
+      "error_message": "Wrong condition in logic",
+      "file": "src/main/java/com/techstore/service/sync/MostSyncService.java",
+      "root_cause": "Condition was: if (isWarranty)",
+      "fix": "Changed to: if (isWarranty && !manualStatus)",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-11-10T06:24:40.812Z"
+    },
+    {
+      "id": "bug-684",
+      "timestamp": "2026-11-10T06:25:46.308Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/sync/AsbisSyncService.java",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 5→7 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-11-10T06:25:46.308Z"
+    },
+    {
+      "id": "bug-685",
+      "timestamp": "2026-11-10T06:28:55.454Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 7→12 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "java"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-11-10T06:28:55.454Z"
+    },
+    {
+      "id": "bug-686",
+      "timestamp": "2026-11-10T06:29:31.381Z",
+      "error_message": "Wrong reference: warranty should be manualStatus",
+      "file": "../../caretech-next/src/views/admin/Products/ProductForm.jsx",
+      "root_cause": "Used \"warranty\" instead of \"manualStatus\"",
+      "fix": "Changed warranty → manualStatus",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "jsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-11-10T06:29:31.381Z"
+    },
+    {
+      "id": "bug-687",
+      "timestamp": "2026-11-10T08:45:00.000Z",
+      "error_message": "Админ задава статус (напр. Наличен), а синхронизацията с доставчика (MOST/VALI/ASBIS/TEKRA) го презаписва; печели последният запис",
+      "file": "src/main/java/com/techstore/service/sync/*SyncService.java, ProductRepository.java, ProductService.java",
+      "root_cause": "Четирите sync-а задаваха статуса безусловно от feed-а, а 3 масови пътя 'липсва във feed-а' маркираха NOT_AVAILABLE; нямаше флаг за ръчно намерение. Видимостта (show_flag) също се смяташе от наличността във feed-а, не от статуса.",
+      "fix": "V44 products.manual_status; Product.applyFeedStatus() пази ръчния статус и връща ефективния; sync-овете смятат show от него; markNotAvailableByPlatformSkuNotIn/countAvailableByPlatformSkuNotIn/hideAsbisProductsNotIn и VALI markUnseenAsUnavailable прескачат флага; ProductService.applyAdminStatus вдига флага при реална промяна или по изричен manualStatus от формата (отметка 'Статус от доставчика' в caretech-next). MOST warranty правилото отстъпва на ръчния статус.",
+      "tags": [
+        "sync",
+        "status",
+        "manual-intent",
+        "admin",
+        "vali",
+        "most",
+        "asbis",
+        "tekra"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-11-10T08:45:00.000Z"
+    },
+    {
+      "id": "bug-688",
+      "timestamp": "2026-11-10T08:45:00.000Z",
+      "error_message": "Запис на продукт от админа с непипната отметка 'Показване в магазина' правеше скрит от sync-а продукт ръчно скрит завинаги",
+      "file": "src/main/java/com/techstore/service/ProductService.java",
+      "root_cause": "Формата зарежда show_flag (който sync-ът слага false при липса на наличност) и го праща при всеки запис; applyAdminVisibility записваше manuallyHidden = !show безусловно.",
+      "fix": "applyAdminVisibility действа само при реална промяна на show (решение на потребителя 2026-11-10, вместо формата да показва намерението).",
+      "tags": [
+        "admin",
+        "visibility",
+        "manually_hidden",
+        "form"
+      ],
+      "related_bugs": [
+        "bug-687"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-11-10T08:45:00.000Z"
     }
   ]
 }

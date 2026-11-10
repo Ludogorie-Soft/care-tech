@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-11-03T07:45:41.864Z
-> Files: 995 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-11-10T06:34:35.179Z
+> Files: 1010 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../../../tmp/
 
@@ -26,6 +26,7 @@
 
 ## ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/
 
+- `admin_manual_status.md` (~296 tok)
 - `admin_order_items_edit.md` (~449 tok)
 - `asbis_price_field.md` (~203 tok)
 - `customer_emails_euro.md` (~493 tok)
@@ -545,6 +546,11 @@
 - `EditOrderModal.test.jsx` — The products of an order in the admin's order editor: the admin can change (~1243 tok)
 - `OrderProductOption.jsx` — A product the admin can add to an order: image, name and price with VAT, or why it cannot be added. (~376 tok)
 
+## ../../caretech-next/src/views/admin/Products/
+
+- `ProductForm.jsx` — SearchSelect (~11246 tok)
+- `ProductForm.test.jsx` — The supplier syncs overwrite a product's status unless an admin set it by (~978 tok)
+
 ## ../../caretech-next/src/views/admin/Promotions/
 
 - `PromoModal.test.jsx` — Creating and editing a promotion of a product, category or brand: an (~1196 tok)
@@ -946,7 +952,7 @@
 - `ParameterRequestDto.java` — Class: ParameterRequestDto (~130 tok)
 - `ParameterValueRequestDto.java` — Class: ParameterValueRequestDto (~142 tok)
 - `PersonalOfferCreateDto.java` — Class: PersonalOfferCreateDto (~277 tok)
-- `ProductCreateRequestDTO.java` — Class: ProductCreateRequestDTO (~759 tok)
+- `ProductCreateRequestDTO.java` — True keeps {@link #status} as the admin's own choice, which the supplier syncs then (~794 tok)
 - `ProductImageOperationsDTO.java` — Class: ProductImageOperationsDTO (~140 tok)
 - `ProductImageUpdateDTO.java` — Class: ProductImageUpdateDTO (~94 tok)
 - `ProductMarkupUpdateDTO.java` — Class: ProductMarkupUpdateDTO (~171 tok)
@@ -985,6 +991,7 @@
 - `OrderResponseDTO.java` — OrderResponseDTO: getFullCustomerName, getFullShippingAddress (~727 tok)
 - `OrderStatisticsResponseDTO.java` — Class: OrderStatisticsResponseDTO (~408 tok)
 - `OrderUserResponseDTO.java` — OrderUserResponseDTO: getFullCustomerName, getFullShippingAddress (~711 tok)
+- `OrderWarrantyAttachedEvent.java` — record(order, registered); OrderService.uploadWarrantyFile го публикува при notifyCustomer != false; OrderEventListener.handleWarrantyAttached е AFTER_COMMIT (~120 tok)
 - `ParameterOptionResponseDto.java` — Class: ParameterOptionResponseDto (~149 tok)
 - `ParameterResponseDto.java` — Class: ParameterResponseDto (~135 tok)
 - `PersonalOfferResponseDto.java` — PersonalOfferResponseDto: from (~412 tok)
@@ -993,14 +1000,13 @@
 - `ProductImageResponseDto.java` — Class: ProductImageResponseDto (~61 tok)
 - `ProductImageUploadResponseDTO.java` — Class: ProductImageUploadResponseDTO (~121 tok)
 - `ProductParameterResponseDto.java` — Class: ProductParameterResponseDto (~162 tok)
-- `ProductResponseDTO.java` — Delivery of this product alone to a Speedy office — the same value the Pazaruvaj feed sends. (~485 tok)
+- `ProductResponseDTO.java` — Delivery of this product alone to a Speedy office — the same value the Pazaruvaj feed sends. (~530 tok)
 - `ProductSearchResponse.java` — Class: ProductSearchResponse (~156 tok)
 - `ProductSearchResult.java` — Class: ProductSearchResult (~221 tok)
 - `ProductSummaryDto.java` — Class: ProductSummaryDto (~95 tok)
 - `ReviewResponseDto.java` — ReviewResponseDto: from (~322 tok)
 - `ShippingPreviewResponseDTO.java` — Class: ShippingPreviewResponseDTO (~209 tok)
 - `SubscriptionDto.java` — Class: SubscriptionDto (~81 tok)
-- `OrderWarrantyAttachedEvent.java` — record(order, registered); OrderService.uploadWarrantyFile го публикува при notifyCustomer != false; OrderEventListener.handleWarrantyAttached е AFTER_COMMIT (~120 tok)
 - `SyncHealthDto.java` — record: syncType, lastRunAt, lastStatus, lastSuccessAt, overdue (~120 tok)
 - `SyncLogResponseDTO.java` — Class: SyncLogResponseDTO (~273 tok)
 - `UserAddressResponseDTO.java` — Class: UserAddressResponseDTO (~130 tok)
@@ -1074,7 +1080,7 @@
 - `Parameter.java` — Entity: Parameter (~544 tok)
 - `ParameterOption.java` — Entity: ParameterOption (~260 tok)
 - `PersonalOffer.java` — Entity: PersonalOffer (~665 tok)
-- `Product.java` — True when an admin hid this product from the admin panel. The sync recomputes (~2993 tok)
+- `Product.java` — True when an admin hid this product from the admin panel. The sync recomputes (~3323 tok)
 - `ProductFlag.java` — Entity: ProductFlag (~231 tok)
 - `ProductParameter.java` — Entity: ProductParameter (~266 tok)
 - `Review.java` — Entity: Review (~219 tok)
@@ -1150,7 +1156,7 @@
 - `ParameterRepository.java` — Repository: ParameterRepository. findParametersForAvailableProductsByCategory uses status = AVAILABLE (not <> NOT_AVAILABLE) (~1065 tok)
 - `PersonalOfferRepository.java` — Class: PersonalOfferRepository (~408 tok)
 - `ProductParameterRepository.java` — Repository: ProductParameterRepository (~557 tok)
-- `ProductRepository.java` — For the product page head, which shows the manufacturer outside a transaction. (~4295 tok)
+- `ProductRepository.java` — For the product page head, which shows the manufacturer outside a transaction. (~4700 tok)
 - `ProductSearchRepository.java` — Guards against a pathological query turning into dozens of ANDed ILIKEs. (~11934 tok)
 - `ReviewRepository.java` — Repository: ReviewRepository (~302 tok)
 - `SubscriptionRepository.java` — Repository: SubscriptionRepository (~118 tok)
@@ -1184,13 +1190,13 @@
 - `PazaruvajFeedService.java` — Thread-safe holder for the pre-generated XML feed. (~3679 tok)
 - `PersonalOfferService.java` — Service: PersonalOfferService (~3744 tok)
 - `ProductSearchService.java` — Returns the given category ID plus all descendant IDs (recursive). (~2597 tok)
-- `SyncHealthService.java` — 11-те типа от CronJobService.syncApis (cron 05/11/17/23 от app.sync.cron); health(): overdue = няма SUCCESS ред от 8 ч (MAX_AGE). Липсващ ред също е закъснение (~550 tok)
-- `ProductService.java` — Whether the product page shows this product; only AVAILABLE products are shown on the site. (~13728 tok)
+- `ProductService.java` — Whether the product page shows this product; only AVAILABLE products are shown on the site. (~14511 tok)
 - `PromotionExpiryService.java` — @Scheduled every 60s: products with promo_ends_at <= now (Europe/Sofia) → discount 0 + price recalculated; categories/brands → promo flag/discount/end cleared. PROMO_ZONE constant (~827 tok)
 - `ReviewService.java` — Service: ReviewService (~946 tok)
 - `S3Service.java` — Downloads an image from a remote URL and uploads it to S3. (~3045 tok)
 - `SpeedyService.java` — Взема населени места по име (~2459 tok)
 - `SubscriptionService.java` — Service: SubscriptionService (~464 tok)
+- `SyncHealthService.java` — 11-те типа от CronJobService.syncApis (cron 05/11/17/23 от app.sync.cron); health(): overdue = няма SUCCESS ред от 8 ч (MAX_AGE). Липсващ ред също е закъснение (~550 tok)
 - `TbiLeasingService.java` — Initiates a TBI leasing application for a product-page "Buy with TBI" click. (~8765 tok)
 - `TbiLeasingService.java` — TBI Fusion Pay integration: registerApplication (AES encrypt → TBI API), processStatusWebhook, getStatistics, admin queries (~350 tok)
 - `TekraApiService.java` — Fetches Tekra categories (JSON) and products (XML); getProductsRaw чете страница по страница (PAGE_SIZE 100, спира при къса страница/без нови SKU/MAX_PAGES 30; пауза tekra.api.page-delay-ms 10s; 429 retry tekra.api.retry-delay-ms 60s×2, 3 опита); неуспешна страница/счупен XML → изключение (не частичен списък); кеш 30 мин; putText пази повторени prop_* като List (~5200 tok)
@@ -1245,12 +1251,12 @@
 ## src/main/java/com/techstore/service/sync/
 
 - `AsbisCategoryResolver.java` — Finds the shop category for an ASBIS product from its feed category (L1, "ProductCategory") and type (~1299 tok)
-- `AsbisSyncService.java` — AsbisSyncService (~14236 tok)
-- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~17394 tok)
+- `AsbisSyncService.java` — AsbisSyncService (~14291 tok)
+- `MostSyncService.java` — MostSyncService - COMPLETELY REWRITTEN VERSION 3.0 (~17426 tok)
 - `TekraFeedValues.java` — Turns the text of one TEKRA feed property into the values it holds. (~917 tok)
 - `TekraFeedValues.java` — Стойностите на едно TEKRA свойство: повторен таг (List), разделяне по <br/>, „A,A“→„A“, лимит 2000 знака, Stats за sync лога (~900 tok)
-- `TekraSyncService.java` — Service: TekraSyncService; extractTekraParameters → Map<key, List<value>> (една опция на стойност) (~23500 tok)
-- `ValiSyncService.java` — VALI sync. syncProducts НЕ е @Transactional: кешове в една транзакция, всяка партида (30) в своя REQUIRES_NEW (inNewTransaction), markUnseen и dedup отделно; fallback по reference_number само за продукти без external_id; повторен Vali id в партида се пропуска; FailedChunks → FAILED + CRITICAL (~16600 tok)
+- `TekraSyncService.java` — Share of the available TEKRA products one run may mark unavailable before the read counts as incompl (~23377 tok)
+- `ValiSyncService.java` — ValiSyncService - VERSION 4.3 - FINAL FIX (~17104 tok)
 
 ## src/main/java/com/techstore/util/
 
@@ -1258,13 +1264,13 @@
 - `CyrillicTransliterator.java` — Turns a Cyrillic search word into the Latin form the catalogue actually stores. (~1367 tok)
 - `ExceptionHelper.java` — Wraps database operations and converts common exceptions to business exceptions (~1811 tok)
 - `JwtUtil.java` — Component: JwtUtil (~1188 tok)
-- `WarrantyFiles.java` — гаранционен файл: extension(key), contentType(ext) (изрично, Spring mime.types няма docx/xlsx/webp/heic), customerFileName → garantsia-<номер>.<ext> (~350 tok)
 - `LogHelper.java` — create/updateSyncLogSimple в REQUIRES_NEW: записът в sync_logs оцелява, когато sync транзакцията се върне (~450 tok)
 - `Markers.java` — SLF4J marker constants. Markers.CRITICAL = MarkerFactory.getMarker("CRITICAL"). Use with log.error(Markers.CRITICAL, ...) to route to Slack. (~60 tok)
 - `SecurityHelper.java` — Component: SecurityHelper (~640 tok)
 - `SlugUtils.java` — SlugUtils: generateSlug (~624 tok)
 - `SyncHelper.java` — Find category by hierarchical path (e.g., "zahranvaniya-i-baterii/za-postoyanno-naprezhenie") (~2631 tok)
 - `TbiEncryptionUtil.java` — TBI Fusion Pay encryption utility. (~1015 tok)
+- `WarrantyFiles.java` — гаранционен файл: extension(key), contentType(ext) (изрично, Spring mime.types няма docx/xlsx/webp/heic), customerFileName → garantsia-<номер>.<ext> (~350 tok)
 
 ## src/main/resources/
 
@@ -1313,6 +1319,7 @@
 - `V41__seed_more_filter_junk_rules.sql` — V41: More static IGNORE / HIDE rules, found after curating 83 categories (2026-09-24). (~419 tok)
 - `V42__drop_legacy_filter_flags.sql` — V42: DROP parameters.is_filter, parameters.filter_order, category_parameters.is_filter (нищо не ги чете след фаза 6) (~150 tok)
 - `V43__add_promotion_end_date.sql` — V43: products.promo_ends_at (+ partial index); categories/manufacturers.promo_discount + promo_ends_at; backfills promo_discount with the most common product discount (~399 tok)
+- `V44__add_manual_status_to_products.sql` — Marks products whose status (Наличен / Неналичен ...) was set by an admin. (~232 tok)
 - `V5__update_fts_combined_index.sql` — V5__update_fts_combined_index.sql (~209 tok)
 - `V6__add_isfilter_to_category_parameters.sql` — V6: Add per-category is_filter flag to category_parameters junction table (~198 tok)
 - `V7__set_category_parameter_filters_by_usage.sql` — V7: Industry-standard per-category filter configuration (~3966 tok)
@@ -1365,11 +1372,14 @@
 ## src/test/java/com/techstore/repository/
 
 - `AdminProductSpecificationsTest.java` — @DataJpaTest on H2 (test profile): words across fields, transliteration, SKU, barcode/ID, onSale/withMarkup, LIKE escaping. 6 tests (~1248 tok)
+- `ProductManualStatusRepositoryTest.java` — The "missing from the feed" passes mark products NOT_AVAILABLE in bulk. A status an admin set by (~935 tok)
 
 ## src/test/java/com/techstore/service/
 
 - `AsbisApiServiceAttrListTest.java` — ASBIS repeats an attribute name inside one product with a different value each time (1,170 times (~532 tok)
 - `AsbisApiServiceAttrListTest.java` — extractAttrList: повторено име пази всички различни стойности в реда от фийда (~450 tok)
+- `CartItemAvailableCountTest.java` — @DataJpaTest H2: countAvailableItemsByUserId не брои неналичен/скрит/неактивен/изтрит; сума от количествата (~800 tok)
+- `CartSummaryAvailabilityTest.java` — Mockito: клиентът вижда/плаща само наличните, админът вижда неналичните отделно, напомнянето за изоставена кошница е само с наличните. 3 теста (~1400 tok)
 - `EmailFormattingTest.java` — noteHtml (XSS, линкове, нови редове), deliveryLines с реалните прод форми, trackingUrl, deliveryDaysText (20 теста) (~1962 tok)
 - `EmailServiceTemplatesTest.java` — Renders every customer email through EmailService with the real templates and checks what the (~4612 tok)
 - `MostApiServiceTest.java` — 11 теста с Mockito за провалите на MOST feed-а: празно/null тяло, connection error, изчерпани опити, възстановяване след преходен отказ, HTTP статус, счупен XML, изключен feed, кеширане на успех и НЕкеширане на провал (~1999 tok)
@@ -1378,13 +1388,11 @@
 - `OrderServiceUpdateItemsTest.java` — Mockito tests for OrderService.updateOrder: changed unit price resets discount + totals, new items with product/custom price, empty-order rejection. 6 tests. (~2300 tok)
 - `PazaruvajFeedServiceTest.java` — DeliveryTime/DeliveryCost във фийда: 120 € → 3.50 EUR, 132 € → безплатно, прагът е по цената с ДДС (3 теста) (~900 tok)
 - `PersonalOfferConvertPricingTest.java` — The contract the admin offer modal relies on: originalPrice is the product price WITHOUT VAT, (~1222 tok)
+- `ProductManualStatusTest.java` — An admin's status wins over the supplier feeds (Product#manualStatus). The admin form sends (~1620 tok)
 - `ProductServiceDeliveryChargeTest.java` — продуктовото API връща deliveryCharge: FIXED / FREE / COURIER_TARIFF (телевизор) (3 теста) (~1100 tok)
-- `ValiProductsSyncDbTest.java` — @DataJpaTest на H2 без тестова транзакция (партидите commit-ват сами): кодът минава към нов запис на Вали → пропуска се; отказана партида се връща сама, другите категории се записват, логът е FAILED; дублиран запис в партидата → веднъж. dedup е подменен (PG-only SQL). 3 теста (~2400 tok)
-- `CartSummaryAvailabilityTest.java` — Mockito: клиентът вижда/плаща само наличните, админът вижда неналичните отделно, напомнянето за изоставена кошница е само с наличните. 3 теста (~1400 tok)
-- `CartItemAvailableCountTest.java` — @DataJpaTest H2: countAvailableItemsByUserId не брои неналичен/скрит/неактивен/изтрит; сума от количествата (~800 tok)
-- `SyncHealthServiceTest.java` — Mockito: ред на типовете, 22.10 → overdue, FAILED след вчерашен успех, никога пускан, граница 26 ч. 5 теста (~1300 tok)
 - `PromotionExpiryServiceDbTest.java` — @DataJpaTest on H2 with the real service: expired product/category/brand cleared, future and no-end promotions untouched. 3 tests (~1299 tok)
 - `PromotionExpiryServiceTest.java` — Mockito: expired product gets full price back, expired category/brand lose flag, nothing due touches nothing. 3 tests (~1200 tok)
+- `SyncHealthServiceTest.java` — Mockito: ред на типовете, 22.10 → overdue, FAILED след вчерашен успех, никога пускан, граница 26 ч. 5 теста (~1300 tok)
 - `TbiLeasingServiceTest.java` — Pure Mockito unit tests: ResellerCode validation, resolveApplication lookup order, Approval (ContractSigned/approved&signed), Rejection (Rejected/Canceled/rejected), EdgeCases. 15 tests. (~3912 tok)
 - `TekraApiServicePagingTest.java` — Paging of the TEKRA product feed. Only page 1 used to be read, so no category went past 100 (~1473 tok)
 - `TekraApiServicePagingTest.java` — Пагинация на TEKRA фийда с mock RestTemplate: всички страници, повторена страница (игнориран page), празна последна, малка категория, провал на страница, 429×3, счупен XML (7 теста) (~1500 tok)
@@ -1392,6 +1400,7 @@
 - `TekraApiServiceXmlTest.java` — Parsing of the TEKRA product feed ({@code action=browse&feed=1}). (~538 tok)
 - `ValiApiServiceRetryTest.java` — WebClient със stub exchangeFunction: 400 „Invalid category id“ → SupplierCategoryGoneException с 1 заявка, 404 → празен списък, 503/502 → retry, 500 → хвърля след retry, 401 → 1 заявка; продукти на изчезнала категория → празен списък (7 теста) (~1300 tok)
 - `ValiApiServiceRetryTest.java` — From 2026-09-26 Vali answers the ids of its removed STEM section with HTTP 400 {"error":"Invalid cat (~1626 tok)
+- `ValiProductsSyncDbTest.java` — @DataJpaTest на H2 без тестова транзакция (партидите commit-ват сами): кодът минава към нов запис на Вали → пропуска се; отказана партида се връща сама, другите категории се записват, логът е FAILED; дублиран запис в партидата → веднъж. dedup е подменен (PG-only SQL). 3 теста (~2400 tok)
 
 ## src/test/java/com/techstore/service/admin/
 
@@ -1419,7 +1428,7 @@
 - `ValiDuplicateParamReproTest.java` — TEMPORARY reproduction of the 2026-11-03 VALI_PRODUCTS rollback — not to be committed. (~1360 tok)
 - `ValiManufacturersSyncTest.java` — Every night VALI_PRODUCTS reported "Errors: 33": 33 VALI products whose manufacturer had no (~1359 tok)
 - `ValiProductNameTest.java` — VALI's own products came with its brand in the name ("Настолен компютър VALI OFFICE BASIC"). (~599 tok)
-- `ValiProductsSyncDbTest.java` — From 23.10 to 03.11.2026 the VALI products sync saved nothing: Vali moved the reference number (~2759 tok)
+- `ValiProductsSyncDbTest.java` — From 23.10 to 03.11.2026 the VALI products sync saved nothing: Vali moved the reference number (~3661 tok)
 
 ## src/test/java/com/techstore/util/
 
