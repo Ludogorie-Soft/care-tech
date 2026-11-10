@@ -173,6 +173,65 @@ class ValiProductsSyncDbTest {
         assertThat(log.getErrorMessage()).contains("Skipped: 1");
     }
 
+    @Test
+    @DisplayName("Ръчен статус остава, когато Вали дава друг: „Наличен“ остава видим, „Неналичен“ — скрит")
+    void manualStatusWinsOverFeed() {
+        Product manualAvailable = existingProduct(33385L, "WD-HDD-PASSPORT-6TB-WH", externalDrives);
+        manualAvailable.setManualStatus(true);
+        productRepository.save(manualAvailable);
+
+        Product manualNotAvailable = existingProduct(33386L, "WD-HDD-PASSPORT-5TB-WH", externalDrives);
+        manualNotAvailable.setStatus(ProductStatus.NOT_AVAILABLE);
+        manualNotAvailable.setShow(false);
+        manualNotAvailable.setManualStatus(true);
+        productRepository.save(manualNotAvailable);
+
+        Product fromFeed = existingProduct(33387L, "WD-HDD-PASSPORT-4TB-WH", externalDrives);
+
+        when(valiApiService.getProductsByCategory(490L)).thenReturn(List.of(
+                item(33385L, "WD-HDD-PASSPORT-6TB-WH", WHITE, ProductStatus.NOT_AVAILABLE),
+                item(33386L, "WD-HDD-PASSPORT-5TB-WH", WHITE, ProductStatus.AVAILABLE),
+                item(33387L, "WD-HDD-PASSPORT-4TB-WH", WHITE, ProductStatus.NOT_AVAILABLE)));
+
+        service.syncProducts();
+
+        Product a = productRepository.findById(manualAvailable.getId()).orElseThrow();
+        assertThat(a.getStatus()).isEqualTo(ProductStatus.AVAILABLE);
+        assertThat(a.getShow()).isTrue();
+
+        Product n = productRepository.findById(manualNotAvailable.getId()).orElseThrow();
+        assertThat(n.getStatus()).isEqualTo(ProductStatus.NOT_AVAILABLE);
+        assertThat(n.getShow()).isFalse();
+
+        Product f = productRepository.findById(fromFeed.getId()).orElseThrow();
+        assertThat(f.getStatus()).isEqualTo(ProductStatus.NOT_AVAILABLE);
+        assertThat(f.getShow()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Продукт с ръчен „Наличен“ остава наличен, когато Вали го махне от каталога си")
+    void manualStatusSurvivesLeavingTheFeed() {
+        existingProduct(33385L, "WD-HDD-PASSPORT-6TB-WH", externalDrives);
+
+        Product manual = existingProduct(33386L, "WD-HDD-PASSPORT-5TB-WH", externalDrives);
+        manual.setManualStatus(true);
+        manual.setShow(true);
+        productRepository.save(manual);
+
+        Product gone = existingProduct(33387L, "WD-HDD-PASSPORT-4TB-WH", externalDrives);
+
+        when(valiApiService.getProductsByCategory(490L)).thenReturn(List.of(
+                item(33385L, "WD-HDD-PASSPORT-6TB-WH", WHITE)));
+
+        service.syncProducts();
+
+        Product m = productRepository.findById(manual.getId()).orElseThrow();
+        assertThat(m.getStatus()).isEqualTo(ProductStatus.AVAILABLE);
+        assertThat(m.getShow()).isTrue();
+        assertThat(productRepository.findById(gone.getId()).orElseThrow().getStatus())
+                .isEqualTo(ProductStatus.NOT_AVAILABLE);
+    }
+
     private Category category(String name, long externalId) {
         Category c = new Category();
         c.setNameBg(name);
@@ -212,6 +271,10 @@ class ValiProductsSyncDbTest {
     }
 
     private static ProductRequestDto item(long id, String referenceNumber, long colourOption) {
+        return item(id, referenceNumber, colourOption, ProductStatus.AVAILABLE);
+    }
+
+    private static ProductRequestDto item(long id, String referenceNumber, long colourOption, ProductStatus status) {
         NameDto name = new NameDto();
         name.setLanguageCode("bg");
         name.setText(referenceNumber);
@@ -224,7 +287,7 @@ class ValiProductsSyncDbTest {
         dto.setId(id);
         dto.setReferenceNumber(referenceNumber);
         dto.setManufacturerId(WD);
-        dto.setStatus(ProductStatus.AVAILABLE.getCode());
+        dto.setStatus(status.getCode());
         dto.setShow(true);
         dto.setPriceClient(new BigDecimal("181.71"));
         dto.setName(List.of(name));

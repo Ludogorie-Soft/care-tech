@@ -48,6 +48,8 @@ public class ProductResponseDTO {
     private LocalDateTime updatedAt;
     private Boolean onSale;
     private int status;
+    /** Admin view only: the status was set by hand and the supplier syncs leave it alone. */
+    private Boolean manualStatus;
     private BigDecimal markupPercentage;
     private BigDecimal finalPrice;
     private boolean show;

@@ -43,6 +43,13 @@ public class ProductCreateRequestDTO {
     @Max(value = 4, message = "Status must be between 0 and 4")
     private Integer status;
 
+    /**
+     * True keeps {@link #status} as the admin's own choice, which the supplier syncs then
+     * leave alone; false hands the status back to the supplier feed. Null (clients that
+     * predate this field) means: mark the status manual only if this request changes it.
+     */
+    private Boolean manualStatus;
+
     @DecimalMin(value = "0.0", message = "Price must be positive")
     @Digits(integer = 8, fraction = 2, message = "Price format is invalid")
     private BigDecimal priceClient;

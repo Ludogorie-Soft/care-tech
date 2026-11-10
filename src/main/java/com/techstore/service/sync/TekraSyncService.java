@@ -1187,11 +1187,13 @@ public class TekraSyncService {
 
         Integer quantity = getIntegerValue(rawProduct, "quantity");
         boolean inStock = (quantity != null && quantity > 0);
-        product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
+        // A hand-set status wins over the feed - see Product#manualStatus.
+        boolean available = product.applyFeedStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE)
+                == ProductStatus.AVAILABLE;
         product.calculateFinalPrice();
         boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
         // An admin's manual hide outlives the sync (SEARCH_AUDIT_PLAN.md phase 1).
-        product.setShow(inStock && hasValidPrice && !Boolean.TRUE.equals(product.getManuallyHidden()));
+        product.setShow(available && hasValidPrice && !Boolean.TRUE.equals(product.getManuallyHidden()));
 
         product = productRepository.save(product);
 
@@ -1359,11 +1361,13 @@ public class TekraSyncService {
 
             Integer quantity = getIntegerValue(rawData, "quantity");
             boolean inStock = (quantity != null && quantity > 0);
-            product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
+            // A hand-set status wins over the feed - see Product#manualStatus.
+            boolean available = product.applyFeedStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE)
+                    == ProductStatus.AVAILABLE;
             product.calculateFinalPrice();
             boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
             // An admin's manual hide outlives the sync (SEARCH_AUDIT_PLAN.md phase 1).
-            product.setShow(inStock && hasValidPrice && !Boolean.TRUE.equals(product.getManuallyHidden()));
+            product.setShow(available && hasValidPrice && !Boolean.TRUE.equals(product.getManuallyHidden()));
 
             return true;
 

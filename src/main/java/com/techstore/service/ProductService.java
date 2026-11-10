@@ -585,6 +585,7 @@ public class ProductService {
         ProductResponseDTO dto = convertToResponseDTO(product, lang);
         dto.setDisplaySpecifications(displaySpecificationService.forProducts(List.of(id), lang)
                 .getOrDefault(id, List.of()));
+        dto.setManualStatus(Boolean.TRUE.equals(product.getManualStatus()));
         return dto;
     }
 
@@ -852,9 +853,14 @@ public class ProductService {
      * Hiding from the admin panel therefore also sets {@code manuallyHidden}, which
      * the sync and the cross-platform dedup both honour; showing again clears it.
      * A null value leaves both flags untouched rather than nulling show_flag.
+     * <p>
+     * Only an actual change of the checkbox counts. The form loads show_flag, which the
+     * sync sets to false for every out-of-stock product, and sends it back on each save:
+     * treating that as intent froze such products hidden, even after an admin set their
+     * status to available by hand.
      */
-    private void applyAdminVisibility(Product p, Boolean show) {
-        if (show == null) {
+    void applyAdminVisibility(Product p, Boolean show) {
+        if (show == null || show.equals(p.getShow())) {
             return;
         }
         p.setShow(show);
@@ -882,6 +888,32 @@ public class ProductService {
         }
     }
 
+    /**
+     * Applies an admin's status choice, recording it as manual intent.
+     * <p>
+     * Same problem as {@link #applyAdminVisibility}: every supplier sync assigns the
+     * status from its feed on each run, so an admin's choice would be gone within hours.
+     * {@code manualStatus} makes the syncs keep it, in both directions and also when the
+     * product drops out of the feed.
+     * <p>
+     * An explicit {@code manualStatus} from the request wins: true keeps the status
+     * manual, false hands it back to the supplier. When the request does not say, only
+     * an actual change of an existing status raises the flag — the form sends the status
+     * on every save, and re-saving a product must not freeze a status the admin never
+     * chose. A new product has no previous status, so creating one never raises it.
+     */
+    void applyAdminStatus(Product p, Integer statusCode, Boolean manualStatus) {
+        ProductStatus previous = p.getStatus();
+        ProductStatus requested = ProductStatus.fromCode(statusCode);
+        p.setStatus(requested);
+
+        if (manualStatus != null) {
+            p.setManualStatus(manualStatus);
+        } else if (previous != null && previous != requested) {
+            p.setManualStatus(true);
+        }
+    }
+
     private void updateProductFieldsFromRest(Product p, ProductCreateRequestDTO dto) {
         p.setReferenceNumber(dto.getReferenceNumber());
         p.setNameEn(dto.getNameEn());
@@ -892,7 +924,7 @@ public class ProductService {
         p.setBarcode(dto.getBarcode());
         applyAdminCategory(p, dto.getCategoryId());
         p.setManufacturer(findManufacturerByIdOrThrow(dto.getManufacturerId()));
-        p.setStatus(ProductStatus.fromCode(dto.getStatus()));
+        applyAdminStatus(p, dto.getStatus(), dto.getManualStatus());
         p.setPriceClient(dto.getPriceClient());
         p.setPricePartner(dto.getPricePartner());
         p.setPricePromo(dto.getPricePromo());
@@ -966,7 +998,7 @@ public class ProductService {
         p.setBarcode(dto.getBarcode());
         applyAdminCategory(p, dto.getCategoryId());
         p.setManufacturer(findManufacturerByIdOrThrow(dto.getManufacturerId()));
-        p.setStatus(ProductStatus.fromCode(dto.getStatus()));
+        applyAdminStatus(p, dto.getStatus(), dto.getManualStatus());
         p.setPriceClient(dto.getPriceClient());
         p.setPricePartner(dto.getPricePartner());
         p.setPricePromo(dto.getPricePromo());
