@@ -1033,8 +1033,8 @@ public class ValiSyncService {
         }
 
         setFlagsToProduct(product, extProduct);
-        ProductStatus resolvedStatus = ProductStatus.fromCode(extProduct.getStatus());
-        product.setStatus(resolvedStatus);
+        // A hand-set status wins over the feed - see Product#manualStatus.
+        ProductStatus resolvedStatus = product.applyFeedStatus(ProductStatus.fromCode(extProduct.getStatus()));
         product.setPriceClient(extProduct.getPriceClient());
         product.setPricePartner(extProduct.getPricePartner());
         product.setPricePromo(extProduct.getPricePromo());
@@ -1295,6 +1295,8 @@ public class ValiSyncService {
 
         List<Product> toMark = allValiProducts.stream()
                 .filter(p -> !seenExternalIds.contains(p.getExternalId()))
+                // A hand-set status outlives the product leaving the feed - see Product#manualStatus.
+                .filter(p -> !Boolean.TRUE.equals(p.getManualStatus()))
                 .filter(p -> p.getStatus() != ProductStatus.NOT_AVAILABLE || Boolean.TRUE.equals(p.getShow()))
                 .toList();
 

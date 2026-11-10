@@ -1092,7 +1092,10 @@ public class MostSyncService {
         }
 
         boolean inStock = Boolean.TRUE.equals(mostProduct.get("inStock"));
-        product.setStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE);
+        // A hand-set status wins over the feed - see Product#manualStatus.
+        boolean available = product.applyFeedStatus(inStock ? ProductStatus.AVAILABLE : ProductStatus.NOT_AVAILABLE)
+                == ProductStatus.AVAILABLE;
+        boolean manualStatus = Boolean.TRUE.equals(product.getManualStatus());
         product.calculateFinalPrice();
         boolean hasValidPrice = product.getFinalPrice() != null && product.getFinalPrice().compareTo(BigDecimal.ZERO) > 0;
 
@@ -1113,7 +1116,8 @@ public class MostSyncService {
         boolean hasImage = product.getPrimaryImageUrl() != null
                 && !product.getPrimaryImageUrl().isBlank();
 
-        if (isWarranty) {
+        if (isWarranty && !manualStatus) {
+            // The name heuristic yields to an admin who set the status by hand.
             product.setShow(false);
             product.setStatus(ProductStatus.NOT_AVAILABLE);
         } else if (Boolean.TRUE.equals(product.getManuallyHidden())) {
@@ -1126,8 +1130,8 @@ public class MostSyncService {
             // stayed invisible forever once it came back. That left 273 in-stock, priced
             // products with images permanently missing from the site (bug-460).
             // Manual hiding is now carried by manuallyHidden above, so show_flag is free
-            // to follow stock and price.
-            product.setShow(inStock && hasValidPrice && hasImage);
+            // to follow the status (the feed's stock, or the admin's choice) and price.
+            product.setShow(available && hasValidPrice && hasImage);
         }
 
         product = productRepository.save(product);

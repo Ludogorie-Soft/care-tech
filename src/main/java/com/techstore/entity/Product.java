@@ -119,6 +119,29 @@ public class Product extends BaseEntity {
     @Column(name = "manually_categorized", nullable = false)
     private Boolean manuallyCategorized = false;
 
+    /**
+     * True when an admin set {@link #status} by hand. The admin's choice then wins over
+     * the distributor feed in both directions: the syncs leave the status alone (also
+     * when the product drops out of the feed) and derive {@link #show} from it instead
+     * of from the feed's stock. Cleared when the admin hands the status back to the
+     * supplier.
+     */
+    @Column(name = "manual_status", nullable = false)
+    private Boolean manualStatus = false;
+
+    /**
+     * Takes the status a supplier feed reports, unless an admin set it by hand
+     * ({@link #manualStatus}), and returns the status the product ends up with. Syncs
+     * derive visibility from the returned value rather than from the feed's stock, so
+     * a hand-set "available" is also shown and a hand-set "not available" stays hidden.
+     */
+    public ProductStatus applyFeedStatus(ProductStatus feedStatus) {
+        if (!Boolean.TRUE.equals(manualStatus)) {
+            this.status = feedStatus;
+        }
+        return this.status;
+    }
+
     private Integer warranty;
 
     @Column(precision = 10, scale = 6)

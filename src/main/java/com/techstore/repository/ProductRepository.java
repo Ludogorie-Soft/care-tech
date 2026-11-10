@@ -127,9 +127,11 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category WHERE p.asbisCode IN :asbisCodes")
     List<Product> findByAsbisCodeIn(@Param("asbisCodes") Collection<String> asbisCodes);
 
+    /** Skips products whose status an admin set by hand - see Product#manualStatus. */
     @Modifying
     @Query("UPDATE Product p SET p.show = false, p.status = com.techstore.enums.ProductStatus.NOT_AVAILABLE " +
            "WHERE p.platform = com.techstore.enums.Platform.ASBIS " +
+           "AND p.manualStatus = false " +
            "AND p.asbisCode NOT IN :knownCodes")
     int hideAsbisProductsNotIn(@Param("knownCodes") Collection<String> knownCodes);
 
@@ -246,13 +248,16 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("UPDATE Product p SET p.show = false WHERE p.sku IN :skus AND p.platform = :platform")
     int hideBySkuInAndPlatform(@Param("skus") Collection<String> skus, @Param("platform") Platform platform);
 
+    /** Skips products whose status an admin set by hand - see Product#manualStatus. */
     @Modifying
     @Query("UPDATE Product p SET p.show = false, p.status = com.techstore.enums.ProductStatus.NOT_AVAILABLE " +
-           "WHERE p.platform = :platform AND p.sku IS NOT NULL AND p.sku NOT IN :knownSkus")
+           "WHERE p.platform = :platform AND p.sku IS NOT NULL AND p.manualStatus = false " +
+           "AND p.sku NOT IN :knownSkus")
     int markNotAvailableByPlatformSkuNotIn(@Param("platform") Platform platform, @Param("knownSkus") Collection<String> knownSkus);
 
     /** What {@link #markNotAvailableByPlatformSkuNotIn} would take off the shop: available products not in the feed. */
     @Query("SELECT COUNT(p) FROM Product p WHERE p.platform = :platform AND p.sku IS NOT NULL " +
+           "AND p.manualStatus = false " +
            "AND p.status <> com.techstore.enums.ProductStatus.NOT_AVAILABLE AND p.sku NOT IN :knownSkus")
     long countAvailableByPlatformSkuNotIn(@Param("platform") Platform platform, @Param("knownSkus") Collection<String> knownSkus);
 

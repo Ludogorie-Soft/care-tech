@@ -4614,3 +4614,55 @@ SUCCESS). URL-ът беше верен — преходен мрежов отк�
 | 11:05 | Проверка на наличности MOST/ASBIS/TEKRA спрямо feed-овете: няма системен бъг, 1.5–3.4 % дневно разминаване; примерният MOST лаптоп е коректен; кошница: значка брои фантомни редове (2 от 5 клиента); гаранции: проучено | prod DB read-only, feeds | чака решения | ~40000 |
 | 11:36 | Бранч feat/sync-6h-warranty-email-cart (бекенд + caretech-next): cron 05/11/17/23 + праг 8 ч; имейл с гаранционната карта до всеки клиент (order-warranty.html, AFTER_COMMIT, без файл → без имейл + CRITICAL), без приложение в „изпратена“; кошница: значка/сума/напомняне само с наличните, админ вижда неналичните сиви. Бекенд 583/583, jest 550/550, e2e админ 14/14; без commit | много | ok | ~60000 |
 | 11:37 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 14 reads | ~44556 tok |
+| 11:43 | care-tech#7 слят (8dcb6fc); caretech-next#4 отворен, CI тече | git | бекенд слят, фронт чака CI | ~3000 |
+| 11:43 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 14 reads | ~44556 tok |
+| 11:51 | caretech-next#4 слят (70a7ab8) след зелен CI; двете репота на main, чакат деплой | git | ok | ~1000 |
+| 11:51 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 14 reads | ~44556 tok |
+| 12:06 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 14 reads | ~44556 tok |
+| 12:06 | Потребителят отложи: 11 скрити ASBIS, TEKRA пропуснати продукти и празни категории | memory | отложено | ~500 |
+| 12:06 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 14 reads | ~44556 tok |
+| 12:07 | Session end: 7 writes across 4 files (vali_products_sync_rollback.md, ValiDuplicateParamReproTest.java, ValiSyncService.java, ValiProductsSyncDbTest.java) | 14 reads | ~44556 tok |
+
+## Session: 2026-11-09 13:08
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:08 | Q: ръчни продукти в Pazaruvaj фийда? Да — няма филтър по platform; прод: 5 ръчни, 3 във фийда (2 скрити/неналични) | ProductRepository, PazaruvajFeedService | answered, verified live feed | ~4k |
+
+## Session: 2026-11-10 08:18
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 08:19 | Analysed admin status vs sync overwrite: 4 syncs set status unconditionally + 3 bulk 'missing from feed' paths; proposed manual_status flag (V44) mirroring manually_hidden/categorized | ProductService, *SyncService, ProductRepository | plan, awaiting approval | ~9k |
+| 08:23 | Created src/main/resources/db/migration/V44__add_manual_status_to_products.sql | — | ~232 |
+| 08:23 | Edited src/main/java/com/techstore/entity/Product.java | expanded (+10 lines) | ~158 |
+| 08:23 | Edited src/main/java/com/techstore/dto/request/ProductCreateRequestDTO.java | expanded (+7 lines) | ~94 |
+| 08:23 | Edited src/main/java/com/techstore/dto/response/ProductResponseDTO.java | 2→4 lines | ~41 |
+| 08:23 | Edited src/main/java/com/techstore/service/ProductService.java | added 2 condition(s) | ~365 |
+| 08:24 | Edited src/main/java/com/techstore/service/ProductService.java | modified getProductByIdForAdmin() | ~175 |
+| 08:24 | Edited src/main/java/com/techstore/entity/Product.java | added 1 condition(s) | ~176 |
+| 08:24 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 3→6 lines | ~115 |
+| 08:24 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | modified if() | ~64 |
+| 08:24 | Edited src/main/java/com/techstore/service/sync/MostSyncService.java | 3→3 lines | ~66 |
+| 08:24 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | setStatus() → applyFeedStatus() | ~50 |
+| 08:25 | Edited src/main/java/com/techstore/service/sync/ValiSyncService.java | 2→4 lines | ~96 |
+| 08:25 | Edited src/main/java/com/techstore/service/sync/AsbisSyncService.java | 5→7 lines | ~175 |
+| 08:25 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | setStatus() → applyFeedStatus() | ~174 |
+| 08:25 | Edited src/main/java/com/techstore/service/sync/TekraSyncService.java | setStatus() → applyFeedStatus() | ~182 |
+| 08:26 | Edited src/main/java/com/techstore/repository/ProductRepository.java | 4→6 lines | ~101 |
+| 08:26 | Edited src/main/java/com/techstore/repository/ProductRepository.java | 8→11 lines | ~227 |
+| 08:28 | Edited src/main/java/com/techstore/service/ProductService.java | modified applyAdminVisibility() | ~168 |
+| 08:29 | Edited ../../caretech-next/src/views/admin/Products/ProductForm.jsx | CSS: own, sm | ~541 |
+| 08:29 | Edited ../../caretech-next/src/views/admin/Products/ProductForm.jsx | CSS: manualStatus | ~28 |
+| 08:29 | Edited ../../caretech-next/src/views/admin/Products/ProductForm.jsx | CSS: manualStatus, manualStatus | ~64 |
+| 08:29 | Edited ../../caretech-next/src/views/admin/Products/ProductForm.jsx | 2→4 lines | ~61 |
+| 08:30 | Created src/test/java/com/techstore/service/ProductManualStatusTest.java | — | ~1620 |
+| 08:30 | Created src/test/java/com/techstore/repository/ProductManualStatusRepositoryTest.java | — | ~935 |
+| 08:30 | Edited src/test/java/com/techstore/service/sync/ValiProductsSyncDbTest.java | modified manualStatusWinsOverFeed() | ~764 |
+| 08:30 | Edited src/test/java/com/techstore/service/sync/ValiProductsSyncDbTest.java | modified item() | ~91 |
+| 08:30 | Edited src/test/java/com/techstore/service/sync/ValiProductsSyncDbTest.java | inline fix | ~11 |
+| 08:33 | Created ../../caretech-next/src/views/admin/Products/ProductForm.test.jsx | — | ~978 |
+| 08:34 | Admin status priority over supplier syncs: V44 manual_status, Product.applyFeedStatus, 4 syncs + 3 bulk passes, applyAdminStatus/applyAdminVisibility (change-only), tests (19 new) | entity/Product, ProductService, *SyncService, ProductRepository, V44, tests | backend 600 tests green; branch feat/admin-status-priority (both repos), not committed | ~60k |
+| 08:34 | caretech-next: ProductForm checkbox "Статус от доставчика", status select sets manualStatus; ProductForm.test.jsx (4) | caretech-next/src/views/admin/Products | jest 554 green, lint clean | ~8k |
+| 08:34 | Created ../../../../.claude/projects/-Users-user-Documents-projects-cp-tech-store-api/memory/admin_manual_status.md | — | ~285 |
+| 08:34 | Session end: 29 writes across 16 files (V44__add_manual_status_to_products.sql, Product.java, ProductCreateRequestDTO.java, ProductResponseDTO.java, ProductService.java) | 8 reads | ~102131 tok |
